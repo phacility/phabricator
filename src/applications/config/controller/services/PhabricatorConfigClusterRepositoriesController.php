@@ -1,13 +1,10 @@
 <?php
 
 final class PhabricatorConfigClusterRepositoriesController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   public function handleRequest(AphrontRequest $request) {
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('cluster/repositories/');
-
-    $title = pht('Cluster Repository Status');
+    $title = pht('Repository Services');
 
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
     $button = id(new PHUIButtonView())
@@ -26,9 +23,8 @@ final class PhabricatorConfigClusterRepositoriesController
     $repo_errors = $this->buildConfigBoxView(
       pht('Repository Errors'), $repository_errors);
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -37,6 +33,8 @@ final class PhabricatorConfigClusterRepositoriesController
           $repo_status,
           $repo_errors,
         ));
+
+    $nav = $this->newNavigation('repository-servers');
 
     return $this->newPage()
       ->setTitle($title)

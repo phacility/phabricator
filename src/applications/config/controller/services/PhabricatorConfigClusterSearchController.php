@@ -1,13 +1,10 @@
 <?php
 
 final class PhabricatorConfigClusterSearchController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   public function handleRequest(AphrontRequest $request) {
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('cluster/search/');
-
-    $title = pht('Cluster Search');
+    $title = pht('Search Servers');
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Search');
 
     $button = id(new PHUIButtonView())
@@ -20,13 +17,14 @@ final class PhabricatorConfigClusterSearchController
 
     $search_status = $this->buildClusterSearchStatus();
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter($search_status);
+
+    $nav = $this->newNavigation('search-servers');
 
     return $this->newPage()
       ->setTitle($title)

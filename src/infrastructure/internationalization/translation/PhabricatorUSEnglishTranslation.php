@@ -1718,6 +1718,11 @@ final class PhabricatorUSEnglishTranslation
         'then try again.',
       ),
 
+      'View All %d Subscriber(s)' => array(
+        'View Subscriber',
+        'View All %d Subscribers',
+      ),
+
     );
   }
 

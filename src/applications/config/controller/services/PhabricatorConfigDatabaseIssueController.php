@@ -153,15 +153,14 @@ final class PhabricatorConfigDatabaseIssueController
         new PhutilNumber($counts[PhabricatorConfigStorageSchema::STATUS_WARN]));
     }
 
-    $title = pht('Database Issues');
+    $title = pht('Schemata Issues');
     $header = $this->buildHeaderView($title);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('dbissue/');
+    $nav = $this->newNavigation('schemata-issues');
 
     $view = $this->buildConfigBoxView(pht('Issues'), $table);
 
-    $crumbs = $this->buildApplicationCrumbs()
+    $crumbs = $this->newCrumbs()
       ->addTextCrumb($title)
       ->setBorder(true);
 

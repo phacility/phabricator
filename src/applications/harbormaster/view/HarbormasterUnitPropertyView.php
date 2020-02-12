@@ -72,13 +72,13 @@ final class HarbormasterUnitPropertyView extends AphrontView {
       }
 
       $name = $message->getUnitMessageDisplayName();
-      $id = $message->getID();
+      $uri = $message->getURI();
 
-      if ($id) {
+      if ($uri) {
         $name = phutil_tag(
           'a',
           array(
-            'href' => "/harbormaster/unit/view/{$id}/",
+            'href' => $uri,
           ),
           $name);
       }

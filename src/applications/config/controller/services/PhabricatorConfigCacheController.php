@@ -1,13 +1,11 @@
 <?php
 
 final class PhabricatorConfigCacheController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('cache/');
 
     $purge_button = id(new PHUIButtonView())
       ->setText(pht('Purge Caches'))
@@ -27,13 +25,14 @@ final class PhabricatorConfigCacheController
       $data_box,
     );
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter($page);
+
+    $nav = $this->newNavigation('cache');
 
     return $this->newPage()
       ->setTitle($title)
@@ -92,10 +91,12 @@ final class PhabricatorConfigCacheController
             'n',
             'n',
           ));
+
+      $table = $this->buildConfigBoxView(pht('Cache Storage'), $table);
     }
 
     $properties = $this->buildConfigBoxView(pht('Data Cache'), $properties);
-    $table = $this->buildConfigBoxView(pht('Cache Storage'), $table);
+
     return array($properties, $table);
   }
 

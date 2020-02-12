@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorConfigHistoryController
-  extends PhabricatorConfigController {
+final class PhabricatorConfigSettingsHistoryController
+  extends PhabricatorConfigSettingsController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
@@ -27,12 +27,10 @@ final class PhabricatorConfigHistoryController
     $title = pht('Settings History');
     $header = $this->buildHeaderView($title);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('history/');
+    $nav = $this->newNavigation('history');
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)

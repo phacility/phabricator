@@ -71,8 +71,7 @@ final class PhabricatorConfigDatabaseStatusController
   }
 
   private function buildResponse($title, $body) {
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('database/');
+    $nav = $this->newNavigation('schemata');
 
     if (!$title) {
       $title = pht('Database Status');
@@ -118,8 +117,7 @@ final class PhabricatorConfigDatabaseStatusController
       );
     }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
+    $crumbs = $this->newCrumbs();
 
     $last_key = last_key($links);
     foreach ($links as $link_key => $link) {

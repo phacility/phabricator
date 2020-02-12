@@ -153,33 +153,54 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
     $block_rules = $this->blockRules;
     $blocks = array();
     $cursor = 0;
-    $prev_block = array();
+
+    $can_merge = array();
+    foreach ($block_rules as $key => $block_rule) {
+      if ($block_rule instanceof PhutilRemarkupDefaultBlockRule) {
+        $can_merge[$key] = true;
+      }
+    }
+
+    $last_block = null;
+    $last_block_key = -1;
+
+    // See T13487. For very large inputs, block separation can dominate
+    // runtime. This is written somewhat clumsily to attempt to handle
+    // very large inputs as gracefully as is practical.
 
     while (isset($text[$cursor])) {
       $starting_cursor = $cursor;
-      foreach ($block_rules as $block_rule) {
+      foreach ($block_rules as $block_key => $block_rule) {
         $num_lines = $block_rule->getMatchingLineCount($text, $cursor);
 
         if ($num_lines) {
-          if ($blocks) {
-            $prev_block = last($blocks);
-          }
-
-          $curr_block = array(
+          $current_block = array(
             'start' => $cursor,
             'num_lines' => $num_lines,
             'rule' => $block_rule,
-            'is_empty' => self::isEmptyBlock($text, $cursor, $num_lines),
+            'empty' => self::isEmptyBlock($text, $cursor, $num_lines),
             'children' => array(),
+            'merge' => isset($can_merge[$block_key]),
           );
 
-          if ($prev_block
-            && self::shouldMergeBlocks($text, $prev_block, $curr_block)) {
-            $blocks[last_key($blocks)]['num_lines'] += $curr_block['num_lines'];
-            $blocks[last_key($blocks)]['is_empty'] =
-              $blocks[last_key($blocks)]['is_empty'] && $curr_block['is_empty'];
+          $should_merge = self::shouldMergeParagraphBlocks(
+            $text,
+            $last_block,
+            $current_block);
+
+          if ($should_merge) {
+            $last_block['num_lines'] =
+              ($last_block['num_lines'] + $current_block['num_lines']);
+
+            $last_block['empty'] =
+              ($last_block['empty'] && $current_block['empty']);
+
+            $blocks[$last_block_key] = $last_block;
           } else {
-            $blocks[] = $curr_block;
+            $blocks[] = $current_block;
+
+            $last_block = $current_block;
+            $last_block_key++;
           }
 
           $cursor += $num_lines;
@@ -192,9 +213,20 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
       }
     }
 
+    // See T13487. It's common for blocks to be small, and this loop seems to
+    // measure as faster if we manually concatenate blocks than if we
+    // "array_slice()" and "implode()" blocks. This is a bit muddy.
+
     foreach ($blocks as $key => $block) {
-      $lines = array_slice($text, $block['start'], $block['num_lines']);
-      $blocks[$key]['text'] = implode('', $lines);
+      $min = $block['start'];
+      $max = $min + $block['num_lines'];
+
+      $lines = '';
+      for ($ii = $min; $ii < $max; $ii++) {
+        $lines .= $text[$ii];
+      }
+
+      $blocks[$key]['text'] = $lines;
     }
 
     // Stop splitting child blocks apart if we get too deep. This arrests
@@ -246,30 +278,48 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
     return $output;
   }
 
-  private static function shouldMergeBlocks($text, $prev_block, $curr_block) {
-    $block_rules = ipull(array($prev_block, $curr_block), 'rule');
+  private static function shouldMergeParagraphBlocks(
+    $text,
+    $last_block,
+    $current_block) {
 
-    $default_rule = 'PhutilRemarkupDefaultBlockRule';
-    try {
-      assert_instances_of($block_rules, $default_rule);
+    // If we're at the beginning of the input, we can't merge.
+    if ($last_block === null) {
+      return false;
+    }
 
-      // If the last block was empty keep merging
-      if ($prev_block['is_empty']) {
-        return true;
-      }
+    // If the previous block wasn't a default block, we can't merge.
+    if (!$last_block['merge']) {
+      return false;
+    }
 
-      // If this line is blank keep merging
-      if ($curr_block['is_empty']) {
-        return true;
-      }
+    // If the current block isn't a default block, we can't merge.
+    if (!$current_block['merge']) {
+      return false;
+    }
 
-      // If the current line and the last line have content, keep merging
-      if (strlen(trim($text[$curr_block['start'] - 1]))) {
-        if (strlen(trim($text[$curr_block['start']]))) {
-          return true;
-        }
-      }
-    } catch (Exception $e) {}
+    // If the last block was empty, we definitely want to merge.
+    if ($last_block['empty']) {
+      return true;
+    }
+
+    // If this block is empty, we definitely want to merge.
+    if ($current_block['empty']) {
+      return true;
+    }
+
+    // Check if the last line of the previous block or the first line of this
+    // block have any non-whitespace text. If they both do, we're going to
+    // merge.
+
+    // If either of them are a blank line or a line with only whitespace, we
+    // do not merge: this means we've found a paragraph break.
+
+    $tail = $text[$current_block['start'] - 1];
+    $head = $text[$current_block['start']];
+    if (strlen(trim($tail)) && strlen(trim($head))) {
+      return true;
+    }
 
     return false;
   }

@@ -121,8 +121,19 @@ final class PhutilRemarkupTableBlockRule extends PhutilRemarkupBlockRule {
           return $table->newRawString();
         }
 
+        // Respect newlines in table cells as literal linebreaks.
+
         $content = $cell->newRawContentString();
-        $content = $this->applyRules($content);
+        $content = trim($content, "\r\n");
+
+        $lines = phutil_split_lines($content, $retain_endings = false);
+        foreach ($lines as $key => $line) {
+          $lines[$key] = $this->applyRules($line);
+        }
+
+        $content = phutil_implode_html(
+          phutil_tag('br'),
+          $lines);
 
         $cell_specs[] = array(
           'type' => $cell->getTagName(),

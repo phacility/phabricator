@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorConfigEditController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigSettingsController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
@@ -30,11 +30,9 @@ final class PhabricatorConfigEditController
         ->setDefault(null)
         ->setDescription($desc);
       $group = null;
-      $group_uri = $this->getApplicationURI();
     } else {
       $option = $options[$key];
       $group = $option->getGroup();
-      $group_uri = $this->getApplicationURI('group/'.$group->getKey().'/');
     }
 
     $issue = $request->getStr('issue');
@@ -42,7 +40,7 @@ final class PhabricatorConfigEditController
       // If the user came here from an open setup issue, send them back.
       $done_uri = $this->getApplicationURI('issue/'.$issue.'/');
     } else {
-      $done_uri = $group_uri;
+      $done_uri = $this->getApplicationURI('settings/');
     }
 
     // Check if the config key is already stored in the database.
@@ -205,23 +203,10 @@ final class PhabricatorConfigEditController
     $title = $key;
 
     $box_header = array();
-    if ($group) {
-      $box_header[] = phutil_tag(
-        'a',
-        array(
-          'href' => $group_uri,
-        ),
-        $group->getName());
-      $box_header[] = " \xC2\xBB ";
-    }
     $box_header[] = $key;
 
-    $crumbs = $this->buildApplicationCrumbs();
-    if ($group) {
-      $crumbs->addTextCrumb($group->getName(), $group_uri);
-    }
-    $crumbs->addTextCrumb($key, '/config/edit/'.$key);
-    $crumbs->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($key, '/config/edit/'.$key);
 
     $form_box = $this->buildConfigBoxView($box_header, $form, $tag);
 
@@ -229,9 +214,6 @@ final class PhabricatorConfigEditController
       $config_entry,
       new PhabricatorConfigTransactionQuery());
     $timeline->setShouldTerminate(true);
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter($group_uri);
 
     $header = $this->buildHeaderView($title);
 
@@ -249,7 +231,6 @@ final class PhabricatorConfigEditController
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
       ->appendChild($view);
   }
 

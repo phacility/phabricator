@@ -336,41 +336,36 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $curtain->addAction($relationship_submenu);
     }
 
+    $viewer_phid = $viewer->getPHID();
     $owner_phid = $task->getOwnerPHID();
     $author_phid = $task->getAuthorPHID();
     $handles = $viewer->loadHandles(array($owner_phid, $author_phid));
 
+    $assigned_refs = id(new PHUICurtainObjectRefListView())
+      ->setViewer($viewer)
+      ->setEmptyMessage(pht('None'));
+
     if ($owner_phid) {
-      $image_uri = $handles[$owner_phid]->getImageURI();
-      $image_href = $handles[$owner_phid]->getURI();
-      $owner = $viewer->renderHandle($owner_phid)->render();
-      $content = phutil_tag('strong', array(), $owner);
-      $assigned_to = id(new PHUIHeadThingView())
-        ->setImage($image_uri)
-        ->setImageHref($image_href)
-        ->setContent($content);
-    } else {
-      $assigned_to = phutil_tag('em', array(), pht('None'));
+      $assigned_ref = $assigned_refs->newObjectRefView()
+        ->setHandle($handles[$owner_phid])
+        ->setHighlighted($owner_phid === $viewer_phid);
     }
 
     $curtain->newPanel()
       ->setHeaderText(pht('Assigned To'))
-      ->appendChild($assigned_to);
+      ->appendChild($assigned_refs);
 
-    $author_uri = $handles[$author_phid]->getImageURI();
-    $author_href = $handles[$author_phid]->getURI();
-    $author = $viewer->renderHandle($author_phid)->render();
-    $content = phutil_tag('strong', array(), $author);
-    $date = phabricator_date($task->getDateCreated(), $viewer);
-    $content = pht('%s, %s', $content, $date);
-    $authored_by = id(new PHUIHeadThingView())
-      ->setImage($author_uri)
-      ->setImageHref($author_href)
-      ->setContent($content);
+    $author_refs = id(new PHUICurtainObjectRefListView())
+      ->setViewer($viewer);
+
+    $author_ref = $author_refs->newObjectRefView()
+      ->setHandle($handles[$author_phid])
+      ->setEpoch($task->getDateCreated())
+      ->setHighlighted($author_phid === $viewer_phid);
 
     $curtain->newPanel()
       ->setHeaderText(pht('Authored By'))
-      ->appendChild($authored_by);
+      ->appendChild($author_refs);
 
     return $curtain;
   }

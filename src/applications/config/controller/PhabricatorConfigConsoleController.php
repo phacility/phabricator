@@ -1,92 +1,139 @@
 <?php
 
-final class PhabricatorConfigVersionController
+final class PhabricatorConfigConsoleController
   extends PhabricatorConfigController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $title = pht('Version Information');
-    $versions = $this->renderModuleStatus($viewer);
+    $menu = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setBig(true);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('version/');
-    $header = $this->buildHeaderView($title);
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Settings'))
+        ->setHref($this->getApplicationURI('settings/'))
+        ->setImageIcon('fa-wrench')
+        ->setClickable(true)
+        ->addAttribute(
+          pht(
+            'Review and modify configuration settings.')));
 
-    $view = $this->buildConfigBoxView(
-      pht('Installed Versions'),
-      $versions);
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Setup Issues'))
+        ->setHref($this->getApplicationURI('issue/'))
+        ->setImageIcon('fa-exclamation-triangle')
+        ->setClickable(true)
+        ->addAttribute(
+          pht(
+            'Show unresolved issues with setup and configuration.')));
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Services'))
+        ->setHref($this->getApplicationURI('cluster/databases/'))
+        ->setImageIcon('fa-server')
+        ->setClickable(true)
+        ->addAttribute(
+          pht(
+            'View status information for databases, caches, repositories, '.
+            'and other services.')));
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Extensions/Modules'))
+        ->setHref($this->getApplicationURI('module/'))
+        ->setImageIcon('fa-gear')
+        ->setClickable(true)
+        ->addAttribute(
+          pht(
+            'Show installed extensions and modules.')));
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
+      ->addTextCrumb(pht('Console'))
       ->setBorder(true);
 
-    $content = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter($view);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Phabricator Configuation'))
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setObjectList($menu);
+
+    $versions = $this->newLibraryVersionTable($viewer);
+    $binary_versions = $this->newBinaryVersionTable();
+
+    $launcher_view = id(new PHUILauncherView())
+      ->appendChild($box)
+      ->appendChild($versions)
+      ->appendChild($binary_versions);
+
+    $view = id(new PHUITwoColumnView())
+      ->setFooter($launcher_view);
 
     return $this->newPage()
-      ->setTitle($title)
+      ->setTitle(pht('Phabricator Configuation'))
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content);
+      ->appendChild($view);
   }
 
-  public function renderModuleStatus($viewer) {
+  public function newLibraryVersionTable() {
+    $viewer = $this->getViewer();
+
     $versions = $this->loadVersions($viewer);
 
-    $version_property_list = id(new PHUIPropertyListView());
+    $rows = array();
     foreach ($versions as $name => $info) {
-      $version = $info['version'];
-
-      if ($info['branchpoint']) {
-        $display = pht(
-          '%s (branched from %s on %s)',
-          $version,
-          $info['branchpoint'],
-          $info['upstream']);
+      $branchpoint = $info['branchpoint'];
+      if (strlen($branchpoint)) {
+        $branchpoint = substr($branchpoint, 0, 12);
       } else {
-        $display = $version;
+        $branchpoint = null;
       }
 
-      $version_property_list->addProperty($name, $display);
-    }
-
-    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
-    $version_path = $phabricator_root.'/conf/local/VERSION';
-    if (Filesystem::pathExists($version_path)) {
-      $version_from_file = Filesystem::readFile($version_path);
-      $version_property_list->addProperty(
-        pht('Local Version'),
-        $version_from_file);
-    }
-
-    $version_property_list->addProperty('php', phpversion());
-
-    $binaries = PhutilBinaryAnalyzer::getAllBinaries();
-    foreach ($binaries as $binary) {
-      if (!$binary->isBinaryAvailable()) {
-        $binary_info = pht('Not Available');
+      $version = $info['hash'];
+      if (strlen($version)) {
+        $version = substr($version, 0, 12);
       } else {
-        $version = $binary->getBinaryVersion();
-        $path = $binary->getBinaryPath();
-        if ($path === null && $version === null) {
-          $binary_info = pht('-');
-        } else if ($path === null) {
-          $binary_info = $version;
-        } else if ($version === null) {
-          $binary_info = pht('- at %s', $path);
-        } else {
-          $binary_info = pht('%s at %s', $version, $path);
-        }
+        $version = pht('Unknown');
       }
 
-      $version_property_list->addProperty(
-        $binary->getBinaryName(),
-        $binary_info);
+
+      $epoch = $info['epoch'];
+      if ($epoch) {
+        $epoch = phabricator_date($epoch, $viewer);
+      } else {
+        $epoch = null;
+      }
+
+      $rows[] = array(
+        $name,
+        $version,
+        $epoch,
+        $branchpoint,
+      );
     }
 
-    return $version_property_list;
+    $table_view = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Library'),
+          pht('Version'),
+          pht('Date'),
+          pht('Branchpoint'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          null,
+          null,
+          'wide',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Phabricator Version Information'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($table_view);
   }
 
   private function loadVersions(PhabricatorUser $viewer) {
@@ -207,13 +254,14 @@ final class PhabricatorConfigVersionController
       list($err, $stdout) = $future->resolve();
       if (!$err) {
         list($hash, $epoch) = explode(' ', $stdout);
-        $version = pht('%s (%s)', $hash, phabricator_date($epoch, $viewer));
       } else {
-        $version = pht('Unknown');
+        $hash = null;
+        $epoch = null;
       }
 
       $result = array(
-        'version' => $version,
+        'hash' => $hash,
+        'epoch' => $epoch,
         'upstream' => null,
         'branchpoint' => null,
       );
@@ -238,5 +286,52 @@ final class PhabricatorConfigVersionController
 
     return $results;
   }
+
+  private function newBinaryVersionTable() {
+    $rows = array();
+
+    $rows[] = array(
+      'php',
+      phpversion(),
+      php_sapi_name(),
+    );
+
+    $binaries = PhutilBinaryAnalyzer::getAllBinaries();
+    foreach ($binaries as $binary) {
+      if (!$binary->isBinaryAvailable()) {
+        $binary_version = pht('Not Available');
+        $binary_path = null;
+      } else {
+        $binary_version = $binary->getBinaryVersion();
+        $binary_path = $binary->getBinaryPath();
+      }
+
+      $rows[] = array(
+        $binary->getBinaryName(),
+        $binary_version,
+        $binary_path,
+      );
+    }
+
+    $table_view = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Binary'),
+          pht('Version'),
+          pht('Path'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          null,
+          'wide',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Other Version Information'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($table_view);
+  }
+
 
 }

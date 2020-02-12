@@ -3,201 +3,102 @@
 final class HeraldNewController extends HeraldController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
+    $viewer = $this->getViewer();
 
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
-    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+    $adapter_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
+    $adapter_type = $request->getStr('adapter');
 
-    $errors = array();
+    if (!isset($adapter_type_map[$adapter_type])) {
+      $title = pht('Create Herald Rule');
+      $content = $this->newAdapterMenu($title);
+    } else {
+      $adapter = HeraldAdapter::getAdapterForContentType($adapter_type);
 
-    $e_type = null;
-    $e_rule = null;
-    $e_object = null;
+      $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+      $rule_type = $request->getStr('type');
 
-    $step = $request->getInt('step');
-    if ($request->isFormPost()) {
-      $content_type = $request->getStr('content_type');
-      if (empty($content_type_map[$content_type])) {
-        $errors[] = pht('You must choose a content type for this rule.');
-        $e_type = pht('Required');
-        $step = 0;
-      }
+      if (!isset($rule_type_map[$rule_type])) {
+        $title = pht(
+          'Create Herald Rule: %s',
+          $adapter->getAdapterContentName());
 
-      if (!$errors && $step > 1) {
-        $rule_type = $request->getStr('rule_type');
-        if (empty($rule_type_map[$rule_type])) {
-          $errors[] = pht('You must choose a rule type for this rule.');
-          $e_rule = pht('Required');
-          $step = 1;
-        }
-      }
+        $content = $this->newTypeMenu($adapter, $title);
+      } else {
+        if ($rule_type !== HeraldRuleTypeConfig::RULE_TYPE_OBJECT) {
+          $target_phid = null;
+          $target_okay = true;
+        } else {
+          $object_name = $request->getStr('objectName');
+          $target_okay = false;
 
-      if (!$errors && $step >= 2) {
-        $target_phid = null;
-        $object_name = $request->getStr('objectName');
-        $done = false;
-        if ($rule_type != HeraldRuleTypeConfig::RULE_TYPE_OBJECT) {
-          $done = true;
-        } else if (strlen($object_name)) {
-          $target_object = id(new PhabricatorObjectQuery())
-            ->setViewer($viewer)
-            ->withNames(array($object_name))
-            ->executeOne();
-          if ($target_object) {
-            $can_edit = PhabricatorPolicyFilter::hasCapability(
-              $viewer,
-              $target_object,
-              PhabricatorPolicyCapability::CAN_EDIT);
-            if (!$can_edit) {
-              $errors[] = pht(
-                'You can not create a rule for that object, because you do '.
-                'not have permission to edit it. You can only create rules '.
-                'for objects you can edit.');
-              $e_object = pht('Not Editable');
-              $step = 2;
-            } else {
-              $adapter = HeraldAdapter::getAdapterForContentType($content_type);
-              if (!$adapter->canTriggerOnObject($target_object)) {
-                $errors[] = pht(
-                  'This object is not of an allowed type for the rule. '.
-                  'Rules can only trigger on certain objects.');
-                $e_object = pht('Invalid');
-                $step = 2;
+          $errors = array();
+          $e_object = null;
+
+          if ($request->isFormPost()) {
+            if (strlen($object_name)) {
+              $target_object = id(new PhabricatorObjectQuery())
+                ->setViewer($viewer)
+                ->withNames(array($object_name))
+                ->executeOne();
+              if ($target_object) {
+                $can_edit = PhabricatorPolicyFilter::hasCapability(
+                  $viewer,
+                  $target_object,
+                  PhabricatorPolicyCapability::CAN_EDIT);
+                if (!$can_edit) {
+                  $errors[] = pht(
+                    'You can not create a rule for that object, because you '.
+                    'do not have permission to edit it. You can only create '.
+                    'rules for objects you can edit.');
+                  $e_object = pht('Not Editable');
+                } else {
+                  if (!$adapter->canTriggerOnObject($target_object)) {
+                    $errors[] = pht(
+                      'This object is not of an allowed type for the rule. '.
+                      'Rules can only trigger on certain objects.');
+                    $e_object = pht('Invalid');
+                  } else {
+                    $target_phid = $target_object->getPHID();
+                  }
+                }
               } else {
-                $target_phid = $target_object->getPHID();
-                $done = true;
+                $errors[] = pht('No object exists by that name.');
+                $e_object = pht('Invalid');
               }
+            } else {
+              $errors[] = pht(
+                'You must choose an object to associate this rule with.');
+              $e_object = pht('Required');
             }
-          } else {
-            $errors[] = pht('No object exists by that name.');
-            $e_object = pht('Invalid');
-            $step = 2;
+
+            $target_okay = !$errors;
           }
-        } else if ($step > 2) {
-          $errors[] = pht(
-            'You must choose an object to associate this rule with.');
-          $e_object = pht('Required');
-          $step = 2;
         }
 
-        if (!$errors && $done) {
+        if (!$target_okay) {
+          $title = pht('Choose Object');
+          $content = $this->newTargetForm(
+            $adapter,
+            $rule_type,
+            $object_name,
+            $errors,
+            $e_object,
+            $title);
+        } else {
           $params = array(
-            'content_type' => $content_type,
+            'content_type' => $adapter_type,
             'rule_type' => $rule_type,
             'targetPHID' => $target_phid,
           );
 
-          $uri = new PhutilURI('edit/', $params);
-          $uri = $this->getApplicationURI($uri);
-          return id(new AphrontRedirectResponse())->setURI($uri);
+          $edit_uri = $this->getApplicationURI('edit/');
+          $edit_uri = new PhutilURI($edit_uri, $params);
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($edit_uri);
         }
       }
     }
-
-    $content_type = $request->getStr('content_type');
-    $rule_type = $request->getStr('rule_type');
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->setAction($this->getApplicationURI('new/'));
-
-    switch ($step) {
-      case 0:
-      default:
-        $content_types = $this->renderContentTypeControl(
-          $content_type_map,
-          $e_type);
-
-        $form
-          ->addHiddenInput('step', 1)
-          ->appendChild($content_types);
-
-        $cancel_text = null;
-        $cancel_uri = $this->getApplicationURI();
-        $title = pht('Create Herald Rule');
-        break;
-      case 1:
-        $rule_types = $this->renderRuleTypeControl(
-          $rule_type_map,
-          $e_rule);
-
-        $form
-          ->addHiddenInput('content_type', $content_type)
-          ->addHiddenInput('step', 2)
-          ->appendChild($rule_types);
-
-        $params = array(
-          'content_type' => $content_type,
-          'step' => '0',
-        );
-
-        $cancel_text = pht('Back');
-        $cancel_uri = new PhutilURI('new/', $params);
-        $cancel_uri = $this->getApplicationURI($cancel_uri);
-        $title = pht('Create Herald Rule: %s',
-          idx($content_type_map, $content_type));
-        break;
-      case 2:
-        $adapter = HeraldAdapter::getAdapterForContentType($content_type);
-        $form
-          ->addHiddenInput('content_type', $content_type)
-          ->addHiddenInput('rule_type', $rule_type)
-          ->addHiddenInput('step', 3)
-          ->appendChild(
-            id(new AphrontFormStaticControl())
-              ->setLabel(pht('Rule for'))
-              ->setValue(
-                phutil_tag(
-                  'strong',
-                  array(),
-                  idx($content_type_map, $content_type))))
-          ->appendChild(
-            id(new AphrontFormStaticControl())
-              ->setLabel(pht('Rule Type'))
-              ->setValue(
-                phutil_tag(
-                  'strong',
-                  array(),
-                  idx($rule_type_map, $rule_type))))
-          ->appendRemarkupInstructions(
-            pht(
-              'Choose the object this rule will act on (for example, enter '.
-              '`rX` to act on the `rX` repository, or `#project` to act on '.
-              'a project).'))
-          ->appendRemarkupInstructions(
-            $adapter->explainValidTriggerObjects())
-          ->appendChild(
-            id(new AphrontFormTextControl())
-              ->setName('objectName')
-              ->setError($e_object)
-              ->setValue($request->getStr('objectName'))
-              ->setLabel(pht('Object')));
-
-        $params = array(
-          'content_type' => $content_type,
-          'rule_type' => $rule_type,
-          'step' => 1,
-        );
-
-        $cancel_text = pht('Back');
-        $cancel_uri = new PhutilURI('new/', $params);
-        $cancel_uri = $this->getApplicationURI($cancel_uri);
-        $title = pht('Create Herald Rule: %s',
-          idx($content_type_map, $content_type));
-        break;
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Continue'))
-          ->addCancelButton($cancel_uri, $cancel_text));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
-      ->setForm($form);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
@@ -205,112 +106,248 @@ final class HeraldNewController extends HeraldController {
       ->setBorder(true);
 
     $view = id(new PHUITwoColumnView())
-      ->setFooter($form_box);
+      ->setFooter($content);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
-  private function renderContentTypeControl(array $content_type_map, $e_type) {
-    $request = $this->getRequest();
+  private function newAdapterMenu($title) {
+    $viewer = $this->getViewer();
 
-    $radio = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('New Rule for'))
-      ->setName('content_type')
-      ->setValue($request->getStr('content_type'))
-      ->setError($e_type);
+    $types = HeraldAdapter::getEnabledAdapterMap($viewer);
 
-    foreach ($content_type_map as $value => $name) {
-      $adapter = HeraldAdapter::getAdapterForContentType($value);
-      $radio->addButton(
-        $value,
-        $name,
-        phutil_escape_html_newlines($adapter->getAdapterContentDescription()));
+    foreach ($types as $key => $type) {
+      $types[$key] = HeraldAdapter::getAdapterForContentType($key);
     }
 
-    return $radio;
+    $types = msort($types, 'getAdapterContentName');
+
+    $base_uri = $this->getApplicationURI('create/');
+
+    $menu = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setBig(true);
+
+    foreach ($types as $key => $adapter) {
+      $adapter_uri = id(new PhutilURI($base_uri))
+        ->replaceQueryParam('adapter', $key);
+
+      $description = $adapter->getAdapterContentDescription();
+      $description = phutil_escape_html_newlines($description);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($adapter->getAdapterContentName())
+        ->setImageIcon($adapter->getAdapterContentIcon())
+        ->addAttribute($description)
+        ->setHref($adapter_uri)
+        ->setClickable(true);
+
+      $menu->addItem($item);
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setObjectList($menu);
+
+    return id(new PHUILauncherView())
+      ->appendChild($box);
   }
 
+  private function newTypeMenu(HeraldAdapter $adapter, $title) {
+    $viewer = $this->getViewer();
 
-  private function renderRuleTypeControl(array $rule_type_map, $e_rule) {
-    $request = $this->getRequest();
+    $global_capability = HeraldManageGlobalRulesCapability::CAPABILITY;
+    $can_global = $this->hasApplicationCapability($global_capability);
 
-    // Reorder array to put less powerful rules first.
-    $rule_type_map = array_select_keys(
-      $rule_type_map,
-      array(
-        HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
-        HeraldRuleTypeConfig::RULE_TYPE_OBJECT,
-        HeraldRuleTypeConfig::RULE_TYPE_GLOBAL,
-      )) + $rule_type_map;
+    if ($can_global) {
+      $global_note = pht(
+        'You have permission to create and manage global rules.');
+    } else {
+      $global_note = pht(
+        'You do not have permission to create or manage global rules.');
+    }
+    $global_note = phutil_tag('em', array(), $global_note);
 
-    list($can_global, $global_link) = $this->explainApplicationCapability(
-      HeraldManageGlobalRulesCapability::CAPABILITY,
-      pht('You have permission to create and manage global rules.'),
-      pht('You do not have permission to create or manage global rules.'));
-
-    $captions = array(
-      HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
-        pht(
+    $specs = array(
+      HeraldRuleTypeConfig::RULE_TYPE_PERSONAL => array(
+        'name' => pht('Personal Rule'),
+        'icon' => 'fa-user',
+        'help' => pht(
           'Personal rules notify you about events. You own them, but they can '.
           'only affect you. Personal rules only trigger for objects you have '.
           'permission to see.'),
-      HeraldRuleTypeConfig::RULE_TYPE_OBJECT =>
-        pht(
+        'enabled' => true,
+      ),
+      HeraldRuleTypeConfig::RULE_TYPE_OBJECT => array(
+        'name' => pht('Object Rule'),
+        'icon' => 'fa-cube',
+        'help' => pht(
           'Object rules notify anyone about events. They are bound to an '.
           'object (like a repository) and can only act on that object. You '.
           'must be able to edit an object to create object rules for it. '.
           'Other users who can edit the object can edit its rules.'),
-      HeraldRuleTypeConfig::RULE_TYPE_GLOBAL =>
-        array(
+        'enabled' => true,
+      ),
+      HeraldRuleTypeConfig::RULE_TYPE_GLOBAL => array(
+        'name' => pht('Global Rule'),
+        'icon' => 'fa-globe',
+        'help' => array(
           pht(
             'Global rules notify anyone about events. Global rules can '.
             'bypass access control policies and act on any object.'),
-          $global_link,
+          $global_note,
         ),
+        'enabled' => $can_global,
+      ),
     );
 
-    $radio = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('Rule Type'))
-      ->setName('rule_type')
-      ->setValue($request->getStr('rule_type'))
-      ->setError($e_rule);
+    $adapter_type = $adapter->getAdapterContentType();
 
-    $adapter = HeraldAdapter::getAdapterForContentType(
-      $request->getStr('content_type'));
+    $base_uri = new PhutilURI($this->getApplicationURI('create/'));
 
-    foreach ($rule_type_map as $value => $name) {
-      $caption = idx($captions, $value);
-      $disabled = ($value == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) &&
-                  (!$can_global);
+    $adapter_uri = id(clone $base_uri)
+      ->replaceQueryParam('adapter', $adapter_type);
 
-      if (!$adapter->supportsRuleType($value)) {
-        $disabled = true;
-        $caption = array(
-          $caption,
-          "\n\n",
-          phutil_tag(
+    $menu = id(new PHUIObjectItemListView())
+      ->setUser($viewer)
+      ->setBig(true);
+
+    foreach ($specs as $rule_type => $spec) {
+      $type_uri = id(clone $adapter_uri)
+        ->replaceQueryParam('type', $rule_type);
+
+      $name = $spec['name'];
+      $icon = $spec['icon'];
+
+      $description = $spec['help'];
+      $description = (array)$description;
+
+      $enabled = $spec['enabled'];
+      if ($enabled) {
+        $enabled = $adapter->supportsRuleType($rule_type);
+        if (!$enabled) {
+          $description[] = phutil_tag(
             'em',
             array(),
             pht(
-              'This rule type is not supported by the selected content type.')),
-        );
+              'This rule type is not supported by the selected '.
+              'content type.'));
+        }
       }
 
-      $radio->addButton(
-        $value,
-        $name,
-        phutil_escape_html_newlines($caption),
-        $disabled ? 'disabled' : null,
-        $disabled);
+      $description = phutil_implode_html(
+        array(
+          phutil_tag('br'),
+          phutil_tag('br'),
+        ),
+        $description);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($name)
+        ->setImageIcon($icon)
+        ->addAttribute($description);
+
+      if ($enabled) {
+        $item
+          ->setHref($type_uri)
+          ->setClickable(true);
+      } else {
+        $item->setDisabled(true);
+      }
+
+      $menu->addItem($item);
     }
 
-    return $radio;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setObjectList($menu);
+
+    $box->newTailButton()
+      ->setText(pht('Back to Content Types'))
+      ->setIcon('fa-chevron-left')
+      ->setHref($base_uri);
+
+    return id(new PHUILauncherView())
+      ->appendChild($box);
+  }
+
+
+  private function newTargetForm(
+    HeraldAdapter $adapter,
+    $rule_type,
+    $object_name,
+    $errors,
+    $e_object,
+    $title) {
+
+    $viewer = $this->getViewer();
+    $content_type = $adapter->getAdapterContentType();
+    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+
+    $params = array(
+      'adapter' => $content_type,
+      'type' => $rule_type,
+    );
+
+    $form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Rule for'))
+          ->setValue(
+            phutil_tag(
+              'strong',
+              array(),
+              $adapter->getAdapterContentName())))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Rule Type'))
+          ->setValue(
+            phutil_tag(
+              'strong',
+              array(),
+              idx($rule_type_map, $rule_type))))
+      ->appendRemarkupInstructions(
+        pht(
+          'Choose the object this rule will act on (for example, enter '.
+          '`rX` to act on the `rX` repository, or `#project` to act on '.
+          'a project).'))
+      ->appendRemarkupInstructions(
+        $adapter->explainValidTriggerObjects())
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('objectName')
+          ->setError($e_object)
+          ->setValue($object_name)
+          ->setLabel(pht('Object')));
+
+    foreach ($params as $key => $value) {
+      $form->addHiddenInput($key, $value);
+    }
+
+    $cancel_params = $params;
+    unset($cancel_params['type']);
+
+    $cancel_uri = $this->getApplicationURI('new/');
+    $cancel_uri = new PhutilURI($cancel_uri, $params);
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Continue'))
+        ->addCancelButton($cancel_uri, pht('Back')));
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setForm($form);
+
+    return $form_box;
   }
 
 }

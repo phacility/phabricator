@@ -6,9 +6,6 @@ final class PhabricatorConfigIssueListController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('issue/');
-
     $engine = new PhabricatorSetupEngine();
     $response = $engine->execute();
     if ($response) {
@@ -34,7 +31,6 @@ final class PhabricatorConfigIssueListController
       'fa-question-circle');
 
     $title = pht('Setup Issues');
-    $header = $this->buildHeaderView($title);
 
     if (!$issues) {
       $issue_list = id(new PHUIInfoView())
@@ -50,21 +46,24 @@ final class PhabricatorConfigIssueListController
         $other,
       );
 
-      $issue_list = $this->buildConfigBoxView(pht('Issues'), $issue_list);
+      $issue_list = $this->buildConfigBoxView(
+        pht('Unresolved Setup Issues'),
+        $issue_list);
     }
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($title)
       ->setBorder(true);
 
+    $launcher_view = id(new PHUILauncherView())
+      ->appendChild($issue_list);
+
     $content = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter($issue_list);
+      ->setFooter($launcher_view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
       ->appendChild($content);
   }
 
@@ -76,27 +75,30 @@ final class PhabricatorConfigIssueListController
     $items = 0;
 
     foreach ($issues as $issue) {
-      if ($issue->getGroup() == $group) {
-        $items++;
-        $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
-        $item = id(new PHUIObjectItemView())
-          ->setHeader($issue->getName())
-          ->setHref($href)
-          ->addAttribute($issue->getSummary());
-        if (!$issue->getIsIgnored()) {
-          $icon = id(new PHUIIconView())
-            ->setIcon($fonticon)
-            ->setBackground('bg-sky');
-          $item->setImageIcon($icon);
-          $list->addItem($item);
-        } else {
-          $icon = id(new PHUIIconView())
-            ->setIcon('fa-eye-slash')
-            ->setBackground('bg-grey');
-          $item->setDisabled(true);
-          $item->setImageIcon($icon);
-          $ignored_items[] = $item;
-        }
+      if ($issue->getGroup() != $group) {
+        continue;
+      }
+
+      $items++;
+      $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($issue->getName())
+        ->setHref($href)
+        ->setClickable(true)
+        ->addAttribute($issue->getSummary());
+      if (!$issue->getIsIgnored()) {
+        $icon = id(new PHUIIconView())
+          ->setIcon($fonticon)
+          ->setBackground('bg-sky');
+        $item->setImageIcon($icon);
+        $list->addItem($item);
+      } else {
+        $icon = id(new PHUIIconView())
+          ->setIcon('fa-eye-slash')
+          ->setBackground('bg-grey');
+        $item->setDisabled(true);
+        $item->setImageIcon($icon);
+        $ignored_items[] = $item;
       }
     }
 
