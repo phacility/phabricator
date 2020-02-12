@@ -592,7 +592,7 @@ final class DifferentialChangesetParser extends Phobject {
       $result = $text;
 
       if (isset($intra[$key])) {
-        $result = ArcanistDiffUtils::applyIntralineDiff(
+        $result = PhabricatorDifferenceEngine::applyIntralineDiff(
           $result,
           $intra[$key]);
       }

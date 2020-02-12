@@ -1,0 +1,16 @@
+<span class="cp">&lt;?</span>
+
+<span class="c">// comment? comment! </span><span class="cp">?&gt;</span>
+
+data
+
+<span class="cp">&lt;?php</span>
+
+<span class="cp">__halt_compiler</span> <span class="cm">/* ! */</span> <span class="o">(</span> <span class="c">// )</span>
+<span class="o">)</span> <span class="cm">/* ;;;; */</span>
+
+<span class="o">;</span>
+
+data data
+&lt;?php
+data
