@@ -9,7 +9,7 @@ function init_phabricator_script(array $options) {
     'include_path',
     $include_path.PATH_SEPARATOR.dirname(__FILE__).'/../../../');
 
-  $ok = @include_once 'arcanist/scripts/init/init-script.php';
+  $ok = @include_once 'arcanist/support/init/init-script.php';
   if (!$ok) {
     echo
       'FATAL ERROR: Unable to load the "Arcanist" library. '.
