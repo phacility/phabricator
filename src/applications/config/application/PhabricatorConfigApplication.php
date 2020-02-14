@@ -38,11 +38,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
     return array(
       '/config/' => array(
         '' => 'PhabricatorConfigConsoleController',
-        'application/' => 'PhabricatorConfigApplicationController',
-        'all/' => 'PhabricatorConfigAllController',
-        'history/' => 'PhabricatorConfigHistoryController',
         'edit/(?P<key>[\w\.\-]+)/' => 'PhabricatorConfigEditController',
-        'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
         'database/'.
           '(?:(?P<ref>[^/]+)/'.
           '(?:(?P<database>[^/]+)/'.
