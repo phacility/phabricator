@@ -8758,6 +8758,7 @@ phutil_register_library_map(array(
       'PhabricatorAuthDAO',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorAuthProviderConfigController' => 'PhabricatorAuthProviderController',
     'PhabricatorAuthProviderConfigEditor' => 'PhabricatorApplicationTransactionEditor',
@@ -9765,10 +9766,12 @@ phutil_register_library_map(array(
     'PhabricatorExternalAccount' => array(
       'PhabricatorUserDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorExternalAccountIdentifier' => array(
       'PhabricatorUserDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorExternalAccountIdentifierQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorExternalAccountQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',

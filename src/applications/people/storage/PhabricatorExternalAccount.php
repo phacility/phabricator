@@ -1,7 +1,10 @@
 <?php
 
-final class PhabricatorExternalAccount extends PhabricatorUserDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorExternalAccount
+  extends PhabricatorUserDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $userPHID;
   protected $accountType;
@@ -160,6 +163,26 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
         return pht(
           'External accounts can only be edited by the account owner.');
     }
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $viewer = $engine->getViewer();
+
+    $identifiers = id(new PhabricatorExternalAccountIdentifierQuery())
+      ->setViewer($viewer)
+      ->withExternalAccountPHIDs(array($this->getPHID()))
+      ->newIterator();
+    foreach ($identifiers as $identifier) {
+      $engine->destroyObject($identifier);
+    }
+
+    $this->delete();
   }
 
 }

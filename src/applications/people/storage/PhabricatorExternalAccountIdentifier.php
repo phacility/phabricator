@@ -2,7 +2,9 @@
 
 final class PhabricatorExternalAccountIdentifier
   extends PhabricatorUserDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $externalAccountPHID;
   protected $providerConfigPHID;
@@ -62,6 +64,15 @@ final class PhabricatorExternalAccountIdentifier
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }
