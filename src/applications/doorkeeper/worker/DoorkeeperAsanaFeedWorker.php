@@ -532,6 +532,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       ->withUserPHIDs($all_phids)
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
+      ->needAccountIdentifiers(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -540,7 +541,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       ->execute();
 
     foreach ($accounts as $account) {
-      $phid_map[$account->getUserPHID()] = $account->getAccountID();
+      $phid_map[$account->getUserPHID()] = $this->getAsanaAccountID($account);
     }
 
     // Put this back in input order.
@@ -562,6 +563,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       ->withUserPHIDs($user_phids)
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
+      ->needAccountIdentifiers(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -601,7 +603,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
         ->withPHIDs(array($account->getUserPHID()))
         ->executeOne();
       if ($user) {
-        return array($user, $account->getAccountID(), $token);
+        return array($user, $this->getAsanaAccountID($account), $token);
       }
     }
 
@@ -705,5 +707,21 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
         $data);
     }
   }
+
+  private function getAsanaAccountID(PhabricatorExternalAccount $account) {
+    $identifiers = $account->getAccountIdentifiers();
+
+    if (count($identifiers) !== 1) {
+      throw new Exception(
+        pht(
+          'Expected external Asana account to have exactly one external '.
+          'account identifier, found %s.',
+          phutil_count($identifiers)));
+    }
+
+    return head($identifiers)->getIdentifierRaw();
+  }
+
+
 
 }
