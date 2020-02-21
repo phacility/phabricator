@@ -216,6 +216,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
       ->setViewer($viewer)
       ->withProviderConfigPHIDs(array($config->getPHID()))
       ->withAccountIDs($raw_identifiers)
+      ->needAccountIdentifiers(true)
       ->execute();
     if (!$accounts) {
       $account = $this->newExternalAccount()
@@ -230,6 +231,17 @@ abstract class PhabricatorAuthProvider extends Phobject {
           'account identifiers which map to more than one account: %s.',
           get_class($this),
           implode(', ', $raw_identifiers)));
+    }
+
+    // See T13493. Add all the identifiers to the account. In the case where
+    // an account initially has a lower-quality identifier (like an email
+    // address) and later adds a higher-quality identifier (like a GUID), this
+    // allows us to automatically upgrade toward the higher-quality identifier
+    // and survive API changes which remove the lower-quality identifier more
+    // gracefully.
+
+    foreach ($identifiers as $identifier) {
+      $account->appendIdentifier($identifier);
     }
 
     return $this->didUpdateAccount($account);
@@ -351,7 +363,8 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return id(new PhabricatorExternalAccount())
       ->setAccountType($adapter->getAdapterType())
       ->setAccountDomain($adapter->getAdapterDomain())
-      ->setProviderConfigPHID($config->getPHID());
+      ->setProviderConfigPHID($config->getPHID())
+      ->attachAccountIdentifiers(array());
   }
 
   public function getLoginOrder() {

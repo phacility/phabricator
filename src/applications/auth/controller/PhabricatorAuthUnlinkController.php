@@ -67,7 +67,7 @@ final class PhabricatorAuthUnlinkController
       ->setWorkflowKey($workflow_key)
       ->requireHighSecurityToken($viewer, $request, $done_uri);
 
-    $account->delete();
+    $account->unlinkAccount();
 
     id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
       $viewer,

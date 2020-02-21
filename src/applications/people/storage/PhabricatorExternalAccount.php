@@ -23,6 +23,7 @@ final class PhabricatorExternalAccount
 
   private $profileImageFile = self::ATTACHABLE;
   private $providerConfig = self::ATTACHABLE;
+  private $accountIdentifiers = self::ATTACHABLE;
 
   public function getProfileImageFile() {
     return $this->assertAttached($this->profileImageFile);
@@ -78,7 +79,48 @@ final class PhabricatorExternalAccount
     if (!$this->getAccountSecret()) {
       $this->setAccountSecret(Filesystem::readRandomCharacters(32));
     }
-    return parent::save();
+
+    $this->openTransaction();
+
+      $result = parent::save();
+
+      $account_phid = $this->getPHID();
+      $config_phid = $this->getProviderConfigPHID();
+
+      if ($this->accountIdentifiers !== self::ATTACHABLE) {
+        foreach ($this->getAccountIdentifiers() as $identifier) {
+          $identifier
+            ->setExternalAccountPHID($account_phid)
+            ->setProviderConfigPHID($config_phid)
+            ->save();
+        }
+      }
+
+    $this->saveTransaction();
+
+    return $result;
+  }
+
+  public function unlinkAccount() {
+
+    // When unlinking an account, we disassociate it from the user and
+    // remove all the identifying information. We retain the PHID, the
+    // object itself, and the "ExternalAccountIdentifier" objects in the
+    // external table.
+
+    // TODO: This unlinks (but does not destroy) any profile image.
+
+    return $this
+      ->setUserPHID(null)
+      ->setDisplayName(null)
+      ->setUsername(null)
+      ->setRealName(null)
+      ->setEmail(null)
+      ->setEmailVerified(0)
+      ->setProfileImagePHID(null)
+      ->setAccountURI(null)
+      ->setProperties(array())
+      ->save();
   }
 
   public function setProperty($key, $value) {
@@ -131,6 +173,44 @@ final class PhabricatorExternalAccount
     return $this->assertAttached($this->providerConfig);
   }
 
+  public function getAccountIdentifiers() {
+    $raw = $this->assertAttached($this->accountIdentifiers);
+    return array_values($raw);
+  }
+
+  public function attachAccountIdentifiers(array $identifiers) {
+    assert_instances_of($identifiers, 'PhabricatorExternalAccountIdentifier');
+    $this->accountIdentifiers = mpull($identifiers, null, 'getIdentifierRaw');
+    return $this;
+  }
+
+  public function appendIdentifier(
+    PhabricatorExternalAccountIdentifier $identifier) {
+
+    $this->assertAttached($this->accountIdentifiers);
+
+    $map = $this->accountIdentifiers;
+    $raw = $identifier->getIdentifierRaw();
+
+    $old = idx($map, $raw);
+    $new = $identifier;
+
+    if ($old === null) {
+      $result = $new;
+    } else {
+      // Here, we already know about an identifier and have rediscovered it.
+
+      // We could copy properties from the new version of the identifier here,
+      // or merge them in some other way (for example, update a "last seen
+      // from the provider" timestamp), but no such properties currently exist.
+      $result = $old;
+    }
+
+    $this->accountIdentifiers[$raw] = $result;
+
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -181,6 +261,8 @@ final class PhabricatorExternalAccount
     foreach ($identifiers as $identifier) {
       $engine->destroyObject($identifier);
     }
+
+    // TODO: This may leave a profile image behind.
 
     $this->delete();
   }

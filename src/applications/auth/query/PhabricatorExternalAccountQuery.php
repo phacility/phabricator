@@ -22,6 +22,7 @@ final class PhabricatorExternalAccountQuery
   private $needImages;
   private $accountSecrets;
   private $providerConfigPHIDs;
+  private $needAccountIdentifiers;
 
   public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
@@ -60,6 +61,11 @@ final class PhabricatorExternalAccountQuery
 
   public function needImages($need) {
     $this->needImages = $need;
+    return $this;
+  }
+
+  public function needAccountIdentifiers($need) {
+    $this->needAccountIdentifiers = $need;
     return $this;
   }
 
@@ -129,6 +135,23 @@ final class PhabricatorExternalAccountQuery
           }
           $account->attachProfileImageFile($default_file);
         }
+      }
+    }
+
+    if ($this->needAccountIdentifiers) {
+      $account_phids = mpull($accounts, 'getPHID');
+
+      $identifiers = id(new PhabricatorExternalAccountIdentifierQuery())
+        ->setViewer($viewer)
+        ->setParentQuery($this)
+        ->withExternalAccountPHIDs($account_phids)
+        ->execute();
+
+      $identifiers = mgroup($identifiers, 'getExternalAccountPHID');
+      foreach ($accounts as $account) {
+        $account_phid = $account->getPHID();
+        $account_identifiers = idx($identifiers, $account_phid, array());
+        $account->attachAccountIdentifiers($account_identifiers);
       }
     }
 

@@ -36,7 +36,10 @@ final class PhabricatorExternalAccountIdentifier
 
   public function save() {
     $identifier_raw = $this->getIdentifierRaw();
-    $this->identiferHash = PhabricatorHash::digestForIndex($identifier_raw);
+
+    $identifier_hash = PhabricatorHash::digestForIndex($identifier_raw);
+    $this->setIdentifierHash($identifier_hash);
+
     return parent::save();
   }
 
