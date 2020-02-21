@@ -190,39 +190,51 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return;
   }
 
-  protected function loadOrCreateAccount($account_id) {
-    if (!strlen($account_id)) {
-      throw new Exception(pht('Empty account ID!'));
+  protected function loadOrCreateAccount(array $identifiers) {
+    assert_instances_of($identifiers, 'PhabricatorExternalAccountIdentifier');
+
+    if (!$identifiers) {
+      throw new Exception(
+        pht(
+          'Authentication provider (of class "%s") is attempting to '.
+          'load or create an external account, but provided no account '.
+          'identifiers.',
+          get_class($this)));
+    }
+
+    if (count($identifiers) !== 1) {
+      throw new Exception(
+        pht(
+          'Unexpected number of account identifiers returned (by class "%s").',
+          get_class($this)));
+    }
+
+    $config = $this->getProviderConfig();
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $raw_identifiers = mpull($identifiers, 'getIdentifierRaw');
+
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($viewer)
+      ->withProviderConfigPHIDs(array($config->getPHID()))
+      ->withAccountIDs($raw_identifiers)
+      ->execute();
+    if (!$accounts) {
+      $account = $this->newExternalAccount()
+        ->setAccountID(head($raw_identifiers));
+    } else if (count($accounts) === 1) {
+      $account = head($accounts);
+    } else {
+      throw new Exception(
+        pht(
+          'Authentication provider (of class "%s") is attempting to load '.
+          'or create an external account, but provided a list of '.
+          'account identifiers which map to more than one account: %s.',
+          get_class($this),
+          implode(', ', $raw_identifiers)));
     }
 
     $adapter = $this->getAdapter();
-    $adapter_class = get_class($adapter);
-
-    if (!strlen($adapter->getAdapterType())) {
-      throw new Exception(
-        pht(
-          "AuthAdapter (of class '%s') has an invalid implementation: ".
-          "no adapter type.",
-          $adapter_class));
-    }
-
-    if (!strlen($adapter->getAdapterDomain())) {
-      throw new Exception(
-        pht(
-          "AuthAdapter (of class '%s') has an invalid implementation: ".
-          "no adapter domain.",
-          $adapter_class));
-    }
-
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountType = %s AND accountDomain = %s AND accountID = %s',
-      $adapter->getAdapterType(),
-      $adapter->getAdapterDomain(),
-      $account_id);
-    if (!$account) {
-      $account = $this->newExternalAccount()
-        ->setAccountID($account_id);
-    }
 
     $account->setUsername($adapter->getAccountName());
     $account->setRealName($adapter->getAccountRealName());
@@ -240,6 +252,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
         // file entry for it, but there's no convenient way to do this with
         // PhabricatorFile right now. The storage will get shared, so the impact
         // here is negligible.
+
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           $image_file = PhabricatorFile::newFromFileDownload(
             $image_uri,

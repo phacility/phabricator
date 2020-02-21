@@ -34,6 +34,11 @@ abstract class PhutilAuthAdapter extends Phobject {
     return $identifiers;
   }
 
+  final protected function newAccountIdentifier($raw_identifier) {
+    return id(new PhabricatorExternalAccountIdentifier())
+      ->setIdentifierRaw($raw_identifier);
+  }
+
   /**
    * Get a unique identifier associated with the account.
    *

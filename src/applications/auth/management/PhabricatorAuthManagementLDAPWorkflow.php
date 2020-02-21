@@ -56,9 +56,12 @@ final class PhabricatorAuthManagementLDAPWorkflow
     $console->writeOut("\n");
     $console->writeOut("%s\n", pht('Connecting to LDAP...'));
 
-    $account_id = $adapter->getAccountID();
-    if ($account_id) {
-      $console->writeOut("%s\n", pht('Found LDAP Account: %s', $account_id));
+    $account_ids = $adapter->getAccountIdentifiers();
+    if ($account_ids) {
+      $value_list = mpull($account_ids, 'getIdentifierRaw');
+      $value_list = implode(', ', $value_list);
+
+      $console->writeOut("%s\n", pht('Found LDAP Account: %s', $value_list));
     } else {
       $console->writeOut("%s\n", pht('Unable to find LDAP account!'));
     }
