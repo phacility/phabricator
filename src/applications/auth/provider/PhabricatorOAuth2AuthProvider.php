@@ -95,7 +95,9 @@ abstract class PhabricatorOAuth2AuthProvider
       return array($account, $response);
     }
 
-    return array($this->loadOrCreateAccount($identifiers), $response);
+    $account = $this->newExternalAccountForIdentifiers($identifiers);
+
+    return array($account, $response);
   }
 
   public function processEditForm(

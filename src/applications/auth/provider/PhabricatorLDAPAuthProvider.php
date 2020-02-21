@@ -180,7 +180,9 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
       }
     }
 
-    return array($this->loadOrCreateAccount($identifiers), $response);
+    $account = $this->newExternalAccountForIdentifiers($identifiers);
+
+    return array($account, $response);
   }
 
 

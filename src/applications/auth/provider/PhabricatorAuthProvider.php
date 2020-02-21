@@ -186,11 +186,9 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return;
   }
 
-  public function willRegisterAccount(PhabricatorExternalAccount $account) {
-    return;
-  }
+  final protected function newExternalAccountForIdentifiers(
+    array $identifiers) {
 
-  protected function loadOrCreateAccount(array $identifiers) {
     assert_instances_of($identifiers, 'PhabricatorExternalAccountIdentifier');
 
     if (!$identifiers) {
@@ -234,6 +232,38 @@ abstract class PhabricatorAuthProvider extends Phobject {
           implode(', ', $raw_identifiers)));
     }
 
+    return $this->didUpdateAccount($account);
+  }
+
+  final protected function newExternalAccountForUser(PhabricatorUser $user) {
+    $config = $this->getProviderConfig();
+
+    // When a user logs in with a provider like username/password, they
+    // always already have a Phabricator account (since there's no way they
+    // could have a username otherwise).
+
+    // These users should never go to registration, so we're building a
+    // dummy "external account" which just links directly back to their
+    // internal account.
+
+    $account = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($user)
+      ->withProviderConfigPHIDs(array($config->getPHID()))
+      ->withUserPHIDs(array($user->getPHID()))
+      ->executeOne();
+    if (!$account) {
+      $account = $this->newExternalAccount()
+        ->setUserPHID($user->getPHID());
+
+      // TODO: Remove this when "accountID" is removed; the column is not
+      // nullable.
+      $account->setAccountID('');
+    }
+
+    return $this->didUpdateAccount($account);
+  }
+
+  private function didUpdateAccount(PhabricatorExternalAccount $account) {
     $adapter = $this->getAdapter();
 
     $account->setUsername($adapter->getAccountName());
