@@ -199,7 +199,7 @@ abstract class PhabricatorOAuth2AuthProvider
     PhabricatorExternalAccount $account,
     $force_refresh = false) {
 
-    if ($account->getProviderKey() !== $this->getProviderKey()) {
+    if ($account->getProviderConfigPHID() !== $this->getProviderConfigPHID()) {
       throw new Exception(pht('Account does not match provider!'));
     }
 

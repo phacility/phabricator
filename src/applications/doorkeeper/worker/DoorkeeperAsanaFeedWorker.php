@@ -525,20 +525,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       return $phid_map;
     }
 
-    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
-
-    $accounts = id(new PhabricatorExternalAccountQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withUserPHIDs($all_phids)
-      ->withAccountTypes(array($provider->getProviderType()))
-      ->withAccountDomains(array($provider->getProviderDomain()))
-      ->needAccountIdentifiers(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->execute();
+    $accounts = $this->loadAsanaExternalAccounts($all_phids);
 
     foreach ($accounts as $account) {
       $phid_map[$account->getUserPHID()] = $this->getAsanaAccountID($account);
@@ -550,19 +537,21 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
     return $phid_map;
   }
 
-  private function findAnyValidAsanaAccessToken(array $user_phids) {
-    if (!$user_phids) {
-      return array(null, null, null);
-    }
-
+  private function loadAsanaExternalAccounts(array $user_phids) {
     $provider = $this->getProvider();
     $viewer = $this->getViewer();
 
+    if (!$user_phids) {
+      return array();
+    }
+
     $accounts = id(new PhabricatorExternalAccountQuery())
-      ->setViewer($viewer)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withUserPHIDs($user_phids)
-      ->withAccountTypes(array($provider->getProviderType()))
-      ->withAccountDomains(array($provider->getProviderDomain()))
+      ->withProviderConfigPHIDs(
+        array(
+          $provider->getProviderConfigPHID(),
+        ))
       ->needAccountIdentifiers(true)
       ->requireCapabilities(
         array(
@@ -570,6 +559,19 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->execute();
+
+    return $accounts;
+  }
+
+  private function findAnyValidAsanaAccessToken(array $user_phids) {
+    $provider = $this->getProvider();
+    $viewer = $this->getViewer();
+
+    if (!$user_phids) {
+      return array(null, null, null);
+    }
+
+    $accounts = $this->loadAsanaExternalAccounts($user_phids);
 
     // Reorder accounts in the original order.
     // TODO: This needs to be adjusted if/when we allow you to link multiple

@@ -7,10 +7,7 @@ final class PhabricatorExternalAccount
     PhabricatorDestructibleInterface {
 
   protected $userPHID;
-  protected $accountType;
-  protected $accountDomain;
   protected $accountSecret;
-  protected $accountID;
   protected $displayName;
   protected $username;
   protected $realName;
@@ -20,6 +17,12 @@ final class PhabricatorExternalAccount
   protected $profileImagePHID;
   protected $properties = array();
   protected $providerConfigPHID;
+
+  // TODO: Remove these (see T13493). These columns are obsolete and have
+  // no readers and only trivial writers.
+  protected $accountType;
+  protected $accountDomain;
+  protected $accountID;
 
   private $profileImageFile = self::ATTACHABLE;
   private $providerConfig = self::ATTACHABLE;
@@ -60,19 +63,14 @@ final class PhabricatorExternalAccount
         'accountURI' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'account_details' => array(
-          'columns' => array('accountType', 'accountDomain', 'accountID'),
-          'unique' => true,
-        ),
         'key_user' => array(
           'columns' => array('userPHID'),
         ),
+        'key_provider' => array(
+          'columns' => array('providerConfigPHID', 'userPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
-  }
-
-  public function getProviderKey() {
-    return $this->getAccountType().':'.$this->getAccountDomain();
   }
 
   public function save() {
@@ -144,24 +142,6 @@ final class PhabricatorExternalAccount
     }
 
     return true;
-  }
-
-  public function getDisplayName() {
-    if (strlen($this->displayName)) {
-      return $this->displayName;
-    }
-
-    // TODO: Figure out how much identifying information we're going to show
-    // to users about external accounts. For now, just show a string which is
-    // clearly not an error, but don't disclose any identifying information.
-
-    $map = array(
-      'email' => pht('Email User'),
-    );
-
-    $type = $this->getAccountType();
-
-    return idx($map, $type, pht('"%s" User', $type));
   }
 
   public function attachProviderConfig(PhabricatorAuthProviderConfig $config) {

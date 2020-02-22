@@ -15,8 +15,6 @@ final class PhabricatorExternalAccountQuery
 
   private $ids;
   private $phids;
-  private $accountTypes;
-  private $accountDomains;
   private $accountIDs;
   private $userPHIDs;
   private $needImages;
@@ -31,16 +29,6 @@ final class PhabricatorExternalAccountQuery
 
   public function withAccountIDs(array $account_ids) {
     $this->accountIDs = $account_ids;
-    return $this;
-  }
-
-  public function withAccountDomains(array $account_domains) {
-    $this->accountDomains = $account_domains;
-    return $this;
-  }
-
-  public function withAccountTypes(array $account_types) {
-    $this->accountTypes = $account_types;
     return $this;
   }
 
@@ -173,20 +161,6 @@ final class PhabricatorExternalAccountQuery
         $conn,
         'phid IN (%Ls)',
         $this->phids);
-    }
-
-    if ($this->accountTypes !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'accountType IN (%Ls)',
-        $this->accountTypes);
-    }
-
-    if ($this->accountDomains !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'accountDomain IN (%Ls)',
-        $this->accountDomains);
     }
 
     if ($this->accountIDs !== null) {

@@ -65,8 +65,10 @@ final class PhabricatorAsanaConfigOptions
     $account = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->withAccountTypes(array($provider->getProviderType()))
-      ->withAccountDomains(array($provider->getProviderDomain()))
+      ->withProviderConfigPHIDs(
+        array(
+          $provider->getProviderConfigPHID(),
+        ))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

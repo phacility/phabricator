@@ -30,7 +30,10 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->withAccountTypes(array($provider->getProviderType()))
+      ->withProviderConfigPHIDs(
+        array(
+          $provider->getProviderConfigPHID(),
+        ))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

@@ -20,6 +20,10 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return $this->providerConfig;
   }
 
+  public function getProviderConfigPHID() {
+    return $this->getProviderConfig()->getPHID();
+  }
+
   public function getConfigurationHelp() {
     return null;
   }
@@ -360,11 +364,18 @@ abstract class PhabricatorAuthProvider extends Phobject {
     $config = $this->getProviderConfig();
     $adapter = $this->getAdapter();
 
-    return id(new PhabricatorExternalAccount())
-      ->setAccountType($adapter->getAdapterType())
-      ->setAccountDomain($adapter->getAdapterDomain())
+    $account = id(new PhabricatorExternalAccount())
       ->setProviderConfigPHID($config->getPHID())
       ->attachAccountIdentifiers(array());
+
+    // TODO: Remove this when these columns are removed. They no longer have
+    // readers or writers (other than this callsite).
+
+    $account
+      ->setAccountType($adapter->getAdapterType())
+      ->setAccountDomain($adapter->getAdapterDomain());
+
+    return $account;
   }
 
   public function getLoginOrder() {
