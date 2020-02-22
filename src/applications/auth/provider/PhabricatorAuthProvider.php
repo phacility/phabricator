@@ -219,12 +219,11 @@ abstract class PhabricatorAuthProvider extends Phobject {
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withProviderConfigPHIDs(array($config->getPHID()))
-      ->withAccountIDs($raw_identifiers)
+      ->withRawAccountIdentifiers($raw_identifiers)
       ->needAccountIdentifiers(true)
       ->execute();
     if (!$accounts) {
-      $account = $this->newExternalAccount()
-        ->setAccountID(head($raw_identifiers));
+      $account = $this->newExternalAccount();
     } else if (count($accounts) === 1) {
       $account = head($accounts);
     } else {
@@ -270,10 +269,6 @@ abstract class PhabricatorAuthProvider extends Phobject {
     if (!$account) {
       $account = $this->newExternalAccount()
         ->setUserPHID($user->getPHID());
-
-      // TODO: Remove this when "accountID" is removed; the column is not
-      // nullable.
-      $account->setAccountID('');
     }
 
     return $this->didUpdateAccount($account);
@@ -374,6 +369,11 @@ abstract class PhabricatorAuthProvider extends Phobject {
     $account
       ->setAccountType($adapter->getAdapterType())
       ->setAccountDomain($adapter->getAdapterDomain());
+
+    // TODO: Remove this when "accountID" is removed; the column is not
+    // nullable.
+
+    $account->setAccountID('');
 
     return $account;
   }
