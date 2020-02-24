@@ -204,13 +204,6 @@ abstract class PhabricatorAuthProvider extends Phobject {
           get_class($this)));
     }
 
-    if (count($identifiers) !== 1) {
-      throw new Exception(
-        pht(
-          'Unexpected number of account identifiers returned (by class "%s").',
-          get_class($this)));
-    }
-
     $config = $this->getProviderConfig();
     $viewer = PhabricatorUser::getOmnipotentUser();
 
