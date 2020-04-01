@@ -76,9 +76,11 @@ final class DrydockConsoleController extends DrydockController {
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setObjectList($menu);
 
+    $launcher_view = id(new PHUILauncherView())
+      ->appendChild($box);
+
     $view = id(new PHUITwoColumnView())
-      ->setFixed(true)
-      ->setFooter($box);
+      ->setFooter($launcher_view);
 
     return $this->newPage()
       ->setTitle($title)

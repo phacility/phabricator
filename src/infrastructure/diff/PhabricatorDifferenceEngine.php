@@ -169,4 +169,93 @@ final class PhabricatorDifferenceEngine extends Phobject {
     return $corpus;
   }
 
+  public static function applyIntralineDiff($str, $intra_stack) {
+    $buf = '';
+    $p = $s = $e = 0; // position, start, end
+    $highlight = $tag = $ent = false;
+    $highlight_o = '<span class="bright">';
+    $highlight_c = '</span>';
+
+    $depth_in = '<span class="depth-in">';
+    $depth_out = '<span class="depth-out">';
+
+    $is_html = false;
+    if ($str instanceof PhutilSafeHTML) {
+      $is_html = true;
+      $str = $str->getHTMLContent();
+    }
+
+    $n = strlen($str);
+    for ($i = 0; $i < $n; $i++) {
+
+      if ($p == $e) {
+        do {
+          if (empty($intra_stack)) {
+            $buf .= substr($str, $i);
+            break 2;
+          }
+          $stack = array_shift($intra_stack);
+          $s = $e;
+          $e += $stack[1];
+        } while ($stack[0] === 0);
+
+        switch ($stack[0]) {
+          case '>':
+            $open_tag = $depth_in;
+            break;
+          case '<':
+            $open_tag = $depth_out;
+            break;
+          default:
+            $open_tag = $highlight_o;
+            break;
+        }
+      }
+
+      if (!$highlight && !$tag && !$ent && $p == $s) {
+        $buf .= $open_tag;
+        $highlight = true;
+      }
+
+      if ($str[$i] == '<') {
+        $tag = true;
+        if ($highlight) {
+          $buf .= $highlight_c;
+        }
+      }
+
+      if (!$tag) {
+        if ($str[$i] == '&') {
+          $ent = true;
+        }
+        if ($ent && $str[$i] == ';') {
+          $ent = false;
+        }
+        if (!$ent) {
+          $p++;
+        }
+      }
+
+      $buf .= $str[$i];
+
+      if ($tag && $str[$i] == '>') {
+        $tag = false;
+        if ($highlight) {
+          $buf .= $open_tag;
+        }
+      }
+
+      if ($highlight && ($p == $e || $i == $n - 1)) {
+        $buf .= $highlight_c;
+        $highlight = false;
+      }
+    }
+
+    if ($is_html) {
+      return phutil_safe_html($buf);
+    }
+
+    return $buf;
+  }
+
 }

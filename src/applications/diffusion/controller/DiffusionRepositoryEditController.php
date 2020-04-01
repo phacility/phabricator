@@ -78,13 +78,15 @@ final class DiffusionRepositoryEditController
       ->addClass('diffusion-create-repo')
       ->appendChild($layout);
 
-    $view = id(new PHUITwoColumnView())
-      ->setFixed(true)
-      ->setFooter(
+    $launcher_view = id(new PHUILauncherView())
+      ->appendChild(
         array(
           $layout,
           $hints,
         ));
+
+    $view = id(new PHUITwoColumnView())
+      ->setFooter($launcher_view);
 
     return $this->newPage()
       ->setTitle($title)

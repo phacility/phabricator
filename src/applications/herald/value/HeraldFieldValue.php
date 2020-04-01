@@ -36,4 +36,8 @@ abstract class HeraldFieldValue extends Phobject {
     return array();
   }
 
+  public function renderTranscriptValue($value) {
+    return $this->renderFieldValue($value);
+  }
+
 }

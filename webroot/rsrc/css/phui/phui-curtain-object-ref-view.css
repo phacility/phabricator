@@ -1,0 +1,84 @@
+/**
+ * @provides phui-curtain-object-ref-view-css
+ */
+
+.phui-curtain-object-ref-list-view-empty {
+  font-style: italic;
+  color: {$greytext};
+}
+
+.phui-curtain-object-ref-view {
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.phui-curtain-object-ref-view-image-cell {
+  min-width: 32px;
+  padding-bottom: 24px;
+}
+
+.phui-curtain-object-ref-view-image-cell > a {
+  height: 24px;
+  width: 24px;
+  background-size: 100%;
+  border-radius: 3px;
+  display: block;
+  position: absolute;
+}
+
+.phui-curtain-object-ref-view-image-cell .phui-icon-view {
+  font-size: 16px;
+  line-height: 16px;
+  vertical-align: middle;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  top: 3px;
+  display: block;
+  position: absolute;
+  color: #ffffff;
+}
+
+.phui-curtain-object-ref-view-icon-image {
+  background-color: {$backdrop};
+}
+
+.phui-curtain-object-ref-view-title-cell {
+  font-weight: bold;
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  /* This is forcing "text-overflow: ellipsis" to actually work. */
+  max-width: 210px;
+}
+
+.phui-curtain-object-ref-view-without-content >
+  .phui-curtain-object-ref-view-title-cell {
+  vertical-align: middle;
+}
+
+.phui-curtain-object-ref-view-with-content >
+  .phui-curtain-object-ref-view-image-cell > a {
+  margin-top: 4px;
+}
+
+.phui-curtain-object-ref-view-title-cell > a {
+  color: {$darkgreytext};
+}
+
+.phui-curtain-object-ref-view-epoch-cell {
+  color: {$greytext};
+}
+
+.phui-curtain-object-ref-list-view-tail {
+  text-align: center;
+  margin-top: 8px;
+  padding: 4px;
+  background: {$lightgreybackground};
+  border-top: 1px dashed {$thinblueborder};
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.04);
+}
+
+.phui-curtain-object-ref-view-highlighted {
+  background: {$bluebackground};
+}

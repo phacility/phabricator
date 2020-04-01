@@ -15,31 +15,15 @@ final class PhabricatorExternalAccountQuery
 
   private $ids;
   private $phids;
-  private $accountTypes;
-  private $accountDomains;
-  private $accountIDs;
   private $userPHIDs;
   private $needImages;
   private $accountSecrets;
   private $providerConfigPHIDs;
+  private $needAccountIdentifiers;
+  private $rawAccountIdentifiers;
 
   public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
-    return $this;
-  }
-
-  public function withAccountIDs(array $account_ids) {
-    $this->accountIDs = $account_ids;
-    return $this;
-  }
-
-  public function withAccountDomains(array $account_domains) {
-    $this->accountDomains = $account_domains;
-    return $this;
-  }
-
-  public function withAccountTypes(array $account_types) {
-    $this->accountTypes = $account_types;
     return $this;
   }
 
@@ -63,8 +47,18 @@ final class PhabricatorExternalAccountQuery
     return $this;
   }
 
+  public function needAccountIdentifiers($need) {
+    $this->needAccountIdentifiers = $need;
+    return $this;
+  }
+
   public function withProviderConfigPHIDs(array $phids) {
     $this->providerConfigPHIDs = $phids;
+    return $this;
+  }
+
+  public function withRawAccountIdentifiers(array $identifiers) {
+    $this->rawAccountIdentifiers = $identifiers;
     return $this;
   }
 
@@ -132,6 +126,23 @@ final class PhabricatorExternalAccountQuery
       }
     }
 
+    if ($this->needAccountIdentifiers) {
+      $account_phids = mpull($accounts, 'getPHID');
+
+      $identifiers = id(new PhabricatorExternalAccountIdentifierQuery())
+        ->setViewer($viewer)
+        ->setParentQuery($this)
+        ->withExternalAccountPHIDs($account_phids)
+        ->execute();
+
+      $identifiers = mgroup($identifiers, 'getExternalAccountPHID');
+      foreach ($accounts as $account) {
+        $account_phid = $account->getPHID();
+        $account_identifiers = idx($identifiers, $account_phid, array());
+        $account->attachAccountIdentifiers($account_identifiers);
+      }
+    }
+
     return $accounts;
   }
 
@@ -141,60 +152,96 @@ final class PhabricatorExternalAccountQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'account.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'account.phid IN (%Ls)',
         $this->phids);
-    }
-
-    if ($this->accountTypes !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'accountType IN (%Ls)',
-        $this->accountTypes);
-    }
-
-    if ($this->accountDomains !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'accountDomain IN (%Ls)',
-        $this->accountDomains);
-    }
-
-    if ($this->accountIDs !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'accountID IN (%Ls)',
-        $this->accountIDs);
     }
 
     if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'userPHID IN (%Ls)',
+        'account.userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
     if ($this->accountSecrets !== null) {
       $where[] = qsprintf(
         $conn,
-        'accountSecret IN (%Ls)',
+        'account.accountSecret IN (%Ls)',
         $this->accountSecrets);
     }
 
     if ($this->providerConfigPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'providerConfigPHID IN (%Ls)',
+        'account.providerConfigPHID IN (%Ls)',
         $this->providerConfigPHIDs);
+
+      // If we have a list of ProviderConfig PHIDs and are joining the
+      // identifiers table, also include the list as an additional constraint
+      // on the identifiers table.
+
+      // This does not change the query results (an Account and its
+      // Identifiers always have the same ProviderConfig PHID) but it allows
+      // us to use keys on the Identifier table more efficiently.
+
+      if ($this->shouldJoinIdentifiersTable()) {
+        $where[] = qsprintf(
+          $conn,
+          'identifier.providerConfigPHID IN (%Ls)',
+          $this->providerConfigPHIDs);
+      }
+    }
+
+    if ($this->rawAccountIdentifiers !== null) {
+      $hashes = array();
+
+      foreach ($this->rawAccountIdentifiers as $raw_identifier) {
+        $hashes[] = PhabricatorHash::digestForIndex($raw_identifier);
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        'identifier.identifierHash IN (%Ls)',
+        $hashes);
     }
 
     return $where;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinIdentifiersTable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %R identifier ON account.phid = identifier.externalAccountPHID',
+        new PhabricatorExternalAccountIdentifier());
+    }
+
+    return $joins;
+  }
+
+  protected function shouldJoinIdentifiersTable() {
+    return ($this->rawAccountIdentifiers !== null);
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinIdentifiersTable()) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'account';
   }
 
   public function getQueryApplicationClass() {

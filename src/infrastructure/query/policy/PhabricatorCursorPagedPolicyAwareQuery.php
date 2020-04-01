@@ -359,6 +359,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $results;
   }
 
+  final public function newIterator() {
+    return new PhabricatorQueryIterator($this);
+  }
+
   final public function executeWithCursorPager(AphrontCursorPagerView $pager) {
     $limit = $pager->getPageSize();
 

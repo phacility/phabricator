@@ -128,6 +128,8 @@ final class DiffusionBranchQueryConduitAPIMethod
       $refs = array_slice($refs, 0, $limit);
     }
 
+    $refs = array_values($refs);
+
     return mpull($refs, 'toDictionary');
   }
 

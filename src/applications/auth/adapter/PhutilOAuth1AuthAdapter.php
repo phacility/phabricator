@@ -156,7 +156,7 @@ abstract class PhutilOAuth1AuthAdapter extends PhutilAuthAdapter {
     $authorize_token_uri = new PhutilURI($this->getAuthorizeTokenURI());
     $authorize_token_uri->replaceQueryParam('oauth_token', $this->getToken());
 
-    return (string)$authorize_token_uri;
+    return phutil_string_cast($authorize_token_uri);
   }
 
   protected function finishOAuthHandshake() {

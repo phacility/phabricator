@@ -271,6 +271,25 @@ final class PhabricatorProjectQuery
 
     $all_graph = $this->getAllReachableAncestors($projects);
 
+    // See T13484. If the graph is damaged (and contains a cycle or an edge
+    // pointing at a project which has been destroyed), some of the nodes we
+    // started with may be filtered out by reachability tests. If any of the
+    // projects we are linking up don't have available ancestors, filter them
+    // out.
+
+    foreach ($projects as $key => $project) {
+      $project_phid = $project->getPHID();
+      if (!isset($all_graph[$project_phid])) {
+        $this->didRejectResult($project);
+        unset($projects[$key]);
+        continue;
+      }
+    }
+
+    if (!$projects) {
+      return array();
+    }
+
     // NOTE: Although we may not need much information about ancestors, we
     // always need to test if the viewer is a member, because we will return
     // ancestor projects to the policy filter via ExtendedPolicy calls. If

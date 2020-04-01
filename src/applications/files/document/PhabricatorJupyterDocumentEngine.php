@@ -129,11 +129,11 @@ final class PhabricatorJupyterDocumentEngine
             $v_segments[] = $v_segment;
           }
 
-          $usource = ArcanistDiffUtils::applyIntralineDiff(
+          $usource = PhabricatorDifferenceEngine::applyIntralineDiff(
             $udisplay,
             $u_segments);
 
-          $vsource = ArcanistDiffUtils::applyIntralineDiff(
+          $vsource = PhabricatorDifferenceEngine::applyIntralineDiff(
             $vdisplay,
             $v_segments);
 

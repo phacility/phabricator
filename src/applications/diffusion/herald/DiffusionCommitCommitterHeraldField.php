@@ -10,7 +10,7 @@ final class DiffusionCommitCommitterHeraldField
   }
 
   public function getHeraldFieldValue($object) {
-    return $object->getCommitData()->getCommitDetail('committerPHID');
+    return $this->getAdapter()->getCommitterPHID();
   }
 
   protected function getHeraldFieldStandardType() {

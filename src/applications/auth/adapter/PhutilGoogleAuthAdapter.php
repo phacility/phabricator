@@ -13,8 +13,23 @@ final class PhutilGoogleAuthAdapter extends PhutilOAuthAuthAdapter {
     return 'google.com';
   }
 
-  public function getAccountID() {
-    return $this->getAccountEmail();
+  protected function newAccountIdentifiers() {
+    $identifiers = array();
+
+    $account_id = $this->getOAuthAccountData('id');
+    if ($account_id !== null) {
+      $account_id = sprintf(
+        'id(%s)',
+        $account_id);
+      $identifiers[] = $this->newAccountIdentifier($account_id);
+    }
+
+    $email = $this->getAccountEmail();
+    if ($email !== null) {
+      $identifiers[] = $this->newAccountIdentifier($email);
+    }
+
+    return $identifiers;
   }
 
   public function getAccountEmail() {

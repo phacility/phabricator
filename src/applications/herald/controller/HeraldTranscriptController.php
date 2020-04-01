@@ -447,52 +447,64 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   private function buildObjectTranscriptPanel(HeraldTranscript $xscript) {
-
+    $viewer = $this->getViewer();
     $adapter = $this->getAdapter();
+
     $field_names = $adapter->getFieldNameMap();
 
     $object_xscript = $xscript->getObjectTranscript();
 
-    $data = array();
+    $rows = array();
     if ($object_xscript) {
       $phid = $object_xscript->getPHID();
       $handles = $this->handles;
 
-      $data += array(
-        pht('Object Name') => $object_xscript->getName(),
-        pht('Object Type') => $object_xscript->getType(),
-        pht('Object PHID') => $phid,
-        pht('Object Link') => $handles[$phid]->renderLink(),
+      $rows[] = array(
+        pht('Object Name'),
+        $object_xscript->getName(),
+      );
+
+      $rows[] = array(
+        pht('Object Type'),
+        $object_xscript->getType(),
+      );
+
+      $rows[] = array(
+        pht('Object PHID'),
+        $phid,
+      );
+
+      $rows[] = array(
+        pht('Object Link'),
+        $handles[$phid]->renderLink(),
       );
     }
 
-    $data += $xscript->getMetadataMap();
-
-    if ($object_xscript) {
-      foreach ($object_xscript->getFields() as $field => $value) {
-        $field = idx($field_names, $field, '['.$field.'?]');
-        $data['Field: '.$field] = $value;
-      }
+    foreach ($xscript->getMetadataMap() as $key => $value) {
+      $rows[] = array(
+        $key,
+        $value,
+      );
     }
 
-    $rows = array();
-    foreach ($data as $name => $value) {
-      if (!($value instanceof PhutilSafeHTML)) {
-        if (!is_scalar($value) && !is_null($value)) {
-          $value = implode("\n", $value);
+    if ($object_xscript) {
+      foreach ($object_xscript->getFields() as $field_type => $value) {
+        if (isset($field_names[$field_type])) {
+          $field_name = pht('Field: %s', $field_names[$field_type]);
+        } else {
+          $field_name = pht('Unknown Field ("%s")', $field_type);
         }
 
-        if (strlen($value) > 256) {
-          $value = phutil_tag(
-            'textarea',
-            array(
-              'class' => 'herald-field-value-transcript',
-            ),
-            $value);
-        }
+        $field_value = $adapter->renderFieldTranscriptValue(
+          $viewer,
+          $field_type,
+          $value);
+
+        $rows[] = array(
+          $field_name,
+          $field_value,
+        );
       }
-
-      $rows[] = array($name, $value);
     }
 
     $property_list = new PHUIPropertyListView();

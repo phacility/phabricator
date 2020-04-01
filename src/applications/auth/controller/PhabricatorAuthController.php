@@ -197,22 +197,6 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       return array($account, $provider, $response);
     }
 
-    $other_account = id(new PhabricatorExternalAccount())->loadAllWhere(
-      'accountType = %s AND accountDomain = %s AND accountID = %s
-        AND id != %d',
-      $account->getAccountType(),
-      $account->getAccountDomain(),
-      $account->getAccountID(),
-      $account->getID());
-
-    if ($other_account) {
-      $response = $this->renderError(
-        pht(
-          'The account you are attempting to register with already belongs '.
-          'to another user.'));
-      return array($account, $provider, $response);
-    }
-
     $config = $account->getProviderConfig();
     if (!$config->getIsEnabled()) {
       $response = $this->renderError(
