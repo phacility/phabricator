@@ -80,13 +80,13 @@ abstract class PhabricatorOAuth2AuthProvider
     // an access token.
 
     try {
-      $account_id = $adapter->getAccountID();
+      $identifiers = $adapter->getAccountIdentifiers();
     } catch (Exception $ex) {
       // TODO: Handle this in a more user-friendly way.
       throw $ex;
     }
 
-    if (!strlen($account_id)) {
+    if (!$identifiers) {
       $response = $controller->buildProviderErrorResponse(
         $this,
         pht(
@@ -95,7 +95,9 @@ abstract class PhabricatorOAuth2AuthProvider
       return array($account, $response);
     }
 
-    return array($this->loadOrCreateAccount($account_id), $response);
+    $account = $this->newExternalAccountForIdentifiers($identifiers);
+
+    return array($account, $response);
   }
 
   public function processEditForm(
@@ -197,7 +199,7 @@ abstract class PhabricatorOAuth2AuthProvider
     PhabricatorExternalAccount $account,
     $force_refresh = false) {
 
-    if ($account->getProviderKey() !== $this->getProviderKey()) {
+    if ($account->getProviderConfigPHID() !== $this->getProviderConfigPHID()) {
       throw new Exception(pht('Account does not match provider!'));
     }
 

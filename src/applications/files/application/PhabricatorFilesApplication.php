@@ -81,7 +81,6 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
         'compose/' => 'PhabricatorFileComposeController',
-        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
         'thread/(?P<phid>[^/]+)/' => 'PhabricatorFileLightboxController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         $this->getEditRoutePattern('edit/')

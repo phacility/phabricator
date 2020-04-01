@@ -205,15 +205,12 @@ final class PhabricatorStartup {
       'include_path',
       $libraries_root.PATH_SEPARATOR.ini_get('include_path'));
 
-    @include_once $root.'libphutil/src/__phutil_library_init__.php';
-    if (!@constant('__LIBPHUTIL__')) {
+    $ok = @include_once $root.'arcanist/src/init/init-library.php';
+    if (!$ok) {
       self::didFatal(
-        "Unable to load libphutil. Put libphutil/ next to phabricator/, or ".
-        "update your PHP 'include_path' to include the parent directory of ".
-        "libphutil/.");
+        'Unable to load the "Arcanist" library. Put "arcanist/" next to '.
+        '"phabricator/" on disk.');
     }
-
-    phutil_load_library('arcanist/src');
 
     // Load Phabricator itself using the absolute path, so we never end up doing
     // anything surprising (loading index.php and libraries from different
@@ -523,7 +520,7 @@ final class PhabricatorStartup {
         "'{$required_version}'.");
     }
 
-    if (get_magic_quotes_gpc()) {
+    if (@get_magic_quotes_gpc()) {
       self::didFatal(
         "Your server is configured with PHP 'magic_quotes_gpc' enabled. This ".
         "feature is 'highly discouraged' by PHP's developers and you must ".

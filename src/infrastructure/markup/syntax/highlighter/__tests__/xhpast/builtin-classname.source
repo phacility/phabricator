@@ -1,0 +1,10 @@
+<?php
+
+class C {
+  public function f() {
+    D::X;
+    self::X;
+    parent::X;
+    static::X;
+  }
+}

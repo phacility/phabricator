@@ -405,6 +405,31 @@ final class PhabricatorAuditEditor
       $phid_map[] = $reverted_phids;
     }
 
+    // See T13463. Copy "related task" edges from the associated revision, if
+    // one exists.
+
+    $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
+      $actor,
+      $object);
+    if ($revision) {
+      $task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $revision->getPHID(),
+        DifferentialRevisionHasTaskEdgeType::EDGECONST);
+      $task_phids = array_fuse($task_phids);
+
+      if ($task_phids) {
+        $related_edge = DiffusionCommitHasTaskEdgeType::EDGECONST;
+        $result[] = id(new PhabricatorAuditTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $related_edge)
+          ->setNewValue(array('+' => $task_phids));
+      }
+
+      // Mark these objects as unmentionable, since the explicit relationship
+      // is stronger and any mentions are redundant.
+      $phid_map[] = $task_phids;
+    }
+
     $phid_map = array_mergev($phid_map);
     $this->addUnmentionablePHIDs($phid_map);
 

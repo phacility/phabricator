@@ -76,11 +76,7 @@ final class PhabricatorDifferentialApplication
             => 'DifferentialRevisionInlinesController',
         ),
         'comment/' => array(
-          'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
-          'save/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveController',
           'inline/' => array(
-            'preview/(?P<id>[1-9]\d*)/'
-              => 'DifferentialInlineCommentPreviewController',
             'edit/(?P<id>[1-9]\d*)/'
               => 'DifferentialInlineCommentEditController',
           ),

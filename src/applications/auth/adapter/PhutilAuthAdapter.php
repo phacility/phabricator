@@ -2,7 +2,7 @@
 
 /**
  * Abstract interface to an identity provider or authentication source, like
- * Twitter, Facebook or Google.
+ * Twitter, Facebook, or Google.
  *
  * Generally, adapters are handed some set of credentials particular to the
  * provider they adapt, and they turn those credentials into standard
@@ -17,13 +17,37 @@
  */
 abstract class PhutilAuthAdapter extends Phobject {
 
+  final public function getAccountIdentifiers() {
+    $result = $this->newAccountIdentifiers();
+    assert_instances_of($result, 'PhabricatorExternalAccountIdentifier');
+    return $result;
+  }
+
+  protected function newAccountIdentifiers() {
+    $identifiers = array();
+
+    $raw_identifier = $this->getAccountID();
+    if ($raw_identifier !== null) {
+      $identifiers[] = $this->newAccountIdentifier($raw_identifier);
+    }
+
+    return $identifiers;
+  }
+
+  final protected function newAccountIdentifier($raw_identifier) {
+    return id(new PhabricatorExternalAccountIdentifier())
+      ->setIdentifierRaw($raw_identifier);
+  }
+
   /**
-   * Get a unique identifier associated with the identity. For most providers,
-   * this is an account ID.
+   * Get a unique identifier associated with the account.
    *
-   * The account ID needs to be unique within this adapter's configuration, such
-   * that `<adapterKey, accountID>` is globally unique and always identifies the
-   * same identity.
+   * This identifier should be permanent, immutable, and uniquely identify
+   * the account. If possible, it should be nonsensitive. For providers that
+   * have a GUID or PHID value for accounts, these are the best values to use.
+   *
+   * You can implement @{method:newAccountIdentifiers} instead if a provider
+   * is unable to emit identifiers with all of these properties.
    *
    * If the adapter was unable to authenticate an identity, it should return
    * `null`.
@@ -31,7 +55,9 @@ abstract class PhutilAuthAdapter extends Phobject {
    * @return string|null Unique account identifier, or `null` if authentication
    *                     failed.
    */
-  abstract public function getAccountID();
+  public function getAccountID() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
 
   /**

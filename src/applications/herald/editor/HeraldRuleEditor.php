@@ -30,6 +30,12 @@ final class HeraldRuleEditor
     return true;
   }
 
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
+    return $types;
+  }
+
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
 

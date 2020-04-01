@@ -1,0 +1,5 @@
+<span class="k">public</span> <span class="k">function</span> <span class="no">f</span><span class="o">()</span> <span class="o">{</span>
+  <span class="nc" data-symbol-name="ExampleClass">ExampleClass</span><span class="o">::</span><span class="na" data-symbol-context="ExampleClass" data-symbol-name="EXAMPLE_CONSTANT">EXAMPLE_CONSTANT</span><span class="o">;</span>
+  <span class="nc" data-symbol-name="ExampleClass">ExampleClass</span><span class="o">::</span><span class="nf" data-symbol-context="ExampleClass" data-symbol-name="exampleMethod">exampleMethod</span><span class="o">();</span>
+  <span class="nf" data-symbol-name="example_function">example_function</span><span class="o">();</span>
+<span class="o">}</span>

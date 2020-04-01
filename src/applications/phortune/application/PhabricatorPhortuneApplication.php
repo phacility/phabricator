@@ -101,11 +101,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         'product/' => array(
           '' => 'PhortuneProductListController',
           'view/(?P<id>\d+)/' => 'PhortuneProductViewController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneProductEditController',
         ),
         'provider/' => array(
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneProviderEditController',
-          'disable/(?P<id>\d+)/' => 'PhortuneProviderDisableController',
           '(?P<id>\d+)/(?P<action>[^/]+)/'
             => 'PhortuneProviderActionController',
         ),

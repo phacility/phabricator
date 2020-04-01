@@ -49,7 +49,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'view/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
           '(?P<action>publish|unpublish)/(?P<id>\d+)/'
             => 'PhamePostPublishController',
-          'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
           'preview/' => 'PhabricatorMarkupPreviewController',
           'move/(?P<id>\d+)/' => 'PhamePostMoveController',
           'archive/(?P<id>\d+)/' => 'PhamePostArchiveController',
@@ -66,20 +65,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
           'header/(?P<id>[1-9]\d*)/' => 'PhameBlogHeaderPictureController',
         ),
-      ) + $this->getResourceSubroutes(),
-    );
-  }
-
-  public function getResourceRoutes() {
-    return array(
-      '/phame/' => $this->getResourceSubroutes(),
-    );
-  }
-
-  private function getResourceSubroutes() {
-    return array(
-      'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)' =>
-        'PhameResourceController',
+      ),
     );
   }
 
