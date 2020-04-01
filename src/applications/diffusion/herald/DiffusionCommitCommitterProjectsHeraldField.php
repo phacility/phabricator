@@ -11,17 +11,16 @@ final class DiffusionCommitCommitterProjectsHeraldField
 
   public function getHeraldFieldValue($object) {
     $adapter = $this->getAdapter();
+    $viewer = $adapter->getViewer();
 
-    $phid = $object->getCommitData()->getCommitDetail('committerPHID');
-    if (!$phid) {
+    $committer_phid = $adapter->getCommitterPHID();
+    if (!$committer_phid) {
       return array();
     }
 
-    $viewer = $adapter->getViewer();
-
     $projects = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
-      ->withMemberPHIDs(array($phid))
+      ->withMemberPHIDs(array($committer_phid))
       ->execute();
 
     return mpull($projects, 'getPHID');

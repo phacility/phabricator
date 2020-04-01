@@ -226,7 +226,7 @@ final class ManiphestTransactionEditor
 
     $body->addLinkSection(
       pht('TASK DETAIL'),
-      PhabricatorEnv::getProductionURI('/T'.$object->getID()));
+      $this->getObjectLinkButtonURIForMail($object));
 
 
     $board_phids = array();

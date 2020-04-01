@@ -210,6 +210,9 @@ EOTEXT
           // This isn't a standard handler installed by an application, but
           // is a reasonable name for a user-installed handler.
           'editor' => true,
+
+          // This handler is for Visual Studio Code.
+          'vscode' => true,
         ))
         ->setSummary(pht('Whitelists editor protocols for "Open in Editor".'))
         ->setDescription(

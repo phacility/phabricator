@@ -46,6 +46,13 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    * @task config
    */
   public function withSourcePHIDs(array $source_phids) {
+    if (!$source_phids) {
+      throw new Exception(
+        pht(
+          'Edge list passed to "withSourcePHIDs(...)" is empty, but it must '.
+          'be nonempty.'));
+    }
+
     $this->sourcePHIDs = $source_phids;
     return $this;
   }
@@ -158,11 +165,10 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    * @task exec
    */
   public function execute() {
-    if (!$this->sourcePHIDs) {
+    if ($this->sourcePHIDs === null) {
       throw new Exception(
         pht(
-          'You must use %s to query edges.',
-          'withSourcePHIDs()'));
+          'You must use "withSourcePHIDs()" to query edges.'));
     }
 
     $sources = phid_group_by_type($this->sourcePHIDs);

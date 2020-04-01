@@ -1110,19 +1110,21 @@ final class PhabricatorUser
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $viewer = $engine->getViewer();
+
     $this->openTransaction();
       $this->delete();
 
       $externals = id(new PhabricatorExternalAccountQuery())
-        ->setViewer($engine->getViewer())
+        ->setViewer($viewer)
         ->withUserPHIDs(array($this->getPHID()))
-        ->execute();
+        ->newIterator();
       foreach ($externals as $external) {
-        $external->delete();
+        $engine->destroyObject($external);
       }
 
       $prefs = id(new PhabricatorUserPreferencesQuery())
-        ->setViewer($engine->getViewer())
+        ->setViewer($viewer)
         ->withUsers(array($this))
         ->execute();
       foreach ($prefs as $pref) {
@@ -1137,7 +1139,7 @@ final class PhabricatorUser
       }
 
       $keys = id(new PhabricatorAuthSSHKeyQuery())
-        ->setViewer($engine->getViewer())
+        ->setViewer($viewer)
         ->withObjectPHIDs(array($this->getPHID()))
         ->execute();
       foreach ($keys as $key) {

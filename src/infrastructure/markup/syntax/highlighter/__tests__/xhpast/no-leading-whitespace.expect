@@ -1,0 +1,3 @@
+<span class="k">foreach</span> <span class="k">(</span><span class="nv">$x</span> <span class="k">as</span> <span class="nv">$y</span><span class="k">)</span> <span class="k">{</span>
+  <span data-symbol-name="z" class="nf">z</span><span class="k">(</span><span class="k">)</span><span class="k">;</span>
+<span class="k">}</span>

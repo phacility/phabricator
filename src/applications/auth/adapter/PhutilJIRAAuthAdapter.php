@@ -22,12 +22,33 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
     return $this->jiraBaseURI;
   }
 
-  public function getAccountID() {
+  protected function newAccountIdentifiers() {
     // Make sure the handshake is finished; this method is used for its
     // side effect by Auth providers.
     $this->getHandshakeData();
 
-    return idx($this->getUserInfo(), 'key');
+    $info = $this->getUserInfo();
+
+    // See T13493. Older versions of JIRA provide a "key" with a username or
+    // email address. Newer versions of JIRA provide a GUID "accountId".
+    // Intermediate versions of JIRA provide both.
+
+    $identifiers = array();
+
+    $account_key = idx($info, 'key');
+    if ($account_key !== null) {
+      $identifiers[] = $this->newAccountIdentifier($account_key);
+    }
+
+    $account_id = idx($info, 'accountId');
+    if ($account_id !== null) {
+      $identifiers[] = $this->newAccountIdentifier(
+        sprintf(
+          'accountId(%s)',
+          $account_id));
+    }
+
+    return $identifiers;
   }
 
   public function getAccountName() {

@@ -27,6 +27,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $showHideOpen;
 
   private $propertyLists = array();
+  private $tailButtons = array();
 
   const COLOR_RED = 'red';
   const COLOR_BLUE = 'blue';
@@ -151,6 +152,16 @@ final class PHUIObjectBoxView extends AphrontTagView {
     PhabricatorApplicationTransactionValidationException $ex = null) {
     $this->validationException = $ex;
     return $this;
+  }
+
+  public function newTailButton() {
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setColor(PHUIButtonView::GREY);
+
+    $this->tailButtons[] = $button;
+
+    return $button;
   }
 
   protected function getTagAttributes() {
@@ -327,6 +338,15 @@ final class PHUIObjectBoxView extends AphrontTagView {
 
     if ($this->objectList) {
       $content[] = $this->objectList;
+    }
+
+    if ($this->tailButtons) {
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-box-tail-buttons',
+        ),
+        $this->tailButtons);
     }
 
     return $content;

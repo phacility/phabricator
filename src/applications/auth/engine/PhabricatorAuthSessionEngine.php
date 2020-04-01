@@ -493,7 +493,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // adds an auth factor, existing sessions won't get a free pass into hisec,
     // since they never actually got marked as hisec.
     if (!$factors) {
-      return $this->issueHighSecurityToken($session, true);
+      return $this->issueHighSecurityToken($session, true)
+        ->setIsUnchallengedToken(true);
     }
 
     $this->request = $request;

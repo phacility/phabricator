@@ -64,17 +64,7 @@ final class HeraldTokenizerFieldValue
   }
 
   public function renderFieldValue($value) {
-    $viewer = $this->getViewer();
-    $value = (array)$value;
-
-    if ($this->valueMap !== null) {
-      foreach ($value as $k => $v) {
-        $value[$k] = idx($this->valueMap, $v, $v);
-      }
-      return implode(', ', $value);
-    }
-
-    return $viewer->renderHandleList((array)$value)->setAsInline(true);
+    return $this->renderValueAsList($value, $for_transcript = false);
   }
 
   public function renderEditorValue($value) {
@@ -85,6 +75,35 @@ final class HeraldTokenizerFieldValue
       ->setViewer($viewer);
 
     return $datasource->getWireTokens($value);
+  }
+
+  public function renderTranscriptValue($value) {
+    return $this->renderValueAsList($value, $for_transcript = true);
+  }
+
+  private function renderValueAsList($value, $for_transcript) {
+    $viewer = $this->getViewer();
+    $value = (array)$value;
+
+    if (!$value) {
+      return phutil_tag('em', array(), pht('None'));
+    }
+
+    if ($this->valueMap !== null) {
+      foreach ($value as $k => $v) {
+        $value[$k] = idx($this->valueMap, $v, $v);
+      }
+
+      return implode(', ', $value);
+    }
+
+    $list = $viewer->renderHandleList($value);
+
+    if (!$for_transcript) {
+      $list->setAsInline(true);
+    }
+
+    return $list;
   }
 
 }

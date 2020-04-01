@@ -58,8 +58,7 @@ final class PhabricatorSecuritySetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('Alternate File Domain Not Configured'))
         ->setSummary(
           pht(
-            'Increase security (and improve performance) by configuring '.
-            'a CDN or alternate file domain.'))
+            'Improve security by configuring an alternate file domain.'))
         ->setMessage(
           pht(
             'Phabricator is currently configured to serve user uploads '.

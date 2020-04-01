@@ -100,22 +100,28 @@ final class PhutilRemarkupNoteBlockRule extends PhutilRemarkupBlockRule {
   }
 
   private function getRegEx() {
-    $words = array(
-      'NOTE',
-      'IMPORTANT',
-      'WARNING',
-    );
+    static $regex;
 
-    foreach ($words as $k => $word) {
-      $words[$k] = preg_quote($word, '/');
+    if ($regex === null) {
+      $words = array(
+        'NOTE',
+        'IMPORTANT',
+        'WARNING',
+      );
+
+      foreach ($words as $k => $word) {
+        $words[$k] = preg_quote($word, '/');
+      }
+      $words = implode('|', $words);
+
+      $regex =
+        '/^(?:'.
+        '(?:\((?P<hideword>'.$words.')\))'.
+        '|'.
+        '(?:(?P<showword>'.$words.'):))\s*'.
+        '/';
     }
-    $words = implode('|', $words);
 
-    return
-      '/^(?:'.
-      '(?:\((?P<hideword>'.$words.')\))'.
-      '|'.
-      '(?:(?P<showword>'.$words.'):))\s*'.
-      '/';
+    return $regex;
   }
 }

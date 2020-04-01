@@ -152,7 +152,7 @@ textarea[disabled],
 }
 
 .aphront-space-select-control-knob {
-  margin: 0 8px 0 0;
+  margin: 0 8px 4px 0;
   float: left;
 }
 
@@ -162,7 +162,6 @@ textarea[disabled],
 }
 
 .device .aphront-space-select-control-knob {
-  margin-bottom: 8px;
   float: none;
 }
 
