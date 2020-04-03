@@ -417,13 +417,19 @@ abstract class AphrontResponse extends Phobject {
   }
 
   public function willBeginWrite() {
-    if ($this->shouldCompressResponse()) {
-      // Enable automatic compression here. Webservers sometimes do this for
-      // us, but we now detect the absence of compression and warn users about
-      // it so try to cover our bases more thoroughly.
-      ini_set('zlib.output_compression', 1);
-    } else {
-      ini_set('zlib.output_compression', 0);
+    // If we've already sent headers, these "ini_set()" calls will warn that
+    // they have no effect. Today, this always happens because we're inside
+    // a unit test, so just skip adjusting the setting.
+
+    if (!headers_sent()) {
+      if ($this->shouldCompressResponse()) {
+        // Enable automatic compression here. Webservers sometimes do this for
+        // us, but we now detect the absence of compression and warn users about
+        // it so try to cover our bases more thoroughly.
+        ini_set('zlib.output_compression', 1);
+      } else {
+        ini_set('zlib.output_compression', 0);
+      }
     }
   }
 
