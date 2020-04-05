@@ -38,6 +38,14 @@ final class DifferentialRevisionInlineTransaction
     $changeset = $data[$comment->getChangesetID()];
     $diff = $changeset->getDiff();
 
+    $is_done = false;
+    switch ($comment->getFixedState()) {
+      case PhabricatorInlineCommentInterface::STATE_DONE:
+      case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
+        $is_done = true;
+        break;
+    }
+
     return array(
       'diff' => array(
         'id' => (int)$diff->getID(),
@@ -47,6 +55,7 @@ final class DifferentialRevisionInlineTransaction
       'line' => (int)$comment->getLineNumber(),
       'length' => (int)($comment->getLineLength() + 1),
       'replyToCommentPHID' => $comment->getReplyToCommentPHID(),
+      'isDone' => $is_done,
     );
   }
 
