@@ -435,6 +435,15 @@ final class DivinerAtomController extends DivinerController {
     $task_specs = array();
 
     $tasks = $symbol->getAtom()->getDocblockMetaValue('task');
+
+    if (!is_array($tasks)) {
+      if (strlen($tasks)) {
+        $tasks = array($tasks);
+      } else {
+        $tasks = array();
+      }
+    }
+
     if ($tasks) {
       foreach ($tasks as $task) {
         list($name, $title) = explode(' ', $task, 2);
