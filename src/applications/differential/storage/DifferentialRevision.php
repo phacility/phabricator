@@ -1053,6 +1053,10 @@ final class DifferentialRevision extends DifferentialDAO
         ->setType('string')
         ->setDescription(pht('The revision title.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('uri')
+        ->setType('uri')
+        ->setDescription(pht('View URI for the revision.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('Revision author PHID.')),
