@@ -472,6 +472,11 @@ final class DifferentialDiff
             $this->getRevision(),
             PhabricatorPolicyCapability::CAN_VIEW,
           );
+        } else if ($this->getRepositoryPHID()) {
+          $extended[] = array(
+            $this->getRepositoryPHID(),
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
         }
         break;
     }
