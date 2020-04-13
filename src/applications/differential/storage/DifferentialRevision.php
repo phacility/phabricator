@@ -1104,6 +1104,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     return array(
       'title' => $this->getTitle(),
+      'uri' => PhabricatorEnv::getURI($this->getURI()),
       'authorPHID' => $this->getAuthorPHID(),
       'status' => $status_info,
       'repositoryPHID' => $this->getRepositoryPHID(),
