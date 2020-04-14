@@ -36,6 +36,13 @@ final class PhutilSearchQueryCompilerTestCase
       '"cat' => false,
       'A"' => false,
       'A"B"' => '+"A" +"B"',
+
+      // Trailing whitespace should be discarded.
+      'a b ' => '+"a" +"b"',
+
+      // Functions must have search text.
+      '""' => false,
+      '-' => false,
     );
 
     $this->assertCompileQueries($tests);
@@ -56,7 +63,6 @@ final class PhutilSearchQueryCompilerTestCase
       'cat -dog' => '+[cat] -[dog]',
     );
     $this->assertCompileQueries($quote_tests, '+ -><()~*:[]&|');
-
   }
 
   public function testCompileQueriesWithStemming() {
@@ -133,6 +139,9 @@ final class PhutilSearchQueryCompilerTestCase
       '"'.$mao.'"' => array(
         array(null, $op_and, $mao),
       ),
+      'title:' => false,
+      'title:+' => false,
+      'title:+""' => false,
     );
 
     $this->assertCompileFunctionQueries($function_tests);
@@ -199,15 +208,19 @@ final class PhutilSearchQueryCompilerTestCase
       $compiler = id(new PhutilSearchQueryCompiler())
         ->setEnableFunctions(true);
 
-      $tokens = $compiler->newTokens($input);
+      try {
+        $tokens = $compiler->newTokens($input);
 
-      $result = array();
-      foreach ($tokens as $token) {
-        $result[] = array(
-          $token->getFunction(),
-          $token->getOperator(),
-          $token->getValue(),
-        );
+        $result = array();
+        foreach ($tokens as $token) {
+          $result[] = array(
+            $token->getFunction(),
+            $token->getOperator(),
+            $token->getValue(),
+          );
+        }
+      } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
+        $result = false;
       }
 
       $this->assertEqual(

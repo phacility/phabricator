@@ -243,34 +243,26 @@ final class PhutilSearchQueryCompiler
           'Query contains unmatched double quotes.'));
     }
 
-    if ($mode == 'operator') {
-      throw new PhutilSearchQueryCompilerSyntaxException(
-        pht(
-          'Query contains operator ("%s") with no search term.',
-          implode('', $current_operator)));
+    // If the input query has trailing space, like "a b ", we may exit the
+    // parser without a final token.
+    if ($current_function !== null || $current_operator || $current_token) {
+      $token = array(
+        'operator' => $current_operator,
+        'quoted' => false,
+        'value' => $current_token,
+      );
+
+      if ($enable_functions) {
+        $token['function'] = $current_function;
+      }
+
+      $tokens[] = $token;
     }
-
-    $token = array(
-      'operator' => $current_operator,
-      'quoted' => false,
-      'value' => $current_token,
-    );
-
-    if ($enable_functions) {
-      $token['function'] = $current_function;
-    }
-
-    $tokens[] = $token;
 
     $results = array();
     foreach ($tokens as $token) {
       $value = implode('', $token['value']);
       $operator_string = implode('', $token['operator']);
-
-      if (!strlen($value)) {
-        continue;
-      }
-
       $is_quoted = $token['quoted'];
 
       switch ($operator_string) {
@@ -302,6 +294,24 @@ final class PhutilSearchQueryCompiler
             pht(
               'Query has an invalid sequence of operators ("%s").',
               $operator_string));
+      }
+
+      if (!strlen($value)) {
+        $require_value = $is_quoted;
+
+        switch ($operator) {
+          default:
+            $require_value = true;
+            break;
+        }
+
+        if ($require_value) {
+          throw new PhutilSearchQueryCompilerSyntaxException(
+            pht(
+              'Query contains a token ("%s") with no search term. Query '.
+              'tokens specify text to search for.',
+              $this->getDisplayToken($token)));
+        }
       }
 
       $result = array(
@@ -369,6 +379,25 @@ final class PhutilSearchQueryCompiler
     $close_quote = $this->operators[11];
 
     return $open_quote.$value.$close_quote;
+  }
+
+  private function getDisplayToken(array $token) {
+    if (isset($token['function'])) {
+      $function = $token['function'].':';
+    } else {
+      $function = '';
+    }
+
+    $operator_string = implode('', $token['operator']);
+
+    $value = implode('', $token['value']);
+
+    $is_quoted = $token['quoted'];
+    if ($is_quoted) {
+      $value = $this->quoteToken($value);
+    }
+
+    return sprintf('%s%s%s', $function, $operator_string, $value);
   }
 
 }
