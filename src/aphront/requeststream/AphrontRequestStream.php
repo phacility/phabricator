@@ -89,4 +89,24 @@ final class AphrontRequestStream extends Phobject {
     return $stream;
   }
 
+  public static function supportsGzip() {
+    if (!function_exists('gzencode') || !function_exists('gzdecode')) {
+      return false;
+    }
+
+    $has_zlib = false;
+
+    // NOTE: At least locally, this returns "zlib.*", which is not terribly
+    // reassuring. We care about "zlib.inflate".
+
+    $filters = stream_get_filters();
+    foreach ($filters as $filter) {
+      if (preg_match('/^zlib\\./', $filter)) {
+        $has_zlib = true;
+      }
+    }
+
+    return $has_zlib;
+  }
+
 }

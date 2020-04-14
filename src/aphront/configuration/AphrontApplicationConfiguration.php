@@ -771,11 +771,20 @@ final class AphrontApplicationConfiguration
       );
     }
 
+    $raw_input = @file_get_contents('php://input');
+    if ($raw_input !== false) {
+      $base64_input = base64_encode($raw_input);
+    } else {
+      $base64_input = null;
+    }
+
     $result = array(
       'path' => $path,
       'params' => $params,
       'user' => idx($_SERVER, 'PHP_AUTH_USER'),
       'pass' => idx($_SERVER, 'PHP_AUTH_PW'),
+
+      'raw.base64' => $base64_input,
 
       // This just makes sure that the response compresses well, so reasonable
       // algorithms should want to gzip or deflate it.
