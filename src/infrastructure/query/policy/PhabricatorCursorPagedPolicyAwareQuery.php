@@ -1801,24 +1801,35 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $this->ferretEngine = $engine;
     $this->ferretTokens = $fulltext_tokens;
 
+    $op_absent = PhutilSearchQueryCompiler::OPERATOR_ABSENT;
+
     $default_function = $engine->getDefaultFunctionKey();
     $table_map = array();
     $idx = 1;
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
-      $function = $raw_token->getFunction();
 
+      $function = $raw_token->getFunction();
       if ($function === null) {
         $function = $default_function;
       }
 
       $raw_field = $engine->getFieldForFunction($function);
 
+      // NOTE: The query compiler guarantees that a query can not make a
+      // field both "present" and "absent", so it's safe to just use the
+      // first operator we encounter to determine whether the table is
+      // optional or not.
+
+      $operator = $raw_token->getOperator();
+      $is_optional = ($operator === $op_absent);
+
       if (!isset($table_map[$function])) {
         $alias = 'ftfield_'.$idx++;
         $table_map[$function] = array(
           'alias' => $alias,
           'key' => $raw_field,
+          'optional' => $is_optional,
         );
       }
     }
@@ -1966,6 +1977,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+    $op_absent = PhutilSearchQueryCompiler::OPERATOR_ABSENT;
+    $op_present = PhutilSearchQueryCompiler::OPERATOR_PRESENT;
 
     $engine = $this->ferretEngine;
     $stemmer = $engine->newStemmer();
@@ -1976,11 +1989,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
 
+      $operator = $raw_token->getOperator();
+
       // If this is a negated term like "-pomegranate", don't join the ngram
       // table since we aren't looking for documents with this term. (We could
       // LEFT JOIN the table and require a NULL row, but this is probably more
       // trouble than it's worth.)
-      if ($raw_token->getOperator() == $op_not) {
+      if ($operator === $op_not) {
+        continue;
+      }
+
+      // Neither the "present" or "absent" operators benefit from joining
+      // the ngram table.
+      if ($operator === $op_absent || $operator === $op_present) {
         continue;
       }
 
@@ -2143,31 +2164,54 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
     $op_exact = PhutilSearchQueryCompiler::OPERATOR_EXACT;
+    $op_absent = PhutilSearchQueryCompiler::OPERATOR_ABSENT;
+    $op_present = PhutilSearchQueryCompiler::OPERATOR_PRESENT;
 
     $where = array();
-    $current_function = 'all';
+    $default_function = $engine->getDefaultFunctionKey();
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
       $value = $raw_token->getValue();
 
       $function = $raw_token->getFunction();
       if ($function === null) {
-        $function = $current_function;
+        $function = $default_function;
       }
-      $current_function = $function;
+
+      $operator = $raw_token->getOperator();
 
       $table_alias = $table_map[$function]['alias'];
 
-      $is_not = ($raw_token->getOperator() == $op_not);
+      // If this is a "field is present" operator, we've already implicitly
+      // guaranteed this by JOINing the table. We don't need to do any
+      // more work.
+      $is_present = ($operator === $op_present);
+      if ($is_present) {
+        continue;
+      }
 
-      if ($raw_token->getOperator() == $op_sub) {
+      // If this is a "field is absent" operator, we just want documents
+      // which failed to match to a row when we LEFT JOINed the table. This
+      // means there's no index for the field.
+      $is_absent = ($operator === $op_absent);
+      if ($is_absent) {
+        $where[] = qsprintf(
+          $conn,
+          '(%T.rawCorpus IS NULL)',
+          $table_alias);
+        continue;
+      }
+
+      $is_not = ($operator === $op_not);
+
+      if ($operator == $op_sub) {
         $is_substring = true;
       } else {
         $is_substring = false;
       }
 
       // If we're doing exact search, just test the raw corpus.
-      $is_exact = ($raw_token->getOperator() == $op_exact);
+      $is_exact = ($operator === $op_exact);
       if ($is_exact) {
         if ($is_not) {
           $where[] = qsprintf(
