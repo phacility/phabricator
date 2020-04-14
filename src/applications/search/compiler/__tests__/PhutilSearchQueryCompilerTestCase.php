@@ -185,6 +185,14 @@ final class PhutilSearchQueryCompilerTestCase
         array(null, $op_and, 'x'),
       ),
 
+      // Functions like "title:" continue to stick across quotes if the
+      // quotes aren't the initial argument.
+      'title:a "b c" d' => array(
+        array('title', $op_and, 'a'),
+        array('title', $op_and, 'b c'),
+        array('title', $op_and, 'd'),
+      ),
+
       // These queries require a field be both present and absent, which is
       // impossible.
       'title:- title:x' => false,

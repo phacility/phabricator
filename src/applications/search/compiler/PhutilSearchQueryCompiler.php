@@ -358,7 +358,14 @@ final class PhutilSearchQueryCompiler
 
         $result['function'] = $function;
 
-        $is_sticky = !$result['quoted'];
+        // Note that the function remains sticky across quoted terms appearing
+        // after the function term. For example, all of these terms are title
+        // terms:
+        //
+        //   title:a "b c" d
+
+        $is_sticky = (!$result['quoted'] || ($token['function'] === null));
+
         switch ($operator) {
           case self::OPERATOR_ABSENT:
           case self::OPERATOR_PRESENT:
