@@ -97,6 +97,8 @@ final class PhutilSearchQueryCompilerTestCase
     $op_and = PhutilSearchQueryCompiler::OPERATOR_AND;
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_exact = PhutilSearchQueryCompiler::OPERATOR_EXACT;
+    $op_present = PhutilSearchQueryCompiler::OPERATOR_PRESENT;
+    $op_absent = PhutilSearchQueryCompiler::OPERATOR_ABSENT;
 
     $mao = "\xE7\x8C\xAB";
 
@@ -142,6 +144,18 @@ final class PhutilSearchQueryCompilerTestCase
       'title:' => false,
       'title:+' => false,
       'title:+""' => false,
+      'title:""' => false,
+
+      'title:~' => array(
+        array('title', $op_present, null),
+      ),
+
+      'title:-' => array(
+        array('title', $op_absent, null),
+      ),
+
+      '~' => false,
+      '-' => false,
     );
 
     $this->assertCompileFunctionQueries($function_tests);

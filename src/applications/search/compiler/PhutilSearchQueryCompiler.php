@@ -12,6 +12,8 @@ final class PhutilSearchQueryCompiler
   const OPERATOR_AND = 'and';
   const OPERATOR_SUBSTRING = 'sub';
   const OPERATOR_EXACT = 'exact';
+  const OPERATOR_ABSENT = 'absent';
+  const OPERATOR_PRESENT = 'present';
 
   public function setOperators($operators) {
     $this->operators = $operators;
@@ -300,6 +302,22 @@ final class PhutilSearchQueryCompiler
         $require_value = $is_quoted;
 
         switch ($operator) {
+          case self::OPERATOR_NOT:
+            if ($enable_functions && ($token['function'] !== null)) {
+              $operator = self::OPERATOR_ABSENT;
+              $value = null;
+            } else {
+              $require_value = true;
+            }
+            break;
+          case self::OPERATOR_SUBSTRING:
+            if ($enable_functions && ($token['function'] !== null)) {
+              $operator = self::OPERATOR_PRESENT;
+              $value = null;
+            } else {
+              $require_value = true;
+            }
+            break;
           default:
             $require_value = true;
             break;
