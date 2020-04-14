@@ -156,6 +156,21 @@ final class PhutilSearchQueryCompilerTestCase
 
       '~' => false,
       '-' => false,
+
+      // Functions like "title:" apply to following terms if their term is
+      // not specified with double quotes.
+      'title:x y' => array(
+        array('title', $op_and, 'x'),
+        array('title', $op_and, 'y'),
+      ),
+      'title: x y' => array(
+        array('title', $op_and, 'x'),
+        array('title', $op_and, 'y'),
+      ),
+      'title:"x" y' => array(
+        array('title', $op_and, 'x'),
+        array(null, $op_and, 'y'),
+      ),
     );
 
     $this->assertCompileFunctionQueries($function_tests);

@@ -262,6 +262,7 @@ final class PhutilSearchQueryCompiler
     }
 
     $results = array();
+    $last_function = null;
     foreach ($tokens as $token) {
       $value = implode('', $token['value']);
       $operator_string = implode('', $token['operator']);
@@ -339,7 +340,26 @@ final class PhutilSearchQueryCompiler
       );
 
       if ($enable_functions) {
-        $result['function'] = $token['function'];
+        // If a user provides a query like "title:a b c", we interpret all
+        // of the terms to be title terms: the "title:" function sticks
+        // until we encounter another function.
+
+        // If a user provides a query like "title:"a"" (with a quoted term),
+        // the function is not sticky.
+
+        if ($token['function'] !== null) {
+          $function = $token['function'];
+        } else {
+          $function = $last_function;
+        }
+
+        $result['function'] = $function;
+
+        if ($result['quoted']) {
+          $last_function = null;
+        } else {
+          $last_function = $function;
+        }
       }
 
       $results[] = $result;

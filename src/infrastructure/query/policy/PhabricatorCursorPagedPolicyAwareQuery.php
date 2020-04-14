@@ -1801,7 +1801,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $this->ferretEngine = $engine;
     $this->ferretTokens = $fulltext_tokens;
 
-    $current_function = $engine->getDefaultFunctionKey();
+    $default_function = $engine->getDefaultFunctionKey();
     $table_map = array();
     $idx = 1;
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -1809,7 +1809,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $function = $raw_token->getFunction();
 
       if ($function === null) {
-        $function = $current_function;
+        $function = $default_function;
       }
 
       $raw_field = $engine->getFieldForFunction($function);
@@ -1821,8 +1821,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'key' => $raw_field,
         );
       }
-
-      $current_function = $function;
     }
 
     // Join the title field separately so we can rank results.
