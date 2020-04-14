@@ -10,10 +10,6 @@ final class PhutilSearchQueryCompilerTestCase
       'cat -dog' => '+"cat" -"dog"',
       'cat-dog' => '+"cat-dog"',
 
-      // If there are spaces after an operator, the operator applies to the
-      // next search term.
-      'cat - dog' => '+"cat" -"dog"',
-
       // Double quotes serve as delimiters even if there is no whitespace
       // between terms.
       '"cat"dog' => '+"cat" +"dog"',
@@ -40,9 +36,16 @@ final class PhutilSearchQueryCompilerTestCase
       // Trailing whitespace should be discarded.
       'a b ' => '+"a" +"b"',
 
-      // Functions must have search text.
+      // Tokens must have search text.
       '""' => false,
       '-' => false,
+
+      // Previously, we permitted spaces to appear inside or after operators.
+
+      // Now that "title:-" is now a valid construction meaning "title is
+      // absent", this had to be tightened. We want "title:- duck" to mean
+      // "title is absent, and any other field matches 'duck'".
+      'cat - dog' => false,
     );
 
     $this->assertCompileQueries($tests);
@@ -171,6 +174,21 @@ final class PhutilSearchQueryCompilerTestCase
         array('title', $op_and, 'x'),
         array(null, $op_and, 'y'),
       ),
+
+      // The "present" and "absent" functions are not sticky.
+      'title:~ x' => array(
+        array('title', $op_present, null),
+        array(null, $op_and, 'x'),
+      ),
+      'title:- x' => array(
+        array('title', $op_absent, null),
+        array(null, $op_and, 'x'),
+      ),
+
+      // These queries require a field be both present and absent, which is
+      // impossible.
+      'title:- title:x' => false,
+      'title:- title:~' => false,
     );
 
     $this->assertCompileFunctionQueries($function_tests);

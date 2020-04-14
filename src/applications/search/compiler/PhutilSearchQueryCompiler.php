@@ -172,8 +172,10 @@ final class PhutilSearchQueryCompiler
       }
 
       if ($mode == 'operator') {
-        if (preg_match('/^\s\z/u', $character)) {
-          continue;
+        if (!$current_operator) {
+          if (preg_match('/^\s\z/u', $character)) {
+            continue;
+          }
         }
 
         if (preg_match('/^'.$operator_characters.'\z/', $character)) {
@@ -337,6 +339,7 @@ final class PhutilSearchQueryCompiler
         'operator' => $operator,
         'quoted' => $is_quoted,
         'value' => $value,
+        'raw' => $this->getDisplayToken($token),
       );
 
       if ($enable_functions) {
@@ -355,14 +358,56 @@ final class PhutilSearchQueryCompiler
 
         $result['function'] = $function;
 
-        if ($result['quoted']) {
-          $last_function = null;
-        } else {
+        $is_sticky = !$result['quoted'];
+        switch ($operator) {
+          case self::OPERATOR_ABSENT:
+          case self::OPERATOR_PRESENT:
+            $is_sticky = false;
+            break;
+        }
+
+        if ($is_sticky) {
           $last_function = $function;
+        } else {
+          $last_function = null;
         }
       }
 
       $results[] = $result;
+    }
+
+    if ($enable_functions) {
+      // If any function is required to be "absent", there must be no other
+      // terms which make assertions about it.
+
+      $present_tokens = array();
+      $absent_tokens = array();
+      foreach ($results as $result) {
+        $function = $result['function'];
+
+        if ($result['operator'] === self::OPERATOR_ABSENT) {
+          $absent_tokens[$function][] = $result;
+        } else {
+          $present_tokens[$function][] = $result;
+        }
+      }
+
+      foreach ($absent_tokens as $function => $tokens) {
+        $absent_token = head($tokens);
+
+        if (empty($present_tokens[$function])) {
+          continue;
+        }
+
+        $present_token = head($present_tokens[$function]);
+
+        throw new PhutilSearchQueryCompilerSyntaxException(
+          pht(
+            'Query field must be absent ("%s") and present ("%s"). This '.
+            'is impossible, so the query is not valid.',
+            $absent_token['raw'],
+            $present_token['raw']));
+      }
     }
 
     return $results;
