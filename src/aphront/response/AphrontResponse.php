@@ -10,7 +10,7 @@ abstract class AphrontResponse extends Phobject {
   private $contentSecurityPolicyURIs;
   private $disableContentSecurityPolicy;
   protected $frameable;
-
+  private $headers = array();
 
   public function setRequest($request) {
     $this->request = $request;
@@ -46,6 +46,11 @@ abstract class AphrontResponse extends Phobject {
 
   final public function setDisableContentSecurityPolicy($disable) {
     $this->disableContentSecurityPolicy = $disable;
+    return $this;
+  }
+
+  final public function addHeader($key, $value) {
+    $this->headers[] = array($key, $value);
     return $this;
   }
 
@@ -104,6 +109,10 @@ abstract class AphrontResponse extends Phobject {
     }
 
     $headers[] = array('Referrer-Policy', 'no-referrer');
+
+    foreach ($this->headers as $header) {
+      $headers[] = $header;
+    }
 
     return $headers;
   }

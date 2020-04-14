@@ -101,8 +101,9 @@ final class AphrontRequestStream extends Phobject {
 
     $filters = stream_get_filters();
     foreach ($filters as $filter) {
-      if (preg_match('/^zlib\\./', $filter)) {
+      if (!strncasecmp($filter, 'zlib.', strlen('zlib.'))) {
         $has_zlib = true;
+        break;
       }
     }
 
