@@ -45,6 +45,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
     $self_future = id(new HTTPSFuture($base_uri))
       ->addHeader('X-Phabricator-SelfCheck', 1)
       ->addHeader('Accept-Encoding', 'gzip')
+      ->setDisableContentDecoding(true)
       ->setHTTPBasicAuthCredentials(
         $expect_user,
         new PhutilOpaqueEnvelope($expect_pass))
@@ -134,7 +135,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
         ->setMessage($message);
     } else {
       if (function_exists('gzdecode')) {
-        $body = gzdecode($body);
+        $body = @gzdecode($body);
       } else {
         $body = null;
       }
@@ -303,7 +304,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
     }
 
     $raw_body = idx($structure, 'raw.base64');
-    $raw_body = base64_decode($raw_body);
+    $raw_body = @base64_decode($raw_body);
 
     // The server received the exact compressed bytes we expected it to, so
     // everything is working great.
