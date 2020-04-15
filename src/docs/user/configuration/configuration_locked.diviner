@@ -147,6 +147,12 @@ you should move these configuration values from the database to a local config
 file. Usually, you'll do this by first copying the value from the database:
 
 ```
+phabricator/ $ ./bin/config get <key>
+```
+
+...into local configuration:
+
+```
 phabricator/ $ ./bin/config set <key> <value>
 ```
 
