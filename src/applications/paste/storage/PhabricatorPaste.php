@@ -11,7 +11,9 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSpacesInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorFerretInterface,
+    PhabricatorFulltextInterface {
 
   protected $title;
   protected $authorPHID;
@@ -275,6 +277,21 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       id(new PhabricatorPasteContentSearchEngineAttachment())
         ->setAttachmentKey('content'),
     );
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorPasteFerretEngine();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhabricatorPasteFulltextEngine();
   }
 
 }
