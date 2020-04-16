@@ -2411,28 +2411,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function buildNgramsJoinClause(AphrontDatabaseConnection $conn) {
     $flat = array();
     foreach ($this->ngrams as $spec) {
-      $index = $spec['index'];
-      $value = $spec['value'];
       $length = $spec['length'];
 
-      if ($length >= 3) {
-        $ngrams = $index->getNgramsFromString($value, 'query');
-        $prefix = false;
-      } else if ($length == 2) {
-        $ngrams = $index->getNgramsFromString($value, 'prefix');
-        $prefix = false;
-      } else {
-        $ngrams = array(' '.$value);
-        $prefix = true;
+      if ($length < 3) {
+        continue;
       }
+
+      $index = $spec['index'];
+      $value = $spec['value'];
+
+      $ngrams = $index->getNgramsFromString($value, 'query');
 
       foreach ($ngrams as $ngram) {
         $flat[] = array(
           'table' => $index->getTableName(),
           'ngram' => $ngram,
-          'prefix' => $prefix,
         );
       }
+    }
+
+    if (!$flat) {
+      return array();
     }
 
     // MySQL only allows us to join a maximum of 61 tables per query. Each
@@ -2456,31 +2455,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($flat as $spec) {
       $table = $spec['table'];
       $ngram = $spec['ngram'];
-      $prefix = $spec['prefix'];
 
       $alias = 'ngm'.$idx++;
 
-      if ($prefix) {
-        $joins[] = qsprintf(
-          $conn,
-          'JOIN %T %T ON %T.objectID = %Q AND %T.ngram LIKE %>',
-          $table,
-          $alias,
-          $alias,
-          $id_column,
-          $alias,
-          $ngram);
-      } else {
-        $joins[] = qsprintf(
-          $conn,
-          'JOIN %T %T ON %T.objectID = %Q AND %T.ngram = %s',
-          $table,
-          $alias,
-          $alias,
-          $id_column,
-          $alias,
-          $ngram);
-      }
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T %T ON %T.objectID = %Q AND %T.ngram = %s',
+        $table,
+        $alias,
+        $alias,
+        $id_column,
+        $alias,
+        $ngram);
     }
 
     return $joins;

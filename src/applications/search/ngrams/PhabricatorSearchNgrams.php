@@ -63,9 +63,6 @@ abstract class PhabricatorSearchNgrams
         case 'index':
           $token = ' '.$token.' ';
           break;
-        case 'prefix':
-          $token = ' '.$token;
-          break;
       }
 
       $len = (strlen($token) - 2);
