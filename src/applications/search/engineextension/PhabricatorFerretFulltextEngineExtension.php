@@ -131,7 +131,8 @@ final class PhabricatorFerretFulltextEngineExtension
     }
     $ngrams_source = implode("\n", $ngrams_source);
 
-    $ngrams = $engine->getTermNgramsFromString($ngrams_source);
+    $ngram_engine = new PhabricatorSearchNgramEngine();
+    $ngrams = $ngram_engine->getTermNgramsFromString($ngrams_source);
 
     $object->openTransaction();
 

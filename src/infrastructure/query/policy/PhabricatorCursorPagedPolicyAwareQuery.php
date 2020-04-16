@@ -36,6 +36,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $ferretTables = array();
   private $ferretQuery;
   private $ferretMetadata = array();
+  private $ngramEngine;
 
   const FULLTEXT_RANK = '_ft_rank';
   const FULLTEXT_MODIFIED = '_ft_epochModified';
@@ -1984,6 +1985,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $stemmer = $engine->newStemmer();
 
     $ngram_table = $engine->getNgramsTableName();
+    $ngram_engine = $this->getNgramEngine();
 
     $flat = array();
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -2032,10 +2034,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($is_substring) {
-        $ngrams = $engine->getSubstringNgramsFromString($value);
+        $ngrams = $ngram_engine->getSubstringNgramsFromString($value);
       } else {
         $terms_value = $engine->newTermsCorpus($value);
-        $ngrams = $engine->getTermNgramsFromString($terms_value);
+        $ngrams = $ngram_engine->getTermNgramsFromString($terms_value);
 
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
@@ -2044,7 +2046,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           // is (or, at least, may be) a normal word and activates.
           $terms_value = trim($terms_value, ' ');
           $stem_value = $stemmer->stemToken($terms_value);
-          $stem_ngrams = $engine->getTermNgramsFromString($stem_value);
+          $stem_ngrams = $ngram_engine->getTermNgramsFromString($stem_value);
           $ngrams = array_intersect($ngrams, $stem_ngrams);
         }
       }
@@ -2409,6 +2411,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   protected function buildNgramsJoinClause(AphrontDatabaseConnection $conn) {
+    $ngram_engine = $this->getNgramEngine();
+
     $flat = array();
     foreach ($this->ngrams as $spec) {
       $length = $spec['length'];
@@ -2420,7 +2424,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $index = $spec['index'];
       $value = $spec['value'];
 
-      $ngrams = $index->getNgramsFromString($value, 'query');
+      $ngrams = $ngram_engine->getSubstringNgramsFromString($value);
 
       foreach ($ngrams as $ngram) {
         $flat[] = array(
@@ -2476,6 +2480,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function buildNgramsWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
+    $ngram_engine = $this->getNgramEngine();
+
     foreach ($this->ngrams as $ngram) {
       $index = $ngram['index'];
       $value = $ngram['value'];
@@ -2488,7 +2494,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $column = qsprintf($conn, '%T', $column);
       }
 
-      $tokens = $index->tokenizeString($value);
+      $tokens = $ngram_engine->tokenizeNgramString($value);
+
       foreach ($tokens as $token) {
         $where[] = qsprintf(
           $conn,
@@ -2504,6 +2511,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   protected function shouldGroupNgramResultRows() {
     return (bool)$this->ngrams;
+  }
+
+  private function getNgramEngine() {
+    if (!$this->ngramEngine) {
+      $this->ngramEngine = new PhabricatorSearchNgramEngine();
+    }
+
+    return $this->ngramEngine;
   }
 
 
