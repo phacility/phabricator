@@ -1815,7 +1815,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $function = $default_function;
       }
 
-      $raw_field = $engine->getFieldForFunction($function);
+      $function_def = $engine->getFunctionForName($function);
 
       // NOTE: The query compiler guarantees that a query can not make a
       // field both "present" and "absent", so it's safe to just use the
@@ -1829,7 +1829,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $alias = 'ftfield_'.$idx++;
         $table_map[$function] = array(
           'alias' => $alias,
-          'key' => $raw_field,
+          'function' => $function_def,
           'optional' => $is_optional,
         );
       }
@@ -1838,7 +1838,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     // Join the title field separately so we can rank results.
     $table_map['rank'] = array(
       'alias' => 'ft_rank',
-      'key' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+      'function' => $engine->getFunctionForName('title'),
 
       // See T13345. Not every document has a title, so we want to LEFT JOIN
       // this table to avoid excluding documents with no title that match
@@ -2130,6 +2130,36 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $ngram);
     }
 
+    $object = $this->newResultObject();
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Query class ("%s") must define "newResultObject()" to use '.
+          'Ferret constraints.',
+          get_class($this)));
+    }
+
+    // See T13511. If we have a fulltext query which uses valid field
+    // functions, but at least one of the functions applies to a field which
+    // the object can never have, the query can never match anything. Detect
+    // this and return an empty result set.
+
+    // (Even if the query is "field is absent" or "field does not contain
+    // such-and-such", the interpretation is that these constraints are
+    // not meaningful when applied to an object which can never have the
+    // field.)
+
+    $functions = ipull($this->ferretTables, 'function');
+    $functions = mpull($functions, null, 'getFerretFunctionName');
+    foreach ($functions as $function) {
+      if (!$function->supportsObject($object)) {
+        throw new PhabricatorEmptyQueryException(
+          pht(
+            'This query uses a fulltext function which this document '.
+            'type does not support.'));
+      }
+    }
+
     foreach ($this->ferretTables as $table) {
       $alias = $table['alias'];
 
@@ -2148,7 +2178,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $alias,
         $alias,
         $alias,
-        $table['key']);
+        $table['function']->getFerretFieldKey());
     }
 
     return $joins;

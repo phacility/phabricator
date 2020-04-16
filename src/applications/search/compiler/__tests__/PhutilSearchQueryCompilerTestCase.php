@@ -197,6 +197,14 @@ final class PhutilSearchQueryCompilerTestCase
       // impossible.
       'title:- title:x' => false,
       'title:- title:~' => false,
+
+      'abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ:xyz' => array(
+        array(
+          'abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          $op_and,
+          'xyz',
+        ),
+      ),
     );
 
     $this->assertCompileFunctionQueries($function_tests);

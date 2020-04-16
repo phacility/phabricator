@@ -148,7 +148,7 @@ final class PhutilSearchQueryCompiler
         if ($enable_functions) {
           $found = false;
           for ($jj = $ii; $jj < $length; $jj++) {
-            if (preg_match('/^[a-zA-Z]\z/u', $query[$jj])) {
+            if (preg_match('/^[a-zA-Z-]\z/u', $query[$jj])) {
               continue;
             }
             if ($query[$jj] == ':') {

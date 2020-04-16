@@ -2,6 +2,10 @@
 
 abstract class PhabricatorFerretEngine extends Phobject {
 
+  private $fieldMap = array();
+  private $ferretFunctions;
+  private $templateObject;
+
   abstract public function getApplicationName();
   abstract public function getScopeName();
   abstract public function newSearchEngine();
@@ -14,39 +18,31 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return 1000;
   }
 
-  public function getFieldForFunction($function) {
-    $function = phutil_utf8_strtolower($function);
+  final public function getFunctionForName($raw_name) {
+    if (isset($this->fieldMap[$raw_name])) {
+      return $this->fieldMap[$raw_name];
+    }
 
-    $map = $this->getFunctionMap();
-    if (!isset($map[$function])) {
+    $normalized_name =
+      FerretSearchFunction::getNormalizedFunctionName($raw_name);
+
+    if ($this->ferretFunctions === null) {
+      $functions = FerretSearchFunction::newFerretSearchFunctions();
+      $this->ferretFunctions = $functions;
+    }
+
+    if (!isset($this->ferretFunctions[$normalized_name])) {
       throw new PhutilSearchQueryCompilerSyntaxException(
         pht(
           'Unknown search function "%s". Supported functions are: %s.',
-          $function,
-          implode(', ', array_keys($map))));
+          $raw_name,
+          implode(', ', array_keys($this->ferretFunctions))));
     }
 
-    return $map[$function]['field'];
-  }
+    $function = $this->ferretFunctions[$normalized_name];
+    $this->fieldMap[$raw_name] = $function;
 
-  private function getFunctionMap() {
-    return array(
-      'all' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
-      ),
-      'title' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
-      ),
-      'body' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
-      ),
-      'core' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
-      ),
-      'comment' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
-      ),
-    );
+    return $this->fieldMap[$raw_name];
   }
 
   public function newStemmer() {

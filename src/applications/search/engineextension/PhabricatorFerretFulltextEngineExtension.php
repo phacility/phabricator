@@ -253,4 +253,24 @@ final class PhabricatorFerretFulltextEngineExtension
       $old_id);
   }
 
+  public function newFerretSearchFunctions() {
+    return array(
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('all')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_ALL),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('title')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_TITLE),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('body')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_BODY),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('core')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_CORE),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('comment')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_COMMENT),
+    );
+  }
+
 }
