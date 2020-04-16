@@ -29,17 +29,6 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return $map[$function]['field'];
   }
 
-  public function getAllFunctionFields() {
-    $map = $this->getFunctionMap();
-
-    $fields = array();
-    foreach ($map as $key => $spec) {
-      $fields[] = $spec['field'];
-    }
-
-    return $fields;
-  }
-
   protected function getFunctionMap() {
     return array(
       'all' => array(
