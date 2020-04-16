@@ -29,31 +29,22 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return $map[$function]['field'];
   }
 
-  protected function getFunctionMap() {
+  private function getFunctionMap() {
     return array(
       'all' => array(
         'field' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
-        'aliases' => array(
-          'any',
-        ),
       ),
       'title' => array(
         'field' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
-        'aliases' => array(),
       ),
       'body' => array(
         'field' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
-        'aliases' => array(),
       ),
       'core' => array(
         'field' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
-        'aliases' => array(),
       ),
       'comment' => array(
         'field' => PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
-        'aliases' => array(
-          'comments',
-        ),
       ),
     );
   }
