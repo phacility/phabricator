@@ -35,6 +35,9 @@ JX.install('DiffChangeset', {
     this._displayPath = JX.$H(data.displayPath);
     this._icon = data.icon;
 
+    this._editorURI = data.editorURI;
+    this._editorConfigureURI = data.editorConfigureURI;
+
     this._inlines = [];
   },
 
@@ -64,6 +67,17 @@ JX.install('DiffChangeset', {
     _changesetList: null,
     _icon: null,
     _treeNodeID: null,
+
+    _editorURI: null,
+    _editorConfigureURI: null,
+
+    getEditorURI: function() {
+      return this._editorURI;
+    },
+
+    getEditorConfigureURI: function() {
+      return this._editorConfigureURI;
+    },
 
     getLeftChangesetID: function() {
       return this._leftID;

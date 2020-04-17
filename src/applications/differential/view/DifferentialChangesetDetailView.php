@@ -13,6 +13,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $autoload;
   private $loaded;
   private $renderer;
+  private $repository;
+  private $diff;
 
   public function setAutoload($autoload) {
     $this->autoload = $autoload;
@@ -196,6 +198,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'path' => $display_filename,
           'icon' => $display_icon,
           'treeNodeID' => 'tree-node-'.$changeset->getAnchorName(),
+
+          'editorURI' => $this->getEditorURI(),
+          'editorConfigureURI' => $this->getEditorConfigureURI(),
         ),
         'class' => $class,
         'id'    => $id,
@@ -224,5 +229,59 @@ final class DifferentialChangesetDetailView extends AphrontView {
       ));
   }
 
+  public function setRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->repository;
+  }
+
+  public function getChangeset() {
+    return $this->changeset;
+  }
+
+  public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  public function getDiff() {
+    return $this->diff;
+  }
+
+  private function getEditorURI() {
+    $viewer = $this->getViewer();
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    $repository = $this->getRepository();
+    if (!$repository) {
+      return null;
+    }
+
+    $changeset = $this->getChangeset();
+    $diff = $this->getDiff();
+
+    $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+    $path = ltrim($path, '/');
+
+    $line = idx($changeset->getMetadata(), 'line:first', 1);
+
+    return $viewer->loadEditorLink($path, $line, $repository);
+  }
+
+  private function getEditorConfigureURI() {
+    $viewer = $this->getViewer();
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    return '/settings/panel/display/';
+  }
 
 }

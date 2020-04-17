@@ -211,6 +211,9 @@ JX.install('DiffChangesetList', {
       label = pht('Hide or show all inline comments.');
       this._installKey('A', label, this._onkeyhideall);
 
+      label = pht('Open file in external editor.');
+      this._installKey('\\', label, this._onkeyopeneditor);
+
     },
 
     isAsleep: function() {
@@ -448,6 +451,29 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a file to hide or show.'));
+    },
+
+    _onkeyopeneditor: function() {
+      var pht = this.getTranslations();
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'file') {
+          var changeset = cursor.changeset;
+          var editor_uri = changeset.getEditorURI();
+
+          if (editor_uri === null) {
+            this._warnUser(pht('No external editor is configured.'));
+            return;
+          }
+
+          JX.$U(editor_uri).go();
+
+          return;
+        }
+      }
+
+      this._warnUser(pht('You must select a file to edit.'));
     },
 
     _onkeycollapse: function() {
@@ -849,8 +875,16 @@ JX.install('DiffChangesetList', {
 
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
-      add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
-      add_link('fa-wrench', pht('Configure Editor'), data.editorConfigure);
+
+      var editor_uri = changeset.getEditorURI();
+      if (editor_uri !== null) {
+        add_link('fa-pencil', pht('Open in Editor'), editor_uri, true);
+      } else {
+        var configure_uri = changeset.getEditorConfigureURI();
+        if (configure_uri !== null) {
+          add_link('fa-wrench', pht('Configure Editor'), configure_uri);
+        }
+      }
 
       menu.setContent(list.getNode());
 

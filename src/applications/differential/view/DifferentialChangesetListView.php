@@ -79,9 +79,17 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function getRepository() {
+    return $this->repository;
+  }
+
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
     return $this;
+  }
+
+  public function getDiff() {
+    return $this->diff;
   }
 
   public function setRenderingReferences(array $references) {
@@ -148,6 +156,9 @@ final class DifferentialChangesetListView extends AphrontView {
     $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
       $viewer);
 
+    $repository = $this->getRepository();
+    $diff = $this->getDiff();
+
     $output = array();
     $ids = array();
     foreach ($changesets as $key => $changeset) {
@@ -157,6 +168,14 @@ final class DifferentialChangesetListView extends AphrontView {
 
       $detail = id(new DifferentialChangesetDetailView())
         ->setUser($viewer);
+
+      if ($repository) {
+        $detail->setRepository($repository);
+      }
+
+      if ($diff) {
+        $detail->setDiff($diff);
+      }
 
       $uniq_id = 'diff-'.$changeset->getAnchorName();
       $detail->setID($uniq_id);
@@ -310,6 +329,15 @@ final class DifferentialChangesetListView extends AphrontView {
 
         'Finish editing inline comments before changing display modes.' =>
           pht('Finish editing inline comments before changing display modes.'),
+
+        'Open file in external editor.' =>
+          pht('Open file in external editor.'),
+
+        'You must select a file to edit.' =>
+          pht('You must select a file to edit.'),
+
+        'No external editor is configured.' =>
+          pht('No external editor is configured.'),
       ),
     ));
 
@@ -385,19 +413,6 @@ final class DifferentialChangesetListView extends AphrontView {
         $uri = new PhutilURI($this->rightRawFileURI);
         $uri = $this->appendDefaultQueryParams($uri, $qparams);
         $meta['rightURI'] = (string)$uri;
-      }
-    }
-
-    if ($viewer && $repository) {
-      $path = ltrim(
-        $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-        '/');
-      $line = idx($changeset->getMetadata(), 'line:first', 1);
-      $editor_link = $viewer->loadEditorLink($path, $line, $repository);
-      if ($editor_link) {
-        $meta['editor'] = $editor_link;
-      } else {
-        $meta['editorConfigure'] = '/settings/panel/display/';
       }
     }
 
