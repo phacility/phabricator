@@ -879,13 +879,31 @@ final class DifferentialChangesetParser extends Phobject {
 
     $has_document_engine = ($engine_blocks !== null);
 
-    $shield = null;
-    if ($this->isTopLevel && !$this->comments && !$has_document_engine) {
+    // See T13515. Sometimes, we collapse file content by default: for
+    // example, if the file is marked as containing generated code.
+
+    // If a file has inline comments, that normally means we never collapse
+    // it. However, if the viewer has already collapsed all of the inlines,
+    // it's fine to collapse the file.
+
+    $expanded_comments = array();
+    foreach ($this->comments as $comment) {
+      if ($comment->isHidden()) {
+        continue;
+      }
+      $expanded_comments[] = $comment;
+    }
+
+    $collapsed_count = (count($this->comments) - count($expanded_comments));
+
+    $shield_raw = null;
+    $shield_text = null;
+    $shield_type = null;
+    if ($this->isTopLevel && !$expanded_comments && !$has_document_engine) {
       if ($this->isGenerated()) {
-        $shield = $renderer->renderShield(
-          pht(
-            'This file contains generated code, which does not normally '.
-            'need to be reviewed.'));
+        $shield_text = pht(
+          'This file contains generated code, which does not normally '.
+          'need to be reviewed.');
       } else if ($this->isMoveAway()) {
         // We put an empty shield on these files. Normally, they do not have
         // any diff content anyway. However, if they come through `arc`, they
@@ -895,7 +913,7 @@ final class DifferentialChangesetParser extends Phobject {
         // We could show a message like "this file was moved", but we show
         // that as a change header anyway, so it would be redundant. Instead,
         // just render an empty shield to skip rendering the diff body.
-        $shield = '';
+        $shield_raw = '';
       } else if ($this->isUnchanged()) {
         $type = 'text';
         if (!$rows) {
@@ -909,27 +927,50 @@ final class DifferentialChangesetParser extends Phobject {
           $type = 'none';
         }
 
+        $shield_type = $type;
+
         $type_add = DifferentialChangeType::TYPE_ADD;
         if ($this->changeset->getChangeType() == $type_add) {
           // Although the generic message is sort of accurate in a technical
           // sense, this more-tailored message is less confusing.
-          $shield = $renderer->renderShield(
-            pht('This is an empty file.'),
-            $type);
+          $shield_text = pht('This is an empty file.');
         } else {
-          $shield = $renderer->renderShield(
-            pht('The contents of this file were not changed.'),
-            $type);
+          $shield_text = pht('The contents of this file were not changed.');
         }
       } else if ($this->isDeleted()) {
-        $shield = $renderer->renderShield(
-          pht('This file was completely deleted.'));
+        $shield_text = pht('This file was completely deleted.');
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $shield = $renderer->renderShield(
-          pht(
-            'This file has a very large number of changes (%s lines).',
-            new PhutilNumber($this->changeset->getAffectedLineCount())));
+        $shield_text = pht(
+          'This file has a very large number of changes (%s lines).',
+          new PhutilNumber($this->changeset->getAffectedLineCount()));
       }
+    }
+
+    $shield = null;
+    if ($shield_raw !== null) {
+      $shield = $shield_raw;
+    } else if ($shield_text !== null) {
+      if ($shield_type === null) {
+        $shield_type = 'default';
+      }
+
+      // If we have inlines and the shield would normally show the whole file,
+      // downgrade it to show only text around the inlines.
+      if ($collapsed_count) {
+        if ($shield_type === 'text') {
+          $shield_type = 'default';
+        }
+
+        $shield_text = array(
+          $shield_text,
+          ' ',
+          pht(
+            'This file has %d collapsed inline comment(s).',
+            new PhutilNumber($collapsed_count)),
+        );
+      }
+
+      $shield = $renderer->renderShield($shield_text, $shield_type);
     }
 
     if ($shield !== null) {
