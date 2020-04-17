@@ -79,8 +79,6 @@ final class DiffusionDiffController extends DiffusionController {
         'action' => 'rendering-ref',
       )));
 
-    $parser->readParametersFromRequest($request);
-
     $coverage = $drequest->loadCoverage();
     if ($coverage) {
       $parser->setCoverage($coverage);
@@ -132,8 +130,6 @@ final class DiffusionDiffController extends DiffusionController {
     $parser->setRange($range_s, $range_e);
     $parser->setMask($mask);
 
-    return id(new PhabricatorChangesetResponse())
-      ->setRenderedChangeset($parser->renderChangeset())
-      ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
+    return $parser->newChangesetResponse();
   }
 }

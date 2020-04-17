@@ -11,10 +11,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $renderURI;
   private $renderingRef;
   private $autoload;
-  private $loaded;
-  private $renderer;
   private $repository;
   private $diff;
+  private $changesetResponse;
 
   public function setAutoload($autoload) {
     $this->autoload = $autoload;
@@ -25,15 +24,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this->autoload;
   }
 
-  public function setLoaded($loaded) {
-    $this->loaded = $loaded;
-    return $this;
-  }
-
-  public function getLoaded() {
-    return $this->loaded;
-  }
-
   public function setRenderingRef($rendering_ref) {
     $this->renderingRef = $rendering_ref;
     return $this;
@@ -41,6 +31,15 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
   public function getRenderingRef() {
     return $this->renderingRef;
+  }
+
+  public function setChangesetResponse(PhabricatorChangesetResponse $response) {
+    $this->changesetResponse = $response;
+    return $this;
+  }
+
+  public function getChangesetResponse() {
+    return $this->changesetResponse;
   }
 
   public function setRenderURI($render_uri) {
@@ -70,15 +69,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
   public function setSymbolIndex($symbol_index) {
     $this->symbolIndex = $symbol_index;
     return $this;
-  }
-
-  public function setRenderer($renderer) {
-    $this->renderer = $renderer;
-    return $this;
-  }
-
-  public function getRenderer() {
-    return $this->renderer;
   }
 
   public function getID() {
@@ -139,9 +129,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $icon = id(new PHUIIconView())
       ->setIcon($display_icon);
 
-    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
-      $this->getRenderer());
-
     $changeset_id = $this->changeset->getID();
 
     $vs_id = $this->getVsChangesetID();
@@ -180,6 +167,17 @@ final class DifferentialChangesetDetailView extends AphrontView {
       ),
       $file_part);
 
+    $response = $this->getChangesetResponse();
+    if ($response) {
+      $is_loaded = true;
+      $changeset_markup = $response->getRenderedChangeset();
+      $changeset_state = $response->getChangesetState();
+    } else {
+      $is_loaded = false;
+      $changeset_markup = null;
+      $changeset_state = null;
+    }
+
     return javelin_tag(
       'div',
       array(
@@ -188,12 +186,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'left'  => $left_id,
           'right' => $right_id,
           'renderURI' => $this->getRenderURI(),
-          'highlight' => null,
-          'renderer' => $this->getRenderer(),
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
-          'loaded' => $this->getLoaded(),
-          'undoTemplates' => hsprintf('%s', $renderer->renderUndoTemplates()),
           'displayPath' => hsprintf('%s', $display_parts),
           'path' => $display_filename,
           'icon' => $display_icon,
@@ -201,6 +195,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
           'editorURI' => $this->getEditorURI(),
           'editorConfigureURI' => $this->getEditorConfigureURI(),
+
+          'loaded' => $is_loaded,
+          'changesetState' => $changeset_state,
         ),
         'class' => $class,
         'id'    => $id,
@@ -225,7 +222,10 @@ final class DifferentialChangesetDetailView extends AphrontView {
             'class' => 'changeset-view-content',
             'sigil' => 'changeset-view-content',
           ),
-          $this->renderChildren()),
+          array(
+            $changeset_markup,
+            $this->renderChildren(),
+          )),
       ));
   }
 

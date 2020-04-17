@@ -153,9 +153,6 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $changesets = $this->changesets;
 
-    $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
-      $viewer);
-
     $repository = $this->getRepository();
     $diff = $this->getDiff();
 
@@ -167,7 +164,7 @@ final class DifferentialChangesetListView extends AphrontView {
       $ref = $this->references[$key];
 
       $detail = id(new DifferentialChangesetDetailView())
-        ->setUser($viewer);
+        ->setViewer($viewer);
 
       if ($repository) {
         $detail->setRepository($repository);
@@ -193,11 +190,11 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setRenderingRef($ref);
 
       $detail->setRenderURI($this->renderURI);
-      $detail->setRenderer($renderer);
 
-      if ($this->getParser()) {
-        $detail->appendChild($this->getParser()->renderChangeset());
-        $detail->setLoaded(true);
+      $parser = $this->getParser();
+      if ($parser) {
+        $response = $parser->newChangesetResponse();
+        $detail->setChangesetResponse($response);
       } else {
         $detail->setAutoload(isset($this->visibleChangesets[$key]));
         if (isset($this->visibleChangesets[$key])) {

@@ -798,15 +798,16 @@ JX.install('DiffChangesetList', {
               }
             }
 
-            var renderer = changeset.getRenderer();
+            var renderer = changeset.getRendererKey();
             if (renderer == '1up') {
               renderer = '2up';
             } else {
               renderer = '1up';
             }
-            changeset.setRenderer(renderer);
+            changeset.reload({renderer: renderer});
+          } else {
+            changeset.reload();
           }
-          changeset.reload();
 
           e.prevent();
           menu.close();
@@ -818,13 +819,12 @@ JX.install('DiffChangesetList', {
         .setName(pht('Change Text Encoding...'))
         .setHandler(function(e) {
           var params = {
-            encoding: changeset.getEncoding()
+            encoding: changeset.getCharacterEncoding()
           };
 
           new JX.Workflow('/services/encoding/', params)
             .setHandler(function(r) {
-              changeset.setEncoding(r.encoding);
-              changeset.reload();
+              changeset.reload({encoding: r.encoding});
             })
             .start();
 
@@ -843,8 +843,7 @@ JX.install('DiffChangesetList', {
 
           new JX.Workflow('/services/highlight/', params)
             .setHandler(function(r) {
-              changeset.setHighlight(r.highlight);
-              changeset.reload();
+              changeset.reload({highlight: r.highlight});
             })
             .start();
 
@@ -863,8 +862,7 @@ JX.install('DiffChangesetList', {
 
           new JX.Workflow('/services/viewas/', params)
             .setHandler(function(r) {
-              changeset.setDocumentEngine(r.engine);
-              changeset.reload();
+              changeset.reload({engine: r.engine});
             })
             .start();
 
@@ -917,7 +915,7 @@ JX.install('DiffChangesetList', {
         engine_item.setDisabled(!changeset.isLoaded());
 
         if (changeset.isLoaded()) {
-          if (changeset.getRenderer() == '2up') {
+          if (changeset.getRendererKey() == '2up') {
             up_item
               .setIcon('fa-list-alt')
               .setName(pht('View Unified'));

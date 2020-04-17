@@ -41,8 +41,23 @@ final class PhabricatorChangesetViewStateEngine
     $this->setStorage($storage);
 
     $highlight = $request->getStr('highlight');
-    if ($highlight !== null && strlen($highlight)) {
+    if ($highlight !== null) {
       $this->setChangesetProperty('highlight', $highlight);
+    }
+
+    $encoding = $request->getStr('encoding');
+    if ($encoding !== null) {
+      $this->setChangesetProperty('encoding', $encoding);
+    }
+
+    $engine = $request->getStr('engine');
+    if ($engine !== null) {
+      $this->setChangesetProperty('engine', $engine);
+    }
+
+    $renderer = $request->getStr('renderer');
+    if ($renderer !== null) {
+      $this->setChangesetProperty('renderer', $renderer);
     }
 
     $this->saveViewStateStorage();
@@ -51,6 +66,23 @@ final class PhabricatorChangesetViewStateEngine
 
     $highlight_language = $this->getChangesetProperty('highlight');
     $state->setHighlightLanguage($highlight_language);
+
+    $encoding = $this->getChangesetProperty('encoding');
+    $state->setCharacterEncoding($encoding);
+
+    $document_engine = $this->getChangesetProperty('engine');
+    $state->setDocumentEngineKey($document_engine);
+
+    $renderer = $this->getChangesetProperty('renderer');
+    $state->setRendererKey($renderer);
+
+    // This is the client-selected default renderer based on viewport
+    // dimensions.
+
+    $device_key = $request->getStr('device');
+    if ($device_key !== null && strlen($device_key)) {
+      $state->setDefaultDeviceRendererKey($device_key);
+    }
 
     return $state;
   }

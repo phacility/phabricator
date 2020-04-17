@@ -4,20 +4,19 @@ final class PhabricatorChangesetResponse extends AphrontProxyResponse {
 
   private $renderedChangeset;
   private $coverage;
-  private $undoTemplates;
+  private $changesetState;
 
   public function setRenderedChangeset($rendered_changeset) {
     $this->renderedChangeset = $rendered_changeset;
     return $this;
   }
 
-  public function setCoverage($coverage) {
-    $this->coverage = $coverage;
-    return $this;
+  public function getRenderedChangeset() {
+    return $this->renderedChangeset;
   }
 
-  public function setUndoTemplates($undo_templates) {
-    $this->undoTemplates = $undo_templates;
+  public function setCoverage($coverage) {
+    $this->coverage = $coverage;
     return $this;
   }
 
@@ -27,18 +26,23 @@ final class PhabricatorChangesetResponse extends AphrontProxyResponse {
 
   public function reduceProxyResponse() {
     $content = array(
-      'changeset' => $this->renderedChangeset,
-    );
+      'changeset' => $this->getRenderedChangeset(),
+    ) + $this->getChangesetState();
 
     if ($this->coverage) {
       $content['coverage'] = $this->coverage;
     }
 
-    if ($this->undoTemplates) {
-      $content['undoTemplates'] = $this->undoTemplates;
-    }
-
     return $this->getProxy()->setContent($content);
+  }
+
+  public function setChangesetState(array $state) {
+    $this->changesetState = $state;
+    return $this;
+  }
+
+  public function getChangesetState() {
+    return $this->changesetState;
   }
 
 }

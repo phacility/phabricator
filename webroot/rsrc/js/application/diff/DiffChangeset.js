@@ -22,10 +22,6 @@ JX.install('DiffChangeset', {
 
     this._renderURI = data.renderURI;
     this._ref = data.ref;
-    this._renderer = data.renderer;
-    this._highlight = data.highlight;
-    this._documentEngine = data.documentEngine;
-    this._encoding = data.encoding;
     this._loaded = data.loaded;
     this._treeNodeID = data.treeNodeID;
 
@@ -39,6 +35,10 @@ JX.install('DiffChangeset', {
     this._editorConfigureURI = data.editorConfigureURI;
 
     this._inlines = [];
+
+    if (data.changesetState) {
+      this._loadChangesetState(data.changesetState);
+    }
   },
 
   members: {
@@ -49,10 +49,10 @@ JX.install('DiffChangeset', {
 
     _renderURI: null,
     _ref: null,
-    _renderer: null,
+    _rendererKey: null,
     _highlight: null,
     _documentEngine: null,
-    _encoding: null,
+    _characterEncoding: null,
     _undoTemplates: null,
 
     _leftID: null,
@@ -187,11 +187,11 @@ JX.install('DiffChangeset', {
      *
      * @return this
      */
-    reload: function() {
+    reload: function(state) {
       this._loaded = true;
       this._sequence++;
 
-      var params = this._getViewParameters();
+      var params = this._getViewParameters(state);
       var pht = this.getChangesetList().getTranslations();
 
       var workflow = new JX.Workflow(this._renderURI, params)
@@ -321,14 +321,17 @@ JX.install('DiffChangeset', {
     /**
      * Get parameters which define the current rendering options.
      */
-    _getViewParameters: function() {
-      return {
+    _getViewParameters: function(state) {
+      var parameters = {
         ref: this._ref,
-        renderer: this.getRenderer() || '',
-        highlight: this._highlight || '',
-        engine: this._documentEngine || '',
-        encoding: this._encoding || ''
+        device: this._getDefaultDeviceRenderer()
       };
+
+      if (state) {
+        JX.copy(parameters, state);
+      }
+
+      return parameters;
     },
 
     /**
@@ -344,16 +347,11 @@ JX.install('DiffChangeset', {
       return JX.Router.getInstance().getRoutableByKey(this._getRoutableKey());
     },
 
-    setRenderer: function(renderer) {
-      this._renderer = renderer;
-      return this;
+    getRendererKey: function() {
+      return this._rendererKey;
     },
 
-    getRenderer: function() {
-      if (this._renderer !== null) {
-        return this._renderer;
-      }
-
+    _getDefaultDeviceRenderer: function() {
       // NOTE: If you load the page at one device resolution and then resize to
       // a different one we don't re-render the diffs, because it's a
       // complicated mess and you could lose inline comments, cursor positions,
@@ -365,26 +363,12 @@ JX.install('DiffChangeset', {
       return this._undoTemplates;
     },
 
-    setEncoding: function(encoding) {
-      this._encoding = encoding;
-      return this;
-    },
-
-    getEncoding: function() {
-      return this._encoding;
-    },
-
-    setHighlight: function(highlight) {
-      this._highlight = highlight;
-      return this;
+    getCharacterEncoding: function() {
+      return this._characterEncoding;
     },
 
     getHighlight: function() {
       return this._highlight;
-    },
-
-    setDocumentEngine: function(engine) {
-      this._documentEngine = engine;
     },
 
     getDocumentEngine: function(engine) {
@@ -614,25 +598,34 @@ JX.install('DiffChangeset', {
     _onchangesetresponse: function(response) {
       // Code shared by autoload and context responses.
 
-      if (response.coverage) {
-        for (var k in response.coverage) {
-          try {
-            JX.DOM.replace(JX.$(k), JX.$H(response.coverage[k]));
-          } catch (ignored) {
-            // Not terribly important.
-          }
-        }
-      }
-
-      if (response.undoTemplates) {
-        this._undoTemplates = response.undoTemplates;
-      }
+      this._loadChangesetState(response);
 
       JX.Stratcom.invoke('differential-inline-comment-refresh');
 
       this._rebuildAllInlines();
 
       JX.Stratcom.invoke('resize');
+    },
+
+    _loadChangesetState: function(state) {
+      if (state.coverage) {
+        for (var k in state.coverage) {
+          try {
+            JX.DOM.replace(JX.$(k), JX.$H(state.coverage[k]));
+          } catch (ignored) {
+            // Not terribly important.
+          }
+        }
+      }
+
+      if (state.undoTemplates) {
+        this._undoTemplates = state.undoTemplates;
+      }
+
+      this._rendererKey = state.rendererKey;
+      this._highlight = state.highlight;
+      this._characterEncoding = state.characterEncoding;
+      this._documentEngine = state.documentEngine;
     },
 
     _getContentFrame: function() {

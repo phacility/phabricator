@@ -205,8 +205,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setRightSideCommentMapping($right_source, $right_new)
       ->setLeftSideCommentMapping($left_source, $left_new);
 
-    $parser->readParametersFromRequest($request);
-
     if ($left && $right) {
       $parser->setOriginals($left, $right);
     }
@@ -274,7 +272,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if ($request->isAjax()) {
       // NOTE: We must render the changeset before we render coverage
       // information, since it builds some caches.
-      $rendered_changeset = $parser->renderChangeset();
+      $response = $parser->newChangesetResponse();
 
       $mcov = $parser->renderModifiedCoverage();
 
@@ -282,10 +280,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
-      return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($rendered_changeset)
-        ->setCoverage($coverage_data)
-        ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
+      $response->setCoverage($coverage_data);
+
+      return $response;
     }
 
     $detail = id(new DifferentialChangesetListView())

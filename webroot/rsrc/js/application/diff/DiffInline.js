@@ -461,7 +461,7 @@ JX.install('DiffInline', {
         op: operation,
         id: this._id,
         on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
-        renderer: this.getChangeset().getRenderer(),
+        renderer: this.getChangeset().getRendererKey(),
         number: this.getLineNumber(),
         length: this.getLineLength(),
         is_new: this.isNewFile(),
