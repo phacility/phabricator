@@ -45,7 +45,6 @@ final class DifferentialChangesetParser extends Phobject {
   private $disableCache;
   private $renderer;
   private $characterEncoding;
-  private $highlightAs;
   private $highlightingDisabled;
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
@@ -60,6 +59,8 @@ final class DifferentialChangesetParser extends Phobject {
   private $highlightEngine;
   private $viewer;
   private $documentEngineKey;
+
+  private $viewState;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -85,13 +86,13 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->showEditAndReplyLinks;
   }
 
-  public function setHighlightAs($highlight_as) {
-    $this->highlightAs = $highlight_as;
+  public function setViewState(PhabricatorChangesetViewState $view_state) {
+    $this->viewState = $view_state;
     return $this;
   }
 
-  public function getHighlightAs() {
-    return $this->highlightAs;
+  public function getViewState() {
+    return $this->viewState;
   }
 
   public function setCharacterEncoding($character_encoding) {
@@ -183,7 +184,6 @@ final class DifferentialChangesetParser extends Phobject {
 
   public function readParametersFromRequest(AphrontRequest $request) {
     $this->setCharacterEncoding($request->getStr('encoding'));
-    $this->setHighlightAs($request->getStr('highlight'));
     $this->setDocumentEngineKey($request->getStr('engine'));
 
     $renderer = null;
@@ -376,15 +376,6 @@ final class DifferentialChangesetParser extends Phobject {
   public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
   }
 
   public function setCoverage($coverage) {
@@ -604,7 +595,7 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function getHighlightFuture($corpus) {
-    $language = $this->highlightAs;
+    $language = $this->getViewState()->getHighlightLanguage();
 
     if (!$language) {
       $language = $this->highlightEngine->getLanguageFromFilename(
@@ -634,6 +625,8 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function tryCacheStuff() {
+    $viewstate = $this->getViewState();
+
     $skip_cache = false;
 
     if ($this->disableCache) {
@@ -644,7 +637,8 @@ final class DifferentialChangesetParser extends Phobject {
       $skip_cache = true;
     }
 
-    if ($this->highlightAs) {
+    $highlight_language = $viewstate->getHighlightLanguage();
+    if ($highlight_language !== null) {
       $skip_cache = true;
     }
 
@@ -844,7 +838,7 @@ final class DifferentialChangesetParser extends Phobject {
       count($this->new));
 
     $renderer = $this->getRenderer()
-      ->setUser($this->getUser())
+      ->setUser($this->getViewer())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
       ->setIsTopLevel($this->isTopLevel)

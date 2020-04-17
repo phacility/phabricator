@@ -1002,9 +1002,11 @@ final class DifferentialRevision extends DifferentialDAO
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $viewer = $engine->getViewer();
+
     $this->openTransaction();
       $diffs = id(new DifferentialDiffQuery())
-        ->setViewer($engine->getViewer())
+        ->setViewer($viewer)
         ->withRevisionIDs(array($this->getID()))
         ->execute();
       foreach ($diffs as $diff) {
@@ -1021,6 +1023,13 @@ final class DifferentialRevision extends DifferentialDAO
         'DELETE FROM %T WHERE revisionID = %d',
         $dummy_path->getTableName(),
         $this->getID());
+
+      $viewstates = id(new DifferentialViewStateQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($this->getPHID()));
+      foreach ($viewstates as $viewstate) {
+        $viewstate->delete();
+      }
 
       $this->delete();
     $this->saveTransaction();

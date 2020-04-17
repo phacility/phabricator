@@ -60,9 +60,20 @@ final class DiffusionDiffController extends DiffusionController {
       return new Aphront404Response();
     }
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setUser($viewer);
-    $parser->setChangeset($changeset);
+    $commit = $drequest->loadCommit();
+
+    $viewstate_engine = id(new PhabricatorChangesetViewStateEngine())
+      ->setViewer($viewer)
+      ->setObjectPHID($commit->getPHID())
+      ->setChangeset($changeset);
+
+    $viewstate = $viewstate_engine->newViewStateFromRequest($request);
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setChangeset($changeset)
+      ->setViewState($viewstate);
+
     $parser->setRenderingReference($drequest->generateURI(
       array(
         'action' => 'rendering-ref',
@@ -74,8 +85,6 @@ final class DiffusionDiffController extends DiffusionController {
     if ($coverage) {
       $parser->setCoverage($coverage);
     }
-
-    $commit = $drequest->loadCommit();
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();

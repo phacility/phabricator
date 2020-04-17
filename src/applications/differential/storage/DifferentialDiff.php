@@ -716,6 +716,8 @@ final class DifferentialDiff
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $viewer = $engine->getViewer();
+
     $this->openTransaction();
       $this->delete();
 
@@ -728,6 +730,13 @@ final class DifferentialDiff
         $this->getID());
       foreach ($properties as $prop) {
         $prop->delete();
+      }
+
+      $viewstates = id(new DifferentialViewStateQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($this->getPHID()));
+      foreach ($viewstates as $viewstate) {
+        $viewstate->delete();
       }
 
     $this->saveTransaction();
