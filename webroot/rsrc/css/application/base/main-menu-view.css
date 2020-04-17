@@ -369,6 +369,10 @@ a.phabricator-core-user-menu .caret:before {
 .device-desktop .alert-notifications:hover {
   margin-top: -2px;
   transition-duration: .2s;
+
+  /* See T13508. Avoid animation flickering behavior if the user's cursor is
+     at the very bottom of the element. */
+  padding-bottom: 2px;
 }
 
 .device-desktop .alert-notifications:hover .phui-icon-view {
