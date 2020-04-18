@@ -13,7 +13,7 @@ final class PhabricatorEditorMultipleSetting
   }
 
   public function getSettingPanelKey() {
-    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+    return PhabricatorExternalEditorSettingsPanel::PANELKEY;
   }
 
   protected function getSettingOrder() {
