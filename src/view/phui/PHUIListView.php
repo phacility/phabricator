@@ -3,6 +3,7 @@
 final class PHUIListView extends AphrontTagView {
 
   const NAVBAR_LIST = 'phui-list-navbar';
+  const NAVBAR_VERTICAL = 'phui-list-navbar-vertical';
   const SIDENAV_LIST = 'phui-list-sidenav';
   const TABBAR_LIST = 'phui-list-tabbar';
 
@@ -180,8 +181,21 @@ final class PHUIListView extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-list-view';
     if ($this->type) {
-      $classes[] = $this->type;
+      switch ($this->type) {
+        case self::NAVBAR_LIST:
+          $classes[] = 'phui-list-navbar';
+          $classes[] = 'phui-list-navbar-horizontal';
+          break;
+        case self::NAVBAR_VERTICAL:
+          $classes[] = 'phui-list-navbar';
+          $classes[] = 'phui-list-navbar-vertical';
+          break;
+        default:
+          $classes[] = $this->type;
+          break;
+      }
     }
+
     return array(
       'class' => implode(' ', $classes),
     );

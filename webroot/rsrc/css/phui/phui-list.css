@@ -100,26 +100,54 @@
 .phui-list-view.phui-list-navbar {
   list-style: none;
   overflow: hidden;
+}
+
+.phui-list-view.phui-list-navbar-horizontal {
   border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-list-view.phui-list-navbar > li {
   list-style: none;
-  float: left;
   display: block;
+}
+
+.phui-list-view.phui-list-navbar-horizontal > li {
+  float: left;
   border-right: 1px solid {$thinblueborder};
 }
 
 .phui-list-navbar .phui-list-item-href {
   color: {$bluetext};
-  padding: 8px 16px;
   line-height: 16px;
+}
+
+.phui-list-navbar-horizontal .phui-list-item-href {
+  padding: 8px 16px;
+}
+
+.phui-list-navbar-vertical .phui-list-item-href {
+  padding: 8px 12px;
+}
+
+.phui-list-navbar-vertical {
+  box-shadow: 0 1px 0 rgba({$alphablue}, 0.05);
+}
+
+.phui-list-navbar-vertical .phui-list-item-href {
+  display: block;
+  background: #ffffff;
 }
 
 .phui-list-navbar .phui-list-item-selected .phui-list-item-href {
   background: {$lightbluebackground};
   color: {$darkbluetext};
   font-weight: bold;
+}
+
+.phui-tab-group-view-tab-column {
+  width: 220px;
+  border-right: 1px solid {$thinblueborder};
+  background: {$lightgreybackground};
 }
 
 .phui-list-navbar .phui-list-item-href:hover {
@@ -131,11 +159,19 @@
 .phui-list-navbar .phui-list-item-icon {
   height: 14px;
   width: 14px;
-  display: block;
   font-size: 14px;
+  text-align: center;
 }
 
-.device-phone .phui-list-view.phui-list-navbar > li {
+.phui-list-navbar-vertical .phui-list-item-icon {
+  margin-right: 8px;
+}
+
+.phui-list-navbar-horizontal .phui-list-item-icon {
+  display: block;
+}
+
+.device-phone .phui-list-view.phui-list-navbar-horizontal > li {
   float: none;
   border: none;
 }

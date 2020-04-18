@@ -158,6 +158,11 @@ JX.install('DiffChangesetList', {
 
       var label;
 
+      if (!standalone) {
+        label = pht('Jump to the table of contents.');
+        this._installKey('t', 'diff-nav', label, this._ontoc);
+      }
+
       label = pht('Jump to next change.');
       this._installJumpKey('j', label, 1);
 
@@ -187,32 +192,31 @@ JX.install('DiffChangesetList', {
 
       if (!standalone) {
         label = pht('Hide or show the current file.');
-        this._installKey('h', label, this._onkeytogglefile);
-
-        label = pht('Jump to the table of contents.');
-        this._installKey('t', label, this._ontoc);
+        this._installKey('h', 'diff-vis', label, this._onkeytogglefile);
       }
 
       label = pht('Reply to selected inline comment or change.');
-      this._installKey('r', label, JX.bind(this, this._onkeyreply, false));
+      this._installKey('r', 'inline', label,
+        JX.bind(this, this._onkeyreply, false));
 
       label = pht('Reply and quote selected inline comment.');
-      this._installKey('R', label, JX.bind(this, this._onkeyreply, true));
+      this._installKey('R', 'inline', label,
+        JX.bind(this, this._onkeyreply, true));
 
       label = pht('Edit selected inline comment.');
-      this._installKey('e', label, this._onkeyedit);
+      this._installKey('e', 'inline', label, this._onkeyedit);
 
       label = pht('Mark or unmark selected inline comment as done.');
-      this._installKey('w', label, this._onkeydone);
+      this._installKey('w', 'inline', label, this._onkeydone);
 
       label = pht('Collapse or expand inline comment.');
-      this._installKey('q', label, this._onkeycollapse);
+      this._installKey('q', 'diff-vis', label, this._onkeycollapse);
 
       label = pht('Hide or show all inline comments.');
-      this._installKey('A', label, this._onkeyhideall);
+      this._installKey('A', 'diff-vis', label, this._onkeyhideall);
 
       label = pht('Open file in external editor.');
-      this._installKey('\\', label, this._onkeyopeneditor);
+      this._installKey('\\', 'diff-nav', label, this._onkeyopeneditor);
 
     },
 
@@ -282,11 +286,12 @@ JX.install('DiffChangesetList', {
       }
     },
 
-    _installKey: function(key, label, handler) {
+    _installKey: function(key, group, label, handler) {
       handler = JX.bind(this, this._ifawake, handler);
 
       return new JX.KeyboardShortcut(key, label)
         .setHandler(handler)
+        .setGroup(group)
         .register();
     },
 
@@ -299,7 +304,7 @@ JX.install('DiffChangesetList', {
       };
 
       var handler = JX.bind(this, this._onjumpkey, delta, options);
-      return this._installKey(key, label, handler);
+      return this._installKey(key, 'diff-nav', label, handler);
     },
 
     _ontoc: function(manager) {

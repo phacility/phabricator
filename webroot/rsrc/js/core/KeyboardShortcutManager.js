@@ -65,9 +65,11 @@ JX.install('KeyboardShortcutManager', {
     getShortcutDescriptions : function() {
       var desc = [];
       for (var ii = 0; ii < this._shortcuts.length; ii++) {
+        var shortcut = this._shortcuts[ii];
         desc.push({
-          keys : this._shortcuts[ii].getKeys(),
-          description : this._shortcuts[ii].getDescription()
+          keys : shortcut.getKeys(),
+          group: shortcut.getGroup(),
+          description : shortcut.getDescription()
         });
       }
       return desc;
