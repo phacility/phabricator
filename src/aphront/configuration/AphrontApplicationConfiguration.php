@@ -27,6 +27,8 @@ final class AphrontApplicationConfiguration
     $request->setApplicationConfiguration($this);
     $request->setCookiePrefix($cookie_prefix);
 
+    $request->updateEphemeralCookies();
+
     return $request;
   }
 

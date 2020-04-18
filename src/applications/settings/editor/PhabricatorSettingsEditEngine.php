@@ -128,10 +128,6 @@ final class PhabricatorSettingsEditEngine
     return PhabricatorPolicies::POLICY_ADMIN;
   }
 
-  public function getEffectiveObjectEditDoneURI($object) {
-    return parent::getEffectiveObjectViewURI($object).'saved/';
-  }
-
   public function getEffectiveObjectEditCancelURI($object) {
     if (!$object->getUser()) {
       return '/settings/';
@@ -251,6 +247,18 @@ final class PhabricatorSettingsEditEngine
     }
 
     return parent::getValidationExceptionShortMessage($ex, $field);
+  }
+
+  protected function newEditFormHeadContent(
+    PhabricatorEditEnginePageState $state) {
+
+    if ($state->getIsSave()) {
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('Changes saved.'));
+    }
+
+    return null;
   }
 
 }

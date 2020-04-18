@@ -1036,9 +1036,13 @@ abstract class PhabricatorEditEngine
     $fields = $this->buildEditFields($object);
     $template = $object->getApplicationTransactionTemplate();
 
+    $page_state = new PhabricatorEditEnginePageState();
+
     if ($this->getIsCreate()) {
       $cancel_uri = $this->getObjectCreateCancelURI($object);
       $submit_button = $this->getObjectCreateButtonText($object);
+
+      $page_state->setIsCreate(true);
     } else {
       $cancel_uri = $this->getEffectiveObjectEditCancelURI($object);
       $submit_button = $this->getObjectEditButtonText($object);
@@ -1069,6 +1073,8 @@ abstract class PhabricatorEditEngine
 
     $validation_exception = null;
     if ($request->isFormOrHisecPost() && $request->getBool('editEngine')) {
+      $page_state->setIsSubmit(true);
+
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
@@ -1154,6 +1160,8 @@ abstract class PhabricatorEditEngine
 
           $field->setControlError($message);
         }
+
+        $page_state->setIsError(true);
       }
     } else {
       if ($this->getIsCreate()) {
@@ -1252,6 +1260,17 @@ abstract class PhabricatorEditEngine
       $box_header->addActionLink($action_button);
     }
 
+    $request_submit_key = $request->getSubmitKey();
+    $engine_submit_key = $this->getEditEngineSubmitKey();
+
+    if ($request_submit_key === $engine_submit_key) {
+      $page_state->setIsSubmit(true);
+      $page_state->setIsSave(true);
+    }
+
+    $head = $this->newEditFormHeadContent($page_state);
+    $tail = $this->newEditFormTailContent($page_state);
+
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
       ->setHeader($box_header)
@@ -1259,14 +1278,11 @@ abstract class PhabricatorEditEngine
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->appendChild($form);
 
-    // This is fairly questionable, but in use by Settings.
-    if ($request->getURIData('formSaved')) {
-      $box->setFormSaved(true);
-    }
-
     $content = array(
+      $head,
       $box,
       $previews,
+      $tail,
     );
 
     $view = new PHUITwoColumnView();
@@ -1291,12 +1307,32 @@ abstract class PhabricatorEditEngine
     return $page;
   }
 
+  protected function newEditFormHeadContent(
+    PhabricatorEditEnginePageState $state) {
+    return null;
+  }
+
+  protected function newEditFormTailContent(
+    PhabricatorEditEnginePageState $state) {
+    return null;
+  }
+
   protected function newEditResponse(
     AphrontRequest $request,
     $object,
     array $xactions) {
+
+    $submit_cookie = PhabricatorCookies::COOKIE_SUBMIT;
+    $submit_key = $this->getEditEngineSubmitKey();
+
+    $request->setTemporaryCookie($submit_cookie, $submit_key);
+
     return id(new AphrontRedirectResponse())
       ->setURI($this->getEffectiveObjectEditDoneURI($object));
+  }
+
+  private function getEditEngineSubmitKey() {
+    return 'edit-engine/'.$this->getEngineKey();
   }
 
   private function buildEditForm($object, array $fields) {
