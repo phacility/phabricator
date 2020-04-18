@@ -92,15 +92,19 @@ final class PhabricatorEditorURIEngine
     return array(
       '%' => array(
         'name' => pht('Literal Percent Symbol'),
+        'example' => '%',
       ),
       'r' => array(
         'name' => pht('Repository Callsign'),
+        'example' => 'XYZ',
       ),
       'f' => array(
         'name' => pht('File Name'),
+        'example' => pht('path/to/source.c'),
       ),
       'l' => array(
         'name' => pht('Line Number'),
+        'example' => '777',
       ),
     );
   }

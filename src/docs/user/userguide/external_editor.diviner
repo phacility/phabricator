@@ -3,12 +3,14 @@
 
 Setting up an external editor to integrate with Diffusion and Differential.
 
-= Overview =
+Overview
+========
 
 You can configure a URI handler to allow you to open files from Differential
 and Diffusion in your preferred text editor.
 
-= Configuring Editors =
+Configuring Editors
+===================
 
 To configure an external editor, go to {nav Settings > Application Settings >
 External Editor} and set "Editor Link" to a URI pattern (see below). This
@@ -17,15 +19,12 @@ Diffusion.
 
 In general, you'll set this field to something like:
 
-  lang=uri
-  editor://open/?file=%f
+```lang=uri
+editor://open/?file=%f
+```
 
-Some editors support opening multiple files at once when filenames are separated
-by spaces. If your editor supports this feature, set "Edit Multiple Files" to
-"Supported". Otherwise, you can set it to "Not Supported" to disable "Open All"
-buttons in the interface.
-
-== Configuring: TextMate on OS X ==
+Configuring: TextMate on macOS
+==============================
 
 TextMate installs a `txmt://` handler by default, so it's easy to configure
 this feature if you use TextMate.
@@ -40,5 +39,6 @@ example, if you're developing Phabricator, it might look like this:
 
 Then set your "Editor Link" to:
 
-  lang=uri
-  txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l
+```lang=uri
+txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l
+```

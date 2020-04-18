@@ -20,20 +20,23 @@ final class PhabricatorEditorSetting
   protected function getControlInstructions() {
     return pht(
       "Many text editors can be configured as URI handlers for special ".
-      "protocols like `editor://`. If you have such an editor, Phabricator ".
-      "can generate links that you can click to open files locally.".
+      "protocols like `editor://`. If you have installed and configured ".
+      "such an editor, Phabricator can generate links that you can click ".
+      "to open files locally.".
       "\n\n".
-      "These special variables are supported:".
+      "Provide a URI pattern for building external editor URIs in your ".
+      "environment. For example, if you use TextMate on macOS, the pattern ".
+      "for your machine look like this:".
       "\n\n".
-      "| Value | Replaced With |\n".
-      "|-------|---------------|\n".
-      "| `%%f`  | Filename |\n".
-      "| `%%l`  | Line Number |\n".
-      "| `%%r`  | Repository Callsign |\n".
-      "| `%%%%`  | Literal `%%` |\n".
+      "```name=\"Example: TextMate on macOS\"\n".
+      "%s\n".
+      "```\n".
       "\n\n".
       "For complete instructions on editor configuration, ".
-      "see **[[ %s | %s ]]**.",
+      "see **[[ %s | %s ]]**.".
+      "\n\n".
+      "See the tables below for a list of supported variables and protocols.",
+      'txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l',
       PhabricatorEnv::getDoclink('User Guide: Configuring an External Editor'),
       pht('User Guide: Configuring an External Editor'));
   }
