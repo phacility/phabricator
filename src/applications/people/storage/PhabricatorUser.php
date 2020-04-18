@@ -478,19 +478,6 @@ final class PhabricatorUser
 
     $editor = $this->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
 
-    if (is_array($path)) {
-      $multi_key = PhabricatorEditorMultipleSetting::SETTINGKEY;
-      $multiedit = $this->getUserSetting($multi_key);
-      switch ($multiedit) {
-        case PhabricatorEditorMultipleSetting::VALUE_SPACES:
-          $path = implode(' ', $path);
-          break;
-        case PhabricatorEditorMultipleSetting::VALUE_SINGLE:
-        default:
-          return null;
-      }
-    }
-
     if (!strlen($editor)) {
       return null;
     }
