@@ -26,7 +26,7 @@ final class PhabricatorEditorSetting
       "\n\n".
       "Provide a URI pattern for building external editor URIs in your ".
       "environment. For example, if you use TextMate on macOS, the pattern ".
-      "for your machine look like this:".
+      "for your machine may look something like this:".
       "\n\n".
       "```name=\"Example: TextMate on macOS\"\n".
       "%s\n".
@@ -36,7 +36,7 @@ final class PhabricatorEditorSetting
       "see **[[ %s | %s ]]**.".
       "\n\n".
       "See the tables below for a list of supported variables and protocols.",
-      'txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l',
+      'txmt://open/?url=file:///Users/alincoln/editor_links/%n/%f&line=%l',
       PhabricatorEnv::getDoclink('User Guide: Configuring an External Editor'),
       pht('User Guide: Configuring an External Editor'));
   }

@@ -90,14 +90,6 @@ final class PhabricatorEditorURIEngine
 
   public static function getVariableDefinitions() {
     return array(
-      '%' => array(
-        'name' => pht('Literal Percent Symbol'),
-        'example' => '%',
-      ),
-      'r' => array(
-        'name' => pht('Repository Callsign'),
-        'example' => 'XYZ',
-      ),
       'f' => array(
         'name' => pht('File Name'),
         'example' => pht('path/to/source.c'),
@@ -105,6 +97,26 @@ final class PhabricatorEditorURIEngine
       'l' => array(
         'name' => pht('Line Number'),
         'example' => '777',
+      ),
+      'n' => array(
+        'name' => pht('Repository Short Name'),
+        'example' => 'arcanist',
+      ),
+      'd' => array(
+        'name' => pht('Repository ID'),
+        'example' => '42',
+      ),
+      'p' => array(
+        'name' => pht('Repository PHID'),
+        'example' => 'PHID-REPO-abcdefghijklmnopqrst',
+      ),
+      'r' => array(
+        'name' => pht('Repository Callsign'),
+        'example' => 'XYZ',
+      ),
+      '%' => array(
+        'name' => pht('Literal Percent Symbol'),
+        'example' => '%',
       ),
     );
   }
@@ -119,6 +131,9 @@ final class PhabricatorEditorURIEngine
 
     $variables = array(
       'r' => $this->escapeToken($repository->getCallsign()),
+      'n' => $this->escapeToken($repository->getRepositorySlug()),
+      'd' => $this->escapeToken($repository->getID()),
+      'p' => $this->escapeToken($repository->getPHID()),
     );
 
     return $this->newTokensWithVariables($tokens, $variables);
