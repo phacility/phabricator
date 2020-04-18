@@ -252,16 +252,19 @@ final class DifferentialChangesetDetailView extends AphrontView {
   }
 
   private function getEditorURI() {
-    $viewer = $this->getViewer();
-
-    if (!$viewer->isLoggedIn()) {
-      return null;
-    }
-
     $repository = $this->getRepository();
     if (!$repository) {
       return null;
     }
+
+    $viewer = $this->getViewer();
+
+    $link_engine = PhabricatorEditorURIEngine::newForViewer($viewer);
+    if (!$link_engine) {
+      return null;
+    }
+
+    $link_engine->setRepository($repository);
 
     $changeset = $this->getChangeset();
     $diff = $this->getDiff();
@@ -271,7 +274,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
     $line = idx($changeset->getMetadata(), 'line:first', 1);
 
-    return $viewer->loadEditorLink($path, $line, $repository);
+    return $link_engine->getURIForPath($path, $line);
   }
 
   private function getEditorConfigureURI() {

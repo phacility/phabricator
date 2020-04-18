@@ -478,8 +478,9 @@ final class DiffusionBrowseController extends DiffusionController {
     $line = nonempty((int)$drequest->getLine(), 1);
     $buttons = array();
 
-    $editor_link = $user->loadEditorLink($path, $line, $repository);
-    $template = $user->loadEditorLink($path, '%l', $repository);
+    // TODO: Restore these behaviors.
+    $editor_link = null;
+    $template = null;
 
     $buttons[] =
       id(new PHUIButtonView())

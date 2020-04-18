@@ -43,26 +43,9 @@ final class PhabricatorEditorSetting
       return;
     }
 
-    $ok = PhabricatorHelpEditorProtocolController::hasAllowedProtocol($value);
-    if ($ok) {
-      return;
-    }
-
-    $allowed_key = 'uri.allowed-editor-protocols';
-    $allowed_protocols = PhabricatorEnv::getEnvConfig($allowed_key);
-
-    $proto_names = array();
-    foreach (array_keys($allowed_protocols) as $protocol) {
-      $proto_names[] = $protocol.'://';
-    }
-
-    throw new Exception(
-      pht(
-        'Editor link has an invalid or missing protocol. You must '.
-        'use a whitelisted editor protocol from this list: %s. To '.
-        'add protocols, update "%s" in Config.',
-        implode(', ', $proto_names),
-        $allowed_key));
+    id(new PhabricatorEditorURIEngine())
+      ->setPattern($value)
+      ->validatePattern();
   }
 
 }
