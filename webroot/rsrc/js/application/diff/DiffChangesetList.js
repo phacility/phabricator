@@ -462,23 +462,28 @@ JX.install('DiffChangesetList', {
       var pht = this.getTranslations();
       var cursor = this._cursorItem;
 
+      var changeset;
       if (cursor) {
-        if (cursor.type == 'file') {
-          var changeset = cursor.changeset;
-          var editor_uri = changeset.getEditorURI();
-
-          if (editor_uri === null) {
-            this._warnUser(pht('No external editor is configured.'));
-            return;
-          }
-
-          JX.$U(editor_uri).go();
-
-          return;
-        }
+        changeset = cursor.changeset;
       }
 
-      this._warnUser(pht('You must select a file to edit.'));
+      if (!changeset) {
+        changeset = this._getVisibleChangeset();
+      }
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to edit.'));
+        return;
+      }
+
+      var editor_uri = changeset.getEditorURI();
+
+      if (editor_uri === null) {
+        this._warnUser(pht('No external editor is configured.'));
+        return;
+      }
+
+      JX.$U(editor_uri).go();
     },
 
     _onkeycollapse: function() {
