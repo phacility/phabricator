@@ -68,7 +68,7 @@ final class PhabricatorEditorURIEngine
   }
 
   public function getURIForPath($path, $line) {
-    $tokens = $this->getURITokensForRepository();
+    $tokens = $this->getURITokensForRepository($path);
 
     $variables = array(
       'f' => $this->escapeToken($path),
@@ -80,12 +80,14 @@ final class PhabricatorEditorURIEngine
     return $this->newStringFromTokens($tokens);
   }
 
-  public function getURITokensForRepository() {
-    if (!$this->repositoryTokens) {
-      $this->repositoryTokens = $this->newURITokensForRepository();
-    }
+  public function getURITokensForPath($path) {
+    $tokens = $this->getURITokensForRepository($path);
 
-    return $this->repositoryTokens;
+    $variables = array(
+      'f' => $this->escapeToken($path),
+    );
+
+    return $this->newTokensWithVariables($tokens, $variables);
   }
 
   public static function getVariableDefinitions() {
@@ -119,6 +121,14 @@ final class PhabricatorEditorURIEngine
         'example' => '%',
       ),
     );
+  }
+
+  private function getURITokensForRepository() {
+    if (!$this->repositoryTokens) {
+      $this->repositoryTokens = $this->newURITokensForRepository();
+    }
+
+    return $this->repositoryTokens;
   }
 
   private function newURITokensForRepository() {
@@ -258,6 +268,8 @@ final class PhabricatorEditorURIEngine
 
       $last_literal = $key;
     }
+
+    $tokens = array_values($tokens);
 
     return $tokens;
   }
