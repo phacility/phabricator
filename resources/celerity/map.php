@@ -155,6 +155,7 @@ return array(
     'rsrc/css/phui/phui-fontkit.css' => '1ec937e5',
     'rsrc/css/phui/phui-form-view.css' => '01b796c0',
     'rsrc/css/phui/phui-form.css' => '1f177cb7',
+    'rsrc/css/phui/phui-formation-view.css' => 'aec68a01',
     'rsrc/css/phui/phui-head-thing.css' => 'd7f293df',
     'rsrc/css/phui/phui-header-view.css' => '36c86a58',
     'rsrc/css/phui/phui-hovercard.css' => '6ca90fa0',
@@ -519,6 +520,7 @@ return array(
     'rsrc/js/phui/behavior-phui-submenu.js' => 'b5e9bff9',
     'rsrc/js/phui/behavior-phui-tab-group.js' => '242aa08b',
     'rsrc/js/phui/behavior-phui-timer-control.js' => 'f84bcbf4',
+    'rsrc/js/phui/behavior-phuix-formation-view.js' => '1a12beef',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'c68f183f',
     'rsrc/js/phuix/PHUIXActionView.js' => 'aaa08f3b',
     'rsrc/js/phuix/PHUIXAutocomplete.js' => '2fbe234d',
@@ -526,6 +528,9 @@ return array(
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => '7acfd98b',
     'rsrc/js/phuix/PHUIXExample.js' => 'c2c500a7',
     'rsrc/js/phuix/PHUIXFormControl.js' => '38c1f3fb',
+    'rsrc/js/phuix/PHUIXFormationColumnView.js' => '08fc09e9',
+    'rsrc/js/phuix/PHUIXFormationFlankView.js' => '6648270a',
+    'rsrc/js/phuix/PHUIXFormationView.js' => '0113c54c',
     'rsrc/js/phuix/PHUIXIconView.js' => 'a5257c4e',
   ),
   'symbols' => array(
@@ -667,6 +672,7 @@ return array(
     'javelin-behavior-phui-tab-group' => '242aa08b',
     'javelin-behavior-phui-timer-control' => 'f84bcbf4',
     'javelin-behavior-phuix-example' => 'c2c500a7',
+    'javelin-behavior-phuix-formation-view' => '1a12beef',
     'javelin-behavior-policy-control' => '0eaa33a9',
     'javelin-behavior-policy-rule-editor' => '9347f172',
     'javelin-behavior-project-boards' => '58cb6a88',
@@ -844,6 +850,7 @@ return array(
     'phui-fontkit-css' => '1ec937e5',
     'phui-form-css' => '1f177cb7',
     'phui-form-view-css' => '01b796c0',
+    'phui-formation-view-css' => 'aec68a01',
     'phui-head-thing-view-css' => 'd7f293df',
     'phui-header-view-css' => '36c86a58',
     'phui-hovercard' => '074f0783',
@@ -886,6 +893,9 @@ return array(
     'phuix-button-view' => '55a24e84',
     'phuix-dropdown-menu' => '7acfd98b',
     'phuix-form-control-view' => '38c1f3fb',
+    'phuix-formation-column-view' => '08fc09e9',
+    'phuix-formation-flank-view' => '6648270a',
+    'phuix-formation-view' => '0113c54c',
     'phuix-icon-view' => 'a5257c4e',
     'policy-css' => 'ceb56a08',
     'policy-edit-css' => '8794e2ed',
@@ -912,6 +922,10 @@ return array(
     'unhandled-exception-css' => '9ecfc00d',
   ),
   'requires' => array(
+    '0113c54c' => array(
+      'javelin-install',
+      'javelin-dom',
+    ),
     '0116d3e8' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -984,6 +998,10 @@ return array(
       'javelin-util',
       'javelin-magical-init',
     ),
+    '08fc09e9' => array(
+      'javelin-install',
+      'javelin-dom',
+    ),
     '0922e81d' => array(
       'herald-rule-editor',
       'javelin-behavior',
@@ -1035,6 +1053,12 @@ return array(
     ),
     '16e97ebc' => array(
       'javelin-dom',
+    ),
+    '1a12beef' => array(
+      'javelin-behavior',
+      'phuix-formation-view',
+      'phuix-formation-column-view',
+      'phuix-formation-flank-view',
     ),
     '1a844c06' => array(
       'javelin-install',
@@ -1518,6 +1542,10 @@ return array(
     '66365ee2' => array(
       'javelin-behavior',
       'javelin-stratcom',
+      'javelin-dom',
+    ),
+    '6648270a' => array(
+      'javelin-install',
       'javelin-dom',
     ),
     '6a1583a8' => array(
