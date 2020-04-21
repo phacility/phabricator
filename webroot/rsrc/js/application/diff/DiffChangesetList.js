@@ -90,7 +90,8 @@ JX.install('DiffChangesetList', {
     translations: null,
     inlineURI: null,
     inlineListURI: null,
-    isStandalone: false
+    isStandalone: false,
+    formationView: null
   },
 
   members: {
@@ -142,6 +143,8 @@ JX.install('DiffChangesetList', {
 
       this._bannerChangeset = null;
       this._redrawBanner();
+
+      this._redrawFiletree();
 
       if (this._initialized) {
         return;
@@ -1953,7 +1956,31 @@ JX.install('DiffChangesetList', {
       }
 
       return null;
+    },
+
+    _redrawFiletree : function() {
+      var formation = this.getFormationView();
+
+      if (!formation) {
+        return;
+      }
+
+      var filetree = formation.getColumn(0);
+      var flank = filetree.getFlank();
+
+      var flank_body = flank.getBodyNode();
+
+      var items = [];
+      for (var ii = 0; ii < this._changesets.length; ii++) {
+        var changeset = this._changesets[ii];
+
+        var node = JX.$N('div', {}, changeset.getDisplayPath());
+        items.push(node);
+      }
+
+      JX.DOM.setContent(flank_body, items);
     }
+
   }
 
 });

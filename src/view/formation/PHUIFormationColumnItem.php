@@ -73,6 +73,8 @@ final class PHUIFormationColumnItem
   }
 
   public function newClientProperties() {
+    $column = $this->getColumn();
+
     $expander_id = null;
 
     $expander = $this->getExpander();
@@ -80,17 +82,23 @@ final class PHUIFormationColumnItem
       $expander_id = $expander->getID();
     }
 
-
     $resizer_details = null;
     $resizer_item = $this->getResizerItem();
     if ($resizer_item) {
+      $visible_key = $column->getVisibleSettingKey();
+      $width_key = $column->getWidthSettingKey();
+      $min_width = $column->getMinimumWidth();
+      $max_width = $column->getMaximumWidth();
+
       $resizer_details = array(
         'itemID' => $resizer_item->getID(),
         'controlID' => $resizer_item->getColumn()->getID(),
+        'widthKey' => $width_key,
+        'visibleKey' => $visible_key,
+        'minimumWidth' => $min_width,
+        'maximumWidth' => $max_width,
       );
     }
-
-    $column = $this->getColumn();
 
     $width = $column->getWidth();
     if ($width !== null) {

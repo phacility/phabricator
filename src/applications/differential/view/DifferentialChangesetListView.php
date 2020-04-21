@@ -24,6 +24,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
   private $title;
   private $parser;
+  private $formationView;
 
   public function setParser(DifferentialChangesetParser $parser) {
     $this->parser = $parser;
@@ -146,6 +147,15 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function setFormationView(PHUIFormationView $formation_view) {
+    $this->formationView = $formation_view;
+    return $this;
+  }
+
+  public function getFormationView() {
+    return $this->formationView;
+  }
+
   public function render() {
     $viewer = $this->getViewer();
 
@@ -232,10 +242,17 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $this->requireResource('aphront-tooltip-css');
 
+    $formation_id = null;
+    $formation_view = $this->getFormationView();
+    if ($formation_view) {
+      $formation_id = $formation_view->getID();
+    }
+
     $this->initBehavior(
       'differential-populate',
       array(
       'changesetViewIDs' => $ids,
+      'formationViewID' => $formation_id,
       'inlineURI' => $this->inlineURI,
       'inlineListURI' => $this->inlineListURI,
       'isStandalone' => $this->getIsStandalone(),

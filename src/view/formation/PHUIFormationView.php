@@ -1,7 +1,7 @@
 <?php
 
 final class PHUIFormationView
-  extends AphrontView {
+  extends AphrontAutoIDView {
 
   private $items = array();
 
@@ -62,29 +62,24 @@ final class PHUIFormationView
         ));
     }
 
-    $formation_id = celerity_generate_unique_node_id();
+    $phuix_items = array();
+    foreach ($items as $item) {
+      $phuix_items[] = $item->newClientProperties();
+    }
 
     $table_row = phutil_tag('tr', array(), $cells);
     $table_body = phutil_tag('tbody', array(), $table_row);
-    $table = phutil_tag(
+    $table = javelin_tag(
       'table',
       array(
+        'id' => $this->getID(),
         'class' => 'phui-formation-view',
-        'id' => $formation_id,
+        'sigil' => 'phuix-formation-view',
+        'meta' => array(
+          'items' => $phuix_items,
+        ),
       ),
       $table_body);
-
-    $phuix_columns = array();
-    foreach ($items as $item) {
-      $phuix_columns[] = $item->newClientProperties();
-    }
-
-    Javelin::initBehavior(
-      'phuix-formation-view',
-      array(
-        'nodeID' => $formation_id,
-        'columns' => $phuix_columns,
-      ));
 
     return $table;
   }

@@ -143,3 +143,9 @@
   bottom: 0;
   width: 100%;
 }
+
+.phui-flank-loading {
+  color: {$lightgreytext};
+  text-align: center;
+  margin: 16px;
+}

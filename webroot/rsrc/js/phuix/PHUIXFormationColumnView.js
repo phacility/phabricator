@@ -17,6 +17,10 @@ JX.install('PHUIXFormationColumnView', {
     resizerItem: null,
     resizerControl: null,
     width: null,
+    widthSettingKey: null,
+    visibleSettingKey: null,
+    minimumWidth: null,
+    maximumWidth: null,
     flank: null
   },
 
@@ -83,9 +87,15 @@ JX.install('PHUIXFormationColumnView', {
         width = this.getWidth() + dx;
       }
 
-      // TODO: Make these configurable?
-      width = Math.max(width, 150);
-      width = Math.min(width, 512);
+      var min_width = this.getMinimumWidth();
+      if (min_width) {
+        width = Math.max(width, min_width);
+      }
+
+      var max_width = this.getMaximumWidth();
+      if (max_width) {
+        width = Math.min(width, max_width);
+      }
 
       this._resizingWidth = width;
 
@@ -114,30 +124,35 @@ JX.install('PHUIXFormationColumnView', {
 
       this.setWidth(this._resizingWidth);
 
-      JX.log('new width is ' + this.getWidth());
-
       JX.DOM.alterClass(document.body, 'jx-drag-col', false);
       this._dragging = null;
 
-      // TODO: Save new width setting.
-
-    // new JX.Request('/settings/adjust/', JX.bag)
-    //   .setData(
-    //     {
-    //       key: 'filetree.width',
-    //       value: get_width()
-    //     })
-    //   .send();
-
+      var width_key = this.getWidthSettingKey();
+      if (width_key) {
+        this._adjustSetting(width_key, this.getWidth());
+      }
     },
 
     _setVisibility: function(visible, e) {
       e.kill();
 
-      // TODO: Save the visibility setting.
-
       this.setIsVisible(visible);
       this.repaint();
+
+      var visible_key = this.getVisibleSettingKey();
+      if (visible_key) {
+        this._adjustSetting(visible_key, visible ? 1 : 0);
+      }
+    },
+
+    _adjustSetting: function(key, value) {
+      new JX.Request('/settings/adjust/', JX.bag)
+        .setData(
+          {
+            key: key,
+            value: value
+          })
+        .send();
     },
 
     repaint: function() {

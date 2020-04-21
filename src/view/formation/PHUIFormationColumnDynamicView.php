@@ -6,6 +6,10 @@ abstract class PHUIFormationColumnDynamicView
   private $isVisible = true;
   private $isResizable;
   private $width;
+  private $widthSettingKey;
+  private $visibleSettingKey;
+  private $minimumWidth;
+  private $maximumWidth;
 
   public function setIsVisible($is_visible) {
     $this->isVisible = $is_visible;
@@ -32,6 +36,42 @@ abstract class PHUIFormationColumnDynamicView
 
   public function getWidth() {
     return $this->width;
+  }
+
+  public function setWidthSettingKey($width_setting_key) {
+    $this->widthSettingKey = $width_setting_key;
+    return $this;
+  }
+
+  public function getWidthSettingKey() {
+    return $this->widthSettingKey;
+  }
+
+  public function setVisibleSettingKey($visible_setting_key) {
+    $this->visibleSettingKey = $visible_setting_key;
+    return $this;
+  }
+
+  public function getVisibleSettingKey() {
+    return $this->visibleSettingKey;
+  }
+
+  public function setMinimumWidth($minimum_width) {
+    $this->minimumWidth = $minimum_width;
+    return $this;
+  }
+
+  public function getMinimumWidth() {
+    return $this->minimumWidth;
+  }
+
+  public function setMaximumWidth($maximum_width) {
+    $this->maximumWidth = $maximum_width;
+    return $this;
+  }
+
+  public function getMaximumWidth() {
+    return $this->maximumWidth;
   }
 
 }

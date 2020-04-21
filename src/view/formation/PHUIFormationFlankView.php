@@ -99,7 +99,7 @@ final class PHUIFormationFlankView
     $body_id = $this->getBodyID();
     $tail_id = $this->getTailID();
 
-    $head_content = phutil_tag(
+    $header = phutil_tag(
       'div',
       array(
         'class' => 'phui-flank-header',
@@ -128,21 +128,24 @@ final class PHUIFormationFlankView
             'id' => $head_id,
             'class' => 'phui-flank-view-head',
           ),
-          $head_content),
+          array(
+            $header,
+            $this->head,
+          )),
         phutil_tag(
           'div',
           array(
             'id' => $body_id,
             'class' => 'phui-flank-view-body',
           ),
-          $this->getBody()),
+          $this->body),
         phutil_tag(
           'div',
           array(
             'id' => $tail_id,
             'class' => 'phui-flank-view-tail',
           ),
-          $this->getTail()),
+          $this->tail),
       ));
 
     return $content;

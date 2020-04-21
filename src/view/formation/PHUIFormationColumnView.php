@@ -30,6 +30,22 @@ abstract class PHUIFormationColumnView
     return false;
   }
 
+  public function getVisibleSettingKey() {
+    return null;
+  }
+
+  public function getWidthSettingKey() {
+    return null;
+  }
+
+  public function getMinimumWidth() {
+    return null;
+  }
+
+  public function getMaximumWidth() {
+    return null;
+  }
+
   public function newClientProperties() {
     return null;
   }
