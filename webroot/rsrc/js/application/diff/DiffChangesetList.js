@@ -2,6 +2,7 @@
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
  *           phuix-button-view
+ *           phabricator-diff-tree-view
  * @javelin
  */
 
@@ -638,6 +639,25 @@ JX.install('DiffChangesetList', {
         cursor: cursor,
         items: items
       };
+    },
+
+    selectChangeset: function(changeset, scroll) {
+      var items = this._getSelectableItems();
+
+      var cursor = null;
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
+        if (changeset === item.target) {
+          cursor = ii;
+          break;
+        }
+      }
+
+      if (cursor !== null) {
+        this._setSelectionState(items[cursor], true);
+      }
+
+      return this;
     },
 
     _setSelectionState: function(item, scroll) {
@@ -1467,10 +1487,18 @@ JX.install('DiffChangesetList', {
 
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
+      var tree = this._getTreeView();
+      var formation = this.getFormationView();
 
       if (!changeset) {
         this._bannerChangeset = null;
         JX.DOM.remove(node);
+        tree.setSelectedPath(null);
+
+        if (formation) {
+          formation.repaint();
+        }
+
         return;
       }
 
@@ -1480,6 +1508,14 @@ JX.install('DiffChangesetList', {
         return;
       }
       this._bannerChangeset = changeset;
+
+      var paths = tree.getPaths();
+      for (var ii = 0; ii < paths.length; ii++) {
+        var path = paths[ii];
+        if (path.getChangeset() === changeset) {
+          tree.setSelectedPath(path);
+        }
+      }
 
       var inlines = this._getInlinesByType();
 
@@ -1586,6 +1622,10 @@ JX.install('DiffChangesetList', {
       JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+
+      if (formation) {
+        formation.repaint();
+      }
     },
 
     _getInlinesByType: function() {
@@ -1958,6 +1998,20 @@ JX.install('DiffChangesetList', {
       return null;
     },
 
+    _getTreeView: function() {
+      if (!this._treeView) {
+        var tree = new JX.DiffTreeView();
+
+        for (var ii = 0; ii < this._changesets.length; ii++) {
+          var changeset = this._changesets[ii];
+          tree.addPath(changeset.getPathView());
+        }
+
+        this._treeView = tree;
+      }
+      return this._treeView;
+    },
+
     _redrawFiletree : function() {
       var formation = this.getFormationView();
 
@@ -1970,15 +2024,8 @@ JX.install('DiffChangesetList', {
 
       var flank_body = flank.getBodyNode();
 
-      var items = [];
-      for (var ii = 0; ii < this._changesets.length; ii++) {
-        var changeset = this._changesets[ii];
-
-        var node = JX.$N('div', {}, changeset.getDisplayPath());
-        items.push(node);
-      }
-
-      JX.DOM.setContent(flank_body, items);
+      var tree = this._getTreeView();
+      JX.DOM.setContent(flank_body, tree.getNode());
     }
 
   }

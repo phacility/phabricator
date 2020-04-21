@@ -178,6 +178,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
       $changeset_state = null;
     }
 
+    $path_parts = trim($display_filename, '/');
+    $path_parts = explode('/', $path_parts);
+
     return javelin_tag(
       'div',
       array(
@@ -189,9 +192,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
           'displayPath' => hsprintf('%s', $display_parts),
-          'path' => $display_filename,
           'icon' => $display_icon,
           'treeNodeID' => 'tree-node-'.$changeset->getAnchorName(),
+          'pathParts' => $path_parts,
 
           'editorURI' => $this->getEditorURI(),
           'editorConfigureURI' => $this->getEditorConfigureURI(),

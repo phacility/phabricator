@@ -9,9 +9,9 @@
  *           javelin-behavior-device
  *           javelin-vector
  *           phabricator-diff-inline
+ *           phabricator-diff-path-view
  * @javelin
  */
-
 
 JX.install('DiffChangeset', {
 
@@ -29,6 +29,7 @@ JX.install('DiffChangeset', {
     this._rightID = data.right;
 
     this._displayPath = JX.$H(data.displayPath);
+    this._pathParts = data.pathParts;
     this._icon = data.icon;
 
     this._editorURI = data.editorURI;
@@ -70,6 +71,7 @@ JX.install('DiffChangeset', {
 
     _editorURI: null,
     _editorConfigureURI: null,
+    _pathView: null,
 
     getEditorURI: function() {
       return this._editorURI;
@@ -891,6 +893,21 @@ JX.install('DiffChangeset', {
     _onundo: function(e) {
       e.kill();
       this.toggleVisibility();
+    },
+
+    getPathView: function() {
+      if (!this._pathView) {
+        this._pathView = new JX.DiffPathView()
+          .setChangeset(this)
+          .setPath(this._pathParts);
+      }
+
+      return this._pathView;
+    },
+
+    select: function(scroll) {
+      this.getChangesetList().selectChangeset(this, scroll);
+      return this;
     }
   },
 
