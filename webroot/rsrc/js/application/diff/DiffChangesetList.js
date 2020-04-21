@@ -1177,14 +1177,15 @@ JX.install('DiffChangesetList', {
       // space between the focused element and the outline.
       var p = JX.Vector.getPos(node);
       var s = JX.Vector.getAggregateScrollForNode(node);
+      var d = JX.Vector.getDim(node);
 
-      p.add(s).add(-4, -4).setPos(reticle);
+      p.add(s).add(d.x + 1, 0).setPos(reticle);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
         .add(-p.x, -p.y)
-        .add(JX.Vector.getDim(extended_node))
-        .add(8, 8)
+        .add(0, JX.Vector.getDim(extended_node).y)
+        .add(10, 0)
         .setDim(reticle);
 
       JX.DOM.getContentFrame().appendChild(reticle);

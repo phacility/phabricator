@@ -67,7 +67,6 @@ JX.install('DiffChangeset', {
 
     _changesetList: null,
     _icon: null,
-    _treeNodeID: null,
 
     _editorURI: null,
     _editorConfigureURI: null,
@@ -770,13 +769,6 @@ JX.install('DiffChangeset', {
     },
 
     redrawFileTree: function() {
-      var tree;
-      try {
-        tree = JX.$(this._treeNodeID);
-      } catch (e) {
-        return;
-      }
-
       var inlines = this._inlines;
       var done = [];
       var undone = [];
@@ -833,9 +825,12 @@ JX.install('DiffChangeset', {
         is_completed = false;
       }
 
-      JX.DOM.setContent(tree, hint);
-      JX.DOM.alterClass(tree, 'filetree-comments-visible', is_visible);
-      JX.DOM.alterClass(tree, 'filetree-comments-completed', is_completed);
+      var node = this.getPathView().getInlineNode();
+
+      JX.DOM.setContent(node, hint);
+
+      JX.DOM.alterClass(node, 'diff-tree-path-inlines-visible', is_visible);
+      JX.DOM.alterClass(node, 'diff-tree-path-inlines-completed', is_completed);
     },
 
     toggleVisibility: function() {

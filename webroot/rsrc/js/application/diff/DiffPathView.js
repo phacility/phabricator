@@ -20,6 +20,7 @@ JX.install('DiffPathView', {
     _indentNode: null,
     _pathNode: null,
     _changeset: null,
+    _inlineNode: null,
 
     getNode: function() {
       if (!this._node) {
@@ -71,7 +72,7 @@ JX.install('DiffPathView', {
     setDepth: function(depth) {
       this._depth = depth;
 
-      this._getIndentNode().style.marginLeft = (8 * this._depth) + 'px';
+      this._getIndentNode().style.marginLeft = (6 * this._depth) + 'px';
 
       return this;
     },
@@ -109,12 +110,17 @@ JX.install('DiffPathView', {
 
     _getIndentNode: function() {
       if (!this._indentNode) {
+        var attrs = {
+          className: 'diff-tree-path-indent'
+        };
+
         var content = [
+          this.getInlineNode(),
           this._getIconNode(),
           this._getPathNode(),
         ];
 
-        this._indentNode = JX.$N('div', {}, content);
+        this._indentNode = JX.$N('div', attrs, content);
       }
 
       return this._indentNode;
@@ -138,6 +144,16 @@ JX.install('DiffPathView', {
         this._iconNode = JX.$N('div', attrs, this.getIcon().getNode());
       }
       return this._iconNode;
+    },
+
+    getInlineNode: function() {
+      if (!this._inlineNode) {
+        var attrs = {
+          className: 'diff-tree-path-inlines',
+        };
+        this._inlineNode = JX.$N('div', attrs, '-');
+      }
+      return this._inlineNode;
     }
 
   }

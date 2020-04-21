@@ -81,10 +81,13 @@ body.white-background {
 }
 
 .keyboard-focus-focus-reticle {
-  background: rgba(255, 255, 211, 0.15);
   position: absolute;
-  border: 1px solid {$yellow};
-  pointer-events: none;
+
+  box-sizing: border-box;
+  border-width: 0 6px 0 0;
+  border-style: solid;
+  border-color: {$yellow};
+  background: {$lightyellow};
 }
 
 a.handle-status-closed {

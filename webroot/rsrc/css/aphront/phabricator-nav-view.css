@@ -2,19 +2,11 @@
  * @provides phabricator-nav-view-css
  */
 
-.jx-drag-col {
-  cursor: col-resize;
-}
-
-.device-desktop .has-closed-nav div.phabricator-nav-local,
-.device-desktop .has-closed-nav div.phabricator-nav-drag,
-.device .phui-navigation-shell div.phabricator-nav-local,
-.device .phui-navigation-shell div.phabricator-nav-drag {
+.device .phui-navigation-shell div.phabricator-nav-local {
   display: none;
 }
 
-.device-desktop .has-local-nav .phabricator-nav-local,
-.device-desktop .has-local-nav .phabricator-nav-drag {
+.device-desktop .has-local-nav .phabricator-nav-local {
   display: block;
 }
 
@@ -40,53 +32,9 @@
     width: auto;
 }
 
-.phabricator-nav-drag {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 310px;
-  width: 7px;
-
-  cursor: col-resize;
-  background: #f5f5f5;
-  border-style: solid;
-  border-width: 0 1px 0 1px;
-  border-color: #fff #999c9e #fff #999c9e;
-
-  box-shadow: inset -1px 0px 1px rgba({$alphablack}, 0.15);
-
-  background-image: url(/rsrc/image/divot.png);
-  background-position: center;
-  background-repeat: no-repeat;
-}
 
 .phabricator-nav-content {
   overflow: hidden;
-}
-
-.device-desktop .phabricator-standard-page-body .has-drag-nav
-  .phabricator-nav-content {
-  margin-left: 317px;
-}
-
-.device-desktop .phabricator-standard-page-body .has-drag-nav
-  .phabricator-nav-local {
-    max-width: none;
-}
-
-.has-drag-nav ul.phui-list-view {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
-  width: 310px;
-  padding: 0;
-
-  /* See PHI568. If we don't paint the background explicitly, the content can
-     render underneath it when scrolled horizontally. */
-  background: {$page.background};
 }
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-content {

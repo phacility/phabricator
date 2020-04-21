@@ -54,8 +54,6 @@ return array(
     'javelin-behavior-aphlict-dropdown',
     'javelin-behavior-history-install',
     'javelin-behavior-phabricator-gesture',
-    'javelin-behavior-phabricator-active-nav',
-    'javelin-behavior-phabricator-nav',
     'javelin-behavior-phabricator-remarkup-assist',
     'phabricator-textareautils',
     'phabricator-file-upload',
@@ -187,7 +185,6 @@ return array(
     'phabricator-content-source-view-css',
     'inline-comment-summary-css',
     'phui-inline-comment-view-css',
-    'phabricator-filetree-view-css',
   ),
   'differential.pkg.js' => array(
     'phabricator-drag-and-drop-file-upload',

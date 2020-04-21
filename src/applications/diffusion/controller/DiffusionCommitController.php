@@ -457,26 +457,10 @@ final class DiffusionCommitController extends DiffusionController {
       $commit,
       $timeline);
 
-    $filetree_on = $viewer->compareUserSetting(
-      PhabricatorShowFiletreeSetting::SETTINGKEY,
-      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
-
-    $nav = null;
-    if ($show_changesets && $filetree_on) {
-      $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
-      $collapsed = $viewer->getUserSetting($pref_collapse);
-
-      $pref_width = PhabricatorFiletreeWidthSetting::SETTINGKEY;
-      $width = $viewer->getUserSetting($pref_width);
-
-      $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle($commit->getDisplayName())
-        ->setBaseURI(new PhutilURI($commit->getURI()))
-        ->build($changesets)
-        ->setCrumbs($crumbs)
-        ->setCollapsed((bool)$collapsed)
-        ->setWidth((int)$width);
-    }
+    $filetree = id(new DifferentialFileTreeEngine())
+      ->setViewer($viewer)
+      ->setChangesets($changesets)
+      ->setDisabled(!$show_changesets);
 
     $description_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Description'))
@@ -509,18 +493,20 @@ final class DiffusionCommitController extends DiffusionController {
           $add_comment,
         ));
 
+    $main_content = array(
+      $crumbs,
+      $view,
+    );
+
+    $main_content = $filetree->newView($main_content);
+    if (!$filetree->getDisabled()) {
+      $change_list->setFormationView($main_content);
+    }
+
     $page = $this->newPage()
       ->setTitle($commit->getDisplayName())
-      ->setCrumbs($crumbs)
       ->setPageObjectPHIDS(array($commit->getPHID()))
-      ->appendChild(
-        array(
-          $view,
-      ));
-
-    if ($nav) {
-      $page->setNavigation($nav);
-    }
+      ->appendChild($main_content);
 
     return $page;
 
