@@ -287,7 +287,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
       return null;
     }
 
-    return '/settings/panel/display/';
+    return '/settings/panel/editor/';
   }
 
 }

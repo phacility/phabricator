@@ -135,7 +135,14 @@ JX.install('PHUIXFormationColumnView', {
 
     _setVisibility: function(visible, e) {
       e.kill();
+      this.setVisibility(visible);
+    },
 
+    toggleVisibility: function() {
+      return this.setVisibility(!this.getIsVisible());
+    },
+
+    setVisibility: function(visible) {
       this.setIsVisible(visible);
       this.repaint();
 
@@ -143,6 +150,8 @@ JX.install('PHUIXFormationColumnView', {
       if (visible_key) {
         this._adjustSetting(visible_key, visible ? 1 : 0);
       }
+
+      return this;
     },
 
     _adjustSetting: function(key, value) {

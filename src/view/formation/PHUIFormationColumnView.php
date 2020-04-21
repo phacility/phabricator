@@ -50,4 +50,8 @@ abstract class PHUIFormationColumnView
     return null;
   }
 
+  public function getExpanderTooltip() {
+    return null;
+  }
+
 }

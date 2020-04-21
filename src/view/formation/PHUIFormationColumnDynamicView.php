@@ -10,6 +10,16 @@ abstract class PHUIFormationColumnDynamicView
   private $visibleSettingKey;
   private $minimumWidth;
   private $maximumWidth;
+  private $expanderTooltip;
+
+  public function setExpanderTooltip($expander_tooltip) {
+    $this->expanderTooltip = $expander_tooltip;
+    return $this;
+  }
+
+  public function getExpanderTooltip() {
+    return $this->expanderTooltip;
+  }
 
   public function setIsVisible($is_visible) {
     $this->isVisible = $is_visible;

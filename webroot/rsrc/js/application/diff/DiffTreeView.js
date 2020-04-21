@@ -21,10 +21,15 @@ JX.install('DiffTreeView', {
     _dirty: false,
     _paths: null,
     _selectedPath: null,
+    _focusedPath: null,
 
     getNode: function() {
       if (!this._node) {
-        this._node = JX.$N('ul');
+        var attrs = {
+          className: 'diff-tree-view'
+        };
+
+        this._node = JX.$N('ul', attrs);
       }
 
       if (this._dirty) {
@@ -64,6 +69,21 @@ JX.install('DiffTreeView', {
       return this;
     },
 
+    setFocusedPath: function(path) {
+      if (this._focusedPath) {
+        this._focusedPath.setIsFocused(false);
+        this._focusedPath = null;
+      }
+
+      if (path) {
+        path.setIsFocused(true);
+      }
+
+      this._focusedPath = path;
+
+      return this;
+    },
+
     redraw: function() {
       if (!this._dirty) {
         return;
@@ -83,6 +103,10 @@ JX.install('DiffTreeView', {
         if (!path) {
           path = new JX.DiffPathView()
             .setPath(tree.parts);
+
+          path.getIcon()
+            .setIcon('fa-folder-open-o');
+
           tree.pathObject = path;
         }
 

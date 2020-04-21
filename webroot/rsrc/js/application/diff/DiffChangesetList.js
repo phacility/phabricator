@@ -194,6 +194,13 @@ JX.install('DiffChangesetList', {
         'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
+      var formation = this.getFormationView();
+      if (formation) {
+        var filetree = formation.getColumn(0);
+        var toggletree = JX.bind(filetree, filetree.toggleVisibility);
+        this._installKey('f', 'diff-vis', label, toggletree);
+      }
+
       if (!standalone) {
         label = pht('Hide or show the current file.');
         this._installKey('h', 'diff-vis', label, this._onkeytogglefile);
@@ -683,6 +690,13 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var tree = this._getTreeView();
+      if (cursor.changeset) {
+        tree.setSelectedPath(cursor.changeset.getPathView());
+      } else {
+        tree.setSelectedPath(null);
+      }
+
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
       if (scroll) {
@@ -1139,6 +1153,11 @@ JX.install('DiffChangesetList', {
     },
 
     setFocus: function(node, extended_node) {
+      if (!node) {
+        var tree = this._getTreeView();
+        tree.setSelectedPath(null);
+      }
+
       this._focusStart = node;
       this._focusEnd = extended_node;
       this._redrawFocus();
@@ -1493,7 +1512,7 @@ JX.install('DiffChangesetList', {
       if (!changeset) {
         this._bannerChangeset = null;
         JX.DOM.remove(node);
-        tree.setSelectedPath(null);
+        tree.setFocusedPath(null);
 
         if (formation) {
           formation.repaint();
@@ -1513,7 +1532,7 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < paths.length; ii++) {
         var path = paths[ii];
         if (path.getChangeset() === changeset) {
-          tree.setSelectedPath(path);
+          tree.setFocusedPath(path);
         }
       }
 

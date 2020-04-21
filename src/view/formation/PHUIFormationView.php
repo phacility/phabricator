@@ -167,14 +167,19 @@ final class PHUIFormationView
   private function generateExpanders(array $items) {
     foreach ($items as $item) {
       $control_item = $item->getControlItem();
-      if ($control_item) {
-        $expander = $this->newColumnExpanderView();
-
-        $expander->setColumnItem($item);
-        $item->setExpander($expander);
-
-        $control_item->appendExpander($expander);
+      if (!$control_item) {
+        continue;
       }
+
+      $expander = $this->newColumnExpanderView();
+
+      $tip = $item->getColumn()->getExpanderTooltip();
+      $expander->setTooltip($tip);
+
+      $expander->setColumnItem($item);
+      $item->setExpander($expander);
+
+      $control_item->appendExpander($expander);
     }
 
     return $items;

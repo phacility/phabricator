@@ -43,13 +43,15 @@ final class DifferentialFileTreeEngine
       return $content;
     }
 
+    require_celerity_resource('diff-tree-view-css');
+
     $width = $this->getWidth();
     $is_visible = $this->getIsVisible();
 
     $formation_view = new PHUIFormationView();
 
     $flank_view = $formation_view->newFlankColumn()
-      ->setHeaderText(pht('Affected Paths'))
+      ->setHeaderText(pht('Paths'))
       ->setIsResizable(true)
       ->setIsFixed(true)
       ->setIsVisible($is_visible)
@@ -60,45 +62,34 @@ final class DifferentialFileTreeEngine
     $viewer = $this->getViewer();
     if ($viewer->isLoggedIn()) {
       $flank_view
+        ->setExpanderTooltip(pht('Show Paths Panel'))
         ->setVisibleSettingKey($this->getVisibleSettingKey())
         ->setWidthSettingKey($this->getWidthSettingKey());
     }
 
-    $flank_view->setHead(
-      array(
-        phutil_tag('div', array(),
-          array(
-            id(new PHUIIconView())->setIcon('fa-list'),
-            pht('Table of Contents'),
-            '[t]',
-          )),
-      ));
+    $head_view = id(new PHUIListView())
+      ->addMenuItem(
+        id(new PHUIListItemView())
+          ->setIcon('fa-list')
+          ->setName(pht('Table of Contents'))
+          ->setKeyCommand('t')
+          ->setHref('#'));
+    $flank_view->setHead($head_view);
 
-    $flank_view->setBody(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-flank-loading',
-        ),
-        pht('Loading...')));
-
-    $flank_view->setTail(
-      array(
-        phutil_tag('div', array(),
-          array(
-            id(new PHUIIconView())->setIcon('fa-chevron-left'),
-            pht('Hide Panel'),
-            '[f]',
-          )),
-        phutil_tag(
-          'div',
-          array(),
-          array(
-            id(new PHUIIconView())->setIcon('fa-keyboard-o'),
-            pht('Keyboard Reference'),
-            '[?]',
-          )),
-      ));
+    $tail_view = id(new PHUIListView())
+      ->addMenuItem(
+        id(new PHUIListItemView())
+          ->setIcon('fa-chevron-left')
+          ->setName(pht('Hide Panel'))
+          ->setKeyCommand('f')
+          ->setHref('#'))
+      ->addMenuItem(
+        id(new PHUIListItemView())
+          ->setIcon('fa-keyboard-o')
+          ->setName(pht('Keyboard Reference'))
+          ->setKeyCommand('?')
+          ->setHref('#'));
+    $flank_view->setTail($tail_view);
 
     $main_column = $formation_view->newContentColumn()
       ->appendChild($content);

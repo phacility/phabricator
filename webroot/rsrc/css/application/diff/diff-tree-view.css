@@ -1,0 +1,47 @@
+/**
+ * @provides diff-tree-view-css
+ */
+
+.diff-tree-view {
+  margin: 4px;
+}
+
+.diff-tree-path {
+  position: relative;
+  height: 20px;
+  color: {$greytext};
+  line-height: 20px;
+}
+
+.diff-tree-path-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+
+.diff-tree-path-name {
+  margin-left: 24px;
+  margin-right: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diff-tree-path-changeset {
+  cursor: pointer;
+  color: {$darkbluetext};
+}
+
+.diff-tree-path-focused {
+  background: {$darkgreybackground};
+}
+
+.diff-tree-path-selected {
+  background: {$yellow};
+}
+
+.device-desktop .diff-tree-path-changeset:hover {
+  background: {$lightblueborder};
+  transition: 0.1s;
+}

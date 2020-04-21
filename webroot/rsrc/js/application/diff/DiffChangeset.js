@@ -897,9 +897,14 @@ JX.install('DiffChangeset', {
 
     getPathView: function() {
       if (!this._pathView) {
-        this._pathView = new JX.DiffPathView()
+        var view = new JX.DiffPathView()
           .setChangeset(this)
           .setPath(this._pathParts);
+
+        view.getIcon()
+          .setIcon(this.getIcon());
+
+        this._pathView = view;
       }
 
       return this._pathView;

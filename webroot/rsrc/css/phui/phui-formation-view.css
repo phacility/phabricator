@@ -54,7 +54,7 @@
 
 .phui-flank-header {
   padding: 8px;
-  background: {$greybackground};
+  background: {$bluebackground};
   border-bottom: 1px solid {$lightgreyborder};
 }
 
@@ -144,8 +144,40 @@
   width: 100%;
 }
 
-.phui-flank-loading {
-  color: {$lightgreytext};
+.phui-flank-view .phui-list-view {
+  margin: 4px;
+}
+
+.phui-flank-view .phui-list-item-view {
+  height: 20px;
+  padding: 4px 0;
+}
+
+.phui-flank-view .phui-list-item-view .phui-icon-view {
+  width: 20px;
+  height: 20px;
   text-align: center;
-  margin: 16px;
+  margin-right: 4px;
+}
+
+.phui-flank-view .phui-list-item-view .phui-list-item-href {
+  display: block;
+  color: {$darkbluetext};
+  text-decoration: none;
+}
+
+.device-desktop .phui-flank-view .phui-list-item-view:hover {
+  background: {$lightblueborder};
+  transition: 0.1s;
+}
+
+.phui-flank-view .keyboard-shortcut-key {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  height: 18px;
+  width: 18px;
+  line-height: 18px;
+  padding: 0;
+  color: {$lightgreytext};
 }
