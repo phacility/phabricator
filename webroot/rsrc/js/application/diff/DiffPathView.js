@@ -21,6 +21,8 @@ JX.install('DiffPathView', {
     _pathNode: null,
     _changeset: null,
     _inlineNode: null,
+    _isDirectory: false,
+    _displayPath: null,
 
     getNode: function() {
       if (!this._node) {
@@ -45,10 +47,19 @@ JX.install('DiffPathView', {
 
     setPath: function(path) {
       this._path = path;
+      this._redrawPath();
+      return this;
+    },
 
-      var display = this._path[this._path.length - 1];
-      JX.DOM.setContent(this._getPathNode(), display);
+    setDisplayPath: function(path) {
+      this._displayPath = path;
+      this._redrawPath();
+      return this;
+    },
 
+    setIsDirectory: function(is_directory) {
+      this._isDirectory = is_directory;
+      this._redrawPath();
       return this;
     },
 
@@ -69,10 +80,23 @@ JX.install('DiffPathView', {
       return this._path;
     },
 
+    setHidden: function(hidden) {
+      this._hidden = hidden;
+
+      var node = this.getNode();
+      if (this._hidden) {
+        JX.DOM.hide(node);
+      } else {
+        JX.DOM.show(node);
+      }
+
+      return this;
+    },
+
     setDepth: function(depth) {
       this._depth = depth;
 
-      this._getIndentNode().style.marginLeft = (6 * this._depth) + 'px';
+      this._getIndentNode().style.marginLeft = (8 * this._depth) + 'px';
 
       return this;
     },
@@ -154,6 +178,23 @@ JX.install('DiffPathView', {
         this._inlineNode = JX.$N('div', attrs, '-');
       }
       return this._inlineNode;
+    },
+
+    _redrawPath: function() {
+      var display;
+      if (this._displayPath) {
+        display = this._displayPath;
+      } else {
+        display = this._path[this._path.length - 1];
+      }
+
+      var is_directory = this._isDirectory;
+
+      if (is_directory) {
+        display = display + '/';
+      }
+
+      JX.DOM.setContent(this._getPathNode(), display);
     }
 
   }

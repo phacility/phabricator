@@ -8,8 +8,8 @@
 
 .diff-tree-path {
   height: 20px;
-  color: {$greytext};
   line-height: 20px;
+  color: {$greytext};
 }
 
 .diff-tree-path-indent {
@@ -23,8 +23,12 @@
   text-align: center;
 }
 
+.diff-tree-path-icon .phui-icon-view {
+  color: {$greytext};
+}
+
 .diff-tree-path-name {
-  margin-left: 24px;
+  margin-left: 22px;
   margin-right: 44px;
   white-space: nowrap;
   overflow: hidden;

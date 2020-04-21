@@ -94,11 +94,12 @@ JX.install('DiffTreeView', {
 
       // For nodes which don't have a path object yet, build one.
       var tree;
+      var path;
       var trees = [];
       for (ii = 0; ii < this._keys.length; ii++) {
         var key = this._keys[ii];
         tree = this._nodes[key];
-        var path = tree.pathObject;
+        path = tree.pathObject;
 
         if (!path) {
           path = new JX.DiffPathView()
@@ -115,14 +116,85 @@ JX.install('DiffTreeView', {
 
       for (ii = 0; ii < trees.length; ii++) {
         tree = trees[ii];
+        tree.displayRoot = null;
+        tree.displayPath = null;
+        tree.displayHide = false;
+      }
+
+      var child;
+      for (ii = 0; ii < trees.length; ii++) {
+        tree = trees[ii];
+
+        if (tree.childCount !== 1) {
+          continue;
+        }
+
+        for (var k in tree.children) {
+          if (tree.children.hasOwnProperty(k)) {
+            child = tree.children[k];
+            break;
+          }
+        }
+
+        if (child.pathObject.getChangeset()) {
+          continue;
+        }
+
+        child.displayRoot = tree.displayRoot || tree;
+      }
+
+      for (ii = 0; ii < trees.length; ii++) {
+        tree = trees[ii];
+
+        if (!tree.displayRoot) {
+          continue;
+        }
+
+        if (!tree.displayRoot.displayPath) {
+          tree.displayRoot.displayPath = [
+            tree.displayRoot.parts[tree.displayRoot.parts.length - 1]
+          ];
+        }
+
+        tree.displayRoot.displayPath.push(tree.parts[tree.parts.length - 1]);
+        tree.displayHide = true;
+      }
+
+      for (ii = 0; ii < trees.length; ii++) {
+        tree = trees[ii];
+        path = tree.pathObject;
+
+        path.setHidden(!!tree.displayHide);
+
+        if (tree.displayPath) {
+          path.setDisplayPath(tree.displayPath.join('/'));
+        } else {
+          path.setDisplayPath(null);
+        }
+      }
+
+      for (ii = 0; ii < trees.length; ii++) {
+        tree = trees[ii];
 
         if (!tree.parent) {
           tree.depth = 0;
         } else {
-          tree.depth = tree.parent.depth + 1;
+          // If this node was collapsed into the parent node, don't increase
+          // the tree depth.
+          if (tree.displayHide) {
+            tree.depth = tree.parent.depth;
+          } else {
+            tree.depth = tree.parent.depth + 1;
+          }
         }
 
-        tree.pathObject.setDepth((tree.depth - 1));
+        path = tree.pathObject;
+
+        if (tree.childCount > 0) {
+          path.setIsDirectory(true);
+        }
+
+        path.setDepth((tree.depth - 1));
       }
 
       var nodes = [];
