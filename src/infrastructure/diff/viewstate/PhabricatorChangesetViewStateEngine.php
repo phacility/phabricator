@@ -60,6 +60,11 @@ final class PhabricatorChangesetViewStateEngine
       $this->setChangesetProperty('renderer', $renderer);
     }
 
+    $hidden = $request->getStr('hidden');
+    if ($hidden !== null) {
+      $this->setChangesetProperty('hidden', (int)$hidden);
+    }
+
     $this->saveViewStateStorage();
 
     $state = new PhabricatorChangesetViewState();
@@ -76,12 +81,19 @@ final class PhabricatorChangesetViewStateEngine
     $renderer = $this->getChangesetProperty('renderer');
     $state->setRendererKey($renderer);
 
+    $this->updateHiddenState($state);
+
     // This is the client-selected default renderer based on viewport
     // dimensions.
 
     $device_key = $request->getStr('device');
-    if ($device_key !== null && strlen($device_key)) {
+    if ($device_key !== null) {
       $state->setDefaultDeviceRendererKey($device_key);
+    }
+
+    $discard_response = $request->getStr('discard');
+    if ($discard_response !== null) {
+      $state->setDiscardResponse(true);
     }
 
     return $state;
@@ -172,6 +184,52 @@ final class PhabricatorChangesetViewStateEngine
     }
 
     unset($unguarded);
+  }
+
+  private function updateHiddenState(PhabricatorChangesetViewState $state) {
+    $is_hidden = false;
+    $was_modified = false;
+
+    $storage = $this->getStorage();
+    $changeset = $this->getChangeset();
+
+    $entries = $storage->getChangesetPropertyEntries($changeset, 'hidden');
+    $entries = isort($entries, 'epoch');
+
+    if ($entries) {
+      $other_phid = last_key($entries);
+      $other_spec = last($entries);
+
+      $this_version = (int)$changeset->getDiffID();
+      $other_version = (int)idx($other_spec, 'diffID');
+      $other_value = (bool)idx($other_spec, 'value', false);
+
+      if ($other_value === false) {
+        $is_hidden = false;
+      } else if ($other_version >= $this_version) {
+        $is_hidden = $other_value;
+      } else {
+        $viewer = $this->getViewer();
+
+        $other_changeset = id(new DifferentialChangesetQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($other_phid))
+          ->executeOne();
+
+        $is_modified = false;
+        if ($other_changeset) {
+          if (!$changeset->hasSameEffectAs($other_changeset)) {
+            $is_modified = true;
+          }
+        }
+
+        $is_hidden = false;
+        $was_modified = true;
+      }
+    }
+
+    $state->setHidden($is_hidden);
+    $state->setModifiedSinceHide($was_modified);
   }
 
 }

@@ -39,6 +39,7 @@ JX.install('DiffChangeset', {
     this._pathIconColor = data.pathIconColor;
     this._isLowImportance = data.isLowImportance;
     this._isOwned = data.isOwned;
+    this._isLoading = true;
 
     this._inlines = [];
 
@@ -81,6 +82,7 @@ JX.install('DiffChangeset', {
     _pathIconColor: null,
     _isLowImportance: null,
     _isOwned: null,
+    _isHidden: null,
 
     getEditorURI: function() {
       return this._editorURI;
@@ -202,13 +204,12 @@ JX.install('DiffChangeset', {
       this._loaded = true;
       this._sequence++;
 
-      var params = this._getViewParameters(state);
-      var pht = this.getChangesetList().getTranslations();
-
-      var workflow = new JX.Workflow(this._renderURI, params)
+      var workflow = this._newReloadWorkflow(state)
         .setHandler(JX.bind(this, this._onresponse, this._sequence));
 
       this._startContentWorkflow(workflow);
+
+      var pht = this.getChangesetList().getTranslations();
 
       JX.DOM.setContent(
         this._getContentFrame(),
@@ -218,6 +219,11 @@ JX.install('DiffChangeset', {
           pht('Loading...')));
 
       return this;
+    },
+
+    _newReloadWorkflow: function(state) {
+      var params = this._getViewParameters(state);
+      return new JX.Workflow(this._renderURI, params);
     },
 
     /**
@@ -637,6 +643,15 @@ JX.install('DiffChangeset', {
       this._highlight = state.highlight;
       this._characterEncoding = state.characterEncoding;
       this._documentEngine = state.documentEngine;
+      this._isHidden = state.isHidden;
+
+      var is_hidden = !this.isVisible();
+      if (this._isHidden != is_hidden) {
+        this.setVisible(!this._isHidden);
+      }
+
+      this._isLoading = false;
+      this.getPathView().setIsLoading(this._isLoading);
     },
 
     _getContentFrame: function() {
@@ -844,7 +859,21 @@ JX.install('DiffChangeset', {
     },
 
     toggleVisibility: function() {
-      this._visible = !this._visible;
+      this.setVisible(!this._visible);
+
+      var attrs = {
+        hidden: this.isVisible() ? 0 : 1,
+        discard: 1
+      };
+
+      var workflow = this._newReloadWorkflow(attrs)
+        .setHandler(JX.bag);
+
+      this._startContentWorkflow(workflow);
+    },
+
+    setVisible: function(visible) {
+      this._visible = visible;
 
       var diff = JX.DOM.find(this._node, 'table', 'differential-diff');
       var undo = this._getUndoNode();
@@ -858,6 +887,8 @@ JX.install('DiffChangeset', {
       }
 
       JX.Stratcom.invoke('resize');
+
+      this.getPathView().setIsHidden(!this._visible);
     },
 
     isVisible: function() {
@@ -906,7 +937,8 @@ JX.install('DiffChangeset', {
           .setChangeset(this)
           .setPath(this._pathParts)
           .setIsLowImportance(this._isLowImportance)
-          .setIsOwned(this._isOwned);
+          .setIsOwned(this._isOwned)
+          .setIsLoading(this._isLoading);
 
         view.getIcon()
           .setIcon(this._pathIconIcon)

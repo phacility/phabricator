@@ -59,6 +59,19 @@
   opacity: 0.5;
 }
 
+.diff-tree-path-hidden {
+  opacity: 0.25;
+}
+
+.diff-tree-path-icon-hidden,
+.diff-tree-path-hidden .diff-tree-path-icon-kind {
+  display: none;
+}
+
+.diff-tree-path-hidden .diff-tree-path-icon-hidden {
+  display: block;
+}
+
 .diff-tree-path-owned {
   border-left-color: {$orange};
   box-shadow: inset 2px 0 {$lightorange};

@@ -69,6 +69,10 @@ final class DiffusionDiffController extends DiffusionController {
 
     $viewstate = $viewstate_engine->newViewStateFromRequest($request);
 
+    if ($viewstate->getDiscardResponse()) {
+      return new AphrontAjaxResponse();
+    }
+
     $parser = id(new DifferentialChangesetParser())
       ->setViewer($viewer)
       ->setChangeset($changeset)

@@ -60,12 +60,9 @@ final class DifferentialViewState
     $key,
     $default = null) {
 
-    $path_hash = $this->getChangesetPathHash($changeset);
-
-    $entries = idxv($this->viewState, array('changesets', $path_hash, $key));
-    if (!is_array($entries)) {
-      $entries = array();
-    }
+    $entries = $this->getChangesetPropertyEntries(
+      $changeset,
+      $key);
 
     $entries = isort($entries, 'epoch');
 
@@ -75,6 +72,19 @@ final class DifferentialViewState
     }
 
     return idx($entry, 'value', $default);
+  }
+
+  public function getChangesetPropertyEntries(
+    DifferentialChangeset $changeset,
+    $key) {
+    $path_hash = $this->getChangesetPathHash($changeset);
+
+    $entries = idxv($this->viewState, array('changesets', $path_hash, $key));
+    if (!is_array($entries)) {
+      $entries = array();
+    }
+
+    return $entries;
   }
 
   public function getHasModifications() {

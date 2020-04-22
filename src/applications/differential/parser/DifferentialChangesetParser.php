@@ -1895,6 +1895,7 @@ final class DifferentialChangesetParser extends Phobject {
       'highlight' => $viewstate->getHighlightLanguage(),
       'characterEncoding' => $viewstate->getCharacterEncoding(),
       'documentEngine' => $viewstate->getDocumentEngineKey(),
+      'isHidden' => $viewstate->getHidden(),
     );
 
     return id(new PhabricatorChangesetResponse())

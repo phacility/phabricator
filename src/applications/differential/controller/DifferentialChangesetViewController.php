@@ -195,6 +195,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $viewstate = $viewstate_engine->newViewStateFromRequest($request);
 
+    if ($viewstate->getDiscardResponse()) {
+      return new AphrontAjaxResponse();
+    }
+
     $parser = id(new DifferentialChangesetParser())
       ->setViewer($viewer)
       ->setViewState($viewstate)

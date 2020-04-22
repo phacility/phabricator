@@ -23,8 +23,10 @@ JX.install('DiffPathView', {
     _inlineNode: null,
     _isDirectory: false,
     _displayPath: null,
-    _isOwned: false,
     _isLowImportance: false,
+    _isOwned: false,
+    _isHidden: false,
+    _isLoading: false,
 
     getNode: function() {
       if (!this._node) {
@@ -142,6 +144,24 @@ JX.install('DiffPathView', {
       return this;
     },
 
+    setIsHidden: function(hidden) {
+      this._isHidden = hidden;
+
+      var node = this.getNode();
+      JX.DOM.alterClass(node, 'diff-tree-path-hidden', this._isHidden);
+
+      return this;
+    },
+
+    setIsLoading: function(loading) {
+      this._isLoading = loading;
+
+      var node = this.getNode();
+      JX.DOM.alterClass(node, 'diff-tree-path-loading', this._isLoading);
+
+      return this;
+    },
+
     _onclick: function(e) {
       if (!e.isNormalClick()) {
         return;
@@ -163,6 +183,7 @@ JX.install('DiffPathView', {
 
         var content = [
           this.getInlineNode(),
+          this._getHiddenIconNode(),
           this._getIconNode(),
           this._getPathNode(),
         ];
@@ -186,11 +207,30 @@ JX.install('DiffPathView', {
     _getIconNode: function() {
       if (!this._iconNode) {
         var attrs = {
-          className: 'diff-tree-path-icon',
+          className: 'diff-tree-path-icon diff-tree-path-icon-kind',
         };
         this._iconNode = JX.$N('div', attrs, this.getIcon().getNode());
       }
       return this._iconNode;
+    },
+
+    _getHiddenIconNode: function() {
+      if (!this._hiddenIconNode) {
+        var attrs = {
+          className: 'diff-tree-path-icon diff-tree-path-icon-hidden',
+        };
+        this._hiddenIconNode =
+          JX.$N('div', attrs, this._getHiddenIcon().getNode());
+      }
+      return this._hiddenIconNode;
+    },
+
+    _getHiddenIcon: function() {
+      if (!this._hiddenIcon) {
+        this._hiddenIcon = new JX.PHUIXIconView()
+          .setIcon('fa-times-circle-o');
+      }
+      return this._hiddenIcon;
     },
 
     getInlineNode: function() {

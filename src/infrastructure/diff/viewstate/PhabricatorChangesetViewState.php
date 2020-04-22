@@ -8,6 +8,9 @@ final class PhabricatorChangesetViewState
   private $documentEngineKey;
   private $rendererKey;
   private $defaultDeviceRendererKey;
+  private $hidden;
+  private $modifiedSinceHide;
+  private $discardResponse;
 
   public function setHighlightLanguage($highlight_language) {
     $this->highlightLanguage = $highlight_language;
@@ -52,6 +55,33 @@ final class PhabricatorChangesetViewState
 
   public function getDefaultDeviceRendererKey() {
     return $this->defaultDeviceRendererKey;
+  }
+
+  public function setHidden($hidden) {
+    $this->hidden = $hidden;
+    return $this;
+  }
+
+  public function getHidden() {
+    return $this->hidden;
+  }
+
+  public function setModifiedSinceHide($modified_since_hide) {
+    $this->modifiedSinceHide = $modified_since_hide;
+    return $this;
+  }
+
+  public function getModifiedSinceHide() {
+    return $this->modifiedSinceHide;
+  }
+
+  public function setDiscardResponse($discard_response) {
+    $this->discardResponse = $discard_response;
+    return $this;
+  }
+
+  public function getDiscardResponse() {
+    return $this->discardResponse;
   }
 
 }
