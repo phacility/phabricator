@@ -22,6 +22,9 @@ final class DifferentialChangeset
   private $hunks = self::ATTACHABLE;
   private $diff = self::ATTACHABLE;
 
+  private $authorityPackages;
+  private $changesetPackages;
+
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
   const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
@@ -108,6 +111,24 @@ final class DifferentialChangeset
     $this->hunks[] = $hunk;
     $this->unsavedHunks[] = $hunk;
     return $this;
+  }
+
+  public function setAuthorityPackages(array $authority_packages) {
+    $this->authorityPackages = mpull($authority_packages, null, 'getPHID');
+    return $this;
+  }
+
+  public function getAuthorityPackages() {
+    return $this->authorityPackages;
+  }
+
+  public function setChangesetPackages($changeset_packages) {
+    $this->changesetPackages = mpull($changeset_packages, null, 'getPHID');
+    return $this;
+  }
+
+  public function getChangesetPackages() {
+    return $this->changesetPackages;
   }
 
   public function save() {
@@ -264,6 +285,37 @@ final class DifferentialChangeset
 
     return id(new PHUIIconView())
       ->setIcon("{$icon} {$color}");
+  }
+
+  public function getIsOwnedChangeset() {
+    $authority_packages = $this->getAuthorityPackages();
+    $changeset_packages = $this->getChangesetPackages();
+
+    if (!$authority_packages || !$changeset_packages) {
+      return false;
+    }
+
+    return (bool)array_intersect_key($authority_packages, $changeset_packages);
+  }
+
+  public function getIsLowImportanceChangeset() {
+    $change_type = $this->getChangeType();
+
+    $change_map = array(
+      DifferentialChangeType::TYPE_DELETE => true,
+      DifferentialChangeType::TYPE_MOVE_AWAY => true,
+      DifferentialChangeType::TYPE_MULTICOPY => true,
+    );
+
+    if (isset($change_map[$change_type])) {
+      return $change_map[$change_type];
+    }
+
+    if ($this->isGeneratedChangeset()) {
+      return true;
+    }
+
+    return false;
   }
 
   public function getPathIconIcon() {

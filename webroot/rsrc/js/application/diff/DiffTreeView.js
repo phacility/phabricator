@@ -106,7 +106,8 @@ JX.install('DiffTreeView', {
             .setPath(tree.parts);
 
           path.getIcon()
-            .setIcon('fa-folder-open-o');
+            .setIcon('fa-folder-open-o')
+            .setColor('grey');
 
           tree.pathObject = path;
         }

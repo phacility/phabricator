@@ -384,7 +384,6 @@ final class DifferentialRevisionViewController
         ->setTitle(pht('Diff %s', $target->getID()))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
-
       $revision_id = $revision->getID();
       $inline_list_uri = "/revision/inlines/{$revision_id}/";
       $inline_list_uri = $this->getApplicationURI($inline_list_uri);
@@ -456,6 +455,15 @@ final class DifferentialRevisionViewController
         $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
         $reviewer->attachChangesets($reviewer_changesets);
       }
+
+      $authority_packages = $this->getAuthorityPackages();
+      foreach ($changesets as $changeset) {
+        $changeset_packages = $this->getChangesetPackages($changeset);
+
+        $changeset
+          ->setAuthorityPackages($authority_packages)
+          ->setChangesetPackages($changeset_packages);
+      }
     }
 
     $tab_group = new PHUITabGroupView();
@@ -476,7 +484,6 @@ final class DifferentialRevisionViewController
 
     $filetree = id(new DifferentialFileTreeEngine())
       ->setViewer($viewer);
-
     $filetree_collapsed = !$filetree->getIsVisible();
 
     // See PHI811. If the viewer has the file tree on, the files tab with the

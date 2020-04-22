@@ -10,6 +10,7 @@
   height: 20px;
   line-height: 20px;
   color: {$greytext};
+  border-left: 4px solid transparent;
 }
 
 .diff-tree-path-indent {
@@ -44,13 +45,23 @@
   background: {$darkgreybackground};
 }
 
-.diff-tree-path-selected {
-  background: {$yellow};
-}
-
 .device-desktop .diff-tree-path-changeset:hover {
   background: {$lightblueborder};
   transition: 0.1s;
+}
+
+.diff-tree-view .diff-tree-path-changeset.diff-tree-path-selected {
+  /* Rule is intentionally more specific than "hover". */
+  background: {$yellow};
+}
+
+.diff-tree-path-low-importance .diff-tree-path-name {
+  opacity: 0.5;
+}
+
+.diff-tree-path-owned {
+  border-left-color: {$orange};
+  box-shadow: inset 2px 0 {$lightorange};
 }
 
 .diff-tree-path-inlines {

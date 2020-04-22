@@ -23,6 +23,8 @@ JX.install('DiffPathView', {
     _inlineNode: null,
     _isDirectory: false,
     _displayPath: null,
+    _isOwned: false,
+    _isLowImportance: false,
 
     getNode: function() {
       if (!this._node) {
@@ -115,6 +117,27 @@ JX.install('DiffPathView', {
 
       var node = this.getNode();
       JX.DOM.alterClass(node, 'diff-tree-path-focused', this._focused);
+
+      return this;
+    },
+
+    setIsLowImportance: function(low_importance) {
+      this._isLowImportance = low_importance;
+
+      var node = this.getNode();
+      JX.DOM.alterClass(
+        node,
+        'diff-tree-path-low-importance',
+        this._isLowImportance);
+
+      return this;
+    },
+
+    setIsOwned: function(owned) {
+      this._isOwned = owned;
+
+      var node = this.getNode();
+      JX.DOM.alterClass(node, 'diff-tree-path-owned', this._isOwned);
 
       return this;
     },
