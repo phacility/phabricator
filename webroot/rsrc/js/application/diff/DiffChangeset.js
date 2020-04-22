@@ -35,6 +35,9 @@ JX.install('DiffChangeset', {
     this._editorURI = data.editorURI;
     this._editorConfigureURI = data.editorConfigureURI;
 
+    this._pathIconIcon = data.pathIconIcon;
+    this._pathIconColor = data.pathIconColor;
+
     this._inlines = [];
 
     if (data.changesetState) {
@@ -71,6 +74,9 @@ JX.install('DiffChangeset', {
     _editorURI: null,
     _editorConfigureURI: null,
     _pathView: null,
+
+    _pathIconIcon: null,
+    _pathIconColor: null,
 
     getEditorURI: function() {
       return this._editorURI;
@@ -897,7 +903,8 @@ JX.install('DiffChangeset', {
           .setPath(this._pathParts);
 
         view.getIcon()
-          .setIcon(this.getIcon());
+          .setIcon(this._pathIconIcon)
+          .setColor(this._pathIconColor);
 
         this._pathView = view;
       }

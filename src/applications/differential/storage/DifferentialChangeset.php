@@ -259,48 +259,68 @@ final class DifferentialChangeset
   }
 
   public function newFileTreeIcon() {
-    $file_type = $this->getFileType();
-    $change_type = $this->getChangeType();
-
-    $change_icons = array(
-      DifferentialChangeType::TYPE_DELETE => 'fa-file-o',
-    );
-
-    if (isset($change_icons[$change_type])) {
-      $icon = $change_icons[$change_type];
-    } else {
-      $icon = DifferentialChangeType::getIconForFileType($file_type);
-    }
-
-    $change_colors = array(
-      DifferentialChangeType::TYPE_ADD => 'green',
-      DifferentialChangeType::TYPE_DELETE => 'red',
-      DifferentialChangeType::TYPE_MOVE_AWAY => 'orange',
-      DifferentialChangeType::TYPE_MOVE_HERE => 'orange',
-      DifferentialChangeType::TYPE_COPY_HERE => 'orange',
-      DifferentialChangeType::TYPE_MULTICOPY => 'orange',
-    );
-
-    $color = idx($change_colors, $change_type, 'bluetext');
+    $icon = $this->getPathIconIcon();
+    $color = $this->getPathIconColor();
 
     return id(new PHUIIconView())
-      ->setIcon($icon.' '.$color);
+      ->setIcon("{$icon} {$color}");
   }
 
-  public function getFileTreeClass() {
-    switch ($this->getChangeType()) {
-      case DifferentialChangeType::TYPE_ADD:
-        return 'filetree-added';
-      case DifferentialChangeType::TYPE_DELETE:
-        return 'filetree-deleted';
-      case DifferentialChangeType::TYPE_MOVE_AWAY:
-      case DifferentialChangeType::TYPE_MOVE_HERE:
-      case DifferentialChangeType::TYPE_COPY_HERE:
-      case DifferentialChangeType::TYPE_MULTICOPY:
-        return 'filetree-movecopy';
+  public function getPathIconIcon() {
+    return idx($this->getPathIconDetails(), 'icon');
+  }
+
+  public function getPathIconColor() {
+    return idx($this->getPathIconDetails(), 'color');
+  }
+
+  private function getPathIconDetails() {
+    $change_icons = array(
+      DifferentialChangeType::TYPE_DELETE => array(
+        'icon' => 'fa-times',
+        'color' => 'delete-color',
+      ),
+      DifferentialChangeType::TYPE_ADD => array(
+        'icon' => 'fa-plus',
+        'color' => 'create-color',
+      ),
+      DifferentialChangeType::TYPE_MOVE_AWAY => array(
+        'icon' => 'fa-circle-o',
+        'color' => 'grey',
+      ),
+      DifferentialChangeType::TYPE_MULTICOPY => array(
+        'icon' => 'fa-circle-o',
+        'color' => 'grey',
+      ),
+      DifferentialChangeType::TYPE_MOVE_HERE => array(
+        'icon' => 'fa-plus-circle',
+        'color' => 'create-color',
+      ),
+      DifferentialChangeType::TYPE_COPY_HERE => array(
+        'icon' => 'fa-plus-circle',
+        'color' => 'create-color',
+      ),
+    );
+
+    $change_type = $this->getChangeType();
+    if (isset($change_icons[$change_type])) {
+      return $change_icons[$change_type];
     }
 
-    return null;
+    if ($this->isGeneratedChangeset()) {
+      return array(
+        'icon' => 'fa-cogs',
+        'color' => 'grey',
+      );
+    }
+
+    $file_type = $this->getFileType();
+    $icon = DifferentialChangeType::getIconForFileType($file_type);
+
+    return array(
+      'icon' => $icon,
+      'color' => 'bluetext',
+    );
   }
 
   public function setChangesetMetadata($key, $value) {
