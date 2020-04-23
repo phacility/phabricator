@@ -14,6 +14,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $repository;
   private $diff;
   private $changesetResponse;
+  private $branch;
 
   public function setAutoload($autoload) {
     $this->autoload = $autoload;
@@ -71,6 +72,15 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this;
   }
 
+  public function setBranch($branch) {
+    $this->branch = $branch;
+    return $this;
+  }
+
+  public function getBranch() {
+    return $this->branch;
+  }
+
   public function getID() {
     if (!$this->id) {
       $this->id = celerity_generate_unique_node_id();
@@ -93,6 +103,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
+
     $this->requireResource('differential-changeset-view-css');
     $this->requireResource('syntax-highlighting-css');
 
@@ -181,6 +193,46 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $path_parts = trim($display_filename, '/');
     $path_parts = explode('/', $path_parts);
 
+    $show_path_uri = null;
+    $show_directory_uri = null;
+
+    $repository = $this->getRepository();
+    if ($repository) {
+      $diff = $this->getDiff();
+      if ($diff) {
+        $repo_path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+
+        $repo_dir = dirname($repo_path);
+        if ($repo_dir === $repo_path) {
+          $repo_dir = null;
+        }
+
+        $show_path_uri = $repository->getDiffusionBrowseURIForPath(
+          $viewer,
+          $repo_path,
+          idx($changeset->getMetadata(), 'line:first'),
+          $this->getBranch());
+
+        if ($repo_dir !== null) {
+          $repo_dir = rtrim($repo_dir, '/').'/';
+
+          $show_directory_uri = $repository->getDiffusionBrowseURIForPath(
+            $viewer,
+            $repo_dir,
+            null,
+            $this->getBranch());
+        }
+      }
+    }
+
+    if ($show_path_uri) {
+      $show_path_uri = phutil_string_cast($show_path_uri);
+    }
+
+    if ($show_directory_uri) {
+      $show_directory_uri = phutil_string_cast($show_directory_uri);
+    }
+
     return javelin_tag(
       'div',
       array(
@@ -205,6 +257,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
           'loaded' => $is_loaded,
           'changesetState' => $changeset_state,
+
+          'showPathURI' => $show_path_uri,
+          'showDirectoryURI' => $show_directory_uri,
         ),
         'class' => $class,
         'id'    => $id,

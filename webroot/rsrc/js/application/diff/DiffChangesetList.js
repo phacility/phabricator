@@ -198,6 +198,7 @@ JX.install('DiffChangesetList', {
       if (formation) {
         var filetree = formation.getColumn(0);
         var toggletree = JX.bind(filetree, filetree.toggleVisibility);
+        label = pht('Hide or show the paths panel.');
         this._installKey('f', 'diff-vis', label, toggletree);
       }
 
@@ -226,9 +227,14 @@ JX.install('DiffChangesetList', {
       label = pht('Hide or show all inline comments.');
       this._installKey('A', 'diff-vis', label, this._onkeyhideall);
 
+      label = pht('Show path in repository.');
+      this._installKey('d', 'diff-nav', label, this._onkeyshowpath);
+
+      label = pht('Show directory in repository.');
+      this._installKey('D', 'diff-nav', label, this._onkeyshowdirectory);
+
       label = pht('Open file in external editor.');
       this._installKey('\\', 'diff-nav', label, this._onkeyopeneditor);
-
     },
 
     isAsleep: function() {
@@ -456,21 +462,18 @@ JX.install('DiffChangesetList', {
     },
 
     _onkeytogglefile: function() {
-      var cursor = this._cursorItem;
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
 
-      if (cursor) {
-        if (cursor.type == 'file') {
-          cursor.changeset.toggleVisibility();
-          return;
-        }
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to hide or show.'));
+        return;
       }
 
-      var pht = this.getTranslations();
-      this._warnUser(pht('You must select a file to hide or show.'));
+      changeset.toggleVisibility();
     },
 
-    _onkeyopeneditor: function() {
-      var pht = this.getTranslations();
+    _getChangesetForKeyCommand: function() {
       var cursor = this._cursorItem;
 
       var changeset;
@@ -481,6 +484,13 @@ JX.install('DiffChangesetList', {
       if (!changeset) {
         changeset = this._getVisibleChangeset();
       }
+
+      return changeset;
+    },
+
+    _onkeyopeneditor: function() {
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
 
       if (!changeset) {
         this._warnUser(pht('You must select a file to edit.'));
@@ -495,6 +505,37 @@ JX.install('DiffChangesetList', {
       }
 
       JX.$U(editor_uri).go();
+    },
+
+    _onkeyshowpath: function() {
+      this._onrepositorykey(false);
+    },
+
+    _onkeyshowdirectory: function() {
+      this._onrepositorykey(true);
+    },
+
+    _onrepositorykey: function(is_directory) {
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to open.'));
+        return;
+      }
+
+      var show_uri;
+      if (is_directory) {
+        show_uri = changeset.getShowDirectoryURI();
+      } else {
+        show_uri = changeset.getShowPathURI();
+      }
+
+      if (show_uri === null) {
+        return;
+      }
+
+      window.open(show_uri);
     },
 
     _onkeycollapse: function() {
@@ -661,7 +702,7 @@ JX.install('DiffChangesetList', {
       }
 
       if (cursor !== null) {
-        this._setSelectionState(items[cursor], true);
+        this._setSelectionState(items[cursor], scroll);
       }
 
       return this;
@@ -784,18 +825,14 @@ JX.install('DiffChangesetList', {
       var changeset_list = this;
       var changeset = this.getChangesetForNode(node);
 
-      var menu = new JX.PHUIXDropdownMenu(button);
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
       var list = new JX.PHUIXActionListView();
 
       var add_link = function(icon, name, href, local) {
-        if (!href) {
-          return;
-        }
-
         var link = new JX.PHUIXActionView()
           .setIcon(icon)
           .setName(name)
-          .setHref(href)
           .setHandler(function(e) {
             if (local) {
               window.location.assign(href);
@@ -806,25 +843,36 @@ JX.install('DiffChangesetList', {
             e.prevent();
           });
 
+        if (href) {
+          link.setHref(href);
+        } else {
+          link
+            .setDisabled(true)
+            .setUnresponsive(true);
+        }
+
         list.addItem(link);
         return link;
       };
+
+      var visible_item = new JX.PHUIXActionView()
+        .setKeyCommand('h')
+        .setHandler(function(e) {
+          e.prevent();
+          menu.close();
+
+          changeset.select(false);
+          changeset.toggleVisibility();
+        });
+      list.addItem(visible_item);
 
       var reveal_item = new JX.PHUIXActionView()
         .setIcon('fa-eye');
       list.addItem(reveal_item);
 
-      var visible_item = new JX.PHUIXActionView()
-        .setHandler(function(e) {
-          e.prevent();
-          menu.close();
-
-          changeset.toggleVisibility();
-        });
-      list.addItem(visible_item);
-
-      add_link('fa-file-text', pht('Browse in Diffusion'), data.diffusionURI);
-      add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
 
       var up_item = new JX.PHUIXActionView()
         .setHandler(function(e) {
@@ -901,7 +949,7 @@ JX.install('DiffChangesetList', {
 
       var engine_item = new JX.PHUIXActionView()
         .setIcon('fa-file-image-o')
-        .setName(pht('View As...'))
+        .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
           var params = {
             engine: changeset.getDocumentEngine(),
@@ -918,12 +966,31 @@ JX.install('DiffChangesetList', {
         });
       list.addItem(engine_item);
 
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
+
+      add_link('fa-external-link', pht('View Standalone'), data.standaloneURI);
+
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
 
+      add_link(
+        'fa-folder-open-o',
+        pht('Show Directory in Repository'),
+        changeset.getShowDirectoryURI())
+        .setKeyCommand('D');
+
+      add_link(
+        'fa-file-text-o',
+        pht('Show Path in Repository'),
+        changeset.getShowPathURI())
+        .setKeyCommand('d');
+
       var editor_uri = changeset.getEditorURI();
       if (editor_uri !== null) {
-        add_link('fa-pencil', pht('Open in Editor'), editor_uri, true);
+        add_link('fa-i-cursor', pht('Open in Editor'), editor_uri, true)
+          .setKeyCommand('\\');
       } else {
         var configure_uri = changeset.getEditorConfigureURI();
         if (configure_uri !== null) {
@@ -943,7 +1010,7 @@ JX.install('DiffChangesetList', {
           reveal_item
             .setDisabled(false)
             .setName(pht('Show All Context'))
-            .setIcon('fa-file-o')
+            .setIcon('fa-arrows-v')
             .setHandler(function(e) {
               changeset.loadAllContext();
               e.prevent();
@@ -952,9 +1019,10 @@ JX.install('DiffChangesetList', {
         } else {
           reveal_item
             .setDisabled(true)
+            .setUnresponsive(true)
             .setIcon('fa-file')
             .setName(pht('All Context Shown'))
-            .setHandler(function(e) { e.prevent(); });
+            .setHref(null);
         }
 
         encoding_item.setDisabled(!changeset.isLoaded());
@@ -965,11 +1033,11 @@ JX.install('DiffChangesetList', {
           if (changeset.getRendererKey() == '2up') {
             up_item
               .setIcon('fa-list-alt')
-              .setName(pht('View Unified'));
+              .setName(pht('View Unified Diff'));
           } else {
             up_item
-              .setIcon('fa-files-o')
-              .setName(pht('View Side-by-Side'));
+              .setIcon('fa-columns')
+              .setName(pht('View Side-by-Side Diff'));
           }
         } else {
           up_item

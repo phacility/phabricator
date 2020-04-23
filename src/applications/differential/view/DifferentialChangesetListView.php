@@ -198,6 +198,7 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
       $detail->setRenderingRef($ref);
+      $detail->setBranch($this->getBranch());
 
       $detail->setRenderURI($this->renderURI);
 
@@ -263,17 +264,18 @@ final class DifferentialChangesetListView extends AphrontView {
         "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
         'Expand File' => pht('Expand File'),
         'Collapse File' => pht('Collapse File'),
-        'Browse in Diffusion' => pht('Browse in Diffusion'),
+        'Show Path in Repository' => pht('Show Path in Repository'),
+        'Show Directory in Repository' => pht('Show Directory in Repository'),
         'View Standalone' => pht('View Standalone'),
         'Show Raw File (Left)' => pht('Show Raw File (Left)'),
         'Show Raw File (Right)' => pht('Show Raw File (Right)'),
         'Configure Editor' => pht('Configure Editor'),
         'Load Changes' => pht('Load Changes'),
-        'View Side-by-Side' => pht('View Side-by-Side'),
-        'View Unified' => pht('View Unified'),
+        'View Side-by-Side Diff' => pht('View Side-by-Side Diff'),
+        'View Unified Diff' => pht('View Unified Diff'),
         'Change Text Encoding...' => pht('Change Text Encoding...'),
         'Highlight As...' => pht('Highlight As...'),
-        'View As...' => pht('View As...'),
+        'View As Document Type...' => pht('View As Document Type...'),
 
         'Loading...' => pht('Loading...'),
 
@@ -350,8 +352,19 @@ final class DifferentialChangesetListView extends AphrontView {
         'You must select a file to edit.' =>
           pht('You must select a file to edit.'),
 
+        'You must select a file to open.' =>
+          pht('You must select a file to open.'),
+
         'No external editor is configured.' =>
           pht('No external editor is configured.'),
+
+        'Hide or show the paths panel.' =>
+          pht('Hide or show the paths panel.'),
+
+        'Show path in repository.' =>
+          pht('Show path in repository.'),
+        'Show directory in repository.' =>
+          pht('Show directory in repository.'),
       ),
     ));
 
@@ -395,20 +408,6 @@ final class DifferentialChangesetListView extends AphrontView {
       $uri = new PhutilURI($this->standaloneURI);
       $uri = $this->appendDefaultQueryParams($uri, $qparams);
       $meta['standaloneURI'] = (string)$uri;
-    }
-
-    $repository = $this->repository;
-    if ($repository) {
-      try {
-        $meta['diffusionURI'] =
-          (string)$repository->getDiffusionBrowseURIForPath(
-            $viewer,
-            $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-            idx($changeset->getMetadata(), 'line:first'),
-            $this->getBranch());
-      } catch (DiffusionSetupException $e) {
-        // Ignore
-      }
     }
 
     $change = $changeset->getChangeType();
