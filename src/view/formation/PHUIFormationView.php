@@ -50,11 +50,17 @@ final class PHUIFormationView
         $style[] = 'display: none;';
       }
 
+      $classes = array();
+      if ($column->getIsDesktopOnly()) {
+        $classes[] = 'phui-formation-desktop-only';
+      }
+
       $cells[] = phutil_tag(
         'td',
         array(
           'id' => $item->getID(),
           'style' => implode(' ', $style),
+          'class' => implode(' ', $classes),
         ),
         array(
           $column,
@@ -145,8 +151,8 @@ final class PHUIFormationView
         $resizer_item = $this->newResizerItem();
         $item->setResizerItem($resizer_item);
 
-        $resizer_item
-          ->getColumn()
+        $resizer_item->getColumn()
+          ->setIsDesktopOnly($column->getIsDesktopOnly())
           ->setIsVisible($column->getIsVisible());
       }
 

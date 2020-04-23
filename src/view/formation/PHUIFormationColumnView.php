@@ -4,6 +4,7 @@ abstract class PHUIFormationColumnView
   extends AphrontAutoIDView {
 
   private $item;
+  private $isDesktopOnly;
 
   final public function setColumnItem(PHUIFormationColumnItem $item) {
     $this->item = $item;
@@ -52,6 +53,15 @@ abstract class PHUIFormationColumnView
 
   public function getExpanderTooltip() {
     return null;
+  }
+
+  public function setIsDesktopOnly($is_desktop_only) {
+    $this->isDesktopOnly = $is_desktop_only;
+    return $this;
+  }
+
+  public function getIsDesktopOnly() {
+    return $this->isDesktopOnly;
   }
 
 }

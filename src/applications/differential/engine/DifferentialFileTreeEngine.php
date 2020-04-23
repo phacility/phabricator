@@ -56,6 +56,7 @@ final class DifferentialFileTreeEngine
       ->setIsResizable(true)
       ->setIsFixed(true)
       ->setIsVisible($is_visible)
+      ->setIsDesktopOnly(true)
       ->setWidth($width)
       ->setMinimumWidth($this->getMinimumWidth())
       ->setMaximumWidth($this->getMaximumWidth());

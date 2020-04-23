@@ -17,6 +17,20 @@
   border-color: {$lightgreyborder};
   background: {$lightgreybackground};
   z-index: 4;
+
+  display: none;
+}
+
+.device-desktop .phui-formation-view-expander {
+  display: block;
+}
+
+.phui-formation-desktop-only {
+  display: none;
+}
+
+.device-desktop .phui-formation-desktop-only {
+  display: table-cell;
 }
 
 .phui-formation-view-expander-left {
@@ -111,6 +125,12 @@
   background-image: url(/rsrc/image/divot.png);
   background-position: center;
   background-repeat: no-repeat;
+
+  display: none;
+}
+
+.device-desktop .phui-formation-resizer {
+  display: block;
 }
 
 .phui-flank-view-fixed {
