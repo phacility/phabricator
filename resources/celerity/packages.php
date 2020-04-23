@@ -86,6 +86,12 @@ return array(
     'javelin-behavior-aphlict-status',
     'javelin-behavior-user-menu',
     'phabricator-favicon',
+    'javelin-behavior-phui-tab-group',
+    'javelin-behavior-phui-submenu',
+    'phuix-button-view',
+    'javelin-behavior-comment-actions',
+    'phuix-form-control-view',
+    'phuix-autocomplete',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -156,9 +162,14 @@ return array(
     'phabricator-feed-css',
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
+    'phui-curtain-object-ref-view-css',
+    'phui-comment-form-css',
+    'phui-head-thing-view-css',
+
+    'conpherence-durable-column-view',
+    'phui-button-bar-css',
   ),
   'conpherence.pkg.css' => array(
-    'conpherence-durable-column-view',
     'conpherence-menu-css',
     'conpherence-color-css',
     'conpherence-message-pane-css',
@@ -185,6 +196,8 @@ return array(
     'phabricator-content-source-view-css',
     'inline-comment-summary-css',
     'phui-inline-comment-view-css',
+    'diff-tree-view-css',
+    'phui-formation-view-css',
   ),
   'differential.pkg.js' => array(
     'phabricator-drag-and-drop-file-upload',
@@ -201,6 +214,13 @@ return array(
     'phabricator-diff-inline',
     'phabricator-diff-changeset',
     'phabricator-diff-changeset-list',
+    'phabricator-diff-tree-view',
+    'phabricator-diff-path-view',
+
+    'phuix-formation-view',
+    'phuix-formation-column-view',
+    'phuix-formation-flank-view',
+    'javelin-behavior-diff-preview-link',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',
@@ -216,5 +236,10 @@ return array(
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',
     'javelin-behavior-maniphest-list-editor',
+  ),
+  'dark-console.pkg.js' => array(
+    'javelin-behavior-dark-console',
+    'phabricator-darklog',
+    'phabricator-darkmessage',
   ),
 );

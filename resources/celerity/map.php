@@ -7,12 +7,13 @@
  */
 return array(
   'names' => array(
-    'conpherence.pkg.css' => '3c8a0668',
+    'conpherence.pkg.css' => '0e3cf785',
     'conpherence.pkg.js' => '020aebcf',
-    'core.pkg.css' => '61b7e380',
-    'core.pkg.js' => 'fc49f65b',
-    'differential.pkg.css' => '9b5ee013',
-    'differential.pkg.js' => '1043ee5a',
+    'core.pkg.css' => '589cd2fe',
+    'core.pkg.js' => '49814bac',
+    'dark-console.pkg.js' => '187792c2',
+    'differential.pkg.css' => 'b3469b93',
+    'differential.pkg.js' => 'c8f88d74',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -2216,7 +2217,6 @@ return array(
   ),
   'packages' => array(
     'conpherence.pkg.css' => array(
-      'conpherence-durable-column-view',
       'conpherence-menu-css',
       'conpherence-color-css',
       'conpherence-message-pane-css',
@@ -2294,6 +2294,11 @@ return array(
       'phabricator-feed-css',
       'phabricator-dashboard-css',
       'aphront-multi-column-view-css',
+      'phui-curtain-object-ref-view-css',
+      'phui-comment-form-css',
+      'phui-head-thing-view-css',
+      'conpherence-durable-column-view',
+      'phui-button-bar-css',
     ),
     'core.pkg.js' => array(
       'javelin-util',
@@ -2380,6 +2385,17 @@ return array(
       'javelin-behavior-aphlict-status',
       'javelin-behavior-user-menu',
       'phabricator-favicon',
+      'javelin-behavior-phui-tab-group',
+      'javelin-behavior-phui-submenu',
+      'phuix-button-view',
+      'javelin-behavior-comment-actions',
+      'phuix-form-control-view',
+      'phuix-autocomplete',
+    ),
+    'dark-console.pkg.js' => array(
+      'javelin-behavior-dark-console',
+      'phabricator-darklog',
+      'phabricator-darkmessage',
     ),
     'differential.pkg.css' => array(
       'differential-core-view-css',
@@ -2393,6 +2409,8 @@ return array(
       'phabricator-content-source-view-css',
       'inline-comment-summary-css',
       'phui-inline-comment-view-css',
+      'diff-tree-view-css',
+      'phui-formation-view-css',
     ),
     'differential.pkg.js' => array(
       'phabricator-drag-and-drop-file-upload',
@@ -2406,6 +2424,12 @@ return array(
       'phabricator-diff-inline',
       'phabricator-diff-changeset',
       'phabricator-diff-changeset-list',
+      'phabricator-diff-tree-view',
+      'phabricator-diff-path-view',
+      'phuix-formation-view',
+      'phuix-formation-column-view',
+      'phuix-formation-flank-view',
+      'javelin-behavior-diff-preview-link',
     ),
     'diffusion.pkg.css' => array(
       'diffusion-icons-css',
