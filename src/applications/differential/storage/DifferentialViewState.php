@@ -23,6 +23,9 @@ final class DifferentialViewState
         'key_object' => array(
           'columns' => array('objectPHID'),
         ),
+        'key_modified' => array(
+          'columns' => array('dateModified'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
