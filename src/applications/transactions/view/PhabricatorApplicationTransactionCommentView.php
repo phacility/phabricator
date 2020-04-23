@@ -270,10 +270,14 @@ final class PhabricatorApplicationTransactionCommentView
 
     $badge_view = $this->renderBadgeView();
 
+    $anchor = id(new PhabricatorAnchorView())
+      ->setAnchorName('reply');
+
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->addClass('phui-comment-form-view')
       ->addSigil('phui-comment-form')
+      ->appendChild($anchor)
       ->appendChild(
         phutil_tag(
           'h3',

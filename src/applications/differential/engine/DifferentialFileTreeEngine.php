@@ -77,7 +77,18 @@ final class DifferentialFileTreeEngine
           ->setHref('#'));
     $flank_view->setHead($head_view);
 
-    $tail_view = id(new PHUIListView())
+    $tail_view = id(new PHUIListView());
+
+    if ($viewer->isLoggedIn()) {
+      $tail_view->addMenuItem(
+        id(new PHUIListItemView())
+          ->setIcon('fa-comment-o')
+          ->setName(pht('Add Comment'))
+          ->setKeyCommand('x')
+          ->setHref('#'));
+    }
+
+    $tail_view
       ->addMenuItem(
         id(new PHUIListItemView())
           ->setIcon('fa-chevron-left')

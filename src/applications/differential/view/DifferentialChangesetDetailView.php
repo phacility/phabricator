@@ -270,9 +270,11 @@ final class DifferentialChangesetDetailView extends AphrontView {
           ->setNavigationMarker(true)
           ->render(),
         $buttons,
-        phutil_tag('h1',
+        javelin_tag(
+          'h1',
           array(
             'class' => 'differential-file-icon-header',
+            'sigil' => 'changeset-header',
           ),
           array(
             $icon,

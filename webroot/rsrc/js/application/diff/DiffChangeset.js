@@ -10,6 +10,7 @@
  *           javelin-vector
  *           phabricator-diff-inline
  *           phabricator-diff-path-view
+ *           phuix-button-view
  * @javelin
  */
 
@@ -48,6 +49,9 @@ JX.install('DiffChangeset', {
     if (data.changesetState) {
       this._loadChangesetState(data.changesetState);
     }
+
+    var onselect = JX.bind(this, this._onClickHeader);
+    JX.DOM.listen(this._node, 'mousedown', 'changeset-header', onselect);
   },
 
   members: {
@@ -70,7 +74,6 @@ JX.install('DiffChangeset', {
     _inlines: null,
     _visible: true,
 
-    _undoNode: null,
     _displayPath: null,
 
     _changesetList: null,
@@ -88,6 +91,8 @@ JX.install('DiffChangeset', {
     _isLowImportance: null,
     _isOwned: null,
     _isHidden: null,
+    _isSelected: false,
+    _viewMenu: null,
 
     getEditorURI: function() {
       return this._editorURI;
@@ -115,6 +120,11 @@ JX.install('DiffChangeset', {
 
     setChangesetList: function(list) {
       this._changesetList = list;
+      return this;
+    },
+
+    setViewMenu: function(menu) {
+      this._viewMenu = menu;
       return this;
     },
 
@@ -871,6 +881,16 @@ JX.install('DiffChangeset', {
       JX.DOM.alterClass(node, 'diff-tree-path-inlines-completed', is_completed);
     },
 
+    _onClickHeader: function(e) {
+      e.prevent();
+
+      if (this._isSelected) {
+        this.getChangesetList().selectChangeset(null);
+      } else {
+        this.select(false);
+      }
+    },
+
     toggleVisibility: function() {
       this.setVisible(!this._visible);
 
@@ -888,55 +908,85 @@ JX.install('DiffChangeset', {
     setVisible: function(visible) {
       this._visible = visible;
 
-      var diff = JX.DOM.find(this._node, 'table', 'differential-diff');
-      var undo = this._getUndoNode();
+      var diff = this._getDiffNode();
+      var options = this._getViewButtonNode();
+      var show = this._getShowButtonNode();
 
       if (this._visible) {
         JX.DOM.show(diff);
-        JX.DOM.remove(undo);
+        JX.DOM.show(options);
+        JX.DOM.hide(show);
       } else {
         JX.DOM.hide(diff);
-        JX.DOM.appendContent(diff.parentNode, undo);
+        JX.DOM.hide(options);
+        JX.DOM.show(show);
+
+        if (this._viewMenu) {
+          this._viewMenu.close();
+        }
       }
 
       JX.Stratcom.invoke('resize');
 
+      var node = this._node;
+      JX.DOM.alterClass(node, 'changeset-content-hidden', !this._visible);
+
       this.getPathView().setIsHidden(!this._visible);
+    },
+
+    setIsSelected: function(is_selected) {
+      this._isSelected = !!is_selected;
+
+      var node = this._node;
+      JX.DOM.alterClass(node, 'changeset-selected', this._isSelected);
+
+      return this;
+    },
+
+    _getDiffNode: function() {
+      if (!this._diffNode) {
+        this._diffNode = JX.DOM.find(this._node, 'table', 'differential-diff');
+      }
+      return this._diffNode;
+    },
+
+    _getViewButtonNode: function() {
+      if (!this._viewButtonNode) {
+        this._viewButtonNode = JX.DOM.find(
+          this._node,
+          'a',
+          'differential-view-options');
+      }
+      return this._viewButtonNode;
+    },
+
+    _getShowButtonNode: function() {
+      if (!this._showButtonNode) {
+        var pht = this.getChangesetList().getTranslations();
+
+        var show_button = new JX.PHUIXButtonView()
+          .setIcon('fa-angle-double-down')
+          .setText(pht('Show Changeset'))
+          .setColor('grey');
+
+        var button_node = show_button.getNode();
+        this._getViewButtonNode().parentNode.appendChild(button_node);
+
+        var onshow = JX.bind(this, this._onClickShowButton);
+        JX.DOM.listen(button_node, 'click', null, onshow);
+
+        this._showButtonNode = button_node;
+      }
+      return this._showButtonNode;
+    },
+
+    _onClickShowButton: function(e) {
+      e.prevent();
+      this.setVisible(true);
     },
 
     isVisible: function() {
       return this._visible;
-    },
-
-    _getUndoNode: function() {
-      if (!this._undoNode) {
-        var pht = this.getChangesetList().getTranslations();
-
-        var link_attributes = {
-          href: '#'
-        };
-
-        var undo_link = JX.$N('a', link_attributes, pht('Show Content'));
-
-        var onundo = JX.bind(this, this._onundo);
-        JX.DOM.listen(undo_link, 'click', null, onundo);
-
-        var node_attributes = {
-          className: 'differential-collapse-undo'
-        };
-
-        var node_content = [
-          pht('This file content has been collapsed.'),
-          ' ',
-          undo_link
-        ];
-
-        var undo_node = JX.$N('div', node_attributes, node_content);
-
-        this._undoNode = undo_node;
-      }
-
-      return this._undoNode;
     },
 
     _onundo: function(e) {

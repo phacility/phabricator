@@ -5,8 +5,6 @@
 
 .differential-changeset {
   position: relative;
-  margin: 0;
-  padding-top: 16px;
   overflow-x: auto;
 
   /* Fixes what seems to be a layout bug in Firefox which causes scrollbars,
@@ -312,14 +310,16 @@ td.cov-I {
   border-top: none;
 }
 
-.differential-changeset h1 {
+.differential-changeset .differential-file-icon-header {
   font-size: {$biggestfontsize};
-  padding: 2px 0 20px 12px;
+  padding: 18px 0 20px 12px;
+  margin-top: 4px;
   line-height: 20px;
   color: {$blacktext};
+  cursor: pointer;
 }
 
-.device-phone .differential-changeset h1 {
+.device-phone .differential-changeset .differential-file-icon-header {
   word-break: break-word;
   margin-right: 8px;
 }
@@ -343,19 +343,6 @@ td.cov-I {
   text-align: center;
 }
 
-.differential-collapse-undo {
-  color: {$darkbluetext};
-  padding: 12px;
-  border: 1px solid {$blue};
-  text-align: center;
-  background-color: {$lightblue};
-  margin: 8px;
-}
-
-.differential-collapse-undo a {
-  font-weight: bold;
-}
-
 .differential-file-icon-header .phui-icon-view {
   display: inline-block;
   margin: 0 6px 2px 0;
@@ -369,6 +356,7 @@ td.cov-I {
 
 .differential-changeset-buttons {
   float: right;
+  margin-top: 16px;
   margin-right: 12px;
 }
 
@@ -483,4 +471,14 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.changeset-content-hidden .differential-file-icon-header {
+  background: {$lightgreybackground};
+  color: {$greytext};
+}
+
+.changeset-selected .differential-file-icon-header {
+  background: {$lightyellow};
+  color: {$blacktext};
 }

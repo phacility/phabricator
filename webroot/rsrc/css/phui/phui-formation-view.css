@@ -181,3 +181,13 @@
   padding: 0;
   color: {$lightgreytext};
 }
+
+.phui-flank-view-head .phui-list-view {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  padding-bottom: 4px;
+}
+
+.phui-flank-view-tail .phui-list-view {
+  box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1);
+  padding-top: 4px;
+}

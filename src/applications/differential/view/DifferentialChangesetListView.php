@@ -261,9 +261,8 @@ final class DifferentialChangesetListView extends AphrontView {
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
         'All Context Shown' => pht('All Context Shown'),
-        "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
         'Expand File' => pht('Expand File'),
-        'Collapse File' => pht('Collapse File'),
+        'Hide Changeset' => pht('Hide Changeset'),
         'Show Path in Repository' => pht('Show Path in Repository'),
         'Show Directory in Repository' => pht('Show Directory in Repository'),
         'View Standalone' => pht('View Standalone'),
@@ -318,12 +317,8 @@ final class DifferentialChangesetListView extends AphrontView {
         'Jump to previous inline comment, including collapsed comments.' =>
           pht('Jump to previous inline comment, including collapsed comments.'),
 
-        'This file content has been collapsed.' =>
-          pht('This file content has been collapsed.'),
-        'Show Content' => pht('Show Content'),
-
-        'Hide or show the current file.' =>
-          pht('Hide or show the current file.'),
+        'Hide or show the current changeset.' =>
+          pht('Hide or show the current changeset.'),
         'You must select a file to hide or show.' =>
           pht('You must select a file to hide or show.'),
 
@@ -365,6 +360,11 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('Show path in repository.'),
         'Show directory in repository.' =>
           pht('Show directory in repository.'),
+
+        'Jump to the comment area.' =>
+          pht('Jump to the comment area.'),
+
+        'Show Changeset' => pht('Show Changeset'),
       ),
     ));
 
@@ -439,7 +439,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ->setHref(idx($meta, 'detailURI', '#'))
       ->setMetadata($meta)
       ->addSigil('differential-view-options');
-
   }
 
   private function appendDefaultQueryParams(PhutilURI $uri, array $params) {

@@ -124,6 +124,7 @@ JX.install('DiffChangesetList', {
     _dropdownMenu: null,
     _menuButton: null,
     _menuItems: null,
+    _selectedChangeset: null,
 
     sleep: function() {
       this._asleep = true;
@@ -165,6 +166,9 @@ JX.install('DiffChangesetList', {
       if (!standalone) {
         label = pht('Jump to the table of contents.');
         this._installKey('t', 'diff-nav', label, this._ontoc);
+
+        label = pht('Jump to the comment area.');
+        this._installKey('x', 'diff-nav', label, this._oncomments);
       }
 
       label = pht('Jump to next change.');
@@ -203,7 +207,7 @@ JX.install('DiffChangesetList', {
       }
 
       if (!standalone) {
-        label = pht('Hide or show the current file.');
+        label = pht('Hide or show the current changeset.');
         this._installKey('h', 'diff-vis', label, this._onkeytogglefile);
       }
 
@@ -327,6 +331,11 @@ JX.install('DiffChangesetList', {
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    _oncomments: function(manager) {
+      var reply = JX.$('reply');
+      manager.scrollTo(reply);
     },
 
     getSelectedInline: function() {
@@ -703,6 +712,8 @@ JX.install('DiffChangesetList', {
 
       if (cursor !== null) {
         this._setSelectionState(items[cursor], scroll);
+      } else {
+        this._setSelectionState(null, false);
       }
 
       return this;
@@ -731,12 +742,16 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var changeset = cursor.changeset;
+
       var tree = this._getTreeView();
-      if (cursor.changeset) {
+      if (changeset) {
         tree.setSelectedPath(cursor.changeset.getPathView());
       } else {
         tree.setSelectedPath(null);
       }
+
+      this._selectChangeset(changeset);
 
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
@@ -1047,8 +1062,9 @@ JX.install('DiffChangesetList', {
 
         visible_item
           .setDisabled(true)
-          .setIcon('fa-expand')
-          .setName(pht('Can\'t Toggle Unloaded File'));
+          .setIcon('fa-eye-slash')
+          .setName(pht('Hide Changeset'));
+
         var diffs = JX.DOM.scry(
           JX.$(data.containerID),
           'table',
@@ -1059,17 +1075,7 @@ JX.install('DiffChangesetList', {
             'More than one node with sigil "differential-diff" was found in "'+
             data.containerID+'."');
         } else if (diffs.length == 1) {
-          var diff = diffs[0];
           visible_item.setDisabled(false);
-          if (!changeset.isVisible()) {
-            visible_item
-              .setName(pht('Expand File'))
-              .setIcon('fa-expand');
-          } else {
-            visible_item
-              .setName(pht('Collapse File'))
-              .setIcon('fa-compress');
-          }
         } else {
           // Do nothing when there is no diff shown in the table. For example,
           // the file is binary.
@@ -1078,6 +1084,7 @@ JX.install('DiffChangesetList', {
       });
 
       data.menu = menu;
+      changeset.setViewMenu(menu);
       menu.open();
     },
 
@@ -1224,11 +1231,28 @@ JX.install('DiffChangesetList', {
       if (!node) {
         var tree = this._getTreeView();
         tree.setSelectedPath(null);
+        this._selectChangeset(null);
       }
 
       this._focusStart = node;
       this._focusEnd = extended_node;
       this._redrawFocus();
+    },
+
+    _selectChangeset: function(changeset) {
+      if (this._selectedChangeset === changeset) {
+        return;
+      }
+
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(false);
+        this._selectedChangeset = null;
+      }
+
+      this._selectedChangeset = changeset;
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(true);
+      }
     },
 
     _redrawFocus: function() {
@@ -1247,13 +1271,13 @@ JX.install('DiffChangesetList', {
       var s = JX.Vector.getAggregateScrollForNode(node);
       var d = JX.Vector.getDim(node);
 
-      p.add(s).add(d.x + 1, 0).setPos(reticle);
+      p.add(s).add(d.x + 1, 4).setPos(reticle);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
         .add(-p.x, -p.y)
         .add(0, JX.Vector.getDim(extended_node).y)
-        .add(10, 0)
+        .add(10, -4)
         .setDim(reticle);
 
       JX.DOM.getContentFrame().appendChild(reticle);
