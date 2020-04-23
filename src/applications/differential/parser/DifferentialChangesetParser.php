@@ -1714,10 +1714,7 @@ final class DifferentialChangesetParser extends Phobject {
       if ($old_file) {
         $old_ref->setFile($old_file);
       } else {
-        $old_data = $this->old;
-        $old_data = ipull($old_data, 'text');
-        $old_data = implode('', $old_data);
-
+        $old_data = $this->getRawDocumentEngineData($this->old);
         $old_ref->setData($old_data);
       }
     }
@@ -1730,10 +1727,7 @@ final class DifferentialChangesetParser extends Phobject {
       if ($new_file) {
         $new_ref->setFile($new_file);
       } else {
-        $new_data = $this->new;
-        $new_data = ipull($new_data, 'text');
-        $new_data = implode('', $new_data);
-
+        $new_data = $this->getRawDocumentEngineData($this->new);
         $new_ref->setData($new_data);
       }
     }
@@ -1901,6 +1895,22 @@ final class DifferentialChangesetParser extends Phobject {
     return id(new PhabricatorChangesetResponse())
       ->setRenderedChangeset($rendered_changeset)
       ->setChangesetState($state);
+  }
+
+  private function getRawDocumentEngineData(array $lines) {
+    $text = array();
+
+    foreach ($lines as $line) {
+      // If this is a "No newline at end of file." annotation, don't hand it
+      // off to the DocumentEngine.
+      if ($line['type'] == '\\') {
+        continue;
+      }
+
+      $text[] = $line['text'];
+    }
+
+    return implode('', $text);
   }
 
 }
