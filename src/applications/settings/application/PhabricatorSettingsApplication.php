@@ -23,7 +23,7 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
   }
 
   public function getRoutes() {
-    $panel_pattern = '(?:page/(?P<pageKey>[^/]+)/(?:(?P<formSaved>saved)/)?)?';
+    $panel_pattern = '(?:page/(?P<pageKey>[^/]+)/)?';
 
     return array(
       '/settings/' => array(

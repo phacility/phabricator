@@ -240,6 +240,9 @@ final class CelerityDefaultPostprocessor
 
       'document.border' => '#dedee1',
 
+      'delete-color' => '#c0392b',
+      'create-color' => '#139543',
+
     );
   }
 

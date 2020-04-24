@@ -72,7 +72,17 @@ a.jx-tokenizer-token {
   cursor: pointer;
   border-radius: 3px;
   color: {$sh-bluetext};
-  min-height: 16px;
+
+  /* See T13495. Certain Chinese glyphs can cause layout artifacts unless
+     we're fairly aggressive about specifying element sizing. */
+
+  line-height: 18px;
+  min-height: 20px;
+  max-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
 }
 
 a.jx-tokenizer-token:hover {

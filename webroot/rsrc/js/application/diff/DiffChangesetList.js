@@ -2,6 +2,7 @@
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
  *           phuix-button-view
+ *           phabricator-diff-tree-view
  * @javelin
  */
 
@@ -90,7 +91,8 @@ JX.install('DiffChangesetList', {
     translations: null,
     inlineURI: null,
     inlineListURI: null,
-    isStandalone: false
+    isStandalone: false,
+    formationView: null
   },
 
   members: {
@@ -122,6 +124,7 @@ JX.install('DiffChangesetList', {
     _dropdownMenu: null,
     _menuButton: null,
     _menuItems: null,
+    _selectedChangeset: null,
 
     sleep: function() {
       this._asleep = true;
@@ -143,6 +146,8 @@ JX.install('DiffChangesetList', {
       this._bannerChangeset = null;
       this._redrawBanner();
 
+      this._redrawFiletree();
+
       if (this._initialized) {
         return;
       }
@@ -157,6 +162,14 @@ JX.install('DiffChangesetList', {
       var standalone = this.getIsStandalone();
 
       var label;
+
+      if (!standalone) {
+        label = pht('Jump to the table of contents.');
+        this._installKey('t', 'diff-nav', label, this._ontoc);
+
+        label = pht('Jump to the comment area.');
+        this._installKey('x', 'diff-nav', label, this._oncomments);
+      }
 
       label = pht('Jump to next change.');
       this._installJumpKey('j', label, 1);
@@ -185,32 +198,47 @@ JX.install('DiffChangesetList', {
         'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
-      if (!standalone) {
-        label = pht('Hide or show the current file.');
-        this._installKey('h', label, this._onkeytogglefile);
+      var formation = this.getFormationView();
+      if (formation) {
+        var filetree = formation.getColumn(0);
+        var toggletree = JX.bind(filetree, filetree.toggleVisibility);
+        label = pht('Hide or show the paths panel.');
+        this._installKey('f', 'diff-vis', label, toggletree);
+      }
 
-        label = pht('Jump to the table of contents.');
-        this._installKey('t', label, this._ontoc);
+      if (!standalone) {
+        label = pht('Hide or show the current changeset.');
+        this._installKey('h', 'diff-vis', label, this._onkeytogglefile);
       }
 
       label = pht('Reply to selected inline comment or change.');
-      this._installKey('r', label, JX.bind(this, this._onkeyreply, false));
+      this._installKey('r', 'inline', label,
+        JX.bind(this, this._onkeyreply, false));
 
       label = pht('Reply and quote selected inline comment.');
-      this._installKey('R', label, JX.bind(this, this._onkeyreply, true));
+      this._installKey('R', 'inline', label,
+        JX.bind(this, this._onkeyreply, true));
 
       label = pht('Edit selected inline comment.');
-      this._installKey('e', label, this._onkeyedit);
+      this._installKey('e', 'inline', label, this._onkeyedit);
 
       label = pht('Mark or unmark selected inline comment as done.');
-      this._installKey('w', label, this._onkeydone);
+      this._installKey('w', 'inline', label, this._onkeydone);
 
       label = pht('Collapse or expand inline comment.');
-      this._installKey('q', label, this._onkeycollapse);
+      this._installKey('q', 'diff-vis', label, this._onkeycollapse);
 
       label = pht('Hide or show all inline comments.');
-      this._installKey('A', label, this._onkeyhideall);
+      this._installKey('A', 'diff-vis', label, this._onkeyhideall);
 
+      label = pht('Show path in repository.');
+      this._installKey('d', 'diff-nav', label, this._onkeyshowpath);
+
+      label = pht('Show directory in repository.');
+      this._installKey('D', 'diff-nav', label, this._onkeyshowdirectory);
+
+      label = pht('Open file in external editor.');
+      this._installKey('\\', 'diff-nav', label, this._onkeyopeneditor);
     },
 
     isAsleep: function() {
@@ -279,11 +307,12 @@ JX.install('DiffChangesetList', {
       }
     },
 
-    _installKey: function(key, label, handler) {
+    _installKey: function(key, group, label, handler) {
       handler = JX.bind(this, this._ifawake, handler);
 
       return new JX.KeyboardShortcut(key, label)
         .setHandler(handler)
+        .setGroup(group)
         .register();
     },
 
@@ -296,12 +325,17 @@ JX.install('DiffChangesetList', {
       };
 
       var handler = JX.bind(this, this._onjumpkey, delta, options);
-      return this._installKey(key, label, handler);
+      return this._installKey(key, 'diff-nav', label, handler);
     },
 
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    _oncomments: function(manager) {
+      var reply = JX.$('reply');
+      manager.scrollTo(reply);
     },
 
     getSelectedInline: function() {
@@ -437,17 +471,80 @@ JX.install('DiffChangesetList', {
     },
 
     _onkeytogglefile: function() {
-      var cursor = this._cursorItem;
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
 
-      if (cursor) {
-        if (cursor.type == 'file') {
-          cursor.changeset.toggleVisibility();
-          return;
-        }
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to hide or show.'));
+        return;
       }
 
+      changeset.toggleVisibility();
+    },
+
+    _getChangesetForKeyCommand: function() {
+      var cursor = this._cursorItem;
+
+      var changeset;
+      if (cursor) {
+        changeset = cursor.changeset;
+      }
+
+      if (!changeset) {
+        changeset = this._getVisibleChangeset();
+      }
+
+      return changeset;
+    },
+
+    _onkeyopeneditor: function() {
       var pht = this.getTranslations();
-      this._warnUser(pht('You must select a file to hide or show.'));
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to edit.'));
+        return;
+      }
+
+      var editor_uri = changeset.getEditorURI();
+
+      if (editor_uri === null) {
+        this._warnUser(pht('No external editor is configured.'));
+        return;
+      }
+
+      JX.$U(editor_uri).go();
+    },
+
+    _onkeyshowpath: function() {
+      this._onrepositorykey(false);
+    },
+
+    _onkeyshowdirectory: function() {
+      this._onrepositorykey(true);
+    },
+
+    _onrepositorykey: function(is_directory) {
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to open.'));
+        return;
+      }
+
+      var show_uri;
+      if (is_directory) {
+        show_uri = changeset.getShowDirectoryURI();
+      } else {
+        show_uri = changeset.getShowPathURI();
+      }
+
+      if (show_uri === null) {
+        return;
+      }
+
+      window.open(show_uri);
     },
 
     _onkeycollapse: function() {
@@ -601,6 +698,27 @@ JX.install('DiffChangesetList', {
       };
     },
 
+    selectChangeset: function(changeset, scroll) {
+      var items = this._getSelectableItems();
+
+      var cursor = null;
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
+        if (changeset === item.target) {
+          cursor = ii;
+          break;
+        }
+      }
+
+      if (cursor !== null) {
+        this._setSelectionState(items[cursor], scroll);
+      } else {
+        this._setSelectionState(null, false);
+      }
+
+      return this;
+    },
+
     _setSelectionState: function(item, scroll) {
       this._cursorItem = item;
       this._redrawSelection(scroll);
@@ -623,6 +741,17 @@ JX.install('DiffChangesetList', {
         this.setFocus(null);
         return;
       }
+
+      var changeset = cursor.changeset;
+
+      var tree = this._getTreeView();
+      if (changeset) {
+        tree.setSelectedPath(cursor.changeset.getPathView());
+      } else {
+        tree.setSelectedPath(null);
+      }
+
+      this._selectChangeset(changeset);
 
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
@@ -711,18 +840,14 @@ JX.install('DiffChangesetList', {
       var changeset_list = this;
       var changeset = this.getChangesetForNode(node);
 
-      var menu = new JX.PHUIXDropdownMenu(button);
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
       var list = new JX.PHUIXActionListView();
 
       var add_link = function(icon, name, href, local) {
-        if (!href) {
-          return;
-        }
-
         var link = new JX.PHUIXActionView()
           .setIcon(icon)
           .setName(name)
-          .setHref(href)
           .setHandler(function(e) {
             if (local) {
               window.location.assign(href);
@@ -733,25 +858,36 @@ JX.install('DiffChangesetList', {
             e.prevent();
           });
 
+        if (href) {
+          link.setHref(href);
+        } else {
+          link
+            .setDisabled(true)
+            .setUnresponsive(true);
+        }
+
         list.addItem(link);
         return link;
       };
+
+      var visible_item = new JX.PHUIXActionView()
+        .setKeyCommand('h')
+        .setHandler(function(e) {
+          e.prevent();
+          menu.close();
+
+          changeset.select(false);
+          changeset.toggleVisibility();
+        });
+      list.addItem(visible_item);
 
       var reveal_item = new JX.PHUIXActionView()
         .setIcon('fa-eye');
       list.addItem(reveal_item);
 
-      var visible_item = new JX.PHUIXActionView()
-        .setHandler(function(e) {
-          e.prevent();
-          menu.close();
-
-          changeset.toggleVisibility();
-        });
-      list.addItem(visible_item);
-
-      add_link('fa-file-text', pht('Browse in Diffusion'), data.diffusionURI);
-      add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
 
       var up_item = new JX.PHUIXActionView()
         .setHandler(function(e) {
@@ -772,15 +908,16 @@ JX.install('DiffChangesetList', {
               }
             }
 
-            var renderer = changeset.getRenderer();
+            var renderer = changeset.getRendererKey();
             if (renderer == '1up') {
               renderer = '2up';
             } else {
               renderer = '1up';
             }
-            changeset.setRenderer(renderer);
+            changeset.reload({renderer: renderer});
+          } else {
+            changeset.reload();
           }
-          changeset.reload();
 
           e.prevent();
           menu.close();
@@ -792,13 +929,12 @@ JX.install('DiffChangesetList', {
         .setName(pht('Change Text Encoding...'))
         .setHandler(function(e) {
           var params = {
-            encoding: changeset.getEncoding()
+            encoding: changeset.getCharacterEncoding()
           };
 
           new JX.Workflow('/services/encoding/', params)
             .setHandler(function(r) {
-              changeset.setEncoding(r.encoding);
-              changeset.reload();
+              changeset.reload({encoding: r.encoding});
             })
             .start();
 
@@ -817,8 +953,7 @@ JX.install('DiffChangesetList', {
 
           new JX.Workflow('/services/highlight/', params)
             .setHandler(function(r) {
-              changeset.setHighlight(r.highlight);
-              changeset.reload();
+              changeset.reload({highlight: r.highlight});
             })
             .start();
 
@@ -829,7 +964,7 @@ JX.install('DiffChangesetList', {
 
       var engine_item = new JX.PHUIXActionView()
         .setIcon('fa-file-image-o')
-        .setName(pht('View As...'))
+        .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
           var params = {
             engine: changeset.getDocumentEngine(),
@@ -837,8 +972,7 @@ JX.install('DiffChangesetList', {
 
           new JX.Workflow('/services/viewas/', params)
             .setHandler(function(r) {
-              changeset.setDocumentEngine(r.engine);
-              changeset.reload();
+              changeset.reload({engine: r.engine});
             })
             .start();
 
@@ -847,10 +981,37 @@ JX.install('DiffChangesetList', {
         });
       list.addItem(engine_item);
 
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
+
+      add_link('fa-external-link', pht('View Standalone'), data.standaloneURI);
+
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
-      add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
-      add_link('fa-wrench', pht('Configure Editor'), data.editorConfigure);
+
+      add_link(
+        'fa-folder-open-o',
+        pht('Show Directory in Repository'),
+        changeset.getShowDirectoryURI())
+        .setKeyCommand('D');
+
+      add_link(
+        'fa-file-text-o',
+        pht('Show Path in Repository'),
+        changeset.getShowPathURI())
+        .setKeyCommand('d');
+
+      var editor_uri = changeset.getEditorURI();
+      if (editor_uri !== null) {
+        add_link('fa-i-cursor', pht('Open in Editor'), editor_uri, true)
+          .setKeyCommand('\\');
+      } else {
+        var configure_uri = changeset.getEditorConfigureURI();
+        if (configure_uri !== null) {
+          add_link('fa-wrench', pht('Configure Editor'), configure_uri);
+        }
+      }
 
       menu.setContent(list.getNode());
 
@@ -864,7 +1025,7 @@ JX.install('DiffChangesetList', {
           reveal_item
             .setDisabled(false)
             .setName(pht('Show All Context'))
-            .setIcon('fa-file-o')
+            .setIcon('fa-arrows-v')
             .setHandler(function(e) {
               changeset.loadAllContext();
               e.prevent();
@@ -873,9 +1034,10 @@ JX.install('DiffChangesetList', {
         } else {
           reveal_item
             .setDisabled(true)
+            .setUnresponsive(true)
             .setIcon('fa-file')
             .setName(pht('All Context Shown'))
-            .setHandler(function(e) { e.prevent(); });
+            .setHref(null);
         }
 
         encoding_item.setDisabled(!changeset.isLoaded());
@@ -883,14 +1045,14 @@ JX.install('DiffChangesetList', {
         engine_item.setDisabled(!changeset.isLoaded());
 
         if (changeset.isLoaded()) {
-          if (changeset.getRenderer() == '2up') {
+          if (changeset.getRendererKey() == '2up') {
             up_item
               .setIcon('fa-list-alt')
-              .setName(pht('View Unified'));
+              .setName(pht('View Unified Diff'));
           } else {
             up_item
-              .setIcon('fa-files-o')
-              .setName(pht('View Side-by-Side'));
+              .setIcon('fa-columns')
+              .setName(pht('View Side-by-Side Diff'));
           }
         } else {
           up_item
@@ -900,8 +1062,9 @@ JX.install('DiffChangesetList', {
 
         visible_item
           .setDisabled(true)
-          .setIcon('fa-expand')
-          .setName(pht('Can\'t Toggle Unloaded File'));
+          .setIcon('fa-eye-slash')
+          .setName(pht('Hide Changeset'));
+
         var diffs = JX.DOM.scry(
           JX.$(data.containerID),
           'table',
@@ -912,17 +1075,7 @@ JX.install('DiffChangesetList', {
             'More than one node with sigil "differential-diff" was found in "'+
             data.containerID+'."');
         } else if (diffs.length == 1) {
-          var diff = diffs[0];
           visible_item.setDisabled(false);
-          if (!changeset.isVisible()) {
-            visible_item
-              .setName(pht('Expand File'))
-              .setIcon('fa-expand');
-          } else {
-            visible_item
-              .setName(pht('Collapse File'))
-              .setIcon('fa-compress');
-          }
         } else {
           // Do nothing when there is no diff shown in the table. For example,
           // the file is binary.
@@ -931,6 +1084,7 @@ JX.install('DiffChangesetList', {
       });
 
       data.menu = menu;
+      changeset.setViewMenu(menu);
       menu.open();
     },
 
@@ -1074,9 +1228,31 @@ JX.install('DiffChangesetList', {
     },
 
     setFocus: function(node, extended_node) {
+      if (!node) {
+        var tree = this._getTreeView();
+        tree.setSelectedPath(null);
+        this._selectChangeset(null);
+      }
+
       this._focusStart = node;
       this._focusEnd = extended_node;
       this._redrawFocus();
+    },
+
+    _selectChangeset: function(changeset) {
+      if (this._selectedChangeset === changeset) {
+        return;
+      }
+
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(false);
+        this._selectedChangeset = null;
+      }
+
+      this._selectedChangeset = changeset;
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(true);
+      }
     },
 
     _redrawFocus: function() {
@@ -1093,14 +1269,15 @@ JX.install('DiffChangesetList', {
       // space between the focused element and the outline.
       var p = JX.Vector.getPos(node);
       var s = JX.Vector.getAggregateScrollForNode(node);
+      var d = JX.Vector.getDim(node);
 
-      p.add(s).add(-4, -4).setPos(reticle);
+      p.add(s).add(d.x + 1, 4).setPos(reticle);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
         .add(-p.x, -p.y)
-        .add(JX.Vector.getDim(extended_node))
-        .add(8, 8)
+        .add(0, JX.Vector.getDim(extended_node).y)
+        .add(10, -4)
         .setDim(reticle);
 
       JX.DOM.getContentFrame().appendChild(reticle);
@@ -1422,10 +1599,18 @@ JX.install('DiffChangesetList', {
 
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
+      var tree = this._getTreeView();
+      var formation = this.getFormationView();
 
       if (!changeset) {
         this._bannerChangeset = null;
         JX.DOM.remove(node);
+        tree.setFocusedPath(null);
+
+        if (formation) {
+          formation.repaint();
+        }
+
         return;
       }
 
@@ -1435,6 +1620,14 @@ JX.install('DiffChangesetList', {
         return;
       }
       this._bannerChangeset = changeset;
+
+      var paths = tree.getPaths();
+      for (var ii = 0; ii < paths.length; ii++) {
+        var path = paths[ii];
+        if (path.getChangeset() === changeset) {
+          tree.setFocusedPath(path);
+        }
+      }
 
       var inlines = this._getInlinesByType();
 
@@ -1541,6 +1734,10 @@ JX.install('DiffChangesetList', {
       JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+
+      if (formation) {
+        formation.repaint();
+      }
     },
 
     _getInlinesByType: function() {
@@ -1911,7 +2108,38 @@ JX.install('DiffChangesetList', {
       }
 
       return null;
+    },
+
+    _getTreeView: function() {
+      if (!this._treeView) {
+        var tree = new JX.DiffTreeView();
+
+        for (var ii = 0; ii < this._changesets.length; ii++) {
+          var changeset = this._changesets[ii];
+          tree.addPath(changeset.getPathView());
+        }
+
+        this._treeView = tree;
+      }
+      return this._treeView;
+    },
+
+    _redrawFiletree : function() {
+      var formation = this.getFormationView();
+
+      if (!formation) {
+        return;
+      }
+
+      var filetree = formation.getColumn(0);
+      var flank = filetree.getFlank();
+
+      var flank_body = flank.getBodyNode();
+
+      var tree = this._getTreeView();
+      JX.DOM.setContent(flank_body, tree.getNode());
     }
+
   }
 
 });

@@ -4,18 +4,8 @@
 // underlying file data were not written correctly. This restores edges for
 // any missing pastes.
 
-$table = new PhabricatorPaste();
-$edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-
-foreach (new LiskMigrationIterator($table) as $paste) {
-  $paste_phid = $paste->getPHID();
-  $file_phid = $paste->getFilePHID();
-
-  if (!$file_phid) {
-    continue;
-  }
-
-  id(new PhabricatorEdgeEditor())
-    ->addEdge($paste_phid, $edge_type, $file_phid)
-    ->save();
-}
+// See T13510. The "pastebin" database was later renamed to "paste", which
+// broke this migration. The migration was removed in 2020 since it seems
+// plausible that zero installs are impacted (only installs that ran code
+// from November 2015 and have not upgraded in five years could possibly be
+// impacted).

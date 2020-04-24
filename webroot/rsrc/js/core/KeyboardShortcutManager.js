@@ -16,6 +16,9 @@ JX.install('KeyboardShortcutManager', {
     JX.Stratcom.listen('keypress', null, JX.bind(this, this._onkeypress));
     JX.Stratcom.listen('keydown', null, JX.bind(this, this._onkeydown));
     JX.Stratcom.listen('keyup', null, JX.bind(this, this._onkeyup));
+
+    var onelement = JX.bind(this, this._onelement);
+    JX.Stratcom.listen('click', 'has-key-command', onelement);
   },
 
   statics : {
@@ -65,9 +68,11 @@ JX.install('KeyboardShortcutManager', {
     getShortcutDescriptions : function() {
       var desc = [];
       for (var ii = 0; ii < this._shortcuts.length; ii++) {
+        var shortcut = this._shortcuts[ii];
         desc.push({
-          keys : this._shortcuts[ii].getKeys(),
-          description : this._shortcuts[ii].getDescription()
+          keys : shortcut.getKeys(),
+          group: shortcut.getGroup(),
+          description : shortcut.getDescription()
         });
       }
       return desc;
@@ -116,18 +121,29 @@ JX.install('KeyboardShortcutManager', {
 
       var key = this._getKey(e);
 
+      var handled = this._handleKey(key);
+
+      if (handled) {
+        e.kill();
+      }
+    },
+
+    _handleKey: function(key) {
       var shortcuts = this._shortcuts;
+
       for (var ii = 0; ii < shortcuts.length; ii++) {
         var keys = shortcuts[ii].getKeys();
         for (var jj = 0; jj < keys.length; jj++) {
           if (keys[jj] == key) {
             shortcuts[ii].getHandler()(this);
-            e.kill(); // Consume the event
-            return;
+            return true;
           }
         }
       }
+
+      return false;
     },
+
     _onkeydown : function(e) {
       this._handleTooltipKeyEvent(e, true);
 
@@ -140,6 +156,12 @@ JX.install('KeyboardShortcutManager', {
     },
     _getKey : function(e) {
       return e.getSpecialKey() || String.fromCharCode(e.getRawEvent().charCode);
+    },
+    _onelement: function(e) {
+      var data = e.getNodeData('has-key-command');
+      this._handleKey(data.keyCommand);
+
+      e.kill();
     },
     _handleTooltipKeyEvent : function(e, is_keydown) {
       if (e.getRawEvent().keyCode != 18) {

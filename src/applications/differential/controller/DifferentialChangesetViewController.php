@@ -165,21 +165,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
-    $parser = id(new DifferentialChangesetParser())
-      ->setViewer($viewer)
-      ->setCoverage($coverage)
-      ->setChangeset($changeset)
-      ->setRenderingReference($rendering_reference)
-      ->setRenderCacheKey($render_cache_key)
-      ->setRightSideCommentMapping($right_source, $right_new)
-      ->setLeftSideCommentMapping($left_source, $left_new);
-
-    $parser->readParametersFromRequest($request);
-
-    if ($left && $right) {
-      $parser->setOriginals($left, $right);
-    }
-
     $diff = $changeset->getDiff();
     $revision_id = $diff->getRevisionID();
 
@@ -195,6 +180,37 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
         $object_owner_phid = $revision->getAuthorPHID();
       }
+    }
+
+    if ($revision) {
+      $container_phid = $revision->getPHID();
+    } else {
+      $container_phid = $diff->getPHID();
+    }
+
+    $viewstate_engine = id(new PhabricatorChangesetViewStateEngine())
+      ->setViewer($viewer)
+      ->setObjectPHID($container_phid)
+      ->setChangeset($changeset);
+
+    $viewstate = $viewstate_engine->newViewStateFromRequest($request);
+
+    if ($viewstate->getDiscardResponse()) {
+      return new AphrontAjaxResponse();
+    }
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setViewState($viewstate)
+      ->setCoverage($coverage)
+      ->setChangeset($changeset)
+      ->setRenderingReference($rendering_reference)
+      ->setRenderCacheKey($render_cache_key)
+      ->setRightSideCommentMapping($right_source, $right_new)
+      ->setLeftSideCommentMapping($left_source, $left_new);
+
+    if ($left && $right) {
+      $parser->setOriginals($left, $right);
     }
 
     // Load both left-side and right-side inline comments.
@@ -249,7 +265,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $engine->process();
 
     $parser
-      ->setUser($viewer)
+      ->setViewer($viewer)
       ->setMarkupEngine($engine)
       ->setShowEditAndReplyLinks(true)
       ->setCanMarkDone($can_mark)
@@ -260,7 +276,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if ($request->isAjax()) {
       // NOTE: We must render the changeset before we render coverage
       // information, since it builds some caches.
-      $rendered_changeset = $parser->renderChangeset();
+      $response = $parser->newChangesetResponse();
 
       $mcov = $parser->renderModifiedCoverage();
 
@@ -268,10 +284,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
-      return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($rendered_changeset)
-        ->setCoverage($coverage_data)
-        ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
+      $response->setCoverage($coverage_data);
+
+      return $response;
     }
 
     $detail = id(new DifferentialChangesetListView())

@@ -2,6 +2,10 @@
 
 abstract class PhabricatorFerretEngine extends Phobject {
 
+  private $fieldMap = array();
+  private $ferretFunctions;
+  private $templateObject;
+
   abstract public function getApplicationName();
   abstract public function getScopeName();
   abstract public function newSearchEngine();
@@ -14,123 +18,35 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return 1000;
   }
 
-  public function getFieldForFunction($function) {
-    $function = phutil_utf8_strtolower($function);
+  final public function getFunctionForName($raw_name) {
+    if (isset($this->fieldMap[$raw_name])) {
+      return $this->fieldMap[$raw_name];
+    }
 
-    $map = $this->getFunctionMap();
-    if (!isset($map[$function])) {
+    $normalized_name =
+      FerretSearchFunction::getNormalizedFunctionName($raw_name);
+
+    if ($this->ferretFunctions === null) {
+      $functions = FerretSearchFunction::newFerretSearchFunctions();
+      $this->ferretFunctions = $functions;
+    }
+
+    if (!isset($this->ferretFunctions[$normalized_name])) {
       throw new PhutilSearchQueryCompilerSyntaxException(
         pht(
           'Unknown search function "%s". Supported functions are: %s.',
-          $function,
-          implode(', ', array_keys($map))));
+          $raw_name,
+          implode(', ', array_keys($this->ferretFunctions))));
     }
 
-    return $map[$function]['field'];
-  }
+    $function = $this->ferretFunctions[$normalized_name];
+    $this->fieldMap[$raw_name] = $function;
 
-  public function getAllFunctionFields() {
-    $map = $this->getFunctionMap();
-
-    $fields = array();
-    foreach ($map as $key => $spec) {
-      $fields[] = $spec['field'];
-    }
-
-    return $fields;
-  }
-
-  protected function getFunctionMap() {
-    return array(
-      'all' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
-        'aliases' => array(
-          'any',
-        ),
-      ),
-      'title' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
-        'aliases' => array(),
-      ),
-      'body' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
-        'aliases' => array(),
-      ),
-      'core' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
-        'aliases' => array(),
-      ),
-      'comment' => array(
-        'field' => PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
-        'aliases' => array(
-          'comments',
-        ),
-      ),
-    );
+    return $this->fieldMap[$raw_name];
   }
 
   public function newStemmer() {
     return new PhutilSearchStemmer();
-  }
-
-  public function tokenizeString($value) {
-    $value = trim($value, ' ');
-    $value = preg_split('/\s+/u', $value);
-    return $value;
-  }
-
-  public function getTermNgramsFromString($string) {
-    return $this->getNgramsFromString($string, true);
-  }
-
-  public function getSubstringNgramsFromString($string) {
-    return $this->getNgramsFromString($string, false);
-  }
-
-  private function getNgramsFromString($value, $as_term) {
-    $value = phutil_utf8_strtolower($value);
-    $tokens = $this->tokenizeString($value);
-
-    // First, extract unique tokens from the string. This reduces the number
-    // of `phutil_utf8v()` calls we need to make if we are indexing a large
-    // corpus with redundant terms.
-    $unique_tokens = array();
-    foreach ($tokens as $token) {
-      if ($as_term) {
-        $token = ' '.$token.' ';
-      }
-
-      $unique_tokens[$token] = true;
-    }
-
-    $ngrams = array();
-    foreach ($unique_tokens as $token => $ignored) {
-      $token_v = phutil_utf8v($token);
-      $length = count($token_v);
-
-      // NOTE: We're being somewhat clever here to micro-optimize performance,
-      // especially for very long strings. See PHI87.
-
-      $token_l = array();
-      for ($ii = 0; $ii < $length; $ii++) {
-        $token_l[$ii] = strlen($token_v[$ii]);
-      }
-
-      $ngram_count = $length - 2;
-      $cursor = 0;
-      for ($ii = 0; $ii < $ngram_count; $ii++) {
-        $ngram_l = $token_l[$ii] + $token_l[$ii + 1] + $token_l[$ii + 2];
-
-        $ngram = substr($token, $cursor, $ngram_l);
-        $ngrams[$ngram] = $ngram;
-
-        $cursor += $token_l[$ii];
-      }
-    }
-
-    ksort($ngrams);
-
-    return array_keys($ngrams);
   }
 
   public function newTermsCorpus($raw_corpus) {

@@ -7,7 +7,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $background;
   private $tabGroups = array();
   private $formErrors = null;
-  private $formSaved = false;
   private $infoView;
   private $form;
   private $validationException;
@@ -71,19 +70,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $this->formErrors = id(new PHUIInfoView())
         ->setTitle($title)
         ->setErrors($errors);
-    }
-    return $this;
-  }
-
-  public function setFormSaved($saved, $text = null) {
-    if (!$text) {
-      $text = pht('Changes saved.');
-    }
-    if ($saved) {
-      $save = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild($text);
-      $this->formSaved = $save;
     }
     return $this;
   }
@@ -324,7 +310,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $header,
       $this->infoView,
       $this->formErrors,
-      $this->formSaved,
       $exception_errors,
       $this->form,
       $this->tabGroups,

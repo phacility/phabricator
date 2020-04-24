@@ -550,11 +550,18 @@ abstract class PhabricatorAphlictManagementWorkflow
   }
 
   private function getStartCommand(array $server_argv) {
+    $launch_argv = array();
+
+    if ($this->debug) {
+      $launch_argv[] = '--debug=1';
+    }
+
     return csprintf(
-      '%R %Ls -- %s %Ls',
+      '%R %Ls -- %s %Ls %Ls',
       $this->getNodeBinary(),
       $this->getNodeArgv(),
       $this->getAphlictScriptPath(),
+      $launch_argv,
       $server_argv);
   }
 

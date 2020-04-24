@@ -100,13 +100,13 @@ abstract class PhabricatorOAuth1AuthProvider
     // an access token.
 
     try {
-      $account_id = $adapter->getAccountID();
+      $identifiers = $adapter->getAccountIdentifiers();
     } catch (Exception $ex) {
       // TODO: Handle this in a more user-friendly way.
       throw $ex;
     }
 
-    if (!strlen($account_id)) {
+    if (!$identifiers) {
       $response = $controller->buildProviderErrorResponse(
         $this,
         pht(
@@ -115,7 +115,9 @@ abstract class PhabricatorOAuth1AuthProvider
       return array($account, $response);
     }
 
-    return array($this->loadOrCreateAccount($account_id), $response);
+    $account = $this->newExternalAccountForIdentifiers($identifiers);
+
+    return array($account, $response);
   }
 
   public function processEditForm(

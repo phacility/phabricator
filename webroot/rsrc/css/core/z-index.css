@@ -64,10 +64,6 @@ div.phui-calendar-day-event {
   z-index: 4;
 }
 
-.phabricator-nav-drag {
-  z-index: 4;
-}
-
 .conpherence-message-pane .conpherence-search-main {
   z-index: 4;
 }

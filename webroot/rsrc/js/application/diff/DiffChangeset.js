@@ -9,9 +9,10 @@
  *           javelin-behavior-device
  *           javelin-vector
  *           phabricator-diff-inline
+ *           phabricator-diff-path-view
+ *           phuix-button-view
  * @javelin
  */
-
 
 JX.install('DiffChangeset', {
 
@@ -22,10 +23,6 @@ JX.install('DiffChangeset', {
 
     this._renderURI = data.renderURI;
     this._ref = data.ref;
-    this._renderer = data.renderer;
-    this._highlight = data.highlight;
-    this._documentEngine = data.documentEngine;
-    this._encoding = data.encoding;
     this._loaded = data.loaded;
     this._treeNodeID = data.treeNodeID;
 
@@ -33,9 +30,28 @@ JX.install('DiffChangeset', {
     this._rightID = data.right;
 
     this._displayPath = JX.$H(data.displayPath);
+    this._pathParts = data.pathParts;
     this._icon = data.icon;
 
+    this._editorURI = data.editorURI;
+    this._editorConfigureURI = data.editorConfigureURI;
+    this._showPathURI = data.showPathURI;
+    this._showDirectoryURI = data.showDirectoryURI;
+
+    this._pathIconIcon = data.pathIconIcon;
+    this._pathIconColor = data.pathIconColor;
+    this._isLowImportance = data.isLowImportance;
+    this._isOwned = data.isOwned;
+    this._isLoading = true;
+
     this._inlines = [];
+
+    if (data.changesetState) {
+      this._loadChangesetState(data.changesetState);
+    }
+
+    var onselect = JX.bind(this, this._onClickHeader);
+    JX.DOM.listen(this._node, 'mousedown', 'changeset-header', onselect);
   },
 
   members: {
@@ -46,10 +62,10 @@ JX.install('DiffChangeset', {
 
     _renderURI: null,
     _ref: null,
-    _renderer: null,
+    _rendererKey: null,
     _highlight: null,
     _documentEngine: null,
-    _encoding: null,
+    _characterEncoding: null,
     _undoTemplates: null,
 
     _leftID: null,
@@ -58,12 +74,41 @@ JX.install('DiffChangeset', {
     _inlines: null,
     _visible: true,
 
-    _undoNode: null,
     _displayPath: null,
 
     _changesetList: null,
     _icon: null,
-    _treeNodeID: null,
+
+    _editorURI: null,
+    _editorConfigureURI: null,
+    _showPathURI: null,
+    _showDirectoryURI: null,
+
+    _pathView: null,
+
+    _pathIconIcon: null,
+    _pathIconColor: null,
+    _isLowImportance: null,
+    _isOwned: null,
+    _isHidden: null,
+    _isSelected: false,
+    _viewMenu: null,
+
+    getEditorURI: function() {
+      return this._editorURI;
+    },
+
+    getEditorConfigureURI: function() {
+      return this._editorConfigureURI;
+    },
+
+    getShowPathURI: function() {
+      return this._showPathURI;
+    },
+
+    getShowDirectoryURI: function() {
+      return this._showDirectoryURI;
+    },
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -75,6 +120,11 @@ JX.install('DiffChangeset', {
 
     setChangesetList: function(list) {
       this._changesetList = list;
+      return this;
+    },
+
+    setViewMenu: function(menu) {
+      this._viewMenu = menu;
       return this;
     },
 
@@ -173,17 +223,16 @@ JX.install('DiffChangeset', {
      *
      * @return this
      */
-    reload: function() {
+    reload: function(state) {
       this._loaded = true;
       this._sequence++;
 
-      var params = this._getViewParameters();
-      var pht = this.getChangesetList().getTranslations();
-
-      var workflow = new JX.Workflow(this._renderURI, params)
+      var workflow = this._newReloadWorkflow(state)
         .setHandler(JX.bind(this, this._onresponse, this._sequence));
 
       this._startContentWorkflow(workflow);
+
+      var pht = this.getChangesetList().getTranslations();
 
       JX.DOM.setContent(
         this._getContentFrame(),
@@ -193,6 +242,11 @@ JX.install('DiffChangeset', {
           pht('Loading...')));
 
       return this;
+    },
+
+    _newReloadWorkflow: function(state) {
+      var params = this._getViewParameters(state);
+      return new JX.Workflow(this._renderURI, params);
     },
 
     /**
@@ -307,14 +361,17 @@ JX.install('DiffChangeset', {
     /**
      * Get parameters which define the current rendering options.
      */
-    _getViewParameters: function() {
-      return {
+    _getViewParameters: function(state) {
+      var parameters = {
         ref: this._ref,
-        renderer: this.getRenderer() || '',
-        highlight: this._highlight || '',
-        engine: this._documentEngine || '',
-        encoding: this._encoding || ''
+        device: this._getDefaultDeviceRenderer()
       };
+
+      if (state) {
+        JX.copy(parameters, state);
+      }
+
+      return parameters;
     },
 
     /**
@@ -330,16 +387,11 @@ JX.install('DiffChangeset', {
       return JX.Router.getInstance().getRoutableByKey(this._getRoutableKey());
     },
 
-    setRenderer: function(renderer) {
-      this._renderer = renderer;
-      return this;
+    getRendererKey: function() {
+      return this._rendererKey;
     },
 
-    getRenderer: function() {
-      if (this._renderer !== null) {
-        return this._renderer;
-      }
-
+    _getDefaultDeviceRenderer: function() {
       // NOTE: If you load the page at one device resolution and then resize to
       // a different one we don't re-render the diffs, because it's a
       // complicated mess and you could lose inline comments, cursor positions,
@@ -351,26 +403,12 @@ JX.install('DiffChangeset', {
       return this._undoTemplates;
     },
 
-    setEncoding: function(encoding) {
-      this._encoding = encoding;
-      return this;
-    },
-
-    getEncoding: function() {
-      return this._encoding;
-    },
-
-    setHighlight: function(highlight) {
-      this._highlight = highlight;
-      return this;
+    getCharacterEncoding: function() {
+      return this._characterEncoding;
     },
 
     getHighlight: function() {
       return this._highlight;
-    },
-
-    setDocumentEngine: function(engine) {
-      this._documentEngine = engine;
     },
 
     getDocumentEngine: function(engine) {
@@ -600,25 +638,43 @@ JX.install('DiffChangeset', {
     _onchangesetresponse: function(response) {
       // Code shared by autoload and context responses.
 
-      if (response.coverage) {
-        for (var k in response.coverage) {
-          try {
-            JX.DOM.replace(JX.$(k), JX.$H(response.coverage[k]));
-          } catch (ignored) {
-            // Not terribly important.
-          }
-        }
-      }
-
-      if (response.undoTemplates) {
-        this._undoTemplates = response.undoTemplates;
-      }
+      this._loadChangesetState(response);
 
       JX.Stratcom.invoke('differential-inline-comment-refresh');
 
       this._rebuildAllInlines();
 
       JX.Stratcom.invoke('resize');
+    },
+
+    _loadChangesetState: function(state) {
+      if (state.coverage) {
+        for (var k in state.coverage) {
+          try {
+            JX.DOM.replace(JX.$(k), JX.$H(state.coverage[k]));
+          } catch (ignored) {
+            // Not terribly important.
+          }
+        }
+      }
+
+      if (state.undoTemplates) {
+        this._undoTemplates = state.undoTemplates;
+      }
+
+      this._rendererKey = state.rendererKey;
+      this._highlight = state.highlight;
+      this._characterEncoding = state.characterEncoding;
+      this._documentEngine = state.documentEngine;
+      this._isHidden = state.isHidden;
+
+      var is_hidden = !this.isVisible();
+      if (this._isHidden != is_hidden) {
+        this.setVisible(!this._isHidden);
+      }
+
+      this._isLoading = false;
+      this.getPathView().setIsLoading(this._isLoading);
     },
 
     _getContentFrame: function() {
@@ -761,13 +817,6 @@ JX.install('DiffChangeset', {
     },
 
     redrawFileTree: function() {
-      var tree;
-      try {
-        tree = JX.$(this._treeNodeID);
-      } catch (e) {
-        return;
-      }
-
       var inlines = this._inlines;
       var done = [];
       var undone = [];
@@ -824,66 +873,149 @@ JX.install('DiffChangeset', {
         is_completed = false;
       }
 
-      JX.DOM.setContent(tree, hint);
-      JX.DOM.alterClass(tree, 'filetree-comments-visible', is_visible);
-      JX.DOM.alterClass(tree, 'filetree-comments-completed', is_completed);
+      var node = this.getPathView().getInlineNode();
+
+      JX.DOM.setContent(node, hint);
+
+      JX.DOM.alterClass(node, 'diff-tree-path-inlines-visible', is_visible);
+      JX.DOM.alterClass(node, 'diff-tree-path-inlines-completed', is_completed);
+    },
+
+    _onClickHeader: function(e) {
+      e.prevent();
+
+      if (this._isSelected) {
+        this.getChangesetList().selectChangeset(null);
+      } else {
+        this.select(false);
+      }
     },
 
     toggleVisibility: function() {
-      this._visible = !this._visible;
+      this.setVisible(!this._visible);
 
-      var diff = JX.DOM.find(this._node, 'table', 'differential-diff');
-      var undo = this._getUndoNode();
+      var attrs = {
+        hidden: this.isVisible() ? 0 : 1,
+        discard: 1
+      };
+
+      var workflow = this._newReloadWorkflow(attrs)
+        .setHandler(JX.bag);
+
+      this._startContentWorkflow(workflow);
+    },
+
+    setVisible: function(visible) {
+      this._visible = visible;
+
+      var diff = this._getDiffNode();
+      var options = this._getViewButtonNode();
+      var show = this._getShowButtonNode();
 
       if (this._visible) {
         JX.DOM.show(diff);
-        JX.DOM.remove(undo);
+        JX.DOM.show(options);
+        JX.DOM.hide(show);
       } else {
         JX.DOM.hide(diff);
-        JX.DOM.appendContent(diff.parentNode, undo);
+        JX.DOM.hide(options);
+        JX.DOM.show(show);
+
+        if (this._viewMenu) {
+          this._viewMenu.close();
+        }
       }
 
       JX.Stratcom.invoke('resize');
+
+      var node = this._node;
+      JX.DOM.alterClass(node, 'changeset-content-hidden', !this._visible);
+
+      this.getPathView().setIsHidden(!this._visible);
+    },
+
+    setIsSelected: function(is_selected) {
+      this._isSelected = !!is_selected;
+
+      var node = this._node;
+      JX.DOM.alterClass(node, 'changeset-selected', this._isSelected);
+
+      return this;
+    },
+
+    _getDiffNode: function() {
+      if (!this._diffNode) {
+        this._diffNode = JX.DOM.find(this._node, 'table', 'differential-diff');
+      }
+      return this._diffNode;
+    },
+
+    _getViewButtonNode: function() {
+      if (!this._viewButtonNode) {
+        this._viewButtonNode = JX.DOM.find(
+          this._node,
+          'a',
+          'differential-view-options');
+      }
+      return this._viewButtonNode;
+    },
+
+    _getShowButtonNode: function() {
+      if (!this._showButtonNode) {
+        var pht = this.getChangesetList().getTranslations();
+
+        var show_button = new JX.PHUIXButtonView()
+          .setIcon('fa-angle-double-down')
+          .setText(pht('Show Changeset'))
+          .setColor('grey');
+
+        var button_node = show_button.getNode();
+        this._getViewButtonNode().parentNode.appendChild(button_node);
+
+        var onshow = JX.bind(this, this._onClickShowButton);
+        JX.DOM.listen(button_node, 'click', null, onshow);
+
+        this._showButtonNode = button_node;
+      }
+      return this._showButtonNode;
+    },
+
+    _onClickShowButton: function(e) {
+      e.prevent();
+      this.setVisible(true);
     },
 
     isVisible: function() {
       return this._visible;
     },
 
-    _getUndoNode: function() {
-      if (!this._undoNode) {
-        var pht = this.getChangesetList().getTranslations();
-
-        var link_attributes = {
-          href: '#'
-        };
-
-        var undo_link = JX.$N('a', link_attributes, pht('Show Content'));
-
-        var onundo = JX.bind(this, this._onundo);
-        JX.DOM.listen(undo_link, 'click', null, onundo);
-
-        var node_attributes = {
-          className: 'differential-collapse-undo'
-        };
-
-        var node_content = [
-          pht('This file content has been collapsed.'),
-          ' ',
-          undo_link
-        ];
-
-        var undo_node = JX.$N('div', node_attributes, node_content);
-
-        this._undoNode = undo_node;
-      }
-
-      return this._undoNode;
-    },
-
     _onundo: function(e) {
       e.kill();
       this.toggleVisibility();
+    },
+
+    getPathView: function() {
+      if (!this._pathView) {
+        var view = new JX.DiffPathView()
+          .setChangeset(this)
+          .setPath(this._pathParts)
+          .setIsLowImportance(this._isLowImportance)
+          .setIsOwned(this._isOwned)
+          .setIsLoading(this._isLoading);
+
+        view.getIcon()
+          .setIcon(this._pathIconIcon)
+          .setColor(this._pathIconColor);
+
+        this._pathView = view;
+      }
+
+      return this._pathView;
+    },
+
+    select: function(scroll) {
+      this.getChangesetList().selectChangeset(this, scroll);
+      return this;
     }
   },
 

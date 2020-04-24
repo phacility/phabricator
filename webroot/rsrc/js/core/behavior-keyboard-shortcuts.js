@@ -15,6 +15,7 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
   var workflow = null;
 
   new JX.KeyboardShortcut('?', pht('?'))
+    .setGroup('global')
     .setHandler(function(manager) {
       if (workflow) {
         // Already showing the dialog.
@@ -32,6 +33,7 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
 
   if (config.searchID) {
     new JX.KeyboardShortcut('/', pht('/'))
+      .setGroup('global')
       .setHandler(function() {
         var search = JX.$(config.searchID);
         search.focus();

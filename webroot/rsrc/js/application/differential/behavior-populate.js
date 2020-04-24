@@ -6,6 +6,7 @@
  *           phabricator-tooltip
  *           phabricator-diff-changeset-list
  *           phabricator-diff-changeset
+ *           phuix-formation-view
  * @javelin
  */
 
@@ -64,12 +65,12 @@ JX.behavior('differential-populate', function(config, statics) {
     .setInlineListURI(config.inlineListURI)
     .setIsStandalone(config.isStandalone);
 
-  // Install and activate the current page.
-  var page_id = JX.Quicksand.getCurrentPageID();
-  statics.pages[page_id] = [changeset_list];
-  onredraw(page_id);
-
-
+  if (config.formationViewID) {
+    var formation_node = JX.$(config.formationViewID);
+    var formation_view = new JX.PHUIXFormationView(formation_node);
+    changeset_list.setFormationView(formation_view);
+    formation_view.start();
+  }
 
   for (var ii = 0; ii < config.changesetViewIDs.length; ii++) {
     var id = config.changesetViewIDs[ii];
@@ -79,6 +80,11 @@ JX.behavior('differential-populate', function(config, statics) {
       changeset.setStabilize(true).load();
     }
   }
+
+  // Install and activate the current page.
+  var page_id = JX.Quicksand.getCurrentPageID();
+  statics.pages[page_id] = [changeset_list];
+  onredraw(page_id);
 
   var highlighted = null;
   var highlight_class = null;

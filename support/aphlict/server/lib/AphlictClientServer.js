@@ -3,7 +3,6 @@
 var JX = require('./javelin').JX;
 
 require('./AphlictListenerList');
-require('./AphlictLog');
 
 var url = require('url');
 var util = require('util');
@@ -60,6 +59,17 @@ JX.install('AphlictClientServer', {
       return this;
     },
 
+    trace: function() {
+      var logger = this.getLogger();
+      if (!logger) {
+        return;
+      }
+
+      logger.trace.apply(logger, arguments);
+
+      return this;
+    },
+
     _onrequest: function(request, response) {
       // The websocket code upgrades connections before they get here, so
       // this only handles normal HTTP connections. We just fail them with
@@ -104,17 +114,24 @@ JX.install('AphlictClientServer', {
 
         var listener = self.getListenerList(instance).addListener(ws);
 
-        function log() {
-          self.log(
-            util.format('<%s>', listener.getDescription()) +
+        function msg(argv) {
+          return util.format('<%s>', listener.getDescription()) +
             ' ' +
-            util.format.apply(null, arguments));
+            util.format.apply(null, argv);
         }
 
-        log('Connected from %s.', ws._socket.remoteAddress);
+        function log() {
+          self.log(msg(arguments));
+        }
+
+        function trace() {
+          self.trace(msg(arguments));
+        }
+
+        trace('Connected from %s.', ws._socket.remoteAddress);
 
         ws.on('message', function(data) {
-          log('Received message: %s', data);
+          trace('Received message: %s', data);
 
           var message;
           try {
@@ -126,14 +143,14 @@ JX.install('AphlictClientServer', {
 
           switch (message.command) {
             case 'subscribe':
-              log(
+              trace(
                 'Subscribed to: %s',
                 JSON.stringify(message.data));
               listener.subscribe(message.data);
               break;
 
             case 'unsubscribe':
-              log(
+              trace(
                 'Unsubscribed from: %s',
                 JSON.stringify(message.data));
               listener.unsubscribe(message.data);
@@ -180,7 +197,7 @@ JX.install('AphlictClientServer', {
 
         ws.on('close', function() {
           self.getListenerList(instance).removeListener(listener);
-          log('Disconnected.');
+          trace('Disconnected.');
         });
       });
 

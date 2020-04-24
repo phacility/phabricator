@@ -305,7 +305,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
               ->setObject($user);
 
             if ($engine->isValidPassword($envelope)) {
-              $account = $this->loadOrCreateAccount($user->getPHID());
+              $account = $this->newExternalAccountForUser($user);
               $log_user = $user;
             }
           }
@@ -339,16 +339,6 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return true;
   }
 
-  protected function willSaveAccount(PhabricatorExternalAccount $account) {
-    parent::willSaveAccount($account);
-    $account->setUserPHID($account->getAccountID());
-  }
-
-  public function willRegisterAccount(PhabricatorExternalAccount $account) {
-    parent::willRegisterAccount($account);
-    $account->setAccountID($account->getUserPHID());
-  }
-
   public static function getPasswordProvider() {
     $providers = self::getAllEnabledProviders();
 
@@ -375,4 +365,5 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
   public function shouldAllowEmailTrustConfiguration() {
     return false;
   }
+
 }

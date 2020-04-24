@@ -350,9 +350,12 @@ final class DifferentialInlineCommentMailView
     // comments on diffs with long recipient lists.
     $cache_key = $changeset->getID();
 
+    $viewstate = new PhabricatorChangesetViewState();
+
     $parser = id(new DifferentialChangesetParser())
       ->setRenderCacheKey($cache_key)
-      ->setUser($viewer)
+      ->setViewer($viewer)
+      ->setViewstate($viewstate)
       ->setChangeset($changeset)
       ->setOffsetMode($offset_mode)
       ->setMarkupEngine($engine);

@@ -1,0 +1,12 @@
+{
+  "key": 3.5,
+  "true": true,
+  "false": false,
+  "null": null,
+  "list": [1, 2, 3],
+  "object": {
+    "k1": "v1"
+  },
+  "numbers": [0e1, 1e-1, -1e-1, -1e+1],
+  "\"\u1234'abc[]{}..."
+}

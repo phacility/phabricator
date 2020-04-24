@@ -18,16 +18,6 @@ final class PhabricatorAuthManagementRefreshWorkflow
             'param' => 'user',
             'help' => pht('Refresh tokens for a given user.'),
           ),
-          array(
-            'name' => 'type',
-            'param' => 'provider',
-            'help' => pht('Refresh tokens for a given provider type.'),
-          ),
-          array(
-            'name' => 'domain',
-            'param' => 'domain',
-            'help' => pht('Refresh tokens for a given domain.'),
-          ),
         ));
   }
 
@@ -57,17 +47,6 @@ final class PhabricatorAuthManagementRefreshWorkflow
       }
     }
 
-
-    $type = $args->getArg('type');
-    if (strlen($type)) {
-      $query->withAccountTypes(array($type));
-    }
-
-    $domain = $args->getArg('domain');
-    if (strlen($domain)) {
-      $query->withAccountDomains(array($domain));
-    }
-
     $accounts = $query->execute();
 
     if (!$accounts) {
@@ -82,25 +61,24 @@ final class PhabricatorAuthManagementRefreshWorkflow
     }
 
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
+    $providers = mpull($providers, null, 'getProviderConfigPHID');
 
     foreach ($accounts as $account) {
       $console->writeOut(
         "%s\n",
         pht(
-          'Refreshing account #%d (%s/%s).',
-          $account->getID(),
-          $account->getAccountType(),
-          $account->getAccountDomain()));
+          'Refreshing account #%d.',
+          $account->getID()));
 
-      $key = $account->getProviderKey();
-      if (empty($providers[$key])) {
+      $config_phid = $account->getProviderConfigPHID();
+      if (empty($providers[$config_phid])) {
         $console->writeOut(
           "> %s\n",
           pht('Skipping, provider is not enabled or does not exist.'));
         continue;
       }
 
-      $provider = $providers[$key];
+      $provider = $providers[$config_phid];
       if (!($provider instanceof PhabricatorOAuth2AuthProvider)) {
         $console->writeOut(
           "> %s\n",

@@ -384,7 +384,6 @@ final class DifferentialRevisionViewController
         ->setTitle(pht('Diff %s', $target->getID()))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
-
       $revision_id = $revision->getID();
       $inline_list_uri = "/revision/inlines/{$revision_id}/";
       $inline_list_uri = $this->getApplicationURI($inline_list_uri);
@@ -456,6 +455,15 @@ final class DifferentialRevisionViewController
         $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
         $reviewer->attachChangesets($reviewer_changesets);
       }
+
+      $authority_packages = $this->getAuthorityPackages();
+      foreach ($changesets as $changeset) {
+        $changeset_packages = $this->getChangesetPackages($changeset);
+
+        $changeset
+          ->setAuthorityPackages($authority_packages)
+          ->setChangesetPackages($changeset_packages);
+      }
     }
 
     $tab_group = new PHUITabGroupView();
@@ -474,16 +482,13 @@ final class DifferentialRevisionViewController
         ->setKey('history')
         ->appendChild($history));
 
-    $filetree_on = $viewer->compareUserSetting(
-      PhabricatorShowFiletreeSetting::SETTINGKEY,
-      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
-
-    $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
-    $filetree_collapsed = (bool)$viewer->getUserSetting($collapsed_key);
+    $filetree = id(new DifferentialFileTreeEngine())
+      ->setViewer($viewer);
+    $filetree_collapsed = !$filetree->getIsVisible();
 
     // See PHI811. If the viewer has the file tree on, the files tab with the
     // table of contents is redundant, so default to the "History" tab instead.
-    if ($filetree_on && !$filetree_collapsed) {
+    if (!$filetree_collapsed) {
       $tab_group->selectTab('history');
     }
 
@@ -609,18 +614,9 @@ final class DifferentialRevisionViewController
     $crumbs->addTextCrumb($monogram);
     $crumbs->setBorder(true);
 
-    $nav = null;
-    if ($filetree_on && !$this->isVeryLargeDiff()) {
-      $width_key = PhabricatorFiletreeWidthSetting::SETTINGKEY;
-      $width_value = $viewer->getUserSetting($width_key);
-
-      $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle($monogram)
-        ->setBaseURI(new PhutilURI($revision->getURI()))
-        ->setCollapsed($filetree_collapsed)
-        ->setWidth((int)$width_value)
-        ->build($changesets);
-    }
+    $filetree
+      ->setChangesets($changesets)
+      ->setDisabled($this->isVeryLargeDiff());
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -638,15 +634,21 @@ final class DifferentialRevisionViewController
         ))
       ->setFooter($footer);
 
-    $page =  $this->newPage()
-      ->setTitle($monogram.' '.$revision->getTitle())
-      ->setCrumbs($crumbs)
-      ->setPageObjectPHIDs(array($revision->getPHID()))
-      ->appendChild($view);
+    $main_content = array(
+      $crumbs,
+      $view,
+    );
 
-    if ($nav) {
-      $page->setNavigation($nav);
+    $main_content = $filetree->newView($main_content);
+
+    if (!$filetree->getDisabled()) {
+      $changeset_view->setFormationView($main_content);
     }
+
+    $page = $this->newPage()
+      ->setTitle($monogram.' '.$revision->getTitle())
+      ->setPageObjectPHIDs(array($revision->getPHID()))
+      ->appendChild($main_content);
 
     return $page;
   }

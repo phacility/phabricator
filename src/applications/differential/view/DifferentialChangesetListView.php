@@ -24,6 +24,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
   private $title;
   private $parser;
+  private $formationView;
 
   public function setParser(DifferentialChangesetParser $parser) {
     $this->parser = $parser;
@@ -79,9 +80,17 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function getRepository() {
+    return $this->repository;
+  }
+
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
     return $this;
+  }
+
+  public function getDiff() {
+    return $this->diff;
   }
 
   public function setRenderingReferences(array $references) {
@@ -138,6 +147,15 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function setFormationView(PHUIFormationView $formation_view) {
+    $this->formationView = $formation_view;
+    return $this;
+  }
+
+  public function getFormationView() {
+    return $this->formationView;
+  }
+
   public function render() {
     $viewer = $this->getViewer();
 
@@ -145,8 +163,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $changesets = $this->changesets;
 
-    $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
-      $viewer);
+    $repository = $this->getRepository();
+    $diff = $this->getDiff();
 
     $output = array();
     $ids = array();
@@ -156,7 +174,15 @@ final class DifferentialChangesetListView extends AphrontView {
       $ref = $this->references[$key];
 
       $detail = id(new DifferentialChangesetDetailView())
-        ->setUser($viewer);
+        ->setViewer($viewer);
+
+      if ($repository) {
+        $detail->setRepository($repository);
+      }
+
+      if ($diff) {
+        $detail->setDiff($diff);
+      }
 
       $uniq_id = 'diff-'.$changeset->getAnchorName();
       $detail->setID($uniq_id);
@@ -172,13 +198,14 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
       $detail->setRenderingRef($ref);
+      $detail->setBranch($this->getBranch());
 
       $detail->setRenderURI($this->renderURI);
-      $detail->setRenderer($renderer);
 
-      if ($this->getParser()) {
-        $detail->appendChild($this->getParser()->renderChangeset());
-        $detail->setLoaded(true);
+      $parser = $this->getParser();
+      if ($parser) {
+        $response = $parser->newChangesetResponse();
+        $detail->setChangesetResponse($response);
       } else {
         $detail->setAutoload(isset($this->visibleChangesets[$key]));
         if (isset($this->visibleChangesets[$key])) {
@@ -216,10 +243,17 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $this->requireResource('aphront-tooltip-css');
 
+    $formation_id = null;
+    $formation_view = $this->getFormationView();
+    if ($formation_view) {
+      $formation_id = $formation_view->getID();
+    }
+
     $this->initBehavior(
       'differential-populate',
       array(
       'changesetViewIDs' => $ids,
+      'formationViewID' => $formation_id,
       'inlineURI' => $this->inlineURI,
       'inlineListURI' => $this->inlineListURI,
       'isStandalone' => $this->getIsStandalone(),
@@ -227,20 +261,20 @@ final class DifferentialChangesetListView extends AphrontView {
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
         'All Context Shown' => pht('All Context Shown'),
-        "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
         'Expand File' => pht('Expand File'),
-        'Collapse File' => pht('Collapse File'),
-        'Browse in Diffusion' => pht('Browse in Diffusion'),
+        'Hide Changeset' => pht('Hide Changeset'),
+        'Show Path in Repository' => pht('Show Path in Repository'),
+        'Show Directory in Repository' => pht('Show Directory in Repository'),
         'View Standalone' => pht('View Standalone'),
         'Show Raw File (Left)' => pht('Show Raw File (Left)'),
         'Show Raw File (Right)' => pht('Show Raw File (Right)'),
         'Configure Editor' => pht('Configure Editor'),
         'Load Changes' => pht('Load Changes'),
-        'View Side-by-Side' => pht('View Side-by-Side'),
-        'View Unified' => pht('View Unified'),
+        'View Side-by-Side Diff' => pht('View Side-by-Side Diff'),
+        'View Unified Diff' => pht('View Unified Diff'),
         'Change Text Encoding...' => pht('Change Text Encoding...'),
         'Highlight As...' => pht('Highlight As...'),
-        'View As...' => pht('View As...'),
+        'View As Document Type...' => pht('View As Document Type...'),
 
         'Loading...' => pht('Loading...'),
 
@@ -283,12 +317,8 @@ final class DifferentialChangesetListView extends AphrontView {
         'Jump to previous inline comment, including collapsed comments.' =>
           pht('Jump to previous inline comment, including collapsed comments.'),
 
-        'This file content has been collapsed.' =>
-          pht('This file content has been collapsed.'),
-        'Show Content' => pht('Show Content'),
-
-        'Hide or show the current file.' =>
-          pht('Hide or show the current file.'),
+        'Hide or show the current changeset.' =>
+          pht('Hide or show the current changeset.'),
         'You must select a file to hide or show.' =>
           pht('You must select a file to hide or show.'),
 
@@ -310,6 +340,31 @@ final class DifferentialChangesetListView extends AphrontView {
 
         'Finish editing inline comments before changing display modes.' =>
           pht('Finish editing inline comments before changing display modes.'),
+
+        'Open file in external editor.' =>
+          pht('Open file in external editor.'),
+
+        'You must select a file to edit.' =>
+          pht('You must select a file to edit.'),
+
+        'You must select a file to open.' =>
+          pht('You must select a file to open.'),
+
+        'No external editor is configured.' =>
+          pht('No external editor is configured.'),
+
+        'Hide or show the paths panel.' =>
+          pht('Hide or show the paths panel.'),
+
+        'Show path in repository.' =>
+          pht('Show path in repository.'),
+        'Show directory in repository.' =>
+          pht('Show directory in repository.'),
+
+        'Jump to the comment area.' =>
+          pht('Jump to the comment area.'),
+
+        'Show Changeset' => pht('Show Changeset'),
       ),
     ));
 
@@ -355,20 +410,6 @@ final class DifferentialChangesetListView extends AphrontView {
       $meta['standaloneURI'] = (string)$uri;
     }
 
-    $repository = $this->repository;
-    if ($repository) {
-      try {
-        $meta['diffusionURI'] =
-          (string)$repository->getDiffusionBrowseURIForPath(
-            $viewer,
-            $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-            idx($changeset->getMetadata(), 'line:first'),
-            $this->getBranch());
-      } catch (DiffusionSetupException $e) {
-        // Ignore
-      }
-    }
-
     $change = $changeset->getChangeType();
 
     if ($this->leftRawFileURI) {
@@ -388,19 +429,6 @@ final class DifferentialChangesetListView extends AphrontView {
       }
     }
 
-    if ($viewer && $repository) {
-      $path = ltrim(
-        $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-        '/');
-      $line = idx($changeset->getMetadata(), 'line:first', 1);
-      $editor_link = $viewer->loadEditorLink($path, $line, $repository);
-      if ($editor_link) {
-        $meta['editor'] = $editor_link;
-      } else {
-        $meta['editorConfigure'] = '/settings/panel/display/';
-      }
-    }
-
     $meta['containerID'] = $detail->getID();
 
     return id(new PHUIButtonView())
@@ -411,7 +439,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ->setHref(idx($meta, 'detailURI', '#'))
       ->setMetadata($meta)
       ->addSigil('differential-view-options');
-
   }
 
   private function appendDefaultQueryParams(PhutilURI $uri, array $params) {

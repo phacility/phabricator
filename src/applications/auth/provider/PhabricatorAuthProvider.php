@@ -20,6 +20,10 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return $this->providerConfig;
   }
 
+  public function getProviderConfigPHID() {
+    return $this->getProviderConfig()->getPHID();
+  }
+
   public function getConfigurationHelp() {
     return null;
   }
@@ -186,43 +190,85 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return;
   }
 
-  public function willRegisterAccount(PhabricatorExternalAccount $account) {
-    return;
+  final protected function newExternalAccountForIdentifiers(
+    array $identifiers) {
+
+    assert_instances_of($identifiers, 'PhabricatorExternalAccountIdentifier');
+
+    if (!$identifiers) {
+      throw new Exception(
+        pht(
+          'Authentication provider (of class "%s") is attempting to '.
+          'load or create an external account, but provided no account '.
+          'identifiers.',
+          get_class($this)));
+    }
+
+    $config = $this->getProviderConfig();
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $raw_identifiers = mpull($identifiers, 'getIdentifierRaw');
+
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($viewer)
+      ->withProviderConfigPHIDs(array($config->getPHID()))
+      ->withRawAccountIdentifiers($raw_identifiers)
+      ->needAccountIdentifiers(true)
+      ->execute();
+    if (!$accounts) {
+      $account = $this->newExternalAccount();
+    } else if (count($accounts) === 1) {
+      $account = head($accounts);
+    } else {
+      throw new Exception(
+        pht(
+          'Authentication provider (of class "%s") is attempting to load '.
+          'or create an external account, but provided a list of '.
+          'account identifiers which map to more than one account: %s.',
+          get_class($this),
+          implode(', ', $raw_identifiers)));
+    }
+
+    // See T13493. Add all the identifiers to the account. In the case where
+    // an account initially has a lower-quality identifier (like an email
+    // address) and later adds a higher-quality identifier (like a GUID), this
+    // allows us to automatically upgrade toward the higher-quality identifier
+    // and survive API changes which remove the lower-quality identifier more
+    // gracefully.
+
+    foreach ($identifiers as $identifier) {
+      $account->appendIdentifier($identifier);
+    }
+
+    return $this->didUpdateAccount($account);
   }
 
-  protected function loadOrCreateAccount($account_id) {
-    if (!strlen($account_id)) {
-      throw new Exception(pht('Empty account ID!'));
-    }
+  final protected function newExternalAccountForUser(PhabricatorUser $user) {
+    $config = $this->getProviderConfig();
 
-    $adapter = $this->getAdapter();
-    $adapter_class = get_class($adapter);
+    // When a user logs in with a provider like username/password, they
+    // always already have a Phabricator account (since there's no way they
+    // could have a username otherwise).
 
-    if (!strlen($adapter->getAdapterType())) {
-      throw new Exception(
-        pht(
-          "AuthAdapter (of class '%s') has an invalid implementation: ".
-          "no adapter type.",
-          $adapter_class));
-    }
+    // These users should never go to registration, so we're building a
+    // dummy "external account" which just links directly back to their
+    // internal account.
 
-    if (!strlen($adapter->getAdapterDomain())) {
-      throw new Exception(
-        pht(
-          "AuthAdapter (of class '%s') has an invalid implementation: ".
-          "no adapter domain.",
-          $adapter_class));
-    }
-
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountType = %s AND accountDomain = %s AND accountID = %s',
-      $adapter->getAdapterType(),
-      $adapter->getAdapterDomain(),
-      $account_id);
+    $account = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($user)
+      ->withProviderConfigPHIDs(array($config->getPHID()))
+      ->withUserPHIDs(array($user->getPHID()))
+      ->executeOne();
     if (!$account) {
       $account = $this->newExternalAccount()
-        ->setAccountID($account_id);
+        ->setUserPHID($user->getPHID());
     }
+
+    return $this->didUpdateAccount($account);
+  }
+
+  private function didUpdateAccount(PhabricatorExternalAccount $account) {
+    $adapter = $this->getAdapter();
 
     $account->setUsername($adapter->getAccountName());
     $account->setRealName($adapter->getAccountRealName());
@@ -240,6 +286,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
         // file entry for it, but there's no convenient way to do this with
         // PhabricatorFile right now. The storage will get shared, so the impact
         // here is negligible.
+
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           $image_file = PhabricatorFile::newFromFileDownload(
             $image_uri,
@@ -305,10 +352,23 @@ abstract class PhabricatorAuthProvider extends Phobject {
     $config = $this->getProviderConfig();
     $adapter = $this->getAdapter();
 
-    return id(new PhabricatorExternalAccount())
+    $account = id(new PhabricatorExternalAccount())
+      ->setProviderConfigPHID($config->getPHID())
+      ->attachAccountIdentifiers(array());
+
+    // TODO: Remove this when these columns are removed. They no longer have
+    // readers or writers (other than this callsite).
+
+    $account
       ->setAccountType($adapter->getAdapterType())
-      ->setAccountDomain($adapter->getAdapterDomain())
-      ->setProviderConfigPHID($config->getPHID());
+      ->setAccountDomain($adapter->getAdapterDomain());
+
+    // TODO: Remove this when "accountID" is removed; the column is not
+    // nullable.
+
+    $account->setAccountID('');
+
+    return $account;
   }
 
   public function getLoginOrder() {

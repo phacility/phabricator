@@ -1,0 +1,12 @@
+<span class="o">{</span>
+  <span class="s">&quot;key&quot;</span><span class="o">:</span> <span class="mf">3.5</span><span class="o">,</span>
+  <span class="s">&quot;true&quot;</span><span class="o">:</span> <span class="k">true</span><span class="o">,</span>
+  <span class="s">&quot;false&quot;</span><span class="o">:</span> <span class="k">false</span><span class="o">,</span>
+  <span class="s">&quot;null&quot;</span><span class="o">:</span> <span class="k">null</span><span class="o">,</span>
+  <span class="s">&quot;list&quot;</span><span class="o">:</span> <span class="o">[</span><span class="mf">1</span><span class="o">,</span> <span class="mf">2</span><span class="o">,</span> <span class="mf">3</span><span class="o">],</span>
+  <span class="s">&quot;object&quot;</span><span class="o">:</span> <span class="o">{</span>
+    <span class="s">&quot;k1&quot;</span><span class="o">:</span> <span class="s">&quot;v1&quot;</span>
+  <span class="o">},</span>
+  <span class="s">&quot;numbers&quot;</span><span class="o">:</span> <span class="o">[</span><span class="mf">0</span>e<span class="mf">1</span><span class="o">,</span> <span class="mf">1</span>e<span class="mf">-1</span><span class="o">,</span> <span class="mf">-1</span>e<span class="mf">-1</span><span class="o">,</span> <span class="mf">-1</span>e+<span class="mf">1</span><span class="o">],</span>
+  <span class="s">&quot;</span><span class="k">\&quot;\u1234</span><span class="s">&#039;abc[]{}...&quot;</span>
+<span class="o">}</span>

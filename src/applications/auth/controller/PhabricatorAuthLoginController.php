@@ -116,14 +116,21 @@ final class PhabricatorAuthLoginController
         }
       } else {
 
-        // If the user already has a linked account of this type, prevent them
-        // from linking a second account. This can happen if they swap logins
-        // and then refresh the account link. See T6707. We will eventually
-        // allow this after T2549.
+        // If the user already has a linked account on this provider, prevent
+        // them from linking a second account. This can happen if they swap
+        // logins and then refresh the account link.
+
+        // There's no technical reason we can't allow you to link multiple
+        // accounts from a single provider; disallowing this is currently a
+        // product deciison. See T2549.
+
         $existing_accounts = id(new PhabricatorExternalAccountQuery())
           ->setViewer($viewer)
           ->withUserPHIDs(array($viewer->getPHID()))
-          ->withAccountTypes(array($account->getAccountType()))
+          ->withProviderConfigPHIDs(
+            array(
+              $provider->getProviderConfigPHID(),
+            ))
           ->execute();
         if ($existing_accounts) {
           return $this->renderError(

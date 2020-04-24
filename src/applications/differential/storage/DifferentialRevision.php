@@ -73,13 +73,8 @@ final class DifferentialRevision extends DifferentialDAO
     $view_policy = $app->getPolicy(
       DifferentialDefaultViewCapability::CAPABILITY);
 
-    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
-      $initial_state = DifferentialRevisionStatus::DRAFT;
-      $should_broadcast = false;
-    } else {
-      $initial_state = DifferentialRevisionStatus::NEEDS_REVIEW;
-      $should_broadcast = true;
-    }
+    $initial_state = DifferentialRevisionStatus::DRAFT;
+    $should_broadcast = false;
 
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
@@ -1007,9 +1002,11 @@ final class DifferentialRevision extends DifferentialDAO
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $viewer = $engine->getViewer();
+
     $this->openTransaction();
       $diffs = id(new DifferentialDiffQuery())
-        ->setViewer($engine->getViewer())
+        ->setViewer($viewer)
         ->withRevisionIDs(array($this->getID()))
         ->execute();
       foreach ($diffs as $diff) {
@@ -1026,6 +1023,13 @@ final class DifferentialRevision extends DifferentialDAO
         'DELETE FROM %T WHERE revisionID = %d',
         $dummy_path->getTableName(),
         $this->getID());
+
+      $viewstates = id(new DifferentialViewStateQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($this->getPHID()));
+      foreach ($viewstates as $viewstate) {
+        $viewstate->delete();
+      }
 
       $this->delete();
     $this->saveTransaction();
@@ -1057,6 +1061,10 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('title')
         ->setType('string')
         ->setDescription(pht('The revision title.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('uri')
+        ->setType('uri')
+        ->setDescription(pht('View URI for the revision.')),
       id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('authorPHID')
         ->setType('phid')
@@ -1109,6 +1117,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     return array(
       'title' => $this->getTitle(),
+      'uri' => PhabricatorEnv::getURI($this->getURI()),
       'authorPHID' => $this->getAuthorPHID(),
       'status' => $status_info,
       'repositoryPHID' => $this->getRepositoryPHID(),

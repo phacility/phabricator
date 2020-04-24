@@ -142,6 +142,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         (string)$request_uri);
     }
 
+    if ($this->shouldCompressFileDataResponse($file)) {
+      $response->setCompressResponse(true);
+    }
+
     return $response;
   }
 
@@ -222,6 +226,53 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       throw new PhutilInvalidStateException('loadFile');
     }
     return $this->file;
+  }
+
+  private function shouldCompressFileDataResponse(PhabricatorFile $file) {
+    // If the client sends "Accept-Encoding: gzip", we have the option of
+    // compressing the response.
+
+    // We generally expect this to be a good idea if the file compresses well,
+    // but maybe not such a great idea if the file is already compressed (like
+    // an image or video) or compresses poorly: the CPU cost of compressing and
+    // decompressing the stream may exceed the bandwidth savings during
+    // transfer.
+
+    // Ideally, we'd probably make this decision by compressing files when
+    // they are uploaded, storing the compressed size, and then doing a test
+    // here using the compression savings and estimated transfer speed.
+
+    // For now, just guess that we shouldn't compress images or videos or
+    // files that look like they are already compressed, and should compress
+    // everything else.
+
+    if ($file->isViewableImage()) {
+      return false;
+    }
+
+    if ($file->isAudio()) {
+      return false;
+    }
+
+    if ($file->isVideo()) {
+      return false;
+    }
+
+    $compressed_types = array(
+      'application/x-gzip',
+      'application/x-compress',
+      'application/x-compressed',
+      'application/x-zip-compressed',
+      'application/zip',
+    );
+    $compressed_types = array_fuse($compressed_types);
+
+    $mime_type = $file->getMimeType();
+    if (isset($compressed_types[$mime_type])) {
+      return false;
+    }
+
+    return true;
   }
 
 }

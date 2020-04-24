@@ -94,4 +94,8 @@ final class PhabricatorPasteEditor
     return true;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

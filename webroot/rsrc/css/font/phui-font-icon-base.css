@@ -116,6 +116,11 @@
 .phui-icon-view.red  {
   color: {$red};
 }
+
+.phui-icon-view.delete-color  {
+  color: {$delete-color};
+}
+
 .phui-icon-view.orange {
   color: {$orange};
 }
@@ -125,6 +130,11 @@
 .phui-icon-view.green {
   color: {$green}
 }
+
+.phui-icon-view.create-color  {
+  color: {$create-color};
+}
+
 .phui-icon-view.blue {
   color: {$blue};
 }
