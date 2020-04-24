@@ -191,4 +191,16 @@ final class PHUIFormationView
     return $items;
   }
 
+  public function setFooter($footer) {
+    foreach ($this->items as $item) {
+      if ($item->getColumn() instanceof PHUIFormationContentView) {
+        $item->getColumn()->appendChild($footer);
+        return $this;
+      }
+    }
+
+    throw new Exception(
+      pht('Unable to find a content column to place the footer inside.'));
+  }
+
 }

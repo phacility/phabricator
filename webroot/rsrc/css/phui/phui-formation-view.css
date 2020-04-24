@@ -127,6 +127,7 @@
   background-repeat: no-repeat;
 
   display: none;
+  z-index: 4;
 }
 
 .device-desktop .phui-formation-resizer {
@@ -138,6 +139,8 @@
   top: {$menu.main.height};
   bottom: 0;
   overflow: hidden;
+  background: {$lightgreybackground};
+  z-index: 4;
 }
 
 .phui-flank-view-fixed .phui-flank-view-body {
