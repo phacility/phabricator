@@ -456,6 +456,11 @@ final class DifferentialHunkParser extends Phobject {
 
     $corpus = array();
     foreach ($lines as $l) {
+      if ($l === null) {
+        $corpus[] = "\n";
+        continue;
+      }
+
       if ($l['type'] != '\\') {
         if ($l['text'] === null) {
           // There's no text on this side of the diff, but insert a placeholder
