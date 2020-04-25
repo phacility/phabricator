@@ -61,11 +61,17 @@ final class AphrontHTTPProxyResponse extends AphrontResponse {
     // Strip "Transfer-Encoding" headers. Particularly, the server we proxied
     // may have chunked the response, but cURL will already have un-chunked it.
     // If we emit the header and unchunked data, the response becomes invalid.
+
+    // See T13517. Strip "Content-Encoding" and "Content-Length" headers, since
+    // they may reflect compressed content.
+
     foreach ($headers as $key => $header) {
       list($header_head, $header_body) = $header;
       $header_head = phutil_utf8_strtolower($header_head);
       switch ($header_head) {
         case 'transfer-encoding':
+        case 'content-encoding':
+        case 'content-length':
           unset($headers[$key]);
           break;
       }
