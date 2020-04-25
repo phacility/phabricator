@@ -10,7 +10,6 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
 
   private $jiraBaseURI;
   private $adapterDomain;
-  private $currentSession;
   private $userInfo;
 
   public function setJIRABaseURI($jira_base_uri) {
@@ -106,21 +105,34 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
 
   private function getUserInfo() {
     if ($this->userInfo === null) {
-      $this->currentSession = $this->newJIRAFuture('rest/auth/1/session', 'GET')
-        ->resolveJSON();
-
-      // The session call gives us the username, but not the user key or other
-      // information. Make a second call to get additional information.
-
-      $params = array(
-        'username' => $this->currentSession['name'],
-      );
-
-      $this->userInfo = $this->newJIRAFuture('rest/api/2/user', 'GET', $params)
-        ->resolveJSON();
+      $this->userInfo = $this->newUserInfo();
     }
 
     return $this->userInfo;
+  }
+
+  private function newUserInfo() {
+    // See T13493. Try a relatively modern (circa early 2020) API call first.
+    try {
+      return $this->newJIRAFuture('rest/api/3/myself', 'GET')
+        ->resolveJSON();
+    } catch (Exception $ex) {
+      // If we failed the v3 call, assume the server version is too old
+      // to support this API and fall back to trying the older method.
+    }
+
+    $session = $this->newJIRAFuture('rest/auth/1/session', 'GET')
+      ->resolveJSON();
+
+    // The session call gives us the username, but not the user key or other
+    // information. Make a second call to get additional information.
+
+    $params = array(
+      'username' => $session['name'],
+    );
+
+    return $this->newJIRAFuture('rest/api/2/user', 'GET', $params)
+      ->resolveJSON();
   }
 
   public static function newJIRAKeypair() {
