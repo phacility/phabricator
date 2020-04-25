@@ -110,13 +110,15 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     // but not much larger. Files between 0MB and 8MB will be stored normally;
     // files larger than 8MB will be chunked.
     //return (1024 * 1024 * 8);
-      /*
-       * #RIVIGO_CUSTOM Increasing this limit to 25MB to match email max size.
-       * File attachments of less then or equal to 25MB will be accepted.
-       * This was required for mail_handler as chunk storage is not allowed in mail File attachments
-       * see loadWritableEngines funnction line# 275
-       */
-      return (1024 * 1024 * 25);
+
+    /*
+     * #RIVIGO_CUSTOM Increasing this limit to 25MB to match email max size.
+     * File attachments of less then or equal to 25MB will be accepted.
+     * This was required for mail_handler as chunk storage is not allowed in mail File attachments
+     * see loadWritableEngines funnction line# 275
+     */
+
+    return (1024 * 1024 * 25);
   }
 
 
