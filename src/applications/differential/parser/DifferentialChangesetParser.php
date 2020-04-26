@@ -1326,9 +1326,15 @@ final class DifferentialChangesetParser extends Phobject {
     $old_back = array();
     $new_back = array();
     foreach ($this->old as $ii => $old) {
+      if ($old === null) {
+        continue;
+      }
       $old_back[$old['line']] = $old['line'];
     }
     foreach ($this->new as $ii => $new) {
+      if ($new === null) {
+        continue;
+      }
       $new_back[$new['line']] = $new['line'];
     }
 
