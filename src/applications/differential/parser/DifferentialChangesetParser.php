@@ -1901,9 +1901,13 @@ final class DifferentialChangesetParser extends Phobject {
     $text = array();
 
     foreach ($lines as $line) {
+      if ($line === null) {
+        continue;
+      }
+
       // If this is a "No newline at end of file." annotation, don't hand it
       // off to the DocumentEngine.
-      if ($line['type'] == '\\') {
+      if ($line['type'] === '\\') {
         continue;
       }
 
