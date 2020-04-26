@@ -593,9 +593,14 @@ final class DifferentialChangesetTwoUpRenderer
 
       $map = array();
       foreach ($new as $offset => $new_line) {
+        if ($new_line === null) {
+          continue;
+        }
+
         if ($new_line['line'] === null) {
           continue;
         }
+
         $map[$new_line['line']] = $offset;
       }
 
