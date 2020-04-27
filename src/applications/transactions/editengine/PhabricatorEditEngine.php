@@ -2204,6 +2204,16 @@ abstract class PhabricatorEditEngine
             $transactions_key,
             $key));
       }
+
+      if (!array_key_exists('value', $xaction)) {
+        throw new Exception(
+          pht(
+            'Parameter "%s" must contain a list of transaction descriptions, '.
+            'but item with key "%s" is missing a "value" field. Each '.
+            'transaction must have a value field.',
+            $transactions_key,
+            $key));
+      }
     }
 
     return $xactions;
