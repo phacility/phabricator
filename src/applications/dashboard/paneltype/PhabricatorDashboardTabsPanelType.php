@@ -88,6 +88,7 @@ final class PhabricatorDashboardTabsPanelType
     $selected = 0;
 
     $key_list = array_keys($config);
+    if(count($key_list) > 0){ $selected = $key_list[0]; }
 
     $next_keys = array();
     $prev_keys = array();
@@ -286,7 +287,7 @@ final class PhabricatorDashboardTabsPanelType
         'div',
         array(
           'id' => $content_id,
-          'style' => ($idx == $selected) ? null : 'display: none',
+          'style' => ((string)$idx === (string)$selected) ? null : 'display: none',
         ),
         $panel_content);
 
