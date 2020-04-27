@@ -647,16 +647,26 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     $old = $changeset->getOldProperties();
     $new = $changeset->getNewProperties();
 
-    // When adding files, don't show the uninteresting 644 filemode change.
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_ADD &&
-        $new == array('unix:filemode' => '100644')) {
-      unset($new['unix:filemode']);
-    }
+    // If a property has been changed, but is not present on one side of the
+    // change and has an uninteresting default value on the other, remove it.
+    // This most commonly happens when a change adds or removes a file: the
+    // side of the change with the file has a "100644" filemode in Git.
 
-    // Likewise when removing files.
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_DELETE &&
-        $old == array('unix:filemode' => '100644')) {
-      unset($old['unix:filemode']);
+    $defaults = array(
+      'unix:filemode' => '100644',
+    );
+
+    foreach ($defaults as $default_key => $default_value) {
+      $old_value = idx($old, $default_key, $default_value);
+      $new_value = idx($new, $default_key, $default_value);
+
+      $old_default = ($old_value === $default_value);
+      $new_default = ($new_value === $default_value);
+
+      if ($old_default && $new_default) {
+        unset($old[$default_key]);
+        unset($new[$default_key]);
+      }
     }
 
     $metadata = $changeset->getMetadata();
