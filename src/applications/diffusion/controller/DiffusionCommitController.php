@@ -459,8 +459,11 @@ final class DiffusionCommitController extends DiffusionController {
 
     $filetree = id(new DifferentialFileTreeEngine())
       ->setViewer($viewer)
-      ->setChangesets($changesets)
       ->setDisabled(!$show_changesets);
+
+    if ($show_changesets) {
+      $filetree->setChangesets($changesets);
+    }
 
     $description_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Description'))
