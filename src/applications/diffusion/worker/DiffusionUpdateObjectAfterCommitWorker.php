@@ -166,13 +166,6 @@ final class DiffusionUpdateObjectAfterCommitWorker
       $commit,
       DifferentialRevisionHasCommitEdgeType::EDGECONST);
 
-    /*
-     * #RIVIGO_CUSTOM
-     * Not closing Differential Revision after commits being pushed,
-     * Only Updating the diff
-     */
-
-    /*
     $match_data = $this->getUpdateProperty('revisionMatchData');
     $type_close = DifferentialRevisionCloseTransaction::TRANSACTIONTYPE;
     $xactions[] = $revision->getApplicationTransactionTemplate()
@@ -181,7 +174,6 @@ final class DiffusionUpdateObjectAfterCommitWorker
       ->setMetadataValue('isCommitClose', true)
       ->setMetadataValue('revisionMatchData', $match_data)
       ->setMetadataValue('commitPHID', $commit->getPHID());
-    */
 
     $extraction_engine = id(new DifferentialDiffExtractionEngine())
       ->setViewer($acting_user)
