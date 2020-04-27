@@ -1827,8 +1827,6 @@ final class DifferentialChangesetParser extends Phobject {
 
     if (!$vs) {
       $metadata = $this->changeset->getMetadata();
-      $data = idx($metadata, 'attachment-data');
-
       $old_phid = idx($metadata, 'old:binary-phid');
       $new_phid = idx($metadata, 'new:binary-phid');
     } else {

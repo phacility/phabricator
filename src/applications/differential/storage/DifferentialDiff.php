@@ -232,7 +232,12 @@ final class DifferentialDiff
 
     $changesets = $diff->getChangesets();
 
+    // TODO: This is "safe", but it would be better to propagate a real user
+    // down the stack.
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     id(new DifferentialChangesetEngine())
+      ->setViewer($viewer)
       ->rebuildChangesets($changesets);
 
     return $diff;

@@ -25,6 +25,9 @@ final class DifferentialChangeset
   private $authorityPackages;
   private $changesetPackages;
 
+  private $newFileObject = self::ATTACHABLE;
+  private $oldFileObject = self::ATTACHABLE;
+
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
   const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
@@ -457,6 +460,34 @@ final class DifferentialChangeset
 
   public function isGeneratedChangeset() {
     return $this->getChangesetAttribute(self::ATTRIBUTE_GENERATED);
+  }
+
+  public function getNewFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'new:binary-phid');
+  }
+
+  public function getOldFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'old:binary-phid');
+  }
+
+  public function attachNewFileObject(PhabricatorFile $file) {
+    $this->newFileObject = $file;
+    return $this;
+  }
+
+  public function getNewFileObject() {
+    return $this->assertAttached($this->newFileObject);
+  }
+
+  public function attachOldFileObject(PhabricatorFile $file) {
+    $this->oldFileObject = $file;
+    return $this;
+  }
+
+  public function getOldFileObject() {
+    return $this->assertAttached($this->oldFileObject);
   }
 
 
