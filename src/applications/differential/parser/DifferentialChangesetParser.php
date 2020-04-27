@@ -980,10 +980,15 @@ final class DifferentialChangesetParser extends Phobject {
         $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
 
         $line = $comment->getLineNumber();
-        if ($new_side) {
-          $back_line = $new_backmap[$line];
+
+        // See T13524. Lint inlines from Harbormaster may not have a line
+        // number.
+        if ($line === null) {
+          $back_line = null;
+        } else if ($new_side) {
+          $back_line = idx($new_backmap, $line);
         } else {
-          $back_line = $old_backmap[$line];
+          $back_line = idx($old_backmap, $line);
         }
 
         if ($back_line != $line) {
@@ -1002,7 +1007,6 @@ final class DifferentialChangesetParser extends Phobject {
 
           $comment->setLineNumber($back_line);
           $comment->setLineLength(0);
-
         }
 
         $start = max($comment->getLineNumber() - $lines_context, 0);
