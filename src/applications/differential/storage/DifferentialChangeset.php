@@ -315,6 +315,30 @@ final class DifferentialChangeset
     return $this->assertAttached($this->diff);
   }
 
+  public function getOldStatePathVector() {
+    $path = $this->getOldFile();
+    if (!strlen($path)) {
+      $path = $this->getFilename();
+    }
+
+    $path = trim($path, '/');
+    $path = explode('/', $path);
+
+    return $path;
+  }
+
+  public function getNewStatePathVector() {
+    if (!$this->hasNewState()) {
+      return null;
+    }
+
+    $path = $this->getFilename();
+    $path = trim($path, '/');
+    $path = explode('/', $path);
+
+    return $path;
+  }
+
   public function newFileTreeIcon() {
     $icon = $this->getPathIconIcon();
     $color = $this->getPathIconColor();
@@ -335,16 +359,8 @@ final class DifferentialChangeset
   }
 
   public function getIsLowImportanceChangeset() {
-    $change_type = $this->getChangeType();
-
-    $change_map = array(
-      DifferentialChangeType::TYPE_DELETE => true,
-      DifferentialChangeType::TYPE_MOVE_AWAY => true,
-      DifferentialChangeType::TYPE_MULTICOPY => true,
-    );
-
-    if (isset($change_map[$change_type])) {
-      return $change_map[$change_type];
+    if (!$this->hasNewState()) {
+      return true;
     }
 
     if ($this->isGeneratedChangeset()) {
