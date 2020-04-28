@@ -54,7 +54,7 @@ final class PHUIDiffInlineCommentPreviewListView
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
     $engine->process();
 

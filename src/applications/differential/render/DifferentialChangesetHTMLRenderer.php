@@ -464,19 +464,19 @@ abstract class DifferentialChangesetHTMLRenderer
   }
 
   protected function buildInlineComment(
-    PhabricatorInlineCommentInterface $comment,
+    PhabricatorInlineComment $comment,
     $on_right = false) {
 
-    $user = $this->getUser();
-    $edit = $user &&
-            ($comment->getAuthorPHID() == $user->getPHID()) &&
+    $viewer = $this->getUser();
+    $edit = $viewer &&
+            ($comment->getAuthorPHID() == $viewer->getPHID()) &&
             ($comment->isDraft())
             && $this->getShowEditAndReplyLinks();
-    $allow_reply = (bool)$user && $this->getShowEditAndReplyLinks();
+    $allow_reply = (bool)$viewer && $this->getShowEditAndReplyLinks();
     $allow_done = !$comment->isDraft() && $this->getCanMarkDone();
 
     return id(new PHUIDiffInlineCommentDetailView())
-      ->setUser($user)
+      ->setViewer($viewer)
       ->setInlineComment($comment)
       ->setIsOnRight($on_right)
       ->setHandles($this->getHandles())

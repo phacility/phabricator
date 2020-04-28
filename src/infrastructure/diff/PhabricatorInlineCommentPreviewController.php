@@ -11,14 +11,14 @@ abstract class PhabricatorInlineCommentPreviewController
     $viewer = $request->getUser();
 
     $inlines = $this->loadInlineComments();
-    assert_instances_of($inlines, 'PhabricatorInlineCommentInterface');
+    assert_instances_of($inlines, 'PhabricatorInlineComment');
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($viewer);
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
     $engine->process();
 

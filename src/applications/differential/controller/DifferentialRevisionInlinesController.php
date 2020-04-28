@@ -124,7 +124,7 @@ final class DifferentialRevisionInlinesController
         $inline->getContent());
 
       $state = $inline->getFixedState();
-      if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
+      if ($state == PhabricatorInlineComment::STATE_DONE) {
         $status_icons[] = id(new PHUIIconView())
           ->setIcon('fa-check green')
           ->addClass('mmr');

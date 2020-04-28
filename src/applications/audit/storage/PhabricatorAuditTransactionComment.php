@@ -72,4 +72,13 @@ final class PhabricatorAuditTransactionComment
     return $this->assertAttached($this->replyToComment);
   }
 
+  public function getAttribute($key, $default = null) {
+    return idx($this->attributes, $key, $default);
+  }
+
+  public function setAttribute($key, $value) {
+    $this->attributes[$key] = $value;
+    return $this;
+  }
+
 }

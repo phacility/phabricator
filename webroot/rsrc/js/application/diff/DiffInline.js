@@ -18,7 +18,6 @@ JX.install('DiffInline', {
     _length: null,
     _displaySide: null,
     _isNewFile: null,
-    _undoRow: null,
     _replyToCommentPHID: null,
     _originalText: null,
     _snippet: null,
@@ -38,6 +37,11 @@ JX.install('DiffInline', {
     _isSynthetic: false,
     _isHidden: false,
 
+    _editRow: null,
+    _undoRow: null,
+    _undoType: null,
+    _undoText: null,
+
     bindToRow: function(row) {
       this._row = row;
 
@@ -50,13 +54,10 @@ JX.install('DiffInline', {
       var comment = JX.DOM.find(row, 'div', 'differential-inline-comment');
       var data = JX.Stratcom.getData(comment);
 
-      this._id = data.id;
+      this._readInlineState(data);
       this._phid = data.phid;
 
-      // TODO: This is very, very, very, very, very, very, very hacky.
-      var td = comment.parentNode;
-      var th = td.previousSibling;
-      if (th.parentNode.firstChild != th) {
+      if (data.on_right) {
         this._displaySide = 'right';
       } else {
         this._displaySide = 'left';
@@ -65,9 +66,7 @@ JX.install('DiffInline', {
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
       this._originalText = data.original;
-      this._isNewFile =
-        (this.getDisplaySide() == 'right') ||
-        (data.left != data.right);
+      this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
 
@@ -81,7 +80,13 @@ JX.install('DiffInline', {
       this._isNew = false;
       this._snippet = data.snippet;
 
-      this.setInvisible(false);
+      this._isEditing = data.isEditing;
+
+      if (this._isEditing) {
+        this.edit();
+      } else {
+        this.setInvisible(false);
+      }
 
       return this;
     },
@@ -397,6 +402,12 @@ JX.install('DiffInline', {
         op = 'delete';
       }
 
+      // If there's an existing "unedit" undo element, remove it.
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+      }
+
       var data = this._newRequestData(op);
 
       this.setLoading(true);
@@ -472,8 +483,9 @@ JX.install('DiffInline', {
     },
 
     _oneditresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
 
       this.setLoading(false);
@@ -481,9 +493,14 @@ JX.install('DiffInline', {
     },
 
     _oncreateresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
+    },
+
+    _readInlineState: function(state) {
+      this._id = state.id;
     },
 
     _ondeleteresponse: function() {
@@ -496,10 +513,16 @@ JX.install('DiffInline', {
     },
 
     _drawUndeleteRows: function() {
+      this._undoType = 'undelete';
+      this._undoText = null;
+
       return this._drawUndoRows('undelete', this._row);
     },
 
     _drawUneditRows: function(text) {
+      this._undoType = 'unedit';
+      this._undoText = text;
+
       return this._drawUndoRows('unedit', null, text);
     },
 
@@ -523,16 +546,17 @@ JX.install('DiffInline', {
 
     _drawEditRows: function(rows) {
       this.setEditing(true);
-      return this._drawRows(rows, null, 'edit');
+      this._editRow = this._drawRows(rows, null, 'edit');
     },
 
     _drawRows: function(rows, cursor, type, text) {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
-      var first_meta;
       var row = first_row;
       var anchor = cursor || this._row;
       cursor = cursor || this._row.nextSibling;
 
+
+      var result_row;
       var next_row;
       while (row) {
         // Grab this first, since it's going to change once we insert the row
@@ -546,40 +570,8 @@ JX.install('DiffInline', {
         anchor.parentNode.insertBefore(row, cursor);
         cursor = row;
 
-        var row_meta = {
-          node: row,
-          type: type,
-          text: text || null,
-          listeners: []
-        };
-
-        if (!first_meta) {
-          first_meta = row_meta;
-        }
-
-        if (type == 'edit') {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              ['submit', 'didSyntheticSubmit'],
-              'inline-edit-form',
-              JX.bind(this, this._onsubmit, row_meta)));
-
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'inline-edit-cancel',
-              JX.bind(this, this._oncancel, row_meta)));
-        } else if (type == 'content') {
-          // No special listeners for these rows.
-        } else {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'differential-inline-comment-undo',
-              JX.bind(this, this._onundo, row_meta)));
+        if (!result_row) {
+          result_row = row;
         }
 
         // If the row has a textarea, focus it. This allows the user to start
@@ -602,27 +594,25 @@ JX.install('DiffInline', {
 
       JX.Stratcom.invoke('resize');
 
-      return first_meta;
+      return result_row;
     },
 
-    _onsubmit: function(row, e) {
-      e.kill();
-
-      var handler = JX.bind(this, this._onsubmitresponse, row);
+    save: function(form) {
+      var handler = JX.bind(this, this._onsubmitresponse);
 
       this.setLoading(true);
 
-      JX.Workflow.newFromForm(e.getTarget())
+      JX.Workflow.newFromForm(form)
         .setHandler(handler)
         .start();
     },
 
-    _onundo: function(row, e) {
-      e.kill();
+    undo: function() {
 
-      this._removeRow(row);
+      JX.DOM.remove(this._undoRow);
+      this._undoRow = null;
 
-      if (row.type == 'undelete') {
+      if (this._undoType === 'undelete') {
         var uri = this._getInlineURI();
         var data = this._newRequestData('undelete');
         var handler = JX.bind(this, this._onundelete);
@@ -635,13 +625,10 @@ JX.install('DiffInline', {
           .send();
       }
 
-      if (row.type == 'unedit') {
-        if (this.getID()) {
-          this.edit(row.text);
-        } else {
-          this.create(row.text);
-        }
+      if (this._undoType === 'unedit') {
+        this.edit(this._undoText);
       }
+
     },
 
     _onundelete: function() {
@@ -649,15 +636,16 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _oncancel: function(row, e) {
-      e.kill();
+    cancel: function() {
+      var text = this._readText(this._editRow);
 
-      var text = this._readText(row.node);
+      JX.DOM.remove(this._editRow);
+      this._editRow = null;
+
       if (text && text.length && (text != this._originalText)) {
         this._drawUneditRows(text);
       }
 
-      this._removeRow(row);
       this.setEditing(false);
 
       this.setInvisible(false);
@@ -679,8 +667,11 @@ JX.install('DiffInline', {
       return textarea.value;
     },
 
-    _onsubmitresponse: function(row, response) {
-      this._removeRow(row);
+    _onsubmitresponse: function(response) {
+      if (this._editRow) {
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
 
       this.setLoading(false);
       this.setInvisible(false);
@@ -691,8 +682,8 @@ JX.install('DiffInline', {
 
     _onupdate: function(response) {
       var new_row;
-      if (response.markup) {
-        new_row = this._drawContentRows(JX.$H(response.markup).getNode()).node;
+      if (response.view) {
+        new_row = this._drawContentRows(JX.$H(response.view).getNode());
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a
@@ -739,13 +730,6 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
       JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
       JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
-    },
-
-    _removeRow: function(row) {
-      JX.DOM.remove(row.node);
-      for (var ii = 0; ii < row.listeners.length; ii++) {
-        row.listeners[ii].remove();
-      }
     },
 
     _getInlineURI: function() {

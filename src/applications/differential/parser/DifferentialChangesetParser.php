@@ -354,7 +354,7 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function parseInlineComment(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     // Parse only comments which are actually visible.
     if ($this->isCommentVisibleOnRenderedDiff($comment)) {
@@ -1191,11 +1191,11 @@ final class DifferentialChangesetParser extends Phobject {
    * taking into consideration which halves of which changesets will actually
    * be shown.
    *
-   * @param PhabricatorInlineCommentInterface Comment to test for visibility.
+   * @param PhabricatorInlineComment Comment to test for visibility.
    * @return bool True if the comment is visible on the rendered diff.
    */
   private function isCommentVisibleOnRenderedDiff(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     $changeset_id = $comment->getChangesetID();
     $is_new = $comment->getIsNewFile();
@@ -1219,12 +1219,12 @@ final class DifferentialChangesetParser extends Phobject {
    * Note that the comment must appear somewhere on the rendered changeset, as
    * per isCommentVisibleOnRenderedDiff().
    *
-   * @param PhabricatorInlineCommentInterface Comment to test for display
+   * @param PhabricatorInlineComment Comment to test for display
    *              location.
    * @return bool True for right, false for left.
    */
   private function isCommentOnRightSideWhenDisplayed(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
       throw new Exception(pht('Comment is not visible on changeset!'));

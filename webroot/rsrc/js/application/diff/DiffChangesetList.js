@@ -26,30 +26,6 @@ JX.install('DiffChangesetList', {
     var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
     JX.Stratcom.listen('click', 'reveal-inline', onexpand);
 
-    var onedit = JX.bind(this, this._ifawake, this._onaction, 'edit');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-edit'],
-      onedit);
-
-    var ondone = JX.bind(this, this._ifawake, this._onaction, 'done');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-done'],
-      ondone);
-
-    var ondelete = JX.bind(this, this._ifawake, this._onaction, 'delete');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-delete'],
-      ondelete);
-
-    var onreply = JX.bind(this, this._ifawake, this._onaction, 'reply');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-reply'],
-      onreply);
-
     var onresize = JX.bind(this, this._ifawake, this._onresize);
     JX.Stratcom.listen('resize', null, onresize);
 
@@ -85,6 +61,8 @@ JX.install('DiffChangesetList', {
       'mouseup',
       null,
       onrangeup);
+
+    this._setupInlineCommentListeners();
   },
 
   properties: {
@@ -1163,56 +1141,6 @@ JX.install('DiffChangesetList', {
       }
     },
 
-    _onaction: function(action, e) {
-      e.kill();
-
-      var inline = this._getInlineForEvent(e);
-      var is_ref = false;
-
-      // If we don't have a natural inline object, the user may have clicked
-      // an action (like "Delete") inside a preview element at the bottom of
-      // the page.
-
-      // If they did, try to find an associated normal inline to act on, and
-      // pretend they clicked that instead. This makes the overall state of
-      // the page more consistent.
-
-      // However, there may be no normal inline (for example, because it is
-      // on a version of the diff which is not visible). In this case, we
-      // act by reference.
-
-      if (inline === null) {
-        var data = e.getNodeData('differential-inline-comment');
-        inline = this.getInlineByID(data.id);
-        if (inline) {
-          is_ref = true;
-        } else {
-          switch (action) {
-            case 'delete':
-              this._deleteInlineByID(data.id);
-              return;
-          }
-        }
-      }
-
-      // TODO: For normal operations, highlight the inline range here.
-
-      switch (action) {
-        case 'edit':
-          inline.edit();
-          break;
-        case 'done':
-          inline.toggleDone();
-          break;
-        case 'delete':
-          inline.delete(is_ref);
-          break;
-        case 'reply':
-          inline.reply();
-          break;
-      }
-    },
-
     redrawPreview: function() {
       // TODO: This isn't the cleanest way to find the preview form, but
       // rendering no longer has direct access to it.
@@ -2138,6 +2066,113 @@ JX.install('DiffChangesetList', {
 
       var tree = this._getTreeView();
       JX.DOM.setContent(flank_body, tree.getNode());
+    },
+
+    _setupInlineCommentListeners: function() {
+      var onsave = JX.bind(this, this._onInlineEvent, 'save');
+      JX.Stratcom.listen(
+        ['submit', 'didSyntheticSubmit'],
+        'inline-edit-form',
+        onsave);
+
+      var oncancel = JX.bind(this, this._onInlineEvent, 'cancel');
+      JX.Stratcom.listen(
+        'click',
+        'inline-edit-cancel',
+        oncancel);
+
+      var onundo = JX.bind(this, this._onInlineEvent, 'undo');
+      JX.Stratcom.listen(
+        'click',
+        'differential-inline-comment-undo',
+        onundo);
+
+      var onedit = JX.bind(this, this._onInlineEvent, 'edit');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-edit'],
+        onedit);
+
+      var ondone = JX.bind(this, this._onInlineEvent, 'done');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-done'],
+        ondone);
+
+      var ondelete = JX.bind(this, this._onInlineEvent, 'delete');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-delete'],
+        ondelete);
+
+      var onreply = JX.bind(this, this._onInlineEvent, 'reply');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-reply'],
+        onreply);
+    },
+
+    _onInlineEvent: function(action, e) {
+      if (this.isAsleep()) {
+        return;
+      }
+
+      e.kill();
+
+      var inline = this._getInlineForEvent(e);
+      var is_ref = false;
+
+      // If we don't have a natural inline object, the user may have clicked
+      // an action (like "Delete") inside a preview element at the bottom of
+      // the page.
+
+      // If they did, try to find an associated normal inline to act on, and
+      // pretend they clicked that instead. This makes the overall state of
+      // the page more consistent.
+
+      // However, there may be no normal inline (for example, because it is
+      // on a version of the diff which is not visible). In this case, we
+      // act by reference.
+
+      if (inline === null) {
+        var data = e.getNodeData('differential-inline-comment');
+        inline = this.getInlineByID(data.id);
+        if (inline) {
+          is_ref = true;
+        } else {
+          switch (action) {
+            case 'delete':
+              this._deleteInlineByID(data.id);
+              return;
+          }
+        }
+      }
+
+      // TODO: For normal operations, highlight the inline range here.
+
+      switch (action) {
+        case 'save':
+          inline.save(e.getTarget());
+          break;
+        case 'cancel':
+          inline.cancel();
+          break;
+        case 'undo':
+          inline.undo();
+          break;
+        case 'edit':
+          inline.edit();
+          break;
+        case 'done':
+          inline.toggleDone();
+          break;
+        case 'delete':
+          inline.delete(is_ref);
+          break;
+        case 'reply':
+          inline.reply();
+          break;
+      }
     }
 
   }

@@ -105,7 +105,7 @@ final class DiffusionInlineCommentController
     }
 
     // Saved comments may not be edited.
-    if ($inline->getAuditCommentID()) {
+    if ($inline->getTransactionPHID()) {
       return false;
     }
 
@@ -117,21 +117,21 @@ final class DiffusionInlineCommentController
     return true;
   }
 
-  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
+  protected function deleteComment(PhabricatorInlineComment $inline) {
     $inline->setIsDeleted(1)->save();
   }
 
   protected function undeleteComment(
-    PhabricatorInlineCommentInterface $inline) {
+    PhabricatorInlineComment $inline) {
     $inline->setIsDeleted(0)->save();
   }
 
-  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
+  protected function saveComment(PhabricatorInlineComment $inline) {
     return $inline->save();
   }
 
   protected function loadObjectOwnerPHID(
-    PhabricatorInlineCommentInterface $inline) {
+    PhabricatorInlineComment $inline) {
     return $this->loadCommit()->getAuthorPHID();
   }
 

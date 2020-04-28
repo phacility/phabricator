@@ -80,9 +80,15 @@ final class DifferentialInlineCommentEditController
     $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
+    if (!$inline) {
+      throw new Exception(
+        pht('Unable to load inline "%s".', $id));
+    }
+
     if (!$this->canEditInlineComment($viewer, $inline)) {
       throw new Exception(pht('That comment is not editable!'));
     }
+
     return $inline;
   }
 
@@ -161,7 +167,7 @@ final class DifferentialInlineCommentEditController
     return true;
   }
 
-  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
+  protected function deleteComment(PhabricatorInlineComment $inline) {
     $inline->openTransaction();
       $inline->setIsDeleted(1)->save();
       $this->syncDraft();
@@ -169,14 +175,14 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function undeleteComment(
-    PhabricatorInlineCommentInterface $inline) {
+    PhabricatorInlineComment $inline) {
     $inline->openTransaction();
       $inline->setIsDeleted(0)->save();
       $this->syncDraft();
     $inline->saveTransaction();
   }
 
-  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
+  protected function saveComment(PhabricatorInlineComment $inline) {
     $inline->openTransaction();
       $inline->save();
       $this->syncDraft();
@@ -184,7 +190,7 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function loadObjectOwnerPHID(
-    PhabricatorInlineCommentInterface $inline) {
+    PhabricatorInlineComment $inline) {
     return $this->loadRevision()->getAuthorPHID();
   }
 
