@@ -12,6 +12,7 @@ final class PhabricatorAuditTransactionComment
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
   protected $legacyCommentID;
+  protected $attributes = array();
 
   private $replyToComment = self::ATTACHABLE;
 
@@ -53,6 +54,10 @@ final class PhabricatorAuditTransactionComment
         'columns' => array('legacyCommentID'),
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
+
+    $config[self::CONFIG_SERIALIZATION] = array(
+      'attributes' => self::SERIALIZATION_JSON,
+    ) + idx($config, self::CONFIG_SERIALIZATION, array());
 
     return $config;
   }
