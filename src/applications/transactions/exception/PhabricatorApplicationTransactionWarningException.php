@@ -10,4 +10,8 @@ final class PhabricatorApplicationTransactionWarningException
     parent::__construct();
   }
 
+  public function getTransactions() {
+    return $this->xactions;
+  }
+
 }

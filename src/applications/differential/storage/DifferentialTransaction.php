@@ -578,5 +578,45 @@ final class DifferentialTransaction
     return $body;
   }
 
+  public function newWarningForTransactions($object, array $xactions) {
+    $warning = new PhabricatorTransactionWarning();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        $warning->setTitleText(pht('Warning: Editing Inlines'));
+        $warning->setContinueActionText(pht('Save Inlines and Continue'));
+
+        $count = phutil_count($xactions);
+
+        $body = array();
+        $body[] = pht(
+          'You are currently editing %s inline comment(s) on this '.
+          'revision.',
+          $count);
+        $body[] = pht(
+          'These %s inline comment(s) will be saved and published.',
+          $count);
+
+        $warning->setWarningParagraphs($body);
+        break;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        $warning->setTitleText(pht('Warning: Draft Revision'));
+        $warning->setContinueActionText(pht('Tell No One'));
+
+        $body = array();
+
+        $body[] = pht(
+          'This is a draft revision that will not publish any '.
+          'notifications until the author requests review.');
+
+        $body[] = pht('Mentioned or subscribed users will not be notified.');
+
+        $warning->setWarningParagraphs($body);
+        break;
+    }
+
+    return $warning;
+  }
+
 
 }

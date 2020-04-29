@@ -4975,11 +4975,18 @@ abstract class PhabricatorApplicationTransactionEditor
       return false;
     }
 
+    $type = $xaction->getTransactionType();
+
+    // TODO: This doesn't warn for inlines in Audit, even though they have
+    // the same overall workflow.
+    if ($type === DifferentialTransaction::TYPE_INLINE) {
+      return (bool)$xaction->getComment()->getAttribute('editing', false);
+    }
+
     if (!$object->isDraft()) {
       return false;
     }
 
-    $type = $xaction->getTransactionType();
     if ($type != PhabricatorTransactions::TYPE_SUBSCRIBERS) {
       return false;
     }

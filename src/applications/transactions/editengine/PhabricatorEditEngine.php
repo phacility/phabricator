@@ -2032,6 +2032,7 @@ abstract class PhabricatorEditEngine
         ->setException($ex);
     } catch (PhabricatorApplicationTransactionWarningException $ex) {
       return id(new PhabricatorApplicationTransactionWarningResponse())
+        ->setObject($object)
         ->setCancelURI($view_uri)
         ->setException($ex);
     }
