@@ -197,7 +197,7 @@ final class PhabricatorChangesetViewStateEngine
     $entries = isort($entries, 'epoch');
 
     if ($entries) {
-      $other_phid = last_key($entries);
+      $other_key = last_key($entries);
       $other_spec = last($entries);
 
       $this_version = (int)$changeset->getDiffID();
@@ -213,7 +213,7 @@ final class PhabricatorChangesetViewStateEngine
 
         $other_changeset = id(new DifferentialChangesetQuery())
           ->setViewer($viewer)
-          ->withPHIDs(array($other_phid))
+          ->withIDs(array($other_key))
           ->executeOne();
 
         $is_modified = false;
