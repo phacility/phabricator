@@ -647,10 +647,23 @@ JX.install('DiffInline', {
       }
 
       this.setEditing(false);
-
       this.setInvisible(false);
 
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('cancel');
+      var handler = JX.bind(this, this._onCancelResponse);
+
+      this.setLoading(true);
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
+
       this._didUpdate(true);
+    },
+
+    _onCancelResponse: function(response) {
+      this.setLoading(false);
     },
 
     _readText: function(row) {

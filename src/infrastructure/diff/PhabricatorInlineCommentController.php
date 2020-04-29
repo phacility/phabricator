@@ -215,6 +215,19 @@ abstract class PhabricatorInlineCommentController
         $view = $this->buildScaffoldForView($edit_dialog);
 
         return $this->newInlineResponse($inline, $view);
+      case 'cancel':
+        $inline = $this->loadCommentForEdit($this->getCommentID());
+
+        $inline->setIsEditing(false);
+
+        $content = $inline->getContent();
+        if (!strlen($content)) {
+          $this->deleteComment($inline);
+        } else {
+          $this->saveComment($inline);
+        }
+
+        return $this->buildEmptyResponse();
       case 'new':
       case 'reply':
       default:
