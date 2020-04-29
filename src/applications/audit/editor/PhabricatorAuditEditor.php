@@ -105,6 +105,8 @@ final class PhabricatorAuditEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditActionConstants::INLINE:
+        $xaction->getComment()->setAttribute('editing', false);
+        return;
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;
     }

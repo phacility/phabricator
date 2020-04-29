@@ -112,6 +112,7 @@ final class DifferentialTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
+        $xaction->getComment()->setAttribute('editing', false);
         return;
     }
 
