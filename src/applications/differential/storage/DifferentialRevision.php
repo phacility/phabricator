@@ -870,10 +870,19 @@ final class DifferentialRevision extends DifferentialDAO
 
     foreach ($builds as $key => $build) {
       $plan = $build->getBuildPlan();
-      $hold_key = $behavior->getPlanOption($plan)->getKey();
 
-      $hold_never = ($hold_key === $key_never);
-      $hold_building = ($hold_key === $key_building);
+      // See T13526. If the viewer can't see the build plan, pretend it has
+      // generic options. This is often wrong, but "often wrong" is better than
+      // "fatal".
+      if ($plan) {
+        $hold_key = $behavior->getPlanOption($plan)->getKey();
+
+        $hold_never = ($hold_key === $key_never);
+        $hold_building = ($hold_key === $key_building);
+      } else {
+        $hold_never = false;
+        $hold_building = false;
+      }
 
       // If the build "Never" holds drafts from promoting, we don't care what
       // the status is.
