@@ -109,28 +109,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     if ($left) {
-      $left_data = $left->makeNewFile();
-      $left_properties = $left->getNewProperties();
-      if ($right) {
-        $right_data = $right->makeNewFile();
-        $right_properties = $right->getNewProperties();
-      } else {
-        $right_data = $left->makeOldFile();
-        $right_properties = $left->getOldProperties();
-      }
-
-      $engine = new PhabricatorDifferenceEngine();
-      $synthetic = $engine->generateChangesetFromFileContent(
-        $left_data,
-        $right_data);
-
-      $choice = clone nonempty($left, $right);
-      $choice->attachHunks($synthetic->getHunks());
-
-      $choice->setOldProperties($left_properties);
-      $choice->setNewProperties($right_properties);
-
-      $changeset = $choice;
+      $changeset = $left->newComparisonChangeset($right);
     }
 
     if ($left_new || $right_new) {

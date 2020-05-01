@@ -281,4 +281,8 @@ abstract class PhabricatorDocumentEngine
       ));
   }
 
+  public function shouldSuggestEngine(PhabricatorDocumentRef $ref) {
+    return false;
+  }
+
 }

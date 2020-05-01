@@ -25,6 +25,14 @@ final class DifferentialChangeset
   private $authorityPackages;
   private $changesetPackages;
 
+  private $newFileObject = self::ATTACHABLE;
+  private $oldFileObject = self::ATTACHABLE;
+
+  private $hasOldState;
+  private $hasNewState;
+  private $oldStateMetadata;
+  private $newStateMetadata;
+
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
   const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
@@ -129,6 +137,34 @@ final class DifferentialChangeset
 
   public function getChangesetPackages() {
     return $this->changesetPackages;
+  }
+
+  public function setHasOldState($has_old_state) {
+    $this->hasOldState = $has_old_state;
+    return $this;
+  }
+
+  public function setHasNewState($has_new_state) {
+    $this->hasNewState = $has_new_state;
+    return $this;
+  }
+
+  public function hasOldState() {
+    if ($this->hasOldState !== null) {
+      return $this->hasOldState;
+    }
+
+    $change_type = $this->getChangeType();
+    return !DifferentialChangeType::isCreateChangeType($change_type);
+  }
+
+  public function hasNewState() {
+    if ($this->hasNewState !== null) {
+      return $this->hasNewState;
+    }
+
+    $change_type = $this->getChangeType();
+    return !DifferentialChangeType::isDeleteChangeType($change_type);
   }
 
   public function save() {
@@ -279,6 +315,30 @@ final class DifferentialChangeset
     return $this->assertAttached($this->diff);
   }
 
+  public function getOldStatePathVector() {
+    $path = $this->getOldFile();
+    if (!strlen($path)) {
+      $path = $this->getFilename();
+    }
+
+    $path = trim($path, '/');
+    $path = explode('/', $path);
+
+    return $path;
+  }
+
+  public function getNewStatePathVector() {
+    if (!$this->hasNewState()) {
+      return null;
+    }
+
+    $path = $this->getFilename();
+    $path = trim($path, '/');
+    $path = explode('/', $path);
+
+    return $path;
+  }
+
   public function newFileTreeIcon() {
     $icon = $this->getPathIconIcon();
     $color = $this->getPathIconColor();
@@ -299,16 +359,8 @@ final class DifferentialChangeset
   }
 
   public function getIsLowImportanceChangeset() {
-    $change_type = $this->getChangeType();
-
-    $change_map = array(
-      DifferentialChangeType::TYPE_DELETE => true,
-      DifferentialChangeType::TYPE_MOVE_AWAY => true,
-      DifferentialChangeType::TYPE_MULTICOPY => true,
-    );
-
-    if (isset($change_map[$change_type])) {
-      return $change_map[$change_type];
+    if (!$this->hasNewState()) {
+      return true;
     }
 
     if ($this->isGeneratedChangeset()) {
@@ -457,6 +509,138 @@ final class DifferentialChangeset
 
   public function isGeneratedChangeset() {
     return $this->getChangesetAttribute(self::ATTRIBUTE_GENERATED);
+  }
+
+  public function getNewFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'new:binary-phid');
+  }
+
+  public function getOldFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'old:binary-phid');
+  }
+
+  public function attachNewFileObject(PhabricatorFile $file) {
+    $this->newFileObject = $file;
+    return $this;
+  }
+
+  public function getNewFileObject() {
+    return $this->assertAttached($this->newFileObject);
+  }
+
+  public function attachOldFileObject(PhabricatorFile $file) {
+    $this->oldFileObject = $file;
+    return $this;
+  }
+
+  public function getOldFileObject() {
+    return $this->assertAttached($this->oldFileObject);
+  }
+
+  public function newComparisonChangeset(
+    DifferentialChangeset $against = null) {
+
+    $left = $this;
+    $right = $against;
+
+    $left_data = $left->makeNewFile();
+    $left_properties = $left->getNewProperties();
+    $left_metadata = $left->getNewStateMetadata();
+    $left_state = $left->hasNewState();
+    $shared_metadata = $left->getMetadata();
+    if ($right) {
+      $right_data = $right->makeNewFile();
+      $right_properties = $right->getNewProperties();
+      $right_metadata = $right->getNewStateMetadata();
+      $right_state = $right->hasNewState();
+      $shared_metadata = $right->getMetadata();
+    } else {
+      $right_data = $left->makeOldFile();
+      $right_properties = $left->getOldProperties();
+      $right_metadata = $left->getOldStateMetadata();
+      $right_state = $left->hasOldState();
+    }
+
+    $engine = new PhabricatorDifferenceEngine();
+
+    $synthetic = $engine->generateChangesetFromFileContent(
+      $left_data,
+      $right_data);
+
+    $comparison = id(new self())
+      ->makeEphemeral(true)
+      ->attachDiff($left->getDiff())
+      ->setOldFile($left->getFilename())
+      ->setFilename($right->getFilename());
+
+    // TODO: Change type?
+    // TODO: File type?
+    // TODO: Away paths?
+    // TODO: View state key?
+
+    $comparison->attachHunks($synthetic->getHunks());
+
+    $comparison->setOldProperties($left_properties);
+    $comparison->setNewProperties($right_properties);
+
+    $comparison
+      ->setOldStateMetadata($left_metadata)
+      ->setNewStateMetadata($right_metadata)
+      ->setHasOldState($left_state)
+      ->setHasNewState($right_state);
+
+    // NOTE: Some metadata is not stored statefully, like the "generated"
+    // flag. For now, use the rightmost "new state" metadata to fill in these
+    // values.
+
+    $metadata = $comparison->getMetadata();
+    $metadata = $metadata + $shared_metadata;
+    $comparison->setMetadata($metadata);
+
+    return $comparison;
+  }
+
+  public function getNewStateMetadata() {
+    return $this->getMetadataWithPrefix('new:');
+  }
+
+  public function setNewStateMetadata(array $metadata) {
+    return $this->setMetadataWithPrefix($metadata, 'new:');
+  }
+
+  public function getOldStateMetadata() {
+    return $this->getMetadataWithPrefix('old:');
+  }
+
+  public function setOldStateMetadata(array $metadata) {
+    return $this->setMetadataWithPrefix($metadata, 'old:');
+  }
+
+  private function getMetadataWithPrefix($prefix) {
+    $length = strlen($prefix);
+
+    $result = array();
+    foreach ($this->getMetadata() as $key => $value) {
+      if (strncmp($key, $prefix, $length)) {
+        continue;
+      }
+
+      $key = substr($key, $length);
+      $result[$key] = $value;
+    }
+
+    return $result;
+  }
+
+  private function setMetadataWithPrefix(array $metadata, $prefix) {
+    foreach ($metadata as $key => $value) {
+      $key = $prefix.$key;
+      $this->metadata[$key] = $value;
+    }
+
+    return $this;
   }
 
 

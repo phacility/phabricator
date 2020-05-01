@@ -121,6 +121,8 @@ final class DarkConsoleCore extends Phobject {
         $data[$key] = $this->sanitizeForJSON($value);
       }
       return $data;
+    } else if (is_resource($data)) {
+      return '<resource>';
     } else {
       // Truncate huge strings. Since the data doesn't really matter much,
       // just truncate bytes to avoid PhutilUTF8StringTruncator overhead.

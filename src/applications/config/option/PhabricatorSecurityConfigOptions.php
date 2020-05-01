@@ -213,6 +213,9 @@ EOTEXT
 
           // This handler is for Visual Studio Code.
           'vscode' => true,
+
+          // This is for IntelliJ IDEA.
+          'idea' => true,
         ))
         ->setSummary(pht('Whitelists editor protocols for "Open in Editor".'))
         ->setDescription(

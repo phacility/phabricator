@@ -80,6 +80,7 @@ final class PhabricatorDifferentialRebuildChangesetsWorkflow
       }
 
       id(new DifferentialChangesetEngine())
+        ->setViewer($viewer)
         ->rebuildChangesets($changesets);
 
       foreach ($changesets as $changeset) {

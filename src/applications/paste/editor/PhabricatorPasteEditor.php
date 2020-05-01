@@ -3,6 +3,12 @@
 final class PhabricatorPasteEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $newPasteTitle;
+
+  public function getNewPasteTitle() {
+    return $this->newPasteTitle;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPasteApplication';
   }
@@ -27,6 +33,22 @@ final class PhabricatorPasteEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
+  }
+
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $new_title = $object->getTitle();
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+      if ($type === PhabricatorPasteTitleTransaction::TRANSACTIONTYPE) {
+        $new_title = $xaction->getNewValue();
+      }
+    }
+    $this->newPasteTitle = $new_title;
+
+    return parent::expandTransactions($object, $xactions);
   }
 
   protected function shouldSendMail(
