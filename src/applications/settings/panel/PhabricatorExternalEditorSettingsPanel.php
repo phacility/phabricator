@@ -105,6 +105,7 @@ final class PhabricatorExternalEditorSettingsPanel
       'emacs' => pht('Emacs'),
       'vscode' => pht('Visual Studio Code'),
       'editor' => pht('Generic Editor'),
+      'idea' => pht('IntelliJ IDEA'),
     );
 
     $default_label = phutil_tag('em', array(), pht('Supported Protocol'));
