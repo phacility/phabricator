@@ -204,6 +204,7 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
           }
 
           $cursor += $num_lines;
+
           break;
         }
       }
