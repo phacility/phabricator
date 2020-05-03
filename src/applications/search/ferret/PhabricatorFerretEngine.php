@@ -34,7 +34,9 @@ abstract class PhabricatorFerretEngine extends Phobject {
     if (!isset($this->ferretFunctions[$normalized_name])) {
       throw new PhutilSearchQueryCompilerSyntaxException(
         pht(
-          'Unknown search function "%s". Supported functions are: %s.',
+          'Unknown search function "%s". Supported functions are: %s. '.
+          '(To search for a term containing a colon, surround the term '.
+          'in double quotes.)',
           $raw_name,
           implode(', ', array_keys($this->ferretFunctions))));
     }
