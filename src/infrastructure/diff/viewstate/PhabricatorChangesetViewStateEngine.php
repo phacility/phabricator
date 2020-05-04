@@ -197,12 +197,12 @@ final class PhabricatorChangesetViewStateEngine
     $entries = isort($entries, 'epoch');
 
     if ($entries) {
-      $other_key = last_key($entries);
       $other_spec = last($entries);
 
       $this_version = (int)$changeset->getDiffID();
       $other_version = (int)idx($other_spec, 'diffID');
       $other_value = (bool)idx($other_spec, 'value', false);
+      $other_id = (int)idx($other_spec, 'changesetID');
 
       if ($other_value === false) {
         $is_hidden = false;
@@ -211,10 +211,14 @@ final class PhabricatorChangesetViewStateEngine
       } else {
         $viewer = $this->getViewer();
 
-        $other_changeset = id(new DifferentialChangesetQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($other_key))
-          ->executeOne();
+        if ($other_id) {
+          $other_changeset = id(new DifferentialChangesetQuery())
+            ->setViewer($viewer)
+            ->withIDs(array($other_id))
+            ->executeOne();
+        } else {
+          $other_changeset = null;
+        }
 
         $is_modified = false;
         if ($other_changeset) {
