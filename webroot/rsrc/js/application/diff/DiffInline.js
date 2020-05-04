@@ -43,6 +43,7 @@ JX.install('DiffInline', {
     _undoText: null,
 
     _draftRequest: null,
+    _skipFocus: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -95,7 +96,7 @@ JX.install('DiffInline', {
         // which we're currently editing. This flow is a little clumsy, but
         // reasonable until some future change moves away from "send down
         // the inline, then immediately click edit".
-        this.edit(this._originalText);
+        this.edit(this._originalText, true);
       } else {
         this.setInvisible(false);
       }
@@ -389,7 +390,9 @@ JX.install('DiffInline', {
       return changeset.newInlineReply(this, text);
     },
 
-    edit: function(text) {
+    edit: function(text, skip_focus) {
+      this._skipFocus = !!skip_focus;
+
       // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
       // edit it again: discard the undo state ("AB"). Otherwise we end up
       // with an open editor and an active "Undo" link, which is weird.
@@ -607,19 +610,24 @@ JX.install('DiffInline', {
           result_row = row;
         }
 
-        // If the row has a textarea, focus it. This allows the user to start
-        // typing a comment immediately after a "new", "edit", or "reply"
-        // action.
-        var textareas = JX.DOM.scry(
-          row,
-          'textarea',
-          'differential-inline-comment-edit-textarea');
-        if (textareas.length) {
-          var area = textareas[0];
-          area.focus();
+        if (!this._skipFocus) {
+          // If the row has a textarea, focus it. This allows the user to start
+          // typing a comment immediately after a "new", "edit", or "reply"
+          // action.
 
-          var length = area.value.length;
-          JX.TextAreaUtils.setSelectionRange(area, length, length);
+          // (When simulating an "edit" on page load, we don't do this.)
+
+          var textareas = JX.DOM.scry(
+            row,
+            'textarea',
+            'differential-inline-comment-edit-textarea');
+          if (textareas.length) {
+            var area = textareas[0];
+            area.focus();
+
+            var length = area.value.length;
+            JX.TextAreaUtils.setSelectionRange(area, length, length);
+          }
         }
 
         row = next_row;
