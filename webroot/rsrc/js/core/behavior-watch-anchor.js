@@ -98,7 +98,15 @@ JX.behavior('phabricator-watch-anchor', function() {
       // If there's an "anchor-container" parent element, we'll make the
       // display adjustment to that node instead. For example, this is used
       // by the timeline to highlight timeline stories.
-      var container = JX.DOM.findAbove(node, null, 'anchor-container');
+
+      var container;
+
+      try {
+        container = JX.DOM.findAbove(node, null, 'anchor-container');
+      } catch (ex) {
+        // Ignore.
+      }
+
       if (container) {
         display_target = container;
       } else {
