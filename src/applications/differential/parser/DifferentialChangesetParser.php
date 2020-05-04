@@ -592,6 +592,17 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function tryCacheStuff() {
+    $changeset = $this->getChangeset();
+    if (!$changeset->hasSourceTextBody()) {
+
+      // TODO: This isn't really correct (the change is not "generated"), the
+      // intent is just to not render a text body for Subversion directory
+      // changes, etc.
+      $this->markGenerated();
+
+      return;
+    }
+
     $viewstate = $this->getViewState();
 
     $skip_cache = false;
@@ -610,19 +621,10 @@ final class DifferentialChangesetParser extends Phobject {
       $skip_cache = true;
     }
 
-    $changeset = $this->changeset;
-
-    if ($changeset->getFileType() != DifferentialChangeType::FILE_TEXT &&
-        $changeset->getFileType() != DifferentialChangeType::FILE_SYMLINK) {
-
-      $this->markGenerated();
-
-    } else {
-      if ($skip_cache || !$this->loadCache()) {
-        $this->process();
-        if (!$skip_cache) {
-          $this->saveCache();
-        }
+    if ($skip_cache || !$this->loadCache()) {
+      $this->process();
+      if (!$skip_cache) {
+        $this->saveCache();
       }
     }
   }

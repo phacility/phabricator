@@ -32,6 +32,8 @@ final class DifferentialChangeset
   private $hasNewState;
   private $oldStateMetadata;
   private $newStateMetadata;
+  private $oldFileType;
+  private $newFileType;
 
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
@@ -550,17 +552,20 @@ final class DifferentialChangeset
     $left_metadata = $left->getNewStateMetadata();
     $left_state = $left->hasNewState();
     $shared_metadata = $left->getMetadata();
+    $left_type = $left->getNewFileType();
     if ($right) {
       $right_data = $right->makeNewFile();
       $right_properties = $right->getNewProperties();
       $right_metadata = $right->getNewStateMetadata();
       $right_state = $right->hasNewState();
       $shared_metadata = $right->getMetadata();
+      $right_type = $right->getNewFileType();
     } else {
       $right_data = $left->makeOldFile();
       $right_properties = $left->getOldProperties();
       $right_metadata = $left->getOldStateMetadata();
       $right_state = $left->hasOldState();
+      $right_type = $left->getOldFileType();
     }
 
     $engine = new PhabricatorDifferenceEngine();
@@ -576,7 +581,6 @@ final class DifferentialChangeset
       ->setFilename($right->getFilename());
 
     // TODO: Change type?
-    // TODO: File type?
     // TODO: Away paths?
     // TODO: View state key?
 
@@ -589,7 +593,9 @@ final class DifferentialChangeset
       ->setOldStateMetadata($left_metadata)
       ->setNewStateMetadata($right_metadata)
       ->setHasOldState($left_state)
-      ->setHasNewState($right_state);
+      ->setHasNewState($right_state)
+      ->setOldFileType($left_type)
+      ->setNewFileType($right_type);
 
     // NOTE: Some metadata is not stored statefully, like the "generated"
     // flag. For now, use the rightmost "new state" metadata to fill in these
@@ -600,6 +606,45 @@ final class DifferentialChangeset
     $comparison->setMetadata($metadata);
 
     return $comparison;
+  }
+
+
+  public function setNewFileType($new_file_type) {
+    $this->newFileType = $new_file_type;
+    return $this;
+  }
+
+  public function getNewFileType() {
+    if ($this->newFileType !== null) {
+      return $this->newFileType;
+    }
+
+    return $this->getFiletype();
+  }
+
+  public function setOldFileType($old_file_type) {
+    $this->oldFileType = $old_file_type;
+    return $this;
+  }
+
+  public function getOldFileType() {
+    if ($this->oldFileType !== null) {
+      return $this->oldFileType;
+    }
+
+    return $this->getFileType();
+  }
+
+  public function hasSourceTextBody() {
+    $type_map = array(
+      DifferentialChangeType::FILE_TEXT => true,
+      DifferentialChangeType::FILE_SYMLINK => true,
+    );
+
+    $old_body = isset($type_map[$this->getOldFileType()]);
+    $new_body = isset($type_map[$this->getNewFileType()]);
+
+    return ($old_body || $new_body);
   }
 
   public function getNewStateMetadata() {
