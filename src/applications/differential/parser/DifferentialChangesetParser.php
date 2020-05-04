@@ -752,6 +752,8 @@ final class DifferentialChangesetParser extends Phobject {
     $range_len    = null,
     $mask_force   = array()) {
 
+    $viewer = $this->getViewer();
+
     $renderer = $this->getRenderer();
     if (!$renderer) {
       $renderer = $this->newRenderer();
@@ -852,6 +854,16 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     $has_document_engine = ($engine_blocks !== null);
+
+    // Remove empty comments that don't have any unsaved draft data.
+    PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+      $viewer,
+      $this->comments);
+    foreach ($this->comments as $key => $comment) {
+      if ($comment->isVoidComment($viewer)) {
+        unset($this->comments[$key]);
+      }
+    }
 
     // See T13515. Sometimes, we collapse file content by default: for
     // example, if the file is marked as containing generated code.
@@ -1050,6 +1062,7 @@ final class DifferentialChangesetParser extends Phobject {
         }
       }
     }
+
     $renderer
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);

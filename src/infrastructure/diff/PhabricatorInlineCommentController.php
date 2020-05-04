@@ -192,11 +192,15 @@ abstract class PhabricatorInlineCommentController
               ->setIsEditing(false);
 
             $this->saveComment($inline);
+            $this->purgeVersionedDrafts($inline);
+
             return $this->buildRenderedCommentResponse(
               $inline,
               $this->getIsOnRight());
           } else {
             $this->deleteComment($inline);
+            $this->purgeVersionedDrafts($inline);
+
             return $this->buildEmptyResponse();
           }
         } else {
@@ -234,6 +238,23 @@ abstract class PhabricatorInlineCommentController
         } else {
           $this->saveComment($inline);
         }
+
+        $this->purgeVersionedDrafts($inline);
+
+        return $this->buildEmptyResponse();
+      case 'draft':
+        $inline = $this->loadCommentForEdit($this->getCommentID());
+
+        $versioned_draft = PhabricatorVersionedDraft::loadOrCreateDraft(
+          $inline->getPHID(),
+          $viewer->getPHID(),
+          $inline->getID());
+
+        $text = $this->getCommentText();
+
+        $versioned_draft
+          ->setProperty('inline.text', $text)
+          ->save();
 
         return $this->buildEmptyResponse();
       case 'new':
@@ -404,5 +425,14 @@ abstract class PhabricatorInlineCommentController
     return id(new AphrontAjaxResponse())
       ->setContent($response);
   }
+
+  private function purgeVersionedDrafts(
+    PhabricatorInlineComment $inline) {
+    $viewer = $this->getViewer();
+    PhabricatorVersionedDraft::purgeDrafts(
+      $inline->getPHID(),
+      $viewer->getPHID());
+  }
+
 
 }

@@ -15,9 +15,49 @@ abstract class PhabricatorInlineComment
   private $storageObject;
   private $syntheticAuthor;
   private $isGhost;
+  private $versionedDrafts = array();
 
   public function __clone() {
     $this->storageObject = clone $this->storageObject;
+  }
+
+  final public static function loadAndAttachVersionedDrafts(
+    PhabricatorUser $viewer,
+    array $inlines) {
+
+    $viewer_phid = $viewer->getPHID();
+    if (!$viewer_phid) {
+      return;
+    }
+
+    $inlines = mpull($inlines, null, 'getPHID');
+
+    $load = array();
+    foreach ($inlines as $key => $inline) {
+      if (!$inline->getIsEditing()) {
+        continue;
+      }
+
+      if ($inline->getAuthorPHID() !== $viewer_phid) {
+        continue;
+      }
+
+      $load[$key] = $inline;
+    }
+
+    if (!$load) {
+      return;
+    }
+
+    $drafts = PhabricatorVersionedDraft::loadDrafts(
+      array_keys($load),
+      $viewer_phid);
+
+    $drafts = mpull($drafts, null, 'getObjectPHID');
+    foreach ($inlines as $inline) {
+      $draft = idx($drafts, $inline->getPHID());
+      $inline->attachVersionedDraftForViewer($viewer, $draft);
+    }
   }
 
   public function setSyntheticAuthor($synthetic_author) {
@@ -202,6 +242,57 @@ abstract class PhabricatorInlineComment
   public function makeEphemeral() {
     $this->getStorageObject()->makeEphemeral();
     return $this;
+  }
+
+  public function attachVersionedDraftForViewer(
+    PhabricatorUser $viewer,
+    PhabricatorVersionedDraft $draft = null) {
+
+    $key = $viewer->getCacheFragment();
+    $this->versionedDrafts[$key] = $draft;
+
+    return $this;
+  }
+
+  public function hasVersionedDraftForViewer(PhabricatorUser $viewer) {
+    $key = $viewer->getCacheFragment();
+    return array_key_exists($key, $this->versionedDrafts);
+  }
+
+  public function getVersionedDraftForViewer(PhabricatorUser $viewer) {
+    $key = $viewer->getCacheFragment();
+    if (!array_key_exists($key, $this->versionedDrafts)) {
+      throw new Exception(
+        pht(
+          'Versioned draft is not attached for user with fragment "%s".',
+          $key));
+    }
+
+    return $this->versionedDrafts[$key];
+  }
+
+  public function isVoidComment(PhabricatorUser $viewer) {
+    return !strlen($this->getContentForEdit($viewer));
+  }
+
+  public function getContentForEdit(PhabricatorUser $viewer) {
+    $content = $this->getContent();
+
+    if (!$this->hasVersionedDraftForViewer($viewer)) {
+      return $content;
+    }
+
+    $versioned_draft = $this->getVersionedDraftForViewer($viewer);
+    if (!$versioned_draft) {
+      return $content;
+    }
+
+    $draft_text = $versioned_draft->getProperty('inline.text');
+    if ($draft_text === null) {
+      return $content;
+    }
+
+    return $draft_text;
   }
 
 

@@ -20,12 +20,23 @@ final class DifferentialTransactionQuery
       ->needReplyToComments(true)
       ->execute();
 
-    // Don't count empty inlines when considering draft state.
     foreach ($inlines as $key => $inline) {
-      if ($inline->isEmptyInlineComment()) {
+      $inlines[$key] = DifferentialInlineComment::newFromModernComment(
+        $inline);
+    }
+
+    PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+      $viewer,
+      $inlines);
+
+    // Don't count void inlines when considering draft state.
+    foreach ($inlines as $key => $inline) {
+      if ($inline->isVoidComment($viewer)) {
         unset($inlines[$key]);
       }
     }
+
+    $inlines = mpull($inlines, 'getStorageObject');
 
     return $inlines;
   }

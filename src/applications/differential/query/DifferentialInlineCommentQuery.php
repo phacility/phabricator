@@ -16,7 +16,6 @@ final class DifferentialInlineCommentQuery
   private $revisionPHIDs;
   private $deletedDrafts;
   private $needHidden;
-  private $withEmpty;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -62,11 +61,6 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
-  public function withEmptyInlineComments($empty) {
-    $this->withEmpty = $empty;
-    return $this;
-  }
-
   public function execute() {
     $table = new DifferentialTransactionComment();
     $conn_r = $table->establishConnection('r');
@@ -79,15 +73,6 @@ final class DifferentialInlineCommentQuery
       $this->buildLimitClause($conn_r));
 
     $comments = $table->loadAllFromArray($data);
-
-    if ($this->withEmpty !== null) {
-      $want_empty = (bool)$this->withEmpty;
-      foreach ($comments as $key => $value) {
-        if ($value->isEmptyInlineComment() !== $want_empty) {
-          unset($comments[$key]);
-        }
-      }
-    }
 
     if ($this->needHidden) {
       $viewer_phid = $this->getViewer()->getPHID();

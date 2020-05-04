@@ -197,7 +197,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($viewer)
         ->needHidden(true)
-        ->withEmptyInlineComments(false)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(

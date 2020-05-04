@@ -105,7 +105,13 @@ final class PhabricatorAuditEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditActionConstants::INLINE:
-        $xaction->getComment()->setAttribute('editing', false);
+        $comment = $xaction->getComment();
+
+        $comment->setAttribute('editing', false);
+
+        PhabricatorVersionedDraft::purgeDrafts(
+          $comment->getPHID(),
+          $this->getActingAsPHID());
         return;
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;

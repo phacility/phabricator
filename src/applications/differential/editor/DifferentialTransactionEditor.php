@@ -112,7 +112,13 @@ final class DifferentialTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
-        $xaction->getComment()->setAttribute('editing', false);
+        $comment = $xaction->getComment();
+
+        $comment->setAttribute('editing', false);
+
+        PhabricatorVersionedDraft::purgeDrafts(
+          $comment->getPHID(),
+          $this->getActingAsPHID());
         return;
     }
 

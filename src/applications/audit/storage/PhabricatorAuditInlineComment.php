@@ -111,13 +111,6 @@ final class PhabricatorAuditInlineComment
         $viewer->getPHID());
     }
 
-    foreach ($inlines as $key => $inline) {
-      $is_draft = !$inline->getTransactionPHID();
-      if ($is_draft && $inline->isEmptyInlineComment()) {
-        unset($inlines[$key]);
-      }
-    }
-
     return self::buildProxies($inlines);
   }
 

@@ -42,6 +42,8 @@ JX.install('DiffInline', {
     _undoType: null,
     _undoText: null,
 
+    _draftRequest: null,
+
     bindToRow: function(row) {
       this._row = row;
 
@@ -89,10 +91,16 @@ JX.install('DiffInline', {
       this._isEditing = data.isEditing;
 
       if (this._isEditing) {
-        this.edit();
+        // NOTE: The "original" shipped down in the DOM may reflect a draft
+        // which we're currently editing. This flow is a little clumsy, but
+        // reasonable until some future change moves away from "send down
+        // the inline, then immediately click edit".
+        this.edit(this._originalText);
       } else {
         this.setInvisible(false);
       }
+
+      this._startDrafts();
 
       return this;
     },
@@ -153,6 +161,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -213,6 +222,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -795,7 +805,59 @@ JX.install('DiffInline', {
       var changeset = this.getChangeset();
       var list = changeset.getChangesetList();
       return list.getInlineURI();
+    },
+
+    _startDrafts: function() {
+      if (this._draftRequest) {
+        return;
+      }
+
+      var onresponse = JX.bind(this, this._onDraftResponse);
+      var draft = JX.bind(this, this._getDraftState);
+
+      var uri = this._getInlineURI();
+      var request = new JX.PhabricatorShapedRequest(uri, onresponse, draft);
+
+      // The main transaction code uses a 500ms delay on desktop and a
+      // 10s delay on mobile. Perhaps this should be standardized.
+      request.setRateLimit(2000);
+
+      this._draftRequest = request;
+
+      request.start();
+    },
+
+    _onDraftResponse: function() {
+      // For now, do nothing.
+    },
+
+    _getDraftState: function() {
+      if (this.isDeleted()) {
+        return null;
+      }
+
+      if (!this.isEditing()) {
+        return null;
+      }
+
+      var text = this._readText(this._editRow);
+      if (text === null) {
+        return null;
+      }
+
+      return {
+        op: 'draft',
+        id: this.getID(),
+        text: text
+      };
+    },
+
+    triggerDraft: function() {
+      if (this._draftRequest) {
+        this._draftRequest.trigger();
+      }
     }
+
   }
 
 });

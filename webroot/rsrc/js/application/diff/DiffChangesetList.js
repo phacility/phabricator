@@ -2110,6 +2110,13 @@ JX.install('DiffChangesetList', {
         'click',
         ['differential-inline-comment', 'differential-inline-reply'],
         onreply);
+
+      var ondraft = JX.bind(this, this._onInlineEvent, 'draft');
+      JX.Stratcom.listen(
+        'keydown',
+        ['differential-inline-comment', 'tag:textarea'],
+        ondraft);
+
     },
 
     _onInlineEvent: function(action, e) {
@@ -2117,7 +2124,9 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      e.kill();
+      if (action !== 'draft') {
+        e.kill();
+      }
 
       var inline = this._getInlineForEvent(e);
       var is_ref = false;
@@ -2171,6 +2180,9 @@ JX.install('DiffChangesetList', {
           break;
         case 'reply':
           inline.reply();
+          break;
+        case 'draft':
+          inline.triggerDraft();
           break;
       }
     }
