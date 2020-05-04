@@ -49,6 +49,11 @@ final class DifferentialViewState
       $properties['diffID'] = (int)$diff_id;
     }
 
+    $changeset_id = $changeset->getID();
+    if ($changeset_id !== null) {
+      $properties['changesetID'] = (int)$changeset_id;
+    }
+
     $path_hash = $this->getChangesetPathHash($changeset);
     $changeset_phid = $this->getChangesetKey($changeset);
 
