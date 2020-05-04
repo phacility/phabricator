@@ -560,12 +560,16 @@ final class DifferentialChangeset
       $right_state = $right->hasNewState();
       $shared_metadata = $right->getMetadata();
       $right_type = $right->getNewFileType();
+
+      $file_name = $right->getFilename();
     } else {
       $right_data = $left->makeOldFile();
       $right_properties = $left->getOldProperties();
       $right_metadata = $left->getOldStateMetadata();
       $right_state = $left->hasOldState();
       $right_type = $left->getOldFileType();
+
+      $file_name = $left->getFilename();
     }
 
     $engine = new PhabricatorDifferenceEngine();
@@ -578,7 +582,7 @@ final class DifferentialChangeset
       ->makeEphemeral(true)
       ->attachDiff($left->getDiff())
       ->setOldFile($left->getFilename())
-      ->setFilename($right->getFilename());
+      ->setFilename($file_name);
 
     // TODO: Change type?
     // TODO: Away paths?
