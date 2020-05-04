@@ -75,8 +75,6 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
         break;
     }
 
-    $original_text = $inline->getContentForEdit($viewer);
-
     return array(
       'id' => $inline->getID(),
       'phid' => $inline->getPHID(),
@@ -84,7 +82,7 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'isNewFile' => (bool)$inline->getIsNewFile(),
-      'original' => $original_text,
+      'original' => $inline->getContent(),
       'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
       'isDraft' => $inline->isDraft(),
       'isFixed' => $is_fixed,

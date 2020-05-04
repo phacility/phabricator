@@ -109,7 +109,7 @@ final class PHUIDiffInlineCommentEditView
     $viewer = $this->getViewer();
     $inline = $this->getInlineComment();
 
-    $text = $inline->getContent();
+    $text = $inline->getContentForEdit($viewer);
 
     return id(new PhabricatorRemarkupControl())
       ->setViewer($viewer)

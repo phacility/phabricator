@@ -96,7 +96,7 @@ JX.install('DiffInline', {
         // which we're currently editing. This flow is a little clumsy, but
         // reasonable until some future change moves away from "send down
         // the inline, then immediately click edit".
-        this.edit(this._originalText, true);
+        this.edit(null, true);
       } else {
         this.setInvisible(false);
       }

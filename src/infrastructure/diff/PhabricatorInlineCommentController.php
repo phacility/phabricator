@@ -211,6 +211,14 @@ abstract class PhabricatorInlineCommentController
           }
 
           $this->saveComment($inline);
+
+          if (strlen($text)) {
+            $this->purgeVersionedDrafts($inline);
+          }
+
+          PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+            $viewer,
+            array($inline));
         }
 
         $edit_dialog = $this->buildEditDialog($inline)
