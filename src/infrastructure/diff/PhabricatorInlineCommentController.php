@@ -220,6 +220,14 @@ abstract class PhabricatorInlineCommentController
 
         $inline->setIsEditing(false);
 
+        // If the user uses "Undo" to get into an edited state ("AB"), then
+        // clicks cancel to return to the previous state ("A"), we also want
+        // to set the stored state back to "A".
+        $text = $this->getCommentText();
+        if (strlen($text)) {
+          $inline->setContent($text);
+        }
+
         $content = $inline->getContent();
         if (!strlen($content)) {
           $this->deleteComment($inline);

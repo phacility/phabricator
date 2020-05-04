@@ -65,7 +65,13 @@ JX.install('DiffInline', {
 
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
-      this._originalText = data.original;
+
+      var original = '' + data.original;
+      if (original.length) {
+        this._originalText = original;
+      } else {
+        this._originalText = null;
+      }
       this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
@@ -101,6 +107,10 @@ JX.install('DiffInline', {
 
     isEditing: function() {
       return this._isEditing;
+    },
+
+    isUndo: function() {
+      return !!this._undoRow;
     },
 
     isDeleted: function() {
@@ -370,8 +380,21 @@ JX.install('DiffInline', {
     },
 
     edit: function(text) {
+      // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
+      // edit it again: discard the undo state ("AB"). Otherwise we end up
+      // with an open editor and an active "Undo" link, which is weird.
+
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+
+        this._undoType = null;
+        this._undoText = null;
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
+
       var data = this._newRequestData('edit', text || null);
 
       this.setLoading(true);
@@ -647,10 +670,21 @@ JX.install('DiffInline', {
       }
 
       this.setEditing(false);
-      this.setInvisible(false);
+
+      // If this was an empty box and we typed some text and then hit cancel,
+      // don't show the empty concrete inline.
+      if (!this._originalText) {
+        this.setInvisible(true);
+      } else {
+        this.setInvisible(false);
+      }
+
+      // If you "undo" to restore text ("AB") and then "Cancel", we put you
+      // back in the original text state ("A"). We also send the original
+      // text ("A") to the server as the current persistent state.
 
       var uri = this._getInlineURI();
-      var data = this._newRequestData('cancel');
+      var data = this._newRequestData('cancel', this._originalText);
       var handler = JX.bind(this, this._onCancelResponse);
 
       this.setLoading(true);
@@ -664,6 +698,18 @@ JX.install('DiffInline', {
 
     _onCancelResponse: function(response) {
       this.setLoading(false);
+
+      // If the comment was empty when we started editing it (there's no
+      // original text) and empty when we finished editing it (there's no
+      // undo row), just delete the comment.
+      if (!this._originalText && !this.isUndo()) {
+        this.setDeleted(true);
+
+        JX.DOM.remove(this._row);
+        this._row = null;
+
+        this._didUpdate();
+      }
     },
 
     _readText: function(row) {

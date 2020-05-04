@@ -829,6 +829,10 @@ JX.install('DiffChangeset', {
           continue;
         }
 
+        if (inline.isUndo()) {
+          continue;
+        }
+
         if (inline.isSynthetic()) {
           continue;
         }
