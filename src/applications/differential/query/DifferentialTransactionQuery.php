@@ -11,7 +11,7 @@ final class DifferentialTransactionQuery
     PhabricatorUser $viewer,
     DifferentialRevision $revision) {
 
-    return id(new DifferentialDiffInlineCommentQuery())
+    $inlines = id(new DifferentialDiffInlineCommentQuery())
       ->setViewer($viewer)
       ->withRevisionPHIDs(array($revision->getPHID()))
       ->withAuthorPHIDs(array($viewer->getPHID()))
@@ -19,6 +19,15 @@ final class DifferentialTransactionQuery
       ->withIsDeleted(false)
       ->needReplyToComments(true)
       ->execute();
+
+    // Don't count empty inlines when considering draft state.
+    foreach ($inlines as $key => $inline) {
+      if ($inline->isEmptyInlineComment()) {
+        unset($inlines[$key]);
+      }
+    }
+
+    return $inlines;
   }
 
 }
