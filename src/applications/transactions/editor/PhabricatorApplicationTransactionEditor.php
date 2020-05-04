@@ -5033,7 +5033,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xactions = array();
 
-    foreach ($inlines as $inline) {
+    foreach ($inlines as $key => $inline) {
+      if ($inline->isEmptyInlineComment()) {
+        unset($inlines[$key]);
+        continue;
+      }
+
       $xactions[] = $object->getApplicationTransactionTemplate()
         ->setTransactionType($transaction_type)
         ->attachComment($inline);
@@ -5078,6 +5083,13 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $inlines = array_mergev($inlines);
+
+    foreach ($inlines as $key => $inline) {
+      if ($inline->isEmptyInlineComment()) {
+        unset($inlines[$key]);
+        continue;
+      }
+    }
 
     if (!$inlines) {
       return null;

@@ -127,4 +127,8 @@ final class DifferentialTransactionComment
     return $this;
   }
 
+  public function isEmptyInlineComment() {
+    return !strlen($this->getContent());
+  }
+
 }

@@ -81,4 +81,8 @@ final class PhabricatorAuditTransactionComment
     return $this;
   }
 
+  public function isEmptyInlineComment() {
+    return !strlen($this->getContent());
+  }
+
 }
