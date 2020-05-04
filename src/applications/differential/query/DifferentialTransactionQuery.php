@@ -33,6 +33,17 @@ final class DifferentialTransactionQuery
     foreach ($inlines as $key => $inline) {
       if ($inline->isVoidComment($viewer)) {
         unset($inlines[$key]);
+        continue;
+      }
+
+      // For other inlines: if they have a nonempty draft state, set their
+      // content to the draft state content. We want to submit the comment
+      // as it is currently shown to the user, not as it was stored the last
+      // time they clicked "Save".
+
+      $draft_content = $inline->getContentForEdit($viewer);
+      if (strlen($draft_content)) {
+        $inline->setContent($draft_content);
       }
     }
 
