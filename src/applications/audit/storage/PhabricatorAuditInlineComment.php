@@ -55,27 +55,6 @@ final class PhabricatorAuditInlineComment
     return head(self::buildProxies($inlines));
   }
 
-  public static function loadDraftComments(
-    PhabricatorUser $viewer,
-    $commit_phid,
-    $raw = false) {
-
-    $inlines = id(new DiffusionDiffInlineCommentQuery())
-      ->setViewer($viewer)
-      ->withAuthorPHIDs(array($viewer->getPHID()))
-      ->withCommitPHIDs(array($commit_phid))
-      ->withHasTransaction(false)
-      ->withIsDeleted(false)
-      ->needReplyToComments(true)
-      ->execute();
-
-    if ($raw) {
-      return $inlines;
-    }
-
-    return self::buildProxies($inlines);
-  }
-
   public static function loadPublishedComments(
     PhabricatorUser $viewer,
     $commit_phid) {

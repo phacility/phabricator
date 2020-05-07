@@ -128,10 +128,12 @@ final class DiffusionCommitEditEngine
     $viewer = $this->getViewer();
     $xactions = array();
 
-    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
-      $viewer,
-      $object->getPHID(),
-      $raw = true);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withPublishableComments(true)
+      ->needReplyToComments(true)
+      ->execute();
     $inlines = msort($inlines, 'getID');
 
     $editor = $object->getApplicationTransactionEditor()
