@@ -34,49 +34,6 @@ final class PhabricatorAuditInlineComment
     return $this->getStorageObject();
   }
 
-  public static function loadID($id) {
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'id = %d',
-      $id);
-    if (!$inlines) {
-      return null;
-    }
-
-    return head(self::buildProxies($inlines));
-  }
-
-  public static function loadPHID($phid) {
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'phid = %s',
-      $phid);
-    if (!$inlines) {
-      return null;
-    }
-    return head(self::buildProxies($inlines));
-  }
-
-  public static function loadPublishedComments(
-    PhabricatorUser $viewer,
-    $commit_phid) {
-
-    $inlines = id(new DiffusionDiffInlineCommentQuery())
-      ->setViewer($viewer)
-      ->withCommitPHIDs(array($commit_phid))
-      ->withHasTransaction(true)
-      ->execute();
-
-    return self::buildProxies($inlines);
-  }
-
-  private static function buildProxies(array $inlines) {
-    $results = array();
-    foreach ($inlines as $key => $inline) {
-      $results[$key] = self::newFromModernComment(
-        $inline);
-    }
-    return $results;
-  }
-
   public static function newFromModernComment(
     PhabricatorAuditTransactionComment $comment) {
 

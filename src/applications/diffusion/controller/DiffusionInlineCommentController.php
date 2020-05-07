@@ -42,11 +42,31 @@ final class DiffusionInlineCommentController
   }
 
   protected function loadComment($id) {
-    return PhabricatorAuditInlineComment::loadID($id);
+    $viewer = $this->getViewer();
+    $inline = id(new DiffusionDiffInlineCommentQuery())
+       ->setViewer($viewer)
+       ->withIDs(array($id))
+       ->executeOne();
+
+    if ($inline) {
+      $inline = $inline->newInlineCommentObject();
+    }
+
+    return $inline;
   }
 
   protected function loadCommentByPHID($phid) {
-    return PhabricatorAuditInlineComment::loadPHID($phid);
+    $viewer = $this->getViewer();
+    $inline = id(new DiffusionDiffInlineCommentQuery())
+       ->setViewer($viewer)
+       ->withPHIDs(array($phid))
+       ->executeOne();
+
+    if ($inline) {
+      $inline = $inline->newInlineCommentObject();
+    }
+
+    return $inline;
   }
 
   protected function loadCommentForEdit($id) {
