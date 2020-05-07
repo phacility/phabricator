@@ -3,6 +3,10 @@
 final class DiffusionInlineCommentController
   extends PhabricatorInlineCommentController {
 
+  protected function newInlineCommentQuery() {
+    return new DiffusionDiffInlineCommentQuery();
+  }
+
   private function getCommitPHID() {
     return $this->getRequest()->getURIData('phid');
   }
@@ -41,48 +45,10 @@ final class DiffusionInlineCommentController
       ->setPathID($path_id);
   }
 
-  protected function loadComment($id) {
-    $viewer = $this->getViewer();
-    $inline = id(new DiffusionDiffInlineCommentQuery())
-       ->setViewer($viewer)
-       ->withIDs(array($id))
-       ->executeOne();
-
-    if ($inline) {
-      $inline = $inline->newInlineCommentObject();
-    }
-
-    return $inline;
-  }
-
-  protected function loadCommentByPHID($phid) {
-    $viewer = $this->getViewer();
-    $inline = id(new DiffusionDiffInlineCommentQuery())
-       ->setViewer($viewer)
-       ->withPHIDs(array($phid))
-       ->executeOne();
-
-    if ($inline) {
-      $inline = $inline->newInlineCommentObject();
-    }
-
-    return $inline;
-  }
-
-  protected function loadCommentForEdit($id) {
-    $viewer = $this->getViewer();
-
-    $inline = $this->loadComment($id);
-    if (!$this->canEditInlineComment($viewer, $inline)) {
-      throw new Exception(pht('That comment is not editable!'));
-    }
-    return $inline;
-  }
-
   protected function loadCommentForDone($id) {
     $viewer = $this->getViewer();
 
-    $inline = $this->loadComment($id);
+    $inline = $this->loadCommentByID($id);
     if (!$inline) {
       throw new Exception(pht('Failed to load comment "%d".', $id));
     }
@@ -115,7 +81,7 @@ final class DiffusionInlineCommentController
     return $inline;
   }
 
-  private function canEditInlineComment(
+  protected function canEditInlineComment(
     PhabricatorUser $viewer,
     PhabricatorAuditInlineComment $inline) {
 

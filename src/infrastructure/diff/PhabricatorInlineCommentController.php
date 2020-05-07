@@ -4,10 +4,8 @@ abstract class PhabricatorInlineCommentController
   extends PhabricatorController {
 
   abstract protected function createComment();
-  abstract protected function loadComment($id);
-  abstract protected function loadCommentForEdit($id);
+  abstract protected function newInlineCommentQuery();
   abstract protected function loadCommentForDone($id);
-  abstract protected function loadCommentByPHID($phid);
   abstract protected function loadObjectOwnerPHID(
     PhabricatorInlineComment $inline);
   abstract protected function deleteComment(
@@ -172,7 +170,7 @@ abstract class PhabricatorInlineCommentController
 
         $is_delete = ($op == 'delete' || $op == 'refdelete');
 
-        $inline = $this->loadCommentForEdit($this->getCommentID());
+        $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         if ($is_delete) {
           $this->deleteComment($inline);
@@ -182,7 +180,7 @@ abstract class PhabricatorInlineCommentController
 
         return $this->buildEmptyResponse();
       case 'edit':
-        $inline = $this->loadCommentForEdit($this->getCommentID());
+        $inline = $this->loadCommentByIDForEdit($this->getCommentID());
         $text = $this->getCommentText();
 
         if ($request->isFormPost()) {
@@ -228,7 +226,7 @@ abstract class PhabricatorInlineCommentController
 
         return $this->newInlineResponse($inline, $view);
       case 'cancel':
-        $inline = $this->loadCommentForEdit($this->getCommentID());
+        $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         $inline->setIsEditing(false);
 
@@ -251,7 +249,7 @@ abstract class PhabricatorInlineCommentController
 
         return $this->buildEmptyResponse();
       case 'draft':
-        $inline = $this->loadCommentForEdit($this->getCommentID());
+        $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         $versioned_draft = PhabricatorVersionedDraft::loadOrCreateDraft(
           $inline->getPHID(),
@@ -442,5 +440,58 @@ abstract class PhabricatorInlineCommentController
       $viewer->getPHID());
   }
 
+  final protected function loadCommentByID($id) {
+    $query = $this->newInlineCommentQuery()
+      ->withIDs(array($id));
+
+    return $this->loadCommentByQuery($query);
+  }
+
+  final protected function loadCommentByPHID($phid) {
+    $query = $this->newInlineCommentQuery()
+      ->withPHIDs(array($phid));
+
+    return $this->loadCommentByQuery($query);
+  }
+
+  final protected function loadCommentByIDForEdit($id) {
+    $viewer = $this->getViewer();
+
+    $query = $this->newInlineCommentQuery()
+      ->withIDs(array($id));
+
+    $inline = $this->loadCommentByQuery($query);
+
+    if (!$inline) {
+      throw new Exception(
+        pht(
+          'Unable to load inline "%s".',
+          $id));
+    }
+
+    if (!$this->canEditInlineComment($viewer, $inline)) {
+      throw new Exception(
+        pht(
+          'Inline comment "%s" is not editable.',
+          $id));
+    }
+
+    return $inline;
+  }
+
+  private function loadCommentByQuery(
+    PhabricatorDiffInlineCommentQuery $query) {
+    $viewer = $this->getViewer();
+
+    $inline = $query
+      ->setViewer($viewer)
+      ->executeOne();
+
+    if ($inline) {
+      $inline = $inline->newInlineCommentObject();
+    }
+
+    return $inline;
+  }
 
 }
