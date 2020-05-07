@@ -103,7 +103,8 @@ final class DiffusionDiffController extends DiffusionController {
       ->setViewer($viewer)
       ->withCommitPHIDs(array($commit->getPHID()))
       ->withPathIDs(array($path_id))
-      ->withVisibleComments(true)
+      ->withPublishedComments(true)
+      ->withPublishableComments(true)
       ->execute();
     $inlines = mpull($inlines, 'newInlineCommentObject');
 

@@ -418,7 +418,8 @@ final class DiffusionCommitController extends DiffusionController {
         $inlines = id(new DiffusionDiffInlineCommentQuery())
           ->setViewer($viewer)
           ->withCommitPHIDs(array($commit->getPHID()))
-          ->withVisibleComments(true)
+          ->withPublishedComments(true)
+          ->withPublishableComments(true)
           ->execute();
         $inlines = mpull($inlines, 'newInlineCommentObject');
 

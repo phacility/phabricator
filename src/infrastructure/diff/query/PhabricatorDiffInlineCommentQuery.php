@@ -5,7 +5,7 @@ abstract class PhabricatorDiffInlineCommentQuery
 
   private $fixedStates;
   private $needReplyToComments;
-  private $visibleComments;
+  private $publishedComments;
   private $publishableComments;
 
   abstract protected function buildInlineCommentWhereClauseParts(
@@ -22,13 +22,13 @@ abstract class PhabricatorDiffInlineCommentQuery
     return $this;
   }
 
-  public function withVisibleComments($with_visible) {
-    $this->visibleComments = $with_visible;
+  public function withPublishableComments($with_publishable) {
+    $this->publishableComments = $with_publishable;
     return $this;
   }
 
-  public function withPublishableComments($with_publishable) {
-    $this->publishableComments = $with_publishable;
+  public function withPublishedComments($with_published) {
+    $this->publishedComments = $with_published;
     return $this;
   }
 
@@ -51,32 +51,30 @@ abstract class PhabricatorDiffInlineCommentQuery
     $show_published = false;
     $show_publishable = false;
 
-    if ($this->visibleComments !== null) {
-      if (!$this->visibleComments) {
-        throw new Exception(
-          pht(
-            'Querying for comments that are not visible is '.
-            'not supported.'));
-      }
-      $show_published = true;
-      $show_publishable = true;
-    }
-
     if ($this->publishableComments !== null) {
       if (!$this->publishableComments) {
         throw new Exception(
           pht(
-            'Querying for comments that are not publishable is '.
+            'Querying for comments that are "not publishable" is '.
             'not supported.'));
       }
       $show_publishable = true;
+    }
+
+    if ($this->publishedComments !== null) {
+      if (!$this->publishedComments) {
+        throw new Exception(
+          pht(
+            'Querying for comments that are "not published" is '.
+            'not supported.'));
+      }
+      $show_published = true;
     }
 
     if ($show_publishable || $show_published) {
       $clauses = array();
 
       if ($show_published) {
-        // Published comments are always visible.
         $clauses[] = qsprintf(
           $conn,
           '%T.transactionPHID IS NOT NULL',

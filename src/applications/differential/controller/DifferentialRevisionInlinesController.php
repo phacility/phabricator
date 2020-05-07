@@ -24,11 +24,12 @@ final class DifferentialRevisionInlinesController
     $revision_uri = $revision->getURI();
     $revision_title = $revision->getTitle();
 
-    $query = id(new DifferentialInlineCommentQuery())
+    $inlines = id(new DifferentialDiffInlineCommentQuery())
       ->setViewer($viewer)
-      ->needHidden(true)
-      ->withRevisionPHIDs(array($revision->getPHID()));
-    $inlines = $query->execute();
+      ->withRevisionPHIDs(array($revision->getPHID()))
+      ->withPublishedComments(true)
+      ->execute();
+    $inlines = mpull($inlines, 'newInlineCommentObject');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($revision_monogram, $revision_uri);
