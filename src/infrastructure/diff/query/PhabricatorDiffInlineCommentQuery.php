@@ -6,6 +6,10 @@ abstract class PhabricatorDiffInlineCommentQuery
   private $fixedStates;
   private $needReplyToComments;
 
+  abstract protected function buildInlineCommentWhereClauseParts(
+    AphrontDatabaseConnection $conn);
+  abstract public function withObjectPHIDs(array $phids);
+
   public function withFixedStates(array $states) {
     $this->fixedStates = $states;
     return $this;
@@ -16,14 +20,19 @@ abstract class PhabricatorDiffInlineCommentQuery
     return $this;
   }
 
-  protected function buildWhereClauseComponents(
-    AphrontDatabaseConnection $conn_r) {
-    $where = parent::buildWhereClauseComponents($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+    $alias = $this->getPrimaryTableAlias();
+
+    foreach ($this->buildInlineCommentWhereClauseParts($conn) as $part) {
+      $where[] = $part;
+    }
 
     if ($this->fixedStates !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'fixedState IN (%Ls)',
+        $conn,
+        '%T.fixedState IN (%Ls)',
+        $alias,
         $this->fixedStates);
     }
 

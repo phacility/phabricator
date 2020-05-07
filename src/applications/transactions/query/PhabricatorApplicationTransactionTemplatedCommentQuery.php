@@ -11,8 +11,8 @@ final class PhabricatorApplicationTransactionTemplatedCommentQuery
     return $this;
   }
 
-  protected function getTemplate() {
-    return $this->template;
+  protected function newApplicationTransactionCommentTemplate() {
+    return id(clone $this->template);
   }
 
 }

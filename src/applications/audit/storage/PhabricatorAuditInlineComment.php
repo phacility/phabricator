@@ -65,7 +65,6 @@ final class PhabricatorAuditInlineComment
       ->withAuthorPHIDs(array($viewer->getPHID()))
       ->withCommitPHIDs(array($commit_phid))
       ->withHasTransaction(false)
-      ->withHasPath(true)
       ->withIsDeleted(false)
       ->needReplyToComments(true)
       ->execute();
@@ -85,7 +84,6 @@ final class PhabricatorAuditInlineComment
       ->setViewer($viewer)
       ->withCommitPHIDs(array($commit_phid))
       ->withHasTransaction(true)
-      ->withHasPath(true)
       ->execute();
 
     return self::buildProxies($inlines);

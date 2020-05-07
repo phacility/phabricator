@@ -10,7 +10,7 @@ abstract class PhabricatorApplicationTransactionCommentQuery
   private $isDeleted;
   private $hasTransaction;
 
-  abstract protected function getTemplate();
+  abstract protected function newApplicationTransactionCommentTemplate();
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -42,64 +42,55 @@ abstract class PhabricatorApplicationTransactionCommentQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return $this->newApplicationTransactionCommentTemplate();
+  }
+
   protected function loadPage() {
-    $table = $this->getTemplate();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T xcomment %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    return $this->formatWhereClause(
-      $conn,
-      $this->buildWhereClauseComponents($conn));
-  }
-
-  protected function buildWhereClauseComponents(
-    AphrontDatabaseConnection $conn) {
-
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+    $alias = $this->getPrimaryTableAlias();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'xcomment.id IN (%Ld)',
+        '%T.id IN (%Ld)',
+        $alias,
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'xcomment.phid IN (%Ls)',
+        '%T.phid IN (%Ls)',
+        $alias,
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'xcomment.authorPHID IN (%Ls)',
+        '%T.authorPHID IN (%Ls)',
+        $alias,
         $this->authorPHIDs);
     }
 
     if ($this->transactionPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'xcomment.transactionPHID IN (%Ls)',
+        '%T.transactionPHID IN (%Ls)',
+        $alias,
         $this->transactionPHIDs);
     }
 
     if ($this->isDeleted !== null) {
       $where[] = qsprintf(
         $conn,
-        'xcomment.isDeleted = %d',
+        '%T.isDeleted = %d',
+        $alias,
         (int)$this->isDeleted);
     }
 
@@ -107,21 +98,26 @@ abstract class PhabricatorApplicationTransactionCommentQuery
       if ($this->hasTransaction) {
         $where[] = qsprintf(
           $conn,
-          'xcomment.transactionPHID IS NOT NULL');
+          '%T.transactionPHID IS NOT NULL',
+          $alias);
       } else {
         $where[] = qsprintf(
           $conn,
-          'xcomment.transactionPHID IS NULL');
+          '%T.transactionPHID IS NULL',
+          $alias);
       }
     }
 
     return $where;
   }
 
+  protected function getPrimaryTableAlias() {
+    return 'xcomment';
+  }
+
   public function getQueryApplicationClass() {
     // TODO: Figure out the app via the template?
     return null;
   }
-
 
 }
