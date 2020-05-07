@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorAuditTransactionComment
-  extends PhabricatorApplicationTransactionComment {
+  extends PhabricatorApplicationTransactionComment
+  implements
+    PhabricatorInlineCommentInterface {
 
   protected $commitPHID;
   protected $pathID;
@@ -83,6 +85,10 @@ final class PhabricatorAuditTransactionComment
 
   public function isEmptyInlineComment() {
     return !strlen($this->getContent());
+  }
+
+  public function newInlineCommentObject() {
+    return PhabricatorAuditInlineComment::newFromModernComment($this);
   }
 
 }

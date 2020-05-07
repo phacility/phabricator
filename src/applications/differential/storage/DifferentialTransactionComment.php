@@ -1,7 +1,9 @@
 <?php
 
 final class DifferentialTransactionComment
-  extends PhabricatorApplicationTransactionComment {
+  extends PhabricatorApplicationTransactionComment
+  implements
+    PhabricatorInlineCommentInterface {
 
   protected $revisionPHID;
   protected $changesetID;
@@ -129,6 +131,10 @@ final class DifferentialTransactionComment
 
   public function isEmptyInlineComment() {
     return !strlen($this->getContent());
+  }
+
+  public function newInlineCommentObject() {
+    return DifferentialInlineComment::newFromModernComment($this);
   }
 
 }

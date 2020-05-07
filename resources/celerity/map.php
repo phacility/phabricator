@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '1e667bcb',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => '2d70b7b9',
-    'differential.pkg.js' => '22ec6f26',
+    'differential.pkg.js' => 'faa6e8ab',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -433,7 +433,7 @@ return array(
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '75184d68',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => '9f081f05',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'aa3a100c',
-    'rsrc/js/application/repository/repository-crossreference.js' => '1c95ea63',
+    'rsrc/js/application/repository/repository-crossreference.js' => '6337cf26',
     'rsrc/js/application/search/behavior-reorder-profile-menu-items.js' => 'e5bdb730',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'b86f297f',
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '4dffaeb2',
@@ -685,7 +685,7 @@ return array(
     'javelin-behavior-reorder-applications' => 'aa371860',
     'javelin-behavior-reorder-columns' => '8ac32fd9',
     'javelin-behavior-reorder-profile-menu-items' => 'e5bdb730',
-    'javelin-behavior-repository-crossreference' => '1c95ea63',
+    'javelin-behavior-repository-crossreference' => '6337cf26',
     'javelin-behavior-scrollbar' => '92388bae',
     'javelin-behavior-search-reorder-queries' => 'b86f297f',
     'javelin-behavior-select-content' => 'e8240b50',
@@ -1048,12 +1048,6 @@ return array(
     '1c850a26' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    '1c95ea63' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-uri',
     ),
     '1cab0e9a' => array(
       'javelin-behavior',
@@ -1500,6 +1494,12 @@ return array(
     ),
     '60cd9241' => array(
       'javelin-behavior',
+    ),
+    '6337cf26' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-uri',
     ),
     '65bb0011' => array(
       'javelin-behavior',
