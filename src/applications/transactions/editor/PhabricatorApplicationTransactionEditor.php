@@ -5027,18 +5027,23 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function newAutomaticInlineTransactions(
     PhabricatorLiskDAO $object,
-    array $inlines,
     $transaction_type,
     PhabricatorCursorPagedPolicyAwareQuery $query_template) {
+
+    $actor = $this->getActor();
+
+    $inlines = id(clone $query_template)
+      ->setViewer($actor)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withPublishableComments(true)
+      ->needAppliedDrafts(true)
+      ->needReplyToComments(true)
+      ->execute();
+    $inlines = msort($inlines, 'getID');
 
     $xactions = array();
 
     foreach ($inlines as $key => $inline) {
-      if ($inline->isEmptyInlineComment()) {
-        unset($inlines[$key]);
-        continue;
-      }
-
       $xactions[] = $object->getApplicationTransactionTemplate()
         ->setTransactionType($transaction_type)
         ->attachComment($inline);
@@ -5065,31 +5070,17 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $state_map = PhabricatorTransactions::getInlineStateMap();
 
-    $query = id(clone $query_template)
+    $inline_query = id(clone $query_template)
       ->setViewer($this->getActor())
-      ->withFixedStates(array_keys($state_map));
-
-    $inlines = array();
-
-    $inlines[] = id(clone $query)
-      ->withAuthorPHIDs(array($actor_phid))
-      ->withHasTransaction(false)
-      ->execute();
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withFixedStates(array_keys($state_map))
+      ->withPublishableComments(true);
 
     if ($actor_is_author) {
-      $inlines[] = id(clone $query)
-        ->withHasTransaction(true)
-        ->execute();
+      $inline_query->withPublishedComments(true);
     }
 
-    $inlines = array_mergev($inlines);
-
-    foreach ($inlines as $key => $inline) {
-      if ($inline->isEmptyInlineComment()) {
-        unset($inlines[$key]);
-        continue;
-      }
-    }
+    $inlines = $inline_query->execute();
 
     if (!$inlines) {
       return null;
