@@ -89,29 +89,6 @@ final class PhabricatorAuditInlineComment
     return self::buildProxies($inlines);
   }
 
-  public static function loadDraftAndPublishedComments(
-    PhabricatorUser $viewer,
-    $commit_phid,
-    $path_id = null) {
-
-    if ($path_id === null) {
-      $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-        'commitPHID = %s AND (transactionPHID IS NOT NULL OR authorPHID = %s)
-          AND pathID IS NOT NULL',
-        $commit_phid,
-        $viewer->getPHID());
-    } else {
-      $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-        'commitPHID = %s AND pathID = %d AND
-          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
-        $commit_phid,
-        $path_id,
-        $viewer->getPHID());
-    }
-
-    return self::buildProxies($inlines);
-  }
-
   private static function buildProxies(array $inlines) {
     $results = array();
     foreach ($inlines as $key => $inline) {

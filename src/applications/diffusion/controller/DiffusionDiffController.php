@@ -99,10 +99,13 @@ final class DiffusionDiffController extends DiffusionController {
       ($viewer->getPHID() == $commit->getAuthorPHID()));
     $parser->setObjectOwnerPHID($commit->getAuthorPHID());
 
-    $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
-      $viewer,
-      $commit->getPHID(),
-      $path_id);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit->getPHID()))
+      ->withPathIDs(array($path_id))
+      ->withVisibleComments(true)
+      ->execute();
+    $inlines = mpull($inlines, 'newInlineCommentObject');
 
     if ($inlines) {
       foreach ($inlines as $inline) {
