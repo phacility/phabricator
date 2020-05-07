@@ -1,21 +1,13 @@
 <?php
 
-/**
- * Temporary wrapper for transitioning Differential to ApplicationTransactions.
- */
-final class DifferentialInlineCommentQuery
-  extends PhabricatorOffsetPagedQuery {
+final class PhabricatorInlineCommentAdjustmentEngine
+  extends Phobject {
 
-  // TODO: Remove this when this query eventually moves to PolicyAware.
   private $viewer;
-
-  private $ids;
-  private $phids;
-  private $drafts;
-  private $authorPHIDs;
-  private $revisionPHIDs;
-  private $deletedDrafts;
-  private $needHidden;
+  private $inlines;
+  private $revision;
+  private $oldChangesets;
+  private $newChangesets;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -26,154 +18,51 @@ final class DifferentialInlineCommentQuery
     return $this->viewer;
   }
 
-  public function withIDs(array $ids) {
-    $this->ids = $ids;
+  public function setInlines(array $inlines) {
+    assert_instances_of($inlines, 'DifferentialInlineComment');
+    $this->inlines = $inlines;
     return $this;
   }
 
-  public function withPHIDs(array $phids) {
-    $this->phids = $phids;
+  public function getInlines() {
+    return $this->inlines;
+  }
+
+  public function setOldChangesets(array $old_changesets) {
+    assert_instances_of($old_changesets, 'DifferentialChangeset');
+    $this->oldChangesets = $old_changesets;
     return $this;
   }
 
-  public function withDrafts($drafts) {
-    $this->drafts = $drafts;
+  public function getOldChangesets() {
+    return $this->oldChangesets;
+  }
+
+  public function setNewChangesets(array $new_changesets) {
+    assert_instances_of($new_changesets, 'DifferentialChangeset');
+    $this->newChangesets = $new_changesets;
     return $this;
   }
 
-  public function withAuthorPHIDs(array $author_phids) {
-    $this->authorPHIDs = $author_phids;
+  public function getNewChangesets() {
+    return $this->newChangesets;
+  }
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
     return $this;
   }
 
-  public function withRevisionPHIDs(array $revision_phids) {
-    $this->revisionPHIDs = $revision_phids;
-    return $this;
-  }
-
-  public function withDeletedDrafts($deleted_drafts) {
-    $this->deletedDrafts = $deleted_drafts;
-    return $this;
-  }
-
-  public function needHidden($need) {
-    $this->needHidden = $need;
-    return $this;
+  public function getRevision() {
+    return $this->revision;
   }
 
   public function execute() {
-    $table = new DifferentialTransactionComment();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $comments = $table->loadAllFromArray($data);
-
-    if ($this->needHidden) {
-      $viewer_phid = $this->getViewer()->getPHID();
-      if ($viewer_phid && $comments) {
-        $hidden = queryfx_all(
-          $conn_r,
-          'SELECT commentID FROM %T WHERE userPHID = %s
-            AND commentID IN (%Ls)',
-          id(new DifferentialHiddenComment())->getTableName(),
-          $viewer_phid,
-          mpull($comments, 'getID'));
-        $hidden = array_fuse(ipull($hidden, 'commentID'));
-      } else {
-        $hidden = array();
-      }
-
-      foreach ($comments as $inline) {
-        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
-      }
-    }
-
-    foreach ($comments as $key => $value) {
-      $comments[$key] = DifferentialInlineComment::newFromModernComment(
-        $value);
-    }
-
-    return $comments;
-  }
-
-  public function executeOne() {
-    // TODO: Remove when this query moves to PolicyAware.
-    return head($this->execute());
-  }
-
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
-
-    // Only find inline comments.
-    $where[] = qsprintf(
-      $conn,
-      'changesetID IS NOT NULL');
-
-    if ($this->ids !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'id IN (%Ld)',
-        $this->ids);
-    }
-
-    if ($this->phids !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'phid IN (%Ls)',
-        $this->phids);
-    }
-
-    if ($this->revisionPHIDs !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'revisionPHID IN (%Ls)',
-        $this->revisionPHIDs);
-    }
-
-    if ($this->drafts === null) {
-      if ($this->deletedDrafts) {
-        $where[] = qsprintf(
-          $conn,
-          '(authorPHID = %s) OR (transactionPHID IS NOT NULL)',
-          $this->getViewer()->getPHID());
-      } else {
-        $where[] = qsprintf(
-          $conn,
-          '(authorPHID = %s AND isDeleted = 0)
-            OR (transactionPHID IS NOT NULL)',
-          $this->getViewer()->getPHID());
-      }
-    } else if ($this->drafts) {
-      $where[] = qsprintf(
-        $conn,
-        '(authorPHID = %s AND isDeleted = 0) AND (transactionPHID IS NULL)',
-        $this->getViewer()->getPHID());
-    } else {
-      $where[] = qsprintf(
-        $conn,
-        'transactionPHID IS NOT NULL');
-    }
-
-    return $this->formatWhereClause($conn, $where);
-  }
-
-  public function adjustInlinesForChangesets(
-    array $inlines,
-    array $old,
-    array $new,
-    DifferentialRevision $revision) {
-
-    assert_instances_of($inlines, 'DifferentialInlineComment');
-    assert_instances_of($old, 'DifferentialChangeset');
-    assert_instances_of($new, 'DifferentialChangeset');
-
     $viewer = $this->getViewer();
+    $inlines = $this->getInlines();
+    $revision = $this->getRevision();
+    $old = $this->getOldChangesets();
+    $new = $this->getNewChangesets();
 
     $no_ghosts = $viewer->compareUserSetting(
       PhabricatorOlderInlinesSetting::SETTINGKEY,

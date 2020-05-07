@@ -7,28 +7,37 @@ abstract class PhabricatorDiffInlineCommentQuery
   private $needReplyToComments;
   private $publishedComments;
   private $publishableComments;
+  private $needHidden;
 
   abstract protected function buildInlineCommentWhereClauseParts(
     AphrontDatabaseConnection $conn);
   abstract public function withObjectPHIDs(array $phids);
+  abstract protected function loadHiddenCommentIDs(
+    $viewer_phid,
+    array $comments);
 
-  public function withFixedStates(array $states) {
+  final public function withFixedStates(array $states) {
     $this->fixedStates = $states;
     return $this;
   }
 
-  public function needReplyToComments($need_reply_to) {
+  final public function needReplyToComments($need_reply_to) {
     $this->needReplyToComments = $need_reply_to;
     return $this;
   }
 
-  public function withPublishableComments($with_publishable) {
+  final public function withPublishableComments($with_publishable) {
     $this->publishableComments = $with_publishable;
     return $this;
   }
 
-  public function withPublishedComments($with_published) {
+  final public function withPublishedComments($with_published) {
     $this->publishedComments = $with_published;
+    return $this;
+  }
+
+  final public function needHidden($need_hidden) {
+    $this->needHidden = $need_hidden;
     return $this;
   }
 
@@ -149,6 +158,27 @@ abstract class PhabricatorDiffInlineCommentQuery
           continue;
         }
         $comment->attachReplyToComment($reply);
+      }
+    }
+
+    if (!$comments) {
+      return $comments;
+    }
+
+    if ($this->needHidden) {
+      $viewer = $this->getViewer();
+      $viewer_phid = $viewer->getPHID();
+
+      if ($viewer_phid) {
+        $hidden = $this->loadHiddenCommentIDs(
+          $viewer_phid,
+          $comments);
+      } else {
+        $hidden = array();
+      }
+
+      foreach ($comments as $inline) {
+        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
       }
     }
 

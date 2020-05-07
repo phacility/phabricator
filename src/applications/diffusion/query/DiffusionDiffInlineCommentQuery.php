@@ -60,4 +60,10 @@ final class DiffusionDiffInlineCommentQuery
     return $where;
   }
 
+  protected function loadHiddenCommentIDs(
+    $viewer_phid,
+    array $comments) {
+    return array();
+  }
+
 }
