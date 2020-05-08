@@ -438,12 +438,6 @@ JX.install('DiffInline', {
         op = 'delete';
       }
 
-      // If there's an existing "unedit" undo element, remove it.
-      if (this._undoRow) {
-        JX.DOM.remove(this._undoRow);
-        this._undoRow = null;
-      }
-
       var data = this._newRequestData(op);
 
       this.setLoading(true);
@@ -540,7 +534,23 @@ JX.install('DiffInline', {
     },
 
     _ondeleteresponse: function() {
-      this._drawUndeleteRows();
+      // If there's an existing "unedit" undo element, remove it.
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+      }
+
+      // If there's an existing editor, remove it. This happens when you
+      // delete a comment from the comment preview area. In this case, we
+      // read and preserve the text so "Undo" restores it.
+      var text;
+      if (this._editRow) {
+        text = this._readText(this._editRow);
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
+
+      this._drawUndeleteRows(text);
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -548,9 +558,9 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _drawUndeleteRows: function() {
+    _drawUndeleteRows: function(text) {
       this._undoType = 'undelete';
-      this._undoText = null;
+      this._undoText = text || null;
 
       return this._drawUndoRows('undelete', this._row);
     },
@@ -649,7 +659,6 @@ JX.install('DiffInline', {
     },
 
     undo: function() {
-
       JX.DOM.remove(this._undoRow);
       this._undoRow = null;
 
@@ -666,10 +675,9 @@ JX.install('DiffInline', {
           .send();
       }
 
-      if (this._undoType === 'unedit') {
+      if (this._undoText !== null) {
         this.edit(this._undoText);
       }
-
     },
 
     _onundelete: function() {
