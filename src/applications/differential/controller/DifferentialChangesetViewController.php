@@ -194,16 +194,23 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     // Load both left-side and right-side inline comments.
     if ($revision) {
-      $query = id(new DifferentialInlineCommentQuery())
+      $inlines = id(new DifferentialDiffInlineCommentQuery())
         ->setViewer($viewer)
+        ->withRevisionPHIDs(array($revision->getPHID()))
+        ->withPublishableComments(true)
+        ->withPublishedComments(true)
         ->needHidden(true)
-        ->withRevisionPHIDs(array($revision->getPHID()));
-      $inlines = $query->execute();
-      $inlines = $query->adjustInlinesForChangesets(
-        $inlines,
-        $old,
-        $new,
-        $revision);
+        ->execute();
+
+      $inlines = mpull($inlines, 'newInlineCommentObject');
+
+      $inlines = id(new PhabricatorInlineCommentAdjustmentEngine())
+        ->setViewer($viewer)
+        ->setRevision($revision)
+        ->setOldChangesets($old)
+        ->setNewChangesets($new)
+        ->setInlines($inlines)
+        ->execute();
     } else {
       $inlines = array();
     }
@@ -238,7 +245,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
 
     $engine->process();

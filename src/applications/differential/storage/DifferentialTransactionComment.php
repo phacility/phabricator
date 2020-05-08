@@ -1,7 +1,9 @@
 <?php
 
 final class DifferentialTransactionComment
-  extends PhabricatorApplicationTransactionComment {
+  extends PhabricatorApplicationTransactionComment
+  implements
+    PhabricatorInlineCommentInterface {
 
   protected $revisionPHID;
   protected $changesetID;
@@ -11,6 +13,7 @@ final class DifferentialTransactionComment
   protected $fixedState;
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
+  protected $attributes = array();
 
   private $replyToComment = self::ATTACHABLE;
   private $isHidden = self::ATTACHABLE;
@@ -32,6 +35,7 @@ final class DifferentialTransactionComment
 
   protected function getConfiguration() {
     $config = parent::getConfiguration();
+
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'revisionPHID' => 'phid?',
       'changesetID' => 'id?',
@@ -42,6 +46,7 @@ final class DifferentialTransactionComment
       'hasReplies' => 'bool',
       'replyToCommentPHID' => 'phid?',
     ) + $config[self::CONFIG_COLUMN_SCHEMA];
+
     $config[self::CONFIG_KEY_SCHEMA] = array(
       'key_draft' => array(
         'columns' => array('authorPHID', 'transactionPHID'),
@@ -53,6 +58,11 @@ final class DifferentialTransactionComment
         'columns' => array('revisionPHID'),
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
+
+    $config[self::CONFIG_SERIALIZATION] = array(
+      'attributes' => self::SERIALIZATION_JSON,
+    ) + idx($config, self::CONFIG_SERIALIZATION, array());
+
     return $config;
   }
 
@@ -108,6 +118,23 @@ final class DifferentialTransactionComment
   public function attachIsHidden($hidden) {
     $this->isHidden = $hidden;
     return $this;
+  }
+
+  public function getAttribute($key, $default = null) {
+    return idx($this->attributes, $key, $default);
+  }
+
+  public function setAttribute($key, $value) {
+    $this->attributes[$key] = $value;
+    return $this;
+  }
+
+  public function isEmptyInlineComment() {
+    return !strlen($this->getContent());
+  }
+
+  public function newInlineCommentObject() {
+    return DifferentialInlineComment::newFromModernComment($this);
   }
 
 }

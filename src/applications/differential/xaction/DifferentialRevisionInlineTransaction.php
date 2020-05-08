@@ -40,8 +40,8 @@ final class DifferentialRevisionInlineTransaction
 
     $is_done = false;
     switch ($comment->getFixedState()) {
-      case PhabricatorInlineCommentInterface::STATE_DONE:
-      case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
+      case PhabricatorInlineComment::STATE_DONE:
+      case PhabricatorInlineComment::STATE_UNDRAFT:
         $is_done = true;
         break;
     }

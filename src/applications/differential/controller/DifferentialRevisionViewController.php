@@ -227,16 +227,20 @@ final class DifferentialRevisionViewController
       $old = array_select_keys($changesets, $old_ids);
       $new = array_select_keys($changesets, $new_ids);
 
-      $query = id(new DifferentialInlineCommentQuery())
+      $inlines = id(new DifferentialDiffInlineCommentQuery())
         ->setViewer($viewer)
-        ->needHidden(true)
-        ->withRevisionPHIDs(array($revision->getPHID()));
-      $inlines = $query->execute();
-      $inlines = $query->adjustInlinesForChangesets(
-        $inlines,
-        $old,
-        $new,
-        $revision);
+        ->withRevisionPHIDs(array($revision->getPHID()))
+        ->withPublishableComments(true)
+        ->withPublishedComments(true)
+        ->execute();
+
+      $inlines = id(new PhabricatorInlineCommentAdjustmentEngine())
+        ->setViewer($viewer)
+        ->setRevision($revision)
+        ->setOldChangesets($old)
+        ->setNewChangesets($new)
+        ->setInlines($inlines)
+        ->execute();
 
       foreach ($inlines as $inline) {
         $changeset_id = $inline->getChangesetID();

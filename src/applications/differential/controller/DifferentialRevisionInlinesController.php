@@ -24,11 +24,12 @@ final class DifferentialRevisionInlinesController
     $revision_uri = $revision->getURI();
     $revision_title = $revision->getTitle();
 
-    $query = id(new DifferentialInlineCommentQuery())
+    $inlines = id(new DifferentialDiffInlineCommentQuery())
       ->setViewer($viewer)
-      ->needHidden(true)
-      ->withRevisionPHIDs(array($revision->getPHID()));
-    $inlines = $query->execute();
+      ->withRevisionPHIDs(array($revision->getPHID()))
+      ->withPublishedComments(true)
+      ->execute();
+    $inlines = mpull($inlines, 'newInlineCommentObject');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($revision_monogram, $revision_uri);
@@ -124,7 +125,7 @@ final class DifferentialRevisionInlinesController
         $inline->getContent());
 
       $state = $inline->getFixedState();
-      if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
+      if ($state == PhabricatorInlineComment::STATE_DONE) {
         $status_icons[] = id(new PHUIIconView())
           ->setIcon('fa-check green')
           ->addClass('mmr');

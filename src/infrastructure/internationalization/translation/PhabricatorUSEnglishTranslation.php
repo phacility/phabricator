@@ -1723,6 +1723,17 @@ final class PhabricatorUSEnglishTranslation
         'View All %d Subscribers',
       ),
 
+      'You are currently editing %s inline comment(s) on this '.
+      'revision.' => array(
+        'You are currently editing an inline comment on this revision.',
+        'You are currently editing %s inline comments on this revision.',
+      ),
+
+      'These %s inline comment(s) will be saved and published.' => array(
+        'This inline comment will be saved and published.',
+        'These inline comments will be saved and published.',
+      ),
+
     );
   }
 

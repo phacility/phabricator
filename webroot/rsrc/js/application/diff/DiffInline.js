@@ -18,7 +18,6 @@ JX.install('DiffInline', {
     _length: null,
     _displaySide: null,
     _isNewFile: null,
-    _undoRow: null,
     _replyToCommentPHID: null,
     _originalText: null,
     _snippet: null,
@@ -38,6 +37,14 @@ JX.install('DiffInline', {
     _isSynthetic: false,
     _isHidden: false,
 
+    _editRow: null,
+    _undoRow: null,
+    _undoType: null,
+    _undoText: null,
+
+    _draftRequest: null,
+    _skipFocus: false,
+
     bindToRow: function(row) {
       this._row = row;
 
@@ -50,13 +57,10 @@ JX.install('DiffInline', {
       var comment = JX.DOM.find(row, 'div', 'differential-inline-comment');
       var data = JX.Stratcom.getData(comment);
 
-      this._id = data.id;
+      this._readInlineState(data);
       this._phid = data.phid;
 
-      // TODO: This is very, very, very, very, very, very, very hacky.
-      var td = comment.parentNode;
-      var th = td.previousSibling;
-      if (th.parentNode.firstChild != th) {
+      if (data.on_right) {
         this._displaySide = 'right';
       } else {
         this._displaySide = 'left';
@@ -64,10 +68,14 @@ JX.install('DiffInline', {
 
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
-      this._originalText = data.original;
-      this._isNewFile =
-        (this.getDisplaySide() == 'right') ||
-        (data.left != data.right);
+
+      var original = '' + data.original;
+      if (original.length) {
+        this._originalText = original;
+      } else {
+        this._originalText = null;
+      }
+      this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
 
@@ -81,7 +89,19 @@ JX.install('DiffInline', {
       this._isNew = false;
       this._snippet = data.snippet;
 
-      this.setInvisible(false);
+      this._isEditing = data.isEditing;
+
+      if (this._isEditing) {
+        // NOTE: The "original" shipped down in the DOM may reflect a draft
+        // which we're currently editing. This flow is a little clumsy, but
+        // reasonable until some future change moves away from "send down
+        // the inline, then immediately click edit".
+        this.edit(null, true);
+      } else {
+        this.setInvisible(false);
+      }
+
+      this._startDrafts();
 
       return this;
     },
@@ -96,6 +116,10 @@ JX.install('DiffInline', {
 
     isEditing: function() {
       return this._isEditing;
+    },
+
+    isUndo: function() {
+      return !!this._undoRow;
     },
 
     isDeleted: function() {
@@ -138,6 +162,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -198,6 +223,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -364,9 +390,24 @@ JX.install('DiffInline', {
       return changeset.newInlineReply(this, text);
     },
 
-    edit: function(text) {
+    edit: function(text, skip_focus) {
+      this._skipFocus = !!skip_focus;
+
+      // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
+      // edit it again: discard the undo state ("AB"). Otherwise we end up
+      // with an open editor and an active "Undo" link, which is weird.
+
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+
+        this._undoType = null;
+        this._undoText = null;
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
+
       var data = this._newRequestData('edit', text || null);
 
       this.setLoading(true);
@@ -472,8 +513,9 @@ JX.install('DiffInline', {
     },
 
     _oneditresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
 
       this.setLoading(false);
@@ -481,13 +523,34 @@ JX.install('DiffInline', {
     },
 
     _oncreateresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
     },
 
+    _readInlineState: function(state) {
+      this._id = state.id;
+    },
+
     _ondeleteresponse: function() {
-      this._drawUndeleteRows();
+      // If there's an existing "unedit" undo element, remove it.
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+      }
+
+      // If there's an existing editor, remove it. This happens when you
+      // delete a comment from the comment preview area. In this case, we
+      // read and preserve the text so "Undo" restores it.
+      var text;
+      if (this._editRow) {
+        text = this._readText(this._editRow);
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
+
+      this._drawUndeleteRows(text);
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -495,11 +558,17 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _drawUndeleteRows: function() {
+    _drawUndeleteRows: function(text) {
+      this._undoType = 'undelete';
+      this._undoText = text || null;
+
       return this._drawUndoRows('undelete', this._row);
     },
 
     _drawUneditRows: function(text) {
+      this._undoType = 'unedit';
+      this._undoText = text;
+
       return this._drawUndoRows('unedit', null, text);
     },
 
@@ -523,16 +592,17 @@ JX.install('DiffInline', {
 
     _drawEditRows: function(rows) {
       this.setEditing(true);
-      return this._drawRows(rows, null, 'edit');
+      this._editRow = this._drawRows(rows, null, 'edit');
     },
 
     _drawRows: function(rows, cursor, type, text) {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
-      var first_meta;
       var row = first_row;
       var anchor = cursor || this._row;
       cursor = cursor || this._row.nextSibling;
 
+
+      var result_row;
       var next_row;
       while (row) {
         // Grab this first, since it's going to change once we insert the row
@@ -546,55 +616,28 @@ JX.install('DiffInline', {
         anchor.parentNode.insertBefore(row, cursor);
         cursor = row;
 
-        var row_meta = {
-          node: row,
-          type: type,
-          text: text || null,
-          listeners: []
-        };
-
-        if (!first_meta) {
-          first_meta = row_meta;
+        if (!result_row) {
+          result_row = row;
         }
 
-        if (type == 'edit') {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              ['submit', 'didSyntheticSubmit'],
-              'inline-edit-form',
-              JX.bind(this, this._onsubmit, row_meta)));
+        if (!this._skipFocus) {
+          // If the row has a textarea, focus it. This allows the user to start
+          // typing a comment immediately after a "new", "edit", or "reply"
+          // action.
 
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'inline-edit-cancel',
-              JX.bind(this, this._oncancel, row_meta)));
-        } else if (type == 'content') {
-          // No special listeners for these rows.
-        } else {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'differential-inline-comment-undo',
-              JX.bind(this, this._onundo, row_meta)));
-        }
+          // (When simulating an "edit" on page load, we don't do this.)
 
-        // If the row has a textarea, focus it. This allows the user to start
-        // typing a comment immediately after a "new", "edit", or "reply"
-        // action.
-        var textareas = JX.DOM.scry(
-          row,
-          'textarea',
-          'differential-inline-comment-edit-textarea');
-        if (textareas.length) {
-          var area = textareas[0];
-          area.focus();
+          var textareas = JX.DOM.scry(
+            row,
+            'textarea',
+            'differential-inline-comment-edit-textarea');
+          if (textareas.length) {
+            var area = textareas[0];
+            area.focus();
 
-          var length = area.value.length;
-          JX.TextAreaUtils.setSelectionRange(area, length, length);
+            var length = area.value.length;
+            JX.TextAreaUtils.setSelectionRange(area, length, length);
+          }
         }
 
         row = next_row;
@@ -602,27 +645,24 @@ JX.install('DiffInline', {
 
       JX.Stratcom.invoke('resize');
 
-      return first_meta;
+      return result_row;
     },
 
-    _onsubmit: function(row, e) {
-      e.kill();
-
-      var handler = JX.bind(this, this._onsubmitresponse, row);
+    save: function(form) {
+      var handler = JX.bind(this, this._onsubmitresponse);
 
       this.setLoading(true);
 
-      JX.Workflow.newFromForm(e.getTarget())
+      JX.Workflow.newFromForm(form)
         .setHandler(handler)
         .start();
     },
 
-    _onundo: function(row, e) {
-      e.kill();
+    undo: function() {
+      JX.DOM.remove(this._undoRow);
+      this._undoRow = null;
 
-      this._removeRow(row);
-
-      if (row.type == 'undelete') {
+      if (this._undoType === 'undelete') {
         var uri = this._getInlineURI();
         var data = this._newRequestData('undelete');
         var handler = JX.bind(this, this._onundelete);
@@ -635,12 +675,8 @@ JX.install('DiffInline', {
           .send();
       }
 
-      if (row.type == 'unedit') {
-        if (this.getID()) {
-          this.edit(row.text);
-        } else {
-          this.create(row.text);
-        }
+      if (this._undoText !== null) {
+        this.edit(this._undoText);
       }
     },
 
@@ -649,20 +685,57 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _oncancel: function(row, e) {
-      e.kill();
+    cancel: function() {
+      var text = this._readText(this._editRow);
 
-      var text = this._readText(row.node);
+      JX.DOM.remove(this._editRow);
+      this._editRow = null;
+
       if (text && text.length && (text != this._originalText)) {
         this._drawUneditRows(text);
       }
 
-      this._removeRow(row);
       this.setEditing(false);
 
-      this.setInvisible(false);
+      // If this was an empty box and we typed some text and then hit cancel,
+      // don't show the empty concrete inline.
+      if (!this._originalText) {
+        this.setInvisible(true);
+      } else {
+        this.setInvisible(false);
+      }
+
+      // If you "undo" to restore text ("AB") and then "Cancel", we put you
+      // back in the original text state ("A"). We also send the original
+      // text ("A") to the server as the current persistent state.
+
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('cancel', this._originalText);
+      var handler = JX.bind(this, this._onCancelResponse);
+
+      this.setLoading(true);
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
 
       this._didUpdate(true);
+    },
+
+    _onCancelResponse: function(response) {
+      this.setLoading(false);
+
+      // If the comment was empty when we started editing it (there's no
+      // original text) and empty when we finished editing it (there's no
+      // undo row), just delete the comment.
+      if (!this._originalText && !this.isUndo()) {
+        this.setDeleted(true);
+
+        JX.DOM.remove(this._row);
+        this._row = null;
+
+        this._didUpdate();
+      }
     },
 
     _readText: function(row) {
@@ -679,8 +752,11 @@ JX.install('DiffInline', {
       return textarea.value;
     },
 
-    _onsubmitresponse: function(row, response) {
-      this._removeRow(row);
+    _onsubmitresponse: function(response) {
+      if (this._editRow) {
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
 
       this.setLoading(false);
       this.setInvisible(false);
@@ -691,8 +767,8 @@ JX.install('DiffInline', {
 
     _onupdate: function(response) {
       var new_row;
-      if (response.markup) {
-        new_row = this._drawContentRows(JX.$H(response.markup).getNode()).node;
+      if (response.view) {
+        new_row = this._drawContentRows(JX.$H(response.view).getNode());
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a
@@ -741,18 +817,63 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
     },
 
-    _removeRow: function(row) {
-      JX.DOM.remove(row.node);
-      for (var ii = 0; ii < row.listeners.length; ii++) {
-        row.listeners[ii].remove();
-      }
-    },
-
     _getInlineURI: function() {
       var changeset = this.getChangeset();
       var list = changeset.getChangesetList();
       return list.getInlineURI();
+    },
+
+    _startDrafts: function() {
+      if (this._draftRequest) {
+        return;
+      }
+
+      var onresponse = JX.bind(this, this._onDraftResponse);
+      var draft = JX.bind(this, this._getDraftState);
+
+      var uri = this._getInlineURI();
+      var request = new JX.PhabricatorShapedRequest(uri, onresponse, draft);
+
+      // The main transaction code uses a 500ms delay on desktop and a
+      // 10s delay on mobile. Perhaps this should be standardized.
+      request.setRateLimit(2000);
+
+      this._draftRequest = request;
+
+      request.start();
+    },
+
+    _onDraftResponse: function() {
+      // For now, do nothing.
+    },
+
+    _getDraftState: function() {
+      if (this.isDeleted()) {
+        return null;
+      }
+
+      if (!this.isEditing()) {
+        return null;
+      }
+
+      var text = this._readText(this._editRow);
+      if (text === null) {
+        return null;
+      }
+
+      return {
+        op: 'draft',
+        id: this.getID(),
+        text: text
+      };
+    },
+
+    triggerDraft: function() {
+      if (this._draftRequest) {
+        this._draftRequest.trigger();
+      }
     }
+
   }
 
 });

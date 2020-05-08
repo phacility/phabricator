@@ -319,6 +319,11 @@ td.cov-I {
   cursor: pointer;
 }
 
+.differential-changeset .differential-file-icon-header
+  .differential-changeset-path-name {
+  cursor: auto;
+}
+
 .device-phone .differential-changeset .differential-file-icon-header {
   word-break: break-word;
   margin-right: 8px;

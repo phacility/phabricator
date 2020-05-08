@@ -263,7 +263,7 @@ abstract class DifferentialChangesetRenderer extends Phobject {
 
   public function setNewComments(array $new_comments) {
     foreach ($new_comments as $line_number => $comments) {
-      assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
+      assert_instances_of($comments, 'PhabricatorInlineComment');
     }
     $this->newComments = $new_comments;
     return $this;
@@ -274,7 +274,7 @@ abstract class DifferentialChangesetRenderer extends Phobject {
 
   public function setOldComments(array $old_comments) {
     foreach ($old_comments as $line_number => $comments) {
-      assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
+      assert_instances_of($comments, 'PhabricatorInlineComment');
     }
     $this->oldComments = $old_comments;
     return $this;

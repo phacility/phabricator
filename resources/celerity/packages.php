@@ -220,7 +220,6 @@ return array(
     'phuix-formation-view',
     'phuix-formation-column-view',
     'phuix-formation-flank-view',
-    'javelin-behavior-diff-preview-link',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',

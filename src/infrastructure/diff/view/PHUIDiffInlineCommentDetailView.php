@@ -3,23 +3,16 @@
 final class PHUIDiffInlineCommentDetailView
   extends PHUIDiffInlineCommentView {
 
-  private $inlineComment;
   private $handles;
   private $markupEngine;
   private $editable;
   private $preview;
   private $allowReply;
-  private $renderer;
   private $canMarkDone;
   private $objectOwnerPHID;
 
-  public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
-    $this->inlineComment = $comment;
-    return $this;
-  }
-
   public function isHidden() {
-    return $this->inlineComment->isHidden();
+    return $this->getInlineComment()->isHidden();
   }
 
   public function setHandles(array $handles) {
@@ -48,15 +41,6 @@ final class PHUIDiffInlineCommentDetailView
     return $this;
   }
 
-  public function setRenderer($renderer) {
-    $this->renderer = $renderer;
-    return $this;
-  }
-
-  public function getRenderer() {
-    return $this->renderer;
-  }
-
   public function setCanMarkDone($can_mark_done) {
     $this->canMarkDone = $can_mark_done;
     return $this;
@@ -76,7 +60,7 @@ final class PHUIDiffInlineCommentDetailView
   }
 
   public function getAnchorName() {
-    $inline = $this->inlineComment;
+    $inline = $this->getInlineComment();
     if ($inline->getID()) {
       return 'inline-'.$inline->getID();
     }
@@ -93,49 +77,18 @@ final class PHUIDiffInlineCommentDetailView
 
   public function render() {
     require_celerity_resource('phui-inline-comment-view-css');
-    $inline = $this->inlineComment;
+    $inline = $this->getInlineComment();
 
     $classes = array(
       'differential-inline-comment',
     );
-
-    $is_fixed = false;
-    switch ($inline->getFixedState()) {
-      case PhabricatorInlineCommentInterface::STATE_DONE:
-      case PhabricatorInlineCommentInterface::STATE_DRAFT:
-        $is_fixed = true;
-        break;
-    }
-
-    $is_draft_done = false;
-    switch ($inline->getFixedState()) {
-      case PhabricatorInlineCommentInterface::STATE_DRAFT:
-      case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
-        $is_draft_done = true;
-        break;
-    }
 
     $is_synthetic = false;
     if ($inline->getSyntheticAuthor()) {
       $is_synthetic = true;
     }
 
-    $metadata = array(
-      'id' => $inline->getID(),
-      'phid' => $inline->getPHID(),
-      'changesetID' => $inline->getChangesetID(),
-      'number' => $inline->getLineNumber(),
-      'length' => $inline->getLineLength(),
-      'isNewFile' => (bool)$inline->getIsNewFile(),
-      'on_right' => $this->getIsOnRight(),
-      'original' => $inline->getContent(),
-      'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
-      'isDraft' => $inline->isDraft(),
-      'isFixed' => $is_fixed,
-      'isGhost' => $inline->getIsGhost(),
-      'isSynthetic' => $is_synthetic,
-      'isDraftDone' => $is_draft_done,
-    );
+    $metadata = $this->getInlineCommentMetadata();
 
     $sigil = 'differential-inline-comment';
     if ($this->preview) {
@@ -259,10 +212,10 @@ final class PHUIDiffInlineCommentDetailView
         'a',
         array(
           'class'  => 'inline-button-divider pml msl',
-          'meta'  => array(
-            'anchor' => $anchor_name,
+          'meta' => array(
+            'inlineCommentID' => $inline->getID(),
           ),
-          'sigil'  => 'differential-inline-preview-jump',
+          'sigil' => 'differential-inline-preview-jump',
         ),
         pht('View'));
 
@@ -299,19 +252,19 @@ final class PHUIDiffInlineCommentDetailView
     if (!$is_synthetic) {
       $draft_state = false;
       switch ($inline->getFixedState()) {
-        case PhabricatorInlineCommentInterface::STATE_DRAFT:
+        case PhabricatorInlineComment::STATE_DRAFT:
           $is_done = $mark_done;
           $draft_state = true;
           break;
-        case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
+        case PhabricatorInlineComment::STATE_UNDRAFT:
           $is_done = !$mark_done;
           $draft_state = true;
           break;
-        case PhabricatorInlineCommentInterface::STATE_DONE:
+        case PhabricatorInlineComment::STATE_DONE:
           $is_done = true;
           break;
         default:
-        case PhabricatorInlineCommentInterface::STATE_UNDONE:
+        case PhabricatorInlineComment::STATE_UNDONE:
           $is_done = false;
           break;
       }
@@ -372,7 +325,7 @@ final class PHUIDiffInlineCommentDetailView
 
     $content = $this->markupEngine->getOutput(
       $inline,
-      PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+      PhabricatorInlineComment::MARKUP_FIELD_BODY);
 
     if ($this->preview) {
       $anchor = null;
@@ -490,7 +443,7 @@ final class PHUIDiffInlineCommentDetailView
   }
 
   private function canHide() {
-    $inline = $this->inlineComment;
+    $inline = $this->getInlineComment();
 
     if ($inline->isDraft()) {
       return false;

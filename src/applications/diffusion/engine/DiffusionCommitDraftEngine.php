@@ -7,10 +7,12 @@ final class DiffusionCommitDraftEngine
     $viewer = $this->getViewer();
     $commit = $this->getObject();
 
-    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
-      $viewer,
-      $commit->getPHID(),
-      $raw = true);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit->getPHID()))
+      ->withPublishableComments(true)
+      ->setLimit(1)
+      ->execute();
 
     return (bool)$inlines;
   }

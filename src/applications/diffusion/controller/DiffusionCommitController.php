@@ -414,9 +414,15 @@ final class DiffusionCommitController extends DiffusionController {
         $visible_changesets = $changesets;
       } else {
         $visible_changesets = array();
-        $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
-          $viewer,
-          $commit->getPHID());
+
+        $inlines = id(new DiffusionDiffInlineCommentQuery())
+          ->setViewer($viewer)
+          ->withCommitPHIDs(array($commit->getPHID()))
+          ->withPublishedComments(true)
+          ->withPublishableComments(true)
+          ->execute();
+        $inlines = mpull($inlines, 'newInlineCommentObject');
+
         $path_ids = mpull($inlines, null, 'getPathID');
         foreach ($changesets as $key => $changeset) {
           if (array_key_exists($changeset->getID(), $path_ids)) {

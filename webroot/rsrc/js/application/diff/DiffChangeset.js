@@ -829,6 +829,10 @@ JX.install('DiffChangeset', {
           continue;
         }
 
+        if (inline.isUndo()) {
+          continue;
+        }
+
         if (inline.isSynthetic()) {
           continue;
         }
@@ -882,6 +886,13 @@ JX.install('DiffChangeset', {
     },
 
     _onClickHeader: function(e) {
+      // If the user clicks the actual path name text, don't count this as
+      // a selection action: we want to let them select the path.
+      var path_name = e.getNode('changeset-header-path-name');
+      if (path_name) {
+        return;
+      }
+
       e.prevent();
 
       if (this._isSelected) {
@@ -982,16 +993,14 @@ JX.install('DiffChangeset', {
 
     _onClickShowButton: function(e) {
       e.prevent();
-      this.setVisible(true);
+
+      // We're always showing the changeset, but want to make sure the state
+      // change is persisted on the server.
+      this.toggleVisibility();
     },
 
     isVisible: function() {
       return this._visible;
-    },
-
-    _onundo: function(e) {
-      e.kill();
-      this.toggleVisibility();
     },
 
     getPathView: function() {

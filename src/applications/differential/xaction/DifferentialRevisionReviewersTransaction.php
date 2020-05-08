@@ -385,4 +385,64 @@ final class DifferentialRevisionReviewersTransaction
     return $errors;
   }
 
+
+  public function getTransactionTypeForConduit($xaction) {
+    return 'reviewers';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    $old_value = $xaction->getOldValue();
+    $new_value = $xaction->getNewValue();
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $add_phids = array_diff_key($new_value, $old_value);
+    foreach ($add_phids as $add_phid => $value) {
+      $add_phids[$add_phid] = array(
+        'operation' => 'add',
+        'phid' => $add_phid,
+        'oldStatus' => null,
+        'newStatus' => $value,
+        'isBlocking' => ($value === $status_blocking),
+      );
+    }
+
+    $rem_phids = array_diff_key($old_value, $new_value);
+    foreach ($rem_phids as $rem_phid => $value) {
+      $rem_phids[$rem_phid] = array(
+        'operation' => 'remove',
+        'phid' => $rem_phid,
+        'oldStatus' => $value,
+        'newStatus' => null,
+        'isBlocking' => false,
+      );
+    }
+
+    $mod_phids = array_intersect_key($old_value, $new_value);
+    foreach ($mod_phids as $mod_phid => $ignored) {
+      $old = $old_value[$mod_phid];
+      $new = $new_value[$mod_phid];
+
+      if ($old === $new) {
+        unset($mod_phids[$mod_phid]);
+        continue;
+      }
+
+      $mod_phids[$mod_phid] = array(
+        'operation' => 'update',
+        'phid' => $mod_phid,
+        'oldStatus' => $old,
+        'newStatus' => $new,
+        'isBlocking' => ($new === $status_blocking),
+      );
+    }
+
+    $all_ops = $add_phids + $rem_phids + $mod_phids;
+    $all_ops = array_select_keys($all_ops, $new_value) + $all_ops;
+    $all_ops = array_values($all_ops);
+
+    return array(
+      'operations' => $all_ops,
+    );
+  }
 }

@@ -94,17 +94,8 @@ final class DifferentialCreateCommentConduitAPIMethod
             ->setContent($content));
     }
 
-    if ($request->getValue('attach_inlines')) {
-      $type_inline = DifferentialTransaction::TYPE_INLINE;
-      $inlines = DifferentialTransactionQuery::loadUnsubmittedInlineComments(
-        $viewer,
-        $revision);
-      foreach ($inlines as $inline) {
-        $xactions[] = id(new DifferentialTransaction())
-          ->setTransactionType($type_inline)
-          ->attachComment($inline);
-      }
-    }
+    // NOTE: The legacy "attach_inlines" flag is now ignored and has no
+    // effect. See T13513.
 
     // NOTE: The legacy "silent" flag is now ignored and has no effect. See
     // T13042.
