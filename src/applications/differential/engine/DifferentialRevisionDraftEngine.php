@@ -11,6 +11,7 @@ final class DifferentialRevisionDraftEngine
       ->setViewer($viewer)
       ->withRevisionPHIDs(array($revision->getPHID()))
       ->withPublishableComments(true)
+      ->setLimit(1)
       ->execute();
 
     return (bool)$inlines;

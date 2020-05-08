@@ -7,6 +7,10 @@ final class DiffusionInlineCommentController
     return new DiffusionDiffInlineCommentQuery();
   }
 
+  protected function newContainerObject() {
+    return $this->loadCommit();
+  }
+
   private function getCommitPHID() {
     return $this->getRequest()->getURIData('phid');
   }
@@ -101,19 +105,6 @@ final class DiffusionInlineCommentController
     }
 
     return true;
-  }
-
-  protected function deleteComment(PhabricatorInlineComment $inline) {
-    $inline->setIsDeleted(1)->save();
-  }
-
-  protected function undeleteComment(
-    PhabricatorInlineComment $inline) {
-    $inline->setIsDeleted(0)->save();
-  }
-
-  protected function saveComment(PhabricatorInlineComment $inline) {
-    return $inline->save();
   }
 
   protected function loadObjectOwnerPHID(

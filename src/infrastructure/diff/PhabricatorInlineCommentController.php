@@ -3,17 +3,28 @@
 abstract class PhabricatorInlineCommentController
   extends PhabricatorController {
 
+  private $containerObject;
+
   abstract protected function createComment();
   abstract protected function newInlineCommentQuery();
   abstract protected function loadCommentForDone($id);
   abstract protected function loadObjectOwnerPHID(
     PhabricatorInlineComment $inline);
-  abstract protected function deleteComment(
-    PhabricatorInlineComment $inline);
-  abstract protected function undeleteComment(
-    PhabricatorInlineComment $inline);
-  abstract protected function saveComment(
-    PhabricatorInlineComment $inline);
+  abstract protected function newContainerObject();
+
+  final protected function getContainerObject() {
+    if ($this->containerObject === null) {
+      $object = $this->newContainerObject();
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'Failed to load container object for inline comment.'));
+      }
+      $this->containerObject = $object;
+    }
+
+    return $this->containerObject;
+  }
 
   protected function hideComments(array $ids) {
     throw new PhutilMethodNotImplementedException();
@@ -173,10 +184,12 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         if ($is_delete) {
-          $this->deleteComment($inline);
+          $inline->setIsDeleted(1);
         } else {
-          $this->undeleteComment($inline);
+          $inline->setIsDeleted(0);
         }
+
+        $this->saveComment($inline);
 
         return $this->buildEmptyResponse();
       case 'edit':
@@ -190,33 +203,49 @@ abstract class PhabricatorInlineCommentController
               ->setIsEditing(false);
 
             $this->saveComment($inline);
-            $this->purgeVersionedDrafts($inline);
 
             return $this->buildRenderedCommentResponse(
               $inline,
               $this->getIsOnRight());
           } else {
-            $this->deleteComment($inline);
-            $this->purgeVersionedDrafts($inline);
+            $inline->setIsDeleted(1);
+
+            $this->saveComment($inline);
 
             return $this->buildEmptyResponse();
           }
         } else {
-          $inline->setIsEditing(true);
+          // NOTE: At time of writing, the "editing" state of inlines is
+          // preserved by simluating a click on "Edit" when the inline loads.
+
+          // In this case, we don't want to "saveComment()", because it
+          // recalculates object drafts and purges versioned drafts.
+
+          // The recalculation is merely unnecessary (state doesn't change)
+          // but purging drafts means that loading a page and then closing it
+          // discards your drafts.
+
+          // To avoid the purge, only invoke "saveComment()" if we actually
+          // have changes to apply.
+
+          $is_dirty = false;
+          if (!$inline->getIsEditing()) {
+            $inline->setIsEditing(true);
+            $is_dirty = true;
+          }
 
           if (strlen($text)) {
             $inline->setContent($text);
+            $is_dirty = true;
+          } else {
+            PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+              $viewer,
+              array($inline));
           }
 
-          $this->saveComment($inline);
-
-          if (strlen($text)) {
-            $this->purgeVersionedDrafts($inline);
+          if ($is_dirty) {
+            $this->saveComment($inline);
           }
-
-          PhabricatorInlineComment::loadAndAttachVersionedDrafts(
-            $viewer,
-            array($inline));
         }
 
         $edit_dialog = $this->buildEditDialog($inline)
@@ -240,12 +269,10 @@ abstract class PhabricatorInlineCommentController
 
         $content = $inline->getContent();
         if (!strlen($content)) {
-          $this->deleteComment($inline);
-        } else {
-          $this->saveComment($inline);
+          $inline->setIsDeleted(1);
         }
 
-        $this->purgeVersionedDrafts($inline);
+        $this->saveComment($inline);
 
         return $this->buildEmptyResponse();
       case 'draft':
@@ -261,6 +288,17 @@ abstract class PhabricatorInlineCommentController
         $versioned_draft
           ->setProperty('inline.text', $text)
           ->save();
+
+        // We have to synchronize the draft engine after saving a versioned
+        // draft, because taking an inline comment from "no text, no draft"
+        // to "no text, text in a draft" marks the container object as having
+        // a draft.
+        $draft_engine = $this->newDraftEngine();
+        if ($draft_engine) {
+          $draft_engine->synchronize();
+        } else {
+          phlog('no draft engine');
+        }
 
         return $this->buildEmptyResponse();
       case 'new':
@@ -432,14 +470,6 @@ abstract class PhabricatorInlineCommentController
       ->setContent($response);
   }
 
-  private function purgeVersionedDrafts(
-    PhabricatorInlineComment $inline) {
-    $viewer = $this->getViewer();
-    PhabricatorVersionedDraft::purgeDrafts(
-      $inline->getPHID(),
-      $viewer->getPHID());
-  }
-
   final protected function loadCommentByID($id) {
     $query = $this->newInlineCommentQuery()
       ->withIDs(array($id));
@@ -492,6 +522,37 @@ abstract class PhabricatorInlineCommentController
     }
 
     return $inline;
+  }
+
+  private function saveComment(PhabricatorInlineComment $inline) {
+    $viewer = $this->getViewer();
+    $draft_engine = $this->newDraftEngine();
+
+    $inline->openTransaction();
+      $inline->save();
+
+      PhabricatorVersionedDraft::purgeDrafts(
+        $inline->getPHID(),
+        $viewer->getPHID());
+
+      if ($draft_engine) {
+        $draft_engine->synchronize();
+      }
+
+    $inline->saveTransaction();
+  }
+
+  private function newDraftEngine() {
+    $viewer = $this->getViewer();
+    $object = $this->getContainerObject();
+
+    if (!($object instanceof PhabricatorDraftInterface)) {
+      return null;
+    }
+
+    return $object->newDraftEngine()
+      ->setObject($object)
+      ->setViewer($viewer);
   }
 
 }

@@ -7,6 +7,10 @@ final class DifferentialInlineCommentEditController
     return new DifferentialDiffInlineCommentQuery();
   }
 
+  protected function newContainerObject() {
+    return $this->loadRevision();
+  }
+
   private function getRevisionID() {
     return $this->getRequest()->getURIData('id');
   }
@@ -137,28 +141,6 @@ final class DifferentialInlineCommentEditController
     return true;
   }
 
-  protected function deleteComment(PhabricatorInlineComment $inline) {
-    $inline->openTransaction();
-      $inline->setIsDeleted(1)->save();
-      $this->syncDraft();
-    $inline->saveTransaction();
-  }
-
-  protected function undeleteComment(
-    PhabricatorInlineComment $inline) {
-    $inline->openTransaction();
-      $inline->setIsDeleted(0)->save();
-      $this->syncDraft();
-    $inline->saveTransaction();
-  }
-
-  protected function saveComment(PhabricatorInlineComment $inline) {
-    $inline->openTransaction();
-      $inline->save();
-      $this->syncDraft();
-    $inline->saveTransaction();
-  }
-
   protected function loadObjectOwnerPHID(
     PhabricatorInlineComment $inline) {
     return $this->loadRevision()->getAuthorPHID();
@@ -196,16 +178,6 @@ final class DifferentialInlineCommentEditController
       $table->getTableName(),
       $viewer->getPHID(),
       $ids);
-  }
-
-  private function syncDraft() {
-    $viewer = $this->getViewer();
-    $revision = $this->loadRevision();
-
-    $revision->newDraftEngine()
-      ->setObject($revision)
-      ->setViewer($viewer)
-      ->synchronize();
   }
 
 }
