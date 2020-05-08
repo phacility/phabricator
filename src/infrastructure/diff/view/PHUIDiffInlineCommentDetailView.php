@@ -212,10 +212,10 @@ final class PHUIDiffInlineCommentDetailView
         'a',
         array(
           'class'  => 'inline-button-divider pml msl',
-          'meta'  => array(
-            'anchor' => $anchor_name,
+          'meta' => array(
+            'inlineCommentID' => $inline->getID(),
           ),
-          'sigil'  => 'differential-inline-preview-jump',
+          'sigil' => 'differential-inline-preview-jump',
         ),
         pht('View'));
 

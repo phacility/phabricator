@@ -1115,17 +1115,19 @@ JX.install('DiffChangesetList', {
       this.selectInline(inline);
     },
 
-    selectInline: function(inline) {
+    selectInline: function(inline, force, scroll) {
       var selection = this._getSelectionState();
       var item;
 
-      // If the comment the user clicked is currently selected, deselect it.
-      // This makes it easy to undo things if you clicked by mistake.
-      if (selection.cursor !== null) {
-        item = selection.items[selection.cursor];
-        if (item.target === inline) {
-          this._setSelectionState(null, false);
-          return;
+      if (!force) {
+        // If the comment the user clicked is currently selected, deselect it.
+        // This makes it easy to undo things if you clicked by mistake.
+        if (selection.cursor !== null) {
+          item = selection.items[selection.cursor];
+          if (item.target === inline) {
+            this._setSelectionState(null, false);
+            return;
+          }
         }
       }
 
@@ -1136,9 +1138,10 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < items.length; ii++) {
         item = items[ii];
         if (item.target === inline) {
-          this._setSelectionState(item, false);
+          this._setSelectionState(item, scroll);
         }
       }
+
     },
 
     redrawPreview: function() {
@@ -2117,6 +2120,31 @@ JX.install('DiffChangesetList', {
         ['differential-inline-comment', 'tag:textarea'],
         ondraft);
 
+      var on_preview_view = JX.bind(this, this._onPreviewEvent, 'view');
+      JX.Stratcom.listen(
+        'click',
+        'differential-inline-preview-jump',
+        on_preview_view);
+    },
+
+    _onPreviewEvent: function(action, e) {
+      if (this.isAsleep()) {
+        return;
+      }
+
+      var data = e.getNodeData('differential-inline-preview-jump');
+      var inline = this.getInlineByID(data.inlineCommentID);
+      if (!inline) {
+        return;
+      }
+
+      e.kill();
+
+      switch (action) {
+        case 'view':
+          this.selectInline(inline, true, true);
+          break;
+      }
     },
 
     _onInlineEvent: function(action, e) {

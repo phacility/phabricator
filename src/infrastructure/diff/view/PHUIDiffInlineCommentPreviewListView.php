@@ -28,14 +28,6 @@ final class PHUIDiffInlineCommentPreviewListView
   public function render() {
     $viewer = $this->getViewer();
 
-    $config = array(
-      'pht' => array(
-        'view' => pht('View'),
-      ),
-    );
-
-    Javelin::initBehavior('diff-preview-link', $config);
-
     $inlines = $this->getInlineComments();
     foreach ($inlines as $key => $inline) {
       $inlines[$key] = $inline->newInlineCommentObject();
