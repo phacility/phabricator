@@ -278,7 +278,13 @@ final class DifferentialChangesetDetailView extends AphrontView {
           ),
           array(
             $icon,
-            $display_filename,
+            javelin_tag(
+              'span',
+              array(
+                'class' => 'differential-changeset-path-name',
+                'sigil' => 'changeset-header-path-name',
+              ),
+              $display_filename),
           )),
         javelin_tag(
           'div',
