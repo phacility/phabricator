@@ -234,6 +234,8 @@ final class DifferentialRevisionViewController
         ->withPublishedComments(true)
         ->execute();
 
+      $inlines = mpull($inlines, 'newInlineCommentObject');
+
       $inlines = id(new PhabricatorInlineCommentAdjustmentEngine())
         ->setViewer($viewer)
         ->setRevision($revision)
