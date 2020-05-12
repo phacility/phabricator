@@ -944,8 +944,12 @@ JX.install('DiffChangesetList', {
         .setIcon('fa-file-image-o')
         .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
+          var options = changeset.getAvailableDocumentEngineKeys() || [];
+          options = options.join(',');
+
           var params = {
             engine: changeset.getResponseDocumentEngineKey(),
+            options: options
           };
 
           new JX.Workflow('/services/viewas/', params)

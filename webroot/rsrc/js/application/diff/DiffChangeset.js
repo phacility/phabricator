@@ -66,6 +66,7 @@ JX.install('DiffChangeset', {
     _highlight: null,
     _requestDocumentEngineKey: null,
     _responseDocumentEngineKey: null,
+    _availableDocumentEngineKeys: null,
     _characterEncoding: null,
     _undoTemplates: null,
 
@@ -420,6 +421,10 @@ JX.install('DiffChangeset', {
       return this._responseDocumentEngineKey;
     },
 
+    getAvailableDocumentEngineKeys: function() {
+      return this._availableDocumentEngineKeys;
+    },
+
     getSelectableItems: function() {
       var items = [];
 
@@ -672,6 +677,7 @@ JX.install('DiffChangeset', {
       this._characterEncoding = state.characterEncoding;
       this._requestDocumentEngineKey = state.requestDocumentEngineKey;
       this._responseDocumentEngineKey = state.responseDocumentEngineKey;
+      this._availableDocumentEngineKeys = state.availableDocumentEngineKeys;
       this._isHidden = state.isHidden;
 
       var is_hidden = !this.isVisible();

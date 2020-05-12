@@ -59,6 +59,7 @@ final class DifferentialChangesetParser extends Phobject {
   private $viewer;
 
   private $viewState;
+  private $availableDocumentEngines;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -1773,6 +1774,8 @@ final class DifferentialChangesetParser extends Phobject {
       }
     }
 
+    $this->availableDocumentEngines = $shared_engines;
+
     $viewstate = $this->getViewState();
 
     $engine_key = $viewstate->getDocumentEngineKey();
@@ -1878,6 +1881,24 @@ final class DifferentialChangesetParser extends Phobject {
       $document_engine_key = null;
     }
 
+    $available_keys = array();
+    $engines = $this->availableDocumentEngines;
+    if (!$engines) {
+      $engines = array();
+    }
+
+    $available_keys = mpull($engines, 'getDocumentEngineKey');
+
+    // TODO: Always include "source" as a usable engine to default to
+    // the buitin rendering. This is kind of a hack and does not actually
+    // use the source engine. The source engine isn't a diff engine, so
+    // selecting it causes us to fall through and render with builtin
+    // behavior. For now, overall behavir is reasonable.
+
+    $available_keys[] = PhabricatorSourceDocumentEngine::ENGINEKEY;
+    $available_keys = array_fuse($available_keys);
+    $available_keys = array_values($available_keys);
+
     $state = array(
       'undoTemplates' => $undo_templates,
       'rendererKey' => $renderer_key,
@@ -1885,6 +1906,7 @@ final class DifferentialChangesetParser extends Phobject {
       'characterEncoding' => $viewstate->getCharacterEncoding(),
       'requestDocumentEngineKey' => $viewstate->getDocumentEngineKey(),
       'responseDocumentEngineKey' => $document_engine_key,
+      'availableDocumentEngineKeys' => $available_keys,
       'isHidden' => $viewstate->getHidden(),
     );
 
