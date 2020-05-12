@@ -496,7 +496,12 @@ abstract class DifferentialChangesetHTMLRenderer
    * @param int Total number of lines in the changeset.
    * @return markup Rendered links.
    */
-  protected function renderShowContextLinks($top, $len, $changeset_length) {
+  protected function renderShowContextLinks(
+    $top,
+    $len,
+    $changeset_length,
+    $is_blocks = false) {
+
     $block_size = 20;
     $end = ($top + $len) - $block_size;
 
@@ -509,12 +514,22 @@ abstract class DifferentialChangesetHTMLRenderer
 
     $links = array();
 
+    $block_display = new PhutilNumber($block_size);
+
     if ($is_large_block) {
       $is_first_block = ($top == 0);
       if ($is_first_block) {
-        $text = pht('Show First %d Line(s)', $block_size);
+        if ($is_blocks) {
+          $text = pht('Show First %s Block(s)', $block_display);
+        } else {
+          $text = pht('Show First %s Line(s)', $block_display);
+        }
       } else {
-        $text = pht("\xE2\x96\xB2 Show %d Line(s)", $block_size);
+        if ($is_blocks) {
+          $text = pht("\xE2\x96\xB2 Show %s Block(s)", $block_display);
+        } else {
+          $text = pht("\xE2\x96\xB2 Show %s Line(s)", $block_display);
+        }
       }
 
       $links[] = $this->renderShowContextLink(
@@ -523,17 +538,31 @@ abstract class DifferentialChangesetHTMLRenderer
         $text);
     }
 
+    if ($is_blocks) {
+      $text = pht('Show All %s Block(s)', new PhutilNumber($len));
+    } else {
+      $text = pht('Show All %s Line(s)', new PhutilNumber($len));
+    }
+
     $links[] = $this->renderShowContextLink(
       true,
       "{$top}-{$len}/{$top}-{$len}",
-      pht('Show All %d Line(s)', $len));
+      $text);
 
     if ($is_large_block) {
       $is_last_block = (($top + $len) >= $changeset_length);
       if ($is_last_block) {
-        $text = pht('Show Last %d Line(s)', $block_size);
+        if ($is_blocks) {
+          $text = pht('Show Last %s Block(s)', $block_display);
+        } else {
+          $text = pht('Show Last %s Line(s)', $block_display);
+        }
       } else {
-        $text = "\xE2\x96\xBC ".pht('Show %d Line(s)', $block_size);
+        if ($is_blocks) {
+          $text = pht("\xE2\x96\xBC Show %s Block(s)", $block_display);
+        } else {
+          $text = pht("\xE2\x96\xBC Show %s Line(s)", $block_display);
+        }
       }
 
       $links[] = $this->renderShowContextLink(

@@ -1084,6 +1084,22 @@ final class DifferentialChangesetParser extends Phobject {
         $vs = $id;
       }
 
+      if ($mask_force) {
+        $engine_blocks->setRevealedIndexes(array_keys($mask_force));
+      }
+
+      if ($range_start !== null || $range_len !== null) {
+        $range_min = $range_start;
+
+        if ($range_len === null) {
+          $range_max = null;
+        } else {
+          $range_max = (int)$range_start + (int)$range_len;
+        }
+
+        $engine_blocks->setRange($range_min, $range_max);
+      }
+
       $renderer
         ->setDocumentEngine($engine)
         ->setDocumentEngineBlocks($engine_blocks);
