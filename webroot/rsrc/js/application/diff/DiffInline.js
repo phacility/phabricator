@@ -21,6 +21,7 @@ JX.install('DiffInline', {
     _replyToCommentPHID: null,
     _originalText: null,
     _snippet: null,
+    _documentEngineKey: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -88,6 +89,7 @@ JX.install('DiffInline', {
       this._changesetID = data.changesetID;
       this._isNew = false;
       this._snippet = data.snippet;
+      this._documentEngineKey = data.documentEngineKey;
 
       this._isEditing = data.isEditing;
 
@@ -174,6 +176,7 @@ JX.install('DiffInline', {
       this._isNewFile = inline._isNewFile;
       this._changesetID = inline._changesetID;
       this._isNew = true;
+      this._documentEngineKey = inline._documentEngineKey;
 
       this._replyToCommentPHID = inline._phid;
 
@@ -374,6 +377,11 @@ JX.install('DiffInline', {
     },
 
     create: function(text) {
+      var changeset = this.getChangeset();
+      if (!this._documentEngineKey) {
+        this._documentEngineKey = changeset.getResponseDocumentEngineKey();
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oncreateresponse);
       var data = this._newRequestData('new', text);
@@ -507,8 +515,9 @@ JX.install('DiffInline', {
         length: this.getLineLength(),
         is_new: this.isNewFile(),
         changesetID: this.getChangesetID(),
-        replyToCommentPHID: this.getReplyToCommentPHID() || '',
-        text: text || ''
+        replyToCommentPHID: this.getReplyToCommentPHID(),
+        text: text || null,
+        documentEngineKey: this._documentEngineKey,
       };
     },
 

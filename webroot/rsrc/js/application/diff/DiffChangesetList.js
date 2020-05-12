@@ -945,7 +945,7 @@ JX.install('DiffChangesetList', {
         .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
           var params = {
-            engine: changeset.getDocumentEngine(),
+            engine: changeset.getResponseDocumentEngineKey(),
           };
 
           new JX.Workflow('/services/viewas/', params)

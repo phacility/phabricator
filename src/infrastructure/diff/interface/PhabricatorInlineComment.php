@@ -213,6 +213,15 @@ abstract class PhabricatorInlineComment
     return (bool)$this->getStorageObject()->getAttribute('editing', false);
   }
 
+  public function setDocumentEngineKey($engine_key) {
+    $this->getStorageObject()->setAttribute('documentEngineKey', $engine_key);
+    return $this;
+  }
+
+  public function getDocumentEngineKey() {
+    return $this->getStorageObject()->getAttribute('documentEngineKey');
+  }
+
   public function getDateModified() {
     return $this->getStorageObject()->getDateModified();
   }

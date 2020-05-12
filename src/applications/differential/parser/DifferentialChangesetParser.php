@@ -1871,12 +1871,20 @@ final class DifferentialChangesetParser extends Phobject {
       $undo_templates[$key] = hsprintf('%s', $undo_template);
     }
 
+    $document_engine = $renderer->getDocumentEngine();
+    if ($document_engine) {
+      $document_engine_key = $document_engine->getDocumentEngineKey();
+    } else {
+      $document_engine_key = null;
+    }
+
     $state = array(
       'undoTemplates' => $undo_templates,
       'rendererKey' => $renderer_key,
       'highlight' => $viewstate->getHighlightLanguage(),
       'characterEncoding' => $viewstate->getCharacterEncoding(),
-      'documentEngine' => $viewstate->getDocumentEngineKey(),
+      'requestDocumentEngineKey' => $viewstate->getDocumentEngineKey(),
+      'responseDocumentEngineKey' => $document_engine_key,
       'isHidden' => $viewstate->getHidden(),
     );
 
