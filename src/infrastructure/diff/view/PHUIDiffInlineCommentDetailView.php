@@ -173,12 +173,6 @@ final class PHUIDiffInlineCommentDetailView
         'action' => 'edit',
         'key' => 'e',
       );
-
-      $menu_items[] = array(
-        'label' => pht('Delete Comment'),
-        'icon' => 'fa-trash-o',
-        'action' => 'delete',
-      );
     } else if ($is_preview) {
       $links[] = javelin_tag(
         'a',
@@ -233,6 +227,28 @@ final class PHUIDiffInlineCommentDetailView
         'icon' => 'fa-quote-left',
         'action' => 'quote',
         'key' => 'R',
+      );
+    }
+
+    if (!$is_preview) {
+      $xaction_phid = $inline->getTransactionPHID();
+      $storage = $inline->getStorageObject();
+
+      if ($xaction_phid) {
+        $menu_items[] = array(
+          'label' => pht('View Raw Remarkup'),
+          'icon' => 'fa-code',
+          'action' => 'raw',
+          'uri' => $storage->getRawRemarkupURI(),
+        );
+      }
+    }
+
+    if ($this->editable && !$is_preview) {
+      $menu_items[] = array(
+        'label' => pht('Delete Comment'),
+        'icon' => 'fa-trash-o',
+        'action' => 'delete',
       );
     }
 

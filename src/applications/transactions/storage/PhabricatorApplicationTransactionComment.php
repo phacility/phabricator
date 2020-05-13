@@ -101,6 +101,11 @@ abstract class PhabricatorApplicationTransactionComment
     return ($this->oldComment !== self::ATTACHABLE);
   }
 
+  public function getRawRemarkupURI() {
+    return urisprintf(
+      '/transactions/raw/%s/',
+      $this->getTransactionPHID());
+  }
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

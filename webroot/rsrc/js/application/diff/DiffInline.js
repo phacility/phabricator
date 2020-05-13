@@ -921,7 +921,7 @@ JX.install('DiffInline', {
       for (var ii = 0; ii < this._menuItems.length; ii++) {
         var spec = this._menuItems[ii];
 
-        var onmenu = JX.bind(this, this._onMenuItem, menu, spec.action);
+        var onmenu = JX.bind(this, this._onMenuItem, menu, spec.action, spec);
 
         var item = new JX.PHUIXActionView()
           .setIcon(spec.icon)
@@ -938,7 +938,7 @@ JX.install('DiffInline', {
       return items;
     },
 
-    _onMenuItem: function(menu, action, e) {
+    _onMenuItem: function(menu, action, spec, e) {
       e.prevent();
       menu.close();
 
@@ -957,6 +957,10 @@ JX.install('DiffInline', {
           break;
         case 'edit':
           this.edit();
+          break;
+        case 'raw':
+          new JX.Workflow(spec.uri)
+            .start();
           break;
       }
 
