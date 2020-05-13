@@ -12,7 +12,7 @@
 
 .remarkup-code td > span {
   display: inline;
-  word-break: break-all;
+  line-break: anywhere;
 }
 
 .remarkup-code .rbw_r { color: red; }
