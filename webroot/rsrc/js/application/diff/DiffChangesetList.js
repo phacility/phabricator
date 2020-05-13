@@ -59,6 +59,10 @@ JX.install('DiffChangesetList', {
       null,
       onrangeup);
 
+    var onrange = JX.bind(this, this._ifawake, this._onSelectRange);
+    JX.enableDispatch(window, 'selectionchange');
+    JX.Stratcom.listen('selectionchange', null, onrange);
+
     this._setupInlineCommentListeners();
   },
 
@@ -193,6 +197,10 @@ JX.install('DiffChangesetList', {
       label = pht('Reply and quote selected inline comment.');
       this._installKey('R', 'inline', label,
         JX.bind(this, this._onkeyreply, true));
+
+      label = pht('Add new inline comment on selected source text.');
+      this._installKey('c', 'inline', label,
+        JX.bind(this, this._onKeyCreate));
 
       label = pht('Edit selected inline comment.');
       this._installKey('e', 'inline', label, this._onkeyedit);
@@ -415,6 +423,24 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment to edit.'));
+    },
+
+    _onKeyCreate: function() {
+      var start = this._sourceSelectionStart;
+      var end = this._sourceSelectionEnd;
+
+      if (!this._sourceSelectionStart) {
+        var pht = this.getTranslations();
+        this._warnUser(
+          pht(
+            'You must select source text to create a new inline comment.'));
+        return;
+      }
+
+      this._setSourceSelection(null, null);
+
+      var changeset = start.changeset;
+      changeset.newInlineForRange(start.targetNode, end.targetNode);
     },
 
     _onkeydone: function() {
@@ -2197,8 +2223,278 @@ JX.install('DiffChangesetList', {
           inline.activateMenu(node, e);
           break;
       }
-    }
+    },
 
+    _onSelectRange: function(e) {
+      this._updateSourceSelection();
+    },
+
+    _updateSourceSelection: function() {
+      var ranges = this._getSelectedRanges();
+
+      // If we have zero or more than one range, don't do anything.
+      if (ranges.length === 1) {
+        for (var ii = 0; ii < ranges.length; ii++) {
+          var range = ranges[ii];
+
+          var head = range.startContainer;
+          var last = range.endContainer;
+
+          var head_loc = this._getFragmentLocation(head);
+          var last_loc = this._getFragmentLocation(last);
+
+          if (head_loc === null || last_loc === null) {
+            break;
+          }
+
+          if (head_loc.changesetID !== last_loc.changesetID) {
+            break;
+          }
+
+          head_loc.offset += range.startOffset;
+          last_loc.offset += range.endOffset;
+
+          this._setSourceSelection(head_loc, last_loc);
+          return;
+        }
+      }
+
+      this._setSourceSelection(null, null);
+    },
+
+    _setSourceSelection: function(start, end) {
+      var start_updated =
+        !this._isSameSourceSelection(this._sourceSelectionStart, start);
+
+      var end_updated =
+        !this._isSameSourceSelection(this._sourceSelectionEnd, end);
+
+      if (!start_updated && !end_updated) {
+        return;
+      }
+
+      this._sourceSelectionStart = start;
+      this._sourceSelectionEnd = end;
+
+      if (!start) {
+        this._closeSourceSelectionMenu();
+        return;
+      }
+
+      var menu;
+      if (this._sourceSelectionMenu) {
+        menu = this._sourceSelectionMenu;
+      } else {
+        menu = this._newSourceSelectionMenu();
+        this._sourceSelectionMenu = menu;
+      }
+
+      var pos = JX.$V(start.node)
+        .add(0, -menu.getMenuNodeDimensions().y)
+        .add(0, -24);
+
+      menu.setPosition(pos);
+      menu.open();
+    },
+
+    _newSourceSelectionMenu: function() {
+      var pht = this.getTranslations();
+
+      var menu = new JX.PHUIXDropdownMenu(null)
+        .setWidth(240);
+
+      // We need to disable autofocus for this menu, since it operates on the
+      // text selection in the document. If we leave this enabled, opening the
+      // menu immediately discards the selection.
+      menu.setDisableAutofocus(true);
+
+      var list = new JX.PHUIXActionListView();
+      menu.setContent(list.getNode());
+
+      var oncreate = JX.bind(this, this._onSourceSelectionMenuAction, 'create');
+
+      var comment_item = new JX.PHUIXActionView()
+        .setIcon('fa-comment-o')
+        .setName(pht('New Inline Comment'))
+        .setKeyCommand('c')
+        .setHandler(oncreate);
+
+      list.addItem(comment_item);
+
+      return menu;
+    },
+
+    _onSourceSelectionMenuAction: function(action, e) {
+      e.kill();
+      this._closeSourceSelectionMenu();
+
+      switch (action) {
+        case 'create':
+          this._onKeyCreate();
+          break;
+      }
+    },
+
+    _closeSourceSelectionMenu: function() {
+      if (this._sourceSelectionMenu) {
+        this._sourceSelectionMenu.close();
+      }
+    },
+
+    _isSameSourceSelection: function(u, v) {
+      if (u === null && v === null) {
+        return true;
+      }
+
+      if (u === null && v !== null) {
+        return false;
+      }
+
+      if (u !== null && v === null) {
+        return false;
+      }
+
+      return (
+        (u.changesetID === v.changesetID) &&
+        (u.line === v.line) &&
+        (u.displayColumn === v.displayColumn) &&
+        (u.offset === v.offset)
+      );
+    },
+
+    _getFragmentLocation: function(fragment) {
+      // Find the changeset containing the fragment.
+      var changeset = null;
+      try {
+        var node = JX.DOM.findAbove(
+          fragment,
+          'div',
+          'differential-changeset');
+
+        changeset = this.getChangesetForNode(node);
+        if (!changeset) {
+          return null;
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      // Find the line number and display column for the fragment.
+      var line = null;
+      var column_count = -1;
+      var offset = null;
+      var target_node = null;
+      var td;
+      try {
+
+        // NOTE: In Safari, you can carefully select an entire line and then
+        // move your mouse down slightly, causing selection of an empty
+        // document fragment which is an immediate child of the next "<tr />".
+
+        // If the fragment is a direct child of a "<tr />" parent, assume the
+        // user has done this and select the last child of the previous row
+        // instead. It's possible there are other ways to do this, so this may
+        // not always be the right rule.
+
+        // Otherwise, select the containing "<td />".
+
+        var is_end;
+        if (JX.DOM.isType(fragment.parentNode, 'tr')) {
+          // Assume this is Safari, and that the user has carefully selected a
+          // row and then moved their mouse down a few pixels to select the
+          // invisible fragment at the beginning of the next row.
+          var cells = fragment.parentNode.previousSibling.childNodes;
+          td = cells[cells.length - 1];
+          is_end = true;
+        } else {
+          td = JX.DOM.findAbove(fragment, 'td');
+          is_end = false;
+        }
+
+        var cursor = td;
+        while (cursor) {
+          if (cursor.getAttribute('data-copy-mode')) {
+            column_count++;
+          }
+
+          var n = parseInt(cursor.getAttribute('data-n'));
+
+          if (n) {
+            if (line === null) {
+              target_node = cursor;
+              line = n;
+            }
+          }
+
+          cursor = cursor.previousSibling;
+        }
+
+        if (!line) {
+          return null;
+        }
+
+        if (column_count < 0) {
+          return null;
+        }
+
+        var seen = 0;
+        for (var ii = 0; ii < td.childNodes.length; ii++) {
+          var child = td.childNodes[ii];
+          if (child === fragment) {
+            offset = seen;
+            break;
+          }
+          seen += child.textContent.length;
+        }
+
+        if (offset === null) {
+          if (is_end) {
+            offset = seen;
+          } else {
+            offset = 0;
+          }
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      var changeset_id;
+      if (column_count > 0) {
+        changeset_id = changeset.getRightChangesetID();
+      } else {
+        changeset_id = changeset.getLeftChangesetID();
+      }
+
+      return {
+        node: td,
+        changeset: changeset,
+        changesetID: changeset_id,
+        line: line,
+        displayColumn: column_count,
+        offset: offset,
+        targetNode: target_node
+      };
+    },
+
+    _getSelectedRanges: function() {
+      var ranges = [];
+
+      if (!window.getSelection) {
+        return ranges;
+      }
+
+      var selection = window.getSelection();
+      for (var ii = 0; ii < selection.rangeCount; ii++) {
+        var range = selection.getRangeAt(ii);
+        if (range.collapsed) {
+          continue;
+        }
+
+        ranges.push(range);
+      }
+
+      return ranges;
+    }
   }
 
 });

@@ -365,6 +365,14 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('Jump to the comment area.'),
 
         'Show Changeset' => pht('Show Changeset'),
+
+        'You must select source text to create a new inline comment.' =>
+          pht('You must select source text to create a new inline comment.'),
+
+        'New Inline Comment' => pht('New Inline Comment'),
+
+        'Add new inline comment on selected source text.' =>
+          pht('Add new inline comment on selected source text.'),
       ),
     ));
 

@@ -119,7 +119,7 @@ JX.behavior('phabricator-oncopy', function() {
 
   // When the selection range changes, apply CSS classes if the selection is
   // nonempty. We don't want to make visual changes to the document immediately
-  // when the user press the mouse button, since we aren't yet sure that
+  // when the user presses the mouse button, since we aren't yet sure that
   // they are starting a selection: instead, wait for them to actually select
   // something.
   function onchangeselect() {
