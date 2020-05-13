@@ -439,8 +439,13 @@ JX.install('DiffChangesetList', {
 
       this._setSourceSelection(null, null);
 
+      var config = {
+        startOffset: start.offset,
+        endOffset: end.offset
+      };
+
       var changeset = start.changeset;
-      changeset.newInlineForRange(start.targetNode, end.targetNode);
+      changeset.newInlineForRange(start.targetNode, end.targetNode, config);
     },
 
     _onkeydone: function() {
@@ -1241,6 +1246,10 @@ JX.install('DiffChangesetList', {
     },
 
     _setHoverInline: function(inline) {
+      if (inline && (this._hoverInline === inline)) {
+        return;
+      }
+
       this._hoverInline = inline;
 
       if (inline) {
@@ -1305,13 +1314,30 @@ JX.install('DiffChangesetList', {
     },
 
     _redrawHover: function() {
-      var reticle = this._getHoverNode();
-      if (!this._hoverOrigin || this.isAsleep()) {
-        JX.DOM.remove(reticle);
-        return;
+      var ii;
+
+      var map = this._hoverMap;
+      if (map) {
+        for (ii = 0; ii < map.length; ii++) {
+          JX.DOM.alterClass(map[ii].cellNode, 'inline-hover', false);
+
+          if (map[ii].bright) {
+            JX.DOM.alterClass(map[ii].cellNode, 'inline-hover-bright', false);
+          }
+
+          if (map[ii].hoverNode) {
+            JX.DOM.remove(map[ii].hoverNode);
+          }
+        }
+        this._hoverMap = null;
       }
 
-      JX.DOM.getContentFrame().appendChild(reticle);
+      var reticle = this._getHoverNode();
+      JX.DOM.remove(reticle);
+
+      if (!this._hoverOrigin || this.isAsleep()) {
+        return;
+      }
 
       var top = this._hoverOrigin;
       var bot = this._hoverTarget;
@@ -1325,7 +1351,7 @@ JX.install('DiffChangesetList', {
       // next sibling with a "data-copy-mode" attribute, which is a marker
       // for the cell with actual content in it.
       var content_cell = top;
-      while (content_cell && !content_cell.getAttribute('data-copy-mode')) {
+      while (content_cell && !this._isContentCell(content_cell)) {
         content_cell = content_cell.nextSibling;
       }
 
@@ -1334,22 +1360,184 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      var pos = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell));
+      var inline = this._hoverInline;
+      if (!inline) {
+        var pos = JX.$V(content_cell)
+          .add(JX.Vector.getAggregateScrollForNode(content_cell));
 
-      var dim = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell))
-        .add(-pos.x, -pos.y)
-        .add(JX.Vector.getDim(content_cell));
+        var dim = JX.$V(content_cell)
+          .add(JX.Vector.getAggregateScrollForNode(content_cell))
+          .add(-pos.x, -pos.y)
+          .add(JX.Vector.getDim(content_cell));
 
-      var bpos = JX.$V(bot)
-        .add(JX.Vector.getAggregateScrollForNode(bot));
-      dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
+        var bpos = JX.$V(bot)
+          .add(JX.Vector.getAggregateScrollForNode(bot));
+        dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
 
-      pos.setPos(reticle);
-      dim.setDim(reticle);
+        pos.setPos(reticle);
+        dim.setDim(reticle);
 
-      JX.DOM.show(reticle);
+        JX.DOM.getContentFrame().appendChild(reticle);
+        JX.DOM.show(reticle);
+
+        return;
+      }
+
+      if (!inline.hoverMap) {
+        inline.hoverMap = this._newHoverMap(top, bot, content_cell, inline);
+      }
+
+      map = inline.hoverMap;
+      for (ii = 0; ii < map.length; ii++) {
+        JX.DOM.alterClass(map[ii].cellNode, 'inline-hover', true);
+        if (map[ii].bright) {
+          JX.DOM.alterClass(map[ii].cellNode, 'inline-hover-bright', true);
+        }
+        if (map[ii].hoverNode) {
+          map[ii].cellNode.insertBefore(
+            map[ii].hoverNode,
+            map[ii].cellNode.firstChild);
+        }
+      }
+      this._hoverMap = map;
+    },
+
+    _newHoverMap: function(top, bot, content_cell, inline) {
+      var start = inline.getStartOffset() || 0;
+      var end = inline.getEndOffset() || 0;
+
+      var head_row = JX.DOM.findAbove(top, 'tr');
+      var last_row = JX.DOM.findAbove(bot, 'tr');
+
+      var cursor = head_row;
+      var rows = [];
+      var idx = null;
+      var ii;
+      do {
+        for (ii = 0; ii < cursor.childNodes.length; ii++) {
+          var child = cursor.childNodes[ii];
+          if (!JX.DOM.isType(child, 'td')) {
+            continue;
+          }
+
+          if (child === content_cell) {
+            idx = ii;
+          }
+
+          if (ii === idx) {
+            if (!this._isContentCell(child)) {
+              break;
+            }
+            rows.push({
+              cellNode: child
+            });
+          }
+        }
+
+        if (cursor === last_row) {
+          break;
+        }
+
+        cursor = cursor.nextSibling;
+      } while (cursor);
+
+      var info;
+      var content;
+      for (ii = 0; ii < rows.length; ii++) {
+        info = this._getSelectionOffset(rows[ii].cellNode, null);
+
+        content = info.content;
+        content = content.replace(/\n+$/, '');
+
+        rows[ii].content = content;
+      }
+
+      var attr_dull = {
+        className: 'inline-hover-text'
+      };
+
+      var attr_bright = {
+        className: 'inline-hover-text inline-hover-text-bright'
+      };
+
+      var attr_container = {
+        className: 'inline-hover-container'
+      };
+
+      var min = 0;
+      var max = rows.length - 1;
+      var offset_min;
+      var offset_max;
+      var len;
+      var node;
+      var text;
+      var any_highlight = false;
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        len = content.length;
+
+        if (ii === min) {
+          offset_min = start;
+        } else {
+          offset_min = 0;
+        }
+
+        if (ii === max) {
+          offset_max = Math.min(end, len);
+        } else {
+          offset_max = len;
+        }
+
+        var has_min = (offset_min > 0);
+        var has_max = (offset_max < len);
+
+        if (has_min || has_max) {
+          any_highlight = true;
+        }
+
+        rows[ii].min = offset_min;
+        rows[ii].max = offset_max;
+        rows[ii].hasMin = has_min;
+        rows[ii].hasMax = has_max;
+      }
+
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        offset_min = rows[ii].min;
+        offset_max = rows[ii].max;
+
+        var has_highlight = (rows[ii].hasMin || rows[ii].hasMax);
+
+        if (any_highlight) {
+          var parts = [];
+
+          if (offset_min > 0) {
+            text = content.substring(0, offset_min);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          if (len) {
+            text = content.substring(offset_min, offset_max);
+            node = JX.$N('span', attr_bright, text);
+            parts.push(node);
+          }
+
+          if (offset_max < len) {
+            text = content.substring(offset_max, len);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          rows[ii].hoverNode = JX.$N('div', attr_container, parts);
+        } else {
+          rows[ii].hoverNode = null;
+        }
+
+        rows[ii].bright = (any_highlight && !has_highlight);
+      }
+
+      return rows;
     },
 
     _getHoverNode: function() {
@@ -2461,19 +2649,13 @@ JX.install('DiffChangesetList', {
           }
         }
 
-        var seen = 0;
-        for (var ii = 0; ii < td.childNodes.length; ii++) {
-          var child = td.childNodes[ii];
-          if (child === fragment) {
-            offset = seen;
-            break;
-          }
-          seen += child.textContent.length;
-        }
+        var info = this._getSelectionOffset(td, fragment);
 
-        if (offset === null) {
+        if (info.found) {
+          offset = info.offset;
+        } else {
           if (is_end) {
-            offset = seen;
+            offset = info.offset;
           } else {
             offset = 0;
           }
@@ -2500,6 +2682,42 @@ JX.install('DiffChangesetList', {
       };
     },
 
+    _getSelectionOffset: function(node, target) {
+      if (!node.childNodes || !node.childNodes.length) {
+        return {
+          offset: node.textContent.length,
+          content: node.textContent,
+          found: false
+        };
+      }
+
+      var found = false;
+      var offset = 0;
+      var content = '';
+      for (var ii = 0; ii < node.childNodes.length; ii++) {
+        var child = node.childNodes[ii];
+
+        if (child === target) {
+          found = true;
+        }
+
+        var spec = this._getSelectionOffset(child, target);
+
+        content += spec.content;
+        if (!found) {
+          offset += spec.offset;
+        }
+
+        found = found || spec.found;
+      }
+
+      return {
+        offset: offset,
+        content: content,
+        found: found
+      };
+    },
+
     _getSelectedRanges: function() {
       var ranges = [];
 
@@ -2518,7 +2736,12 @@ JX.install('DiffChangesetList', {
       }
 
       return ranges;
+    },
+
+    _isContentCell: function(node) {
+      return !!node.getAttribute('data-copy-mode');
     }
+
   }
 
 });

@@ -208,6 +208,8 @@ final class CelerityDefaultPostprocessor
       'gentle.highlight' => '#fdf3da',
       'gentle.highlight.border' => '#c9b8a8',
 
+      'highlight.bright' => '#fdf320',
+
       'paste.content' => '#fffef5',
       'paste.border' => '#e9dbcd',
       'paste.highlight' => '#fdf3da',

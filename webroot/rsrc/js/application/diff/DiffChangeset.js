@@ -711,7 +711,7 @@ JX.install('DiffChangeset', {
       return data.inline;
     },
 
-    newInlineForRange: function(origin, target) {
+    newInlineForRange: function(origin, target, options) {
       var list = this.getChangesetList();
 
       var src = list.getLineNumberFromHeader(origin);
@@ -741,6 +741,8 @@ JX.install('DiffChangeset', {
         displaySide: side,
         isNewFile: is_new
       };
+
+      JX.copy(data, options || {});
 
       var inline = new JX.DiffInline()
         .setChangeset(this)

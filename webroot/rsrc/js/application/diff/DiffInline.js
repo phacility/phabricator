@@ -48,6 +48,9 @@ JX.install('DiffInline', {
     _skipFocus: false,
     _menu: null,
 
+    _startOffset: null,
+    _endOffset: null,
+
     bindToRow: function(row) {
       this._row = row;
 
@@ -93,6 +96,8 @@ JX.install('DiffInline', {
       this._snippet = data.snippet;
       this._menuItems = data.menuItems;
       this._documentEngineKey = data.documentEngineKey;
+      this._startOffset = data.startOffset;
+      this._endOffset = data.endOffset;
 
       this._isEditing = data.isEditing;
 
@@ -147,6 +152,14 @@ JX.install('DiffInline', {
       return this._isGhost;
     },
 
+    getStartOffset: function() {
+      return this._startOffset;
+    },
+
+    getEndOffset: function() {
+      return this._endOffset;
+    },
+
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
       this._number = parseInt(data.number, 10);
@@ -154,6 +167,8 @@ JX.install('DiffInline', {
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
       this._isNew = true;
+      this._startOffset = data.startOffset;
+      this._endOffset = data.endOffset;
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -506,19 +521,35 @@ JX.install('DiffInline', {
     },
 
     _newRequestData: function(operation, text) {
-      return {
+      var data = {
         op: operation,
-        id: this._id,
+        is_new: this.isNewFile(),
         on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
         renderer: this.getChangeset().getRendererKey(),
-        number: this.getLineNumber(),
-        length: this.getLineLength(),
-        is_new: this.isNewFile(),
-        changesetID: this.getChangesetID(),
-        replyToCommentPHID: this.getReplyToCommentPHID(),
-        text: text || null,
-        documentEngineKey: this._documentEngineKey,
+        text: text || null
       };
+
+      if (operation === 'new') {
+        var create_data = {
+          changesetID: this.getChangesetID(),
+          documentEngineKey: this._documentEngineKey,
+          replyToCommentPHID: this.getReplyToCommentPHID(),
+          startOffset: this._startOffset,
+          endOffset: this._endOffset,
+          number: this.getLineNumber(),
+          length: this.getLineLength()
+        };
+
+        JX.copy(data, create_data);
+      } else {
+        var edit_data = {
+          id: this._id
+        };
+
+        JX.copy(data, edit_data);
+      }
+
+      return data;
     },
 
     _oneditresponse: function(response) {

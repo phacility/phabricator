@@ -12,8 +12,8 @@ return array(
     'core.pkg.css' => 'a560707d',
     'core.pkg.js' => '0efaf0ac',
     'dark-console.pkg.js' => '187792c2',
-    'differential.pkg.css' => 'd71d4531',
-    'differential.pkg.js' => 'ac6914bb',
+    'differential.pkg.css' => 'b042ee8b',
+    'differential.pkg.js' => '4b2b5659',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -63,7 +63,7 @@ return array(
     'rsrc/css/application/diff/diff-tree-view.css' => 'e2d3e222',
     'rsrc/css/application/diff/inline-comment-summary.css' => '81eb368d',
     'rsrc/css/application/differential/add-comment.css' => '7e5900d9',
-    'rsrc/css/application/differential/changeset-view.css' => 'a5cc67cf',
+    'rsrc/css/application/differential/changeset-view.css' => 'df3afa61',
     'rsrc/css/application/differential/core.css' => '7300a73e',
     'rsrc/css/application/differential/phui-inline-comment.css' => '48acce5b',
     'rsrc/css/application/differential/revision-comment.css' => '7dbc8d1d',
@@ -379,9 +379,9 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'a2ab19be',
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
-    'rsrc/js/application/diff/DiffChangeset.js' => '20715b98',
-    'rsrc/js/application/diff/DiffChangesetList.js' => '9d5b137e',
-    'rsrc/js/application/diff/DiffInline.js' => '6227a0e3',
+    'rsrc/js/application/diff/DiffChangeset.js' => 'b6bb0240',
+    'rsrc/js/application/diff/DiffChangesetList.js' => '2347e0a6',
+    'rsrc/js/application/diff/DiffInline.js' => '417b3cdb',
     'rsrc/js/application/diff/DiffPathView.js' => '8207abf9',
     'rsrc/js/application/diff/DiffTreeView.js' => '5d83623b',
     'rsrc/js/application/differential/behavior-diff-radios.js' => '925fe8cd',
@@ -559,7 +559,7 @@ return array(
     'conpherence-transaction-css' => '3a3f5e7e',
     'd3' => '9d068042',
     'diff-tree-view-css' => 'e2d3e222',
-    'differential-changeset-view-css' => 'a5cc67cf',
+    'differential-changeset-view-css' => 'df3afa61',
     'differential-core-view-css' => '7300a73e',
     'differential-revision-add-comment-css' => '7e5900d9',
     'differential-revision-comment-css' => '7dbc8d1d',
@@ -774,9 +774,9 @@ return array(
     'phabricator-darklog' => '3b869402',
     'phabricator-darkmessage' => '26cd4b73',
     'phabricator-dashboard-css' => '5a205b9d',
-    'phabricator-diff-changeset' => '20715b98',
-    'phabricator-diff-changeset-list' => '9d5b137e',
-    'phabricator-diff-inline' => '6227a0e3',
+    'phabricator-diff-changeset' => 'b6bb0240',
+    'phabricator-diff-changeset-list' => '2347e0a6',
+    'phabricator-diff-inline' => '417b3cdb',
     'phabricator-diff-path-view' => '8207abf9',
     'phabricator-diff-tree-view' => '5d83623b',
     'phabricator-drag-and-drop-file-upload' => '4370900d',
@@ -1082,19 +1082,6 @@ return array(
       'javelin-behavior',
       'javelin-request',
     ),
-    '20715b98' => array(
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-install',
-      'javelin-workflow',
-      'javelin-router',
-      'javelin-behavior-device',
-      'javelin-vector',
-      'phabricator-diff-inline',
-      'phabricator-diff-path-view',
-      'phuix-button-view',
-    ),
     '225bbb98' => array(
       'javelin-install',
       'javelin-reactor',
@@ -1110,6 +1097,11 @@ return array(
       'javelin-util',
       'javelin-request',
       'javelin-typeahead-source',
+    ),
+    '2347e0a6' => array(
+      'javelin-install',
+      'phuix-button-view',
+      'phabricator-diff-tree-view',
     ),
     23631304 => array(
       'phui-fontkit-css',
@@ -1258,6 +1250,9 @@ return array(
     '407ee861' => array(
       'javelin-behavior',
       'javelin-uri',
+    ),
+    '417b3cdb' => array(
+      'javelin-dom',
     ),
     '42c44e8b' => array(
       'javelin-behavior',
@@ -1502,9 +1497,6 @@ return array(
     ),
     '60cd9241' => array(
       'javelin-behavior',
-    ),
-    '6227a0e3' => array(
-      'javelin-dom',
     ),
     '6337cf26' => array(
       'javelin-behavior',
@@ -1816,11 +1808,6 @@ return array(
       'javelin-uri',
       'phabricator-textareautils',
     ),
-    '9d5b137e' => array(
-      'javelin-install',
-      'phuix-button-view',
-      'phabricator-diff-tree-view',
-    ),
     '9f081f05' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1864,9 +1851,6 @@ return array(
     'a5257c4e' => array(
       'javelin-install',
       'javelin-dom',
-    ),
-    'a5cc67cf' => array(
-      'phui-inline-comment-view-css',
     ),
     'a77e2cbd' => array(
       'javelin-behavior',
@@ -1999,6 +1983,19 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
     ),
+    'b6bb0240' => array(
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-install',
+      'javelin-workflow',
+      'javelin-router',
+      'javelin-behavior-device',
+      'javelin-vector',
+      'phabricator-diff-inline',
+      'phabricator-diff-path-view',
+      'phuix-button-view',
+    ),
     'b7b73831' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -2123,6 +2120,9 @@ return array(
       'javelin-behavior',
       'javelin-uri',
       'phabricator-notification',
+    ),
+    'df3afa61' => array(
+      'phui-inline-comment-view-css',
     ),
     'e150bd50' => array(
       'javelin-behavior',

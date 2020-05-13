@@ -320,7 +320,9 @@ abstract class PhabricatorInlineCommentController
           ->setLineLength($length)
           ->setContent((string)$this->getCommentText())
           ->setReplyToCommentPHID($this->getReplyToCommentPHID())
-          ->setIsEditing(true);
+          ->setIsEditing(true)
+          ->setStartOffset($request->getInt('startOffset'))
+          ->setEndOffset($request->getInt('endOffset'));
 
         $document_engine_key = $request->getStr('documentEngineKey');
         if ($document_engine_key !== null) {

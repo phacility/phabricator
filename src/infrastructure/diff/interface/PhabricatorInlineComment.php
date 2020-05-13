@@ -222,6 +222,24 @@ abstract class PhabricatorInlineComment
     return $this->getStorageObject()->getAttribute('documentEngineKey');
   }
 
+  public function setStartOffset($offset) {
+    $this->getStorageObject()->setAttribute('startOffset', $offset);
+    return $this;
+  }
+
+  public function getStartOffset() {
+    return $this->getStorageObject()->getAttribute('startOffset');
+  }
+
+  public function setEndOffset($offset) {
+    $this->getStorageObject()->setAttribute('endOffset', $offset);
+    return $this;
+  }
+
+  public function getEndOffset() {
+    return $this->getStorageObject()->getAttribute('endOffset');
+  }
+
   public function getDateModified() {
     return $this->getStorageObject()->getDateModified();
   }

@@ -487,3 +487,27 @@ unselectable. */
   background: {$lightyellow};
   color: {$blacktext};
 }
+
+.differential-diff tr td.inline-hover {
+  background: {$gentle.highlight};
+}
+
+.differential-diff tr td.inline-hover-bright {
+  background: {$highlight.bright};
+}
+
+.inline-hover-container {
+  position: absolute;
+  color: {$lightgreytext};
+  background: {$lightyellow};
+}
+
+.inline-hover-text {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.inline-hover-text-bright {
+  color: {$blacktext};
+  background: {$highlight.bright};
+}
