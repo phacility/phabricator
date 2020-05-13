@@ -2232,34 +2232,36 @@ JX.install('DiffChangesetList', {
     _updateSourceSelection: function() {
       var ranges = this._getSelectedRanges();
 
-      // If we have zero or more than one range, don't do anything.
-      if (ranges.length === 1) {
-        for (var ii = 0; ii < ranges.length; ii++) {
-          var range = ranges[ii];
-
-          var head = range.startContainer;
-          var last = range.endContainer;
-
-          var head_loc = this._getFragmentLocation(head);
-          var last_loc = this._getFragmentLocation(last);
-
-          if (head_loc === null || last_loc === null) {
-            break;
-          }
-
-          if (head_loc.changesetID !== last_loc.changesetID) {
-            break;
-          }
-
-          head_loc.offset += range.startOffset;
-          last_loc.offset += range.endOffset;
-
-          this._setSourceSelection(head_loc, last_loc);
-          return;
-        }
+      // In Firefox, selecting multiple rows gives us multiple ranges. In
+      // Safari and Chrome, we get a single range.
+      if (!ranges.length) {
+        this._setSourceSelection(null, null);
+        return;
       }
 
-      this._setSourceSelection(null, null);
+      var min = 0;
+      var max = ranges.length - 1;
+
+      var head = ranges[min].startContainer;
+      var last = ranges[max].endContainer;
+
+      var head_loc = this._getFragmentLocation(head);
+      var last_loc = this._getFragmentLocation(last);
+
+      if (head_loc === null || last_loc === null) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      if (head_loc.changesetID !== last_loc.changesetID) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      head_loc.offset += ranges[min].startOffset;
+      last_loc.offset += ranges[max].endOffset;
+
+      this._setSourceSelection(head_loc, last_loc);
     },
 
     _setSourceSelection: function(start, end) {
@@ -2382,6 +2384,8 @@ JX.install('DiffChangesetList', {
       // Find the line number and display column for the fragment.
       var line = null;
       var column_count = -1;
+      var has_new = false;
+      var has_old = false;
       var offset = null;
       var target_node = null;
       var td;
@@ -2415,6 +2419,18 @@ JX.install('DiffChangesetList', {
         while (cursor) {
           if (cursor.getAttribute('data-copy-mode')) {
             column_count++;
+          } else {
+            // In unified mode, the content column isn't currently marked
+            // with an attribute, and we can't count content columns anyway.
+            // Keep track of whether or not we see a "NL" (New Line) column
+            // and/or an "OL" (Old Line) column to try to puzzle out which
+            // side of the display change we're on.
+
+            if (cursor.id.match(/NL/)) {
+              has_new = true;
+            } else if (cursor.id.match(/OL/)) {
+              has_old = true;
+            }
           }
 
           var n = parseInt(cursor.getAttribute('data-n'));
@@ -2434,7 +2450,15 @@ JX.install('DiffChangesetList', {
         }
 
         if (column_count < 0) {
-          return null;
+          if (has_new || has_old) {
+            if (has_new) {
+              column_count = 1;
+            } else {
+              column_count = 0;
+            }
+          } else {
+            return null;
+          }
         }
 
         var seen = 0;
