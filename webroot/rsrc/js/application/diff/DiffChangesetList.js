@@ -20,9 +20,6 @@ JX.install('DiffChangesetList', {
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
 
-    var oncollapse = JX.bind(this, this._ifawake, this._oncollapse, true);
-    JX.Stratcom.listen('click', 'hide-inline', oncollapse);
-
     var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
     JX.Stratcom.listen('click', 'reveal-inline', onexpand);
 
@@ -336,16 +333,7 @@ JX.install('DiffChangesetList', {
           var inline = cursor.target;
           if (inline.canReply()) {
             this.setFocus(null);
-
-            var text;
-            if (is_quote) {
-              text = inline.getRawText();
-              text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
-            } else {
-              text = '';
-            }
-
-            inline.reply(text);
+            inline.reply(true);
             return;
           }
         }
@@ -2094,12 +2082,6 @@ JX.install('DiffChangesetList', {
         'differential-inline-comment-undo',
         onundo);
 
-      var onedit = JX.bind(this, this._onInlineEvent, 'edit');
-      JX.Stratcom.listen(
-        'click',
-        ['differential-inline-comment', 'differential-inline-edit'],
-        onedit);
-
       var ondone = JX.bind(this, this._onInlineEvent, 'done');
       JX.Stratcom.listen(
         'click',
@@ -2112,11 +2094,11 @@ JX.install('DiffChangesetList', {
         ['differential-inline-comment', 'differential-inline-delete'],
         ondelete);
 
-      var onreply = JX.bind(this, this._onInlineEvent, 'reply');
+      var onmenu = JX.bind(this, this._onInlineEvent, 'menu');
       JX.Stratcom.listen(
         'click',
-        ['differential-inline-comment', 'differential-inline-reply'],
-        onreply);
+        ['differential-inline-comment', 'inline-action-dropdown'],
+        onmenu);
 
       var ondraft = JX.bind(this, this._onInlineEvent, 'draft');
       JX.Stratcom.listen(
@@ -2156,7 +2138,7 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      if (action !== 'draft') {
+      if (action !== 'draft' && action !== 'menu') {
         e.kill();
       }
 
@@ -2201,20 +2183,18 @@ JX.install('DiffChangesetList', {
         case 'undo':
           inline.undo();
           break;
-        case 'edit':
-          inline.edit();
-          break;
         case 'done':
           inline.toggleDone();
           break;
         case 'delete':
           inline.delete(is_ref);
           break;
-        case 'reply':
-          inline.reply();
-          break;
         case 'draft':
           inline.triggerDraft();
+          break;
+        case 'menu':
+          var node = e.getNode('inline-action-dropdown');
+          inline.activateMenu(node, e);
           break;
       }
     }

@@ -21,6 +21,7 @@ JX.install('DiffInline', {
     _replyToCommentPHID: null,
     _originalText: null,
     _snippet: null,
+    _menuItems: null,
     _documentEngineKey: null,
 
     _isDeleted: false,
@@ -45,6 +46,7 @@ JX.install('DiffInline', {
 
     _draftRequest: null,
     _skipFocus: false,
+    _menu: null,
 
     bindToRow: function(row) {
       this._row = row;
@@ -89,6 +91,7 @@ JX.install('DiffInline', {
       this._changesetID = data.changesetID;
       this._isNew = false;
       this._snippet = data.snippet;
+      this._menuItems = data.menuItems;
       this._documentEngineKey = data.documentEngineKey;
 
       this._isEditing = data.isEditing;
@@ -252,19 +255,11 @@ JX.install('DiffInline', {
     },
 
     canReply: function() {
-      if (!this._hasAction('reply')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('reply');
     },
 
     canEdit: function() {
-      if (!this._hasAction('edit')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('edit');
     },
 
     canDone: function() {
@@ -276,20 +271,11 @@ JX.install('DiffInline', {
     },
 
     canCollapse: function() {
-      if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('collapse');
     },
 
     getRawText: function() {
       return this._originalText;
-    },
-
-    _hasAction: function(action) {
-      var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
-      return (nodes.length > 0);
     },
 
     _newRow: function() {
@@ -312,6 +298,8 @@ JX.install('DiffInline', {
     },
 
     setCollapsed: function(collapsed) {
+      this._closeMenu();
+
       this._isCollapsed = collapsed;
 
       var op;
@@ -393,12 +381,24 @@ JX.install('DiffInline', {
         .send();
     },
 
-    reply: function(text) {
+    reply: function(with_quote) {
+      this._closeMenu();
+
+      var text;
+      if (with_quote) {
+        text = this.getRawText();
+        text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
+      } else {
+        text = '';
+      }
+
       var changeset = this.getChangeset();
       return changeset.newInlineReply(this, text);
     },
 
     edit: function(text, skip_focus) {
+      this._closeMenu();
+
       this._skipFocus = !!skip_focus;
 
       // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
@@ -880,6 +880,101 @@ JX.install('DiffInline', {
     triggerDraft: function() {
       if (this._draftRequest) {
         this._draftRequest.trigger();
+      }
+    },
+
+    activateMenu: function(button, e) {
+      // If we already have a menu for this button, let the menu handle the
+      // event.
+      var data = JX.Stratcom.getData(button);
+      if (data.menu) {
+        return;
+      }
+
+      e.prevent();
+
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
+
+      var list = new JX.PHUIXActionListView();
+      var items = this._newMenuItems(menu);
+      for (var ii = 0; ii < items.length; ii++) {
+        list.addItem(items[ii]);
+      }
+
+      menu.setContent(list.getNode());
+
+      data.menu = menu;
+      this._menu = menu;
+
+      menu.listen('open', JX.bind(this, function() {
+        var changeset_list = this.getChangeset().getChangesetList();
+        changeset_list.selectInline(this, true);
+      }));
+
+      menu.open();
+    },
+
+    _newMenuItems: function(menu) {
+      var items = [];
+
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+
+        var onmenu = JX.bind(this, this._onMenuItem, menu, spec.action);
+
+        var item = new JX.PHUIXActionView()
+          .setIcon(spec.icon)
+          .setName(spec.label)
+          .setHandler(onmenu);
+
+        if (spec.key) {
+          item.setKeyCommand(spec.key);
+        }
+
+        items.push(item);
+      }
+
+      return items;
+    },
+
+    _onMenuItem: function(menu, action, e) {
+      e.prevent();
+      menu.close();
+
+      switch (action) {
+        case 'reply':
+          this.reply();
+          break;
+        case 'quote':
+          this.reply(true);
+          break;
+        case 'collapse':
+          this.setCollapsed(true);
+          break;
+        case 'delete':
+          this.delete();
+          break;
+        case 'edit':
+          this.edit();
+          break;
+      }
+
+    },
+
+    _hasMenuAction: function(action) {
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+        if (spec.action === action) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    _closeMenu: function() {
+      if (this._menu) {
+        this._menu.close();
       }
     }
 
