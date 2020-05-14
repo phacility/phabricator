@@ -441,12 +441,22 @@ JX.install('DiffChangesetList', {
 
       this._setSourceSelection(null, null);
 
-      var config = {
-        startOffset: start.offset,
-        endOffset: end.offset
-      };
-
       var changeset = start.changeset;
+
+      var config = {};
+      if (changeset.getResponseDocumentEngineKey() === null) {
+        // If the changeset is using a document renderer, we ignore the
+        // selection range and just treat this as a comment from the first
+        // block to the last block.
+
+        // If we don't discard the range, we later render a bogus highlight
+        // if the block content is complex (like a Jupyter notebook cell
+        // with images).
+
+        config.startOffset = start.offset;
+        config.endOffset = end.offset;
+      }
+
       changeset.newInlineForRange(start.targetNode, end.targetNode, config);
     },
 
@@ -2623,7 +2633,7 @@ JX.install('DiffChangesetList', {
           td = cells[cells.length - 1];
           is_end = true;
         } else {
-          td = JX.DOM.findAbove(fragment, 'td');
+          td = this._findContentCell(fragment);
           is_end = false;
         }
 
@@ -2707,6 +2717,16 @@ JX.install('DiffChangesetList', {
     },
 
     _getSelectionOffset: function(node, target) {
+      // If this is an aural hint node in a unified diff, ignore it when
+      // calculating the selection offset.
+      if (node.getAttribute && node.getAttribute('data-aural')) {
+        return {
+          offset: 0,
+          content: '',
+          found: false
+        };
+      }
+
       if (!node.childNodes || !node.childNodes.length) {
         return {
           offset: node.textContent.length,
@@ -2764,6 +2784,16 @@ JX.install('DiffChangesetList', {
 
     _isContentCell: function(node) {
       return !!node.getAttribute('data-copy-mode');
+    },
+
+    _findContentCell: function(node) {
+      var cursor = node;
+      while (true) {
+        cursor = JX.DOM.findAbove(cursor, 'td');
+        if (this._isContentCell(cursor)) {
+          return cursor;
+        }
+      }
     }
 
   }
