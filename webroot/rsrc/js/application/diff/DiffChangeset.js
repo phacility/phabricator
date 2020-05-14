@@ -907,7 +907,10 @@ JX.install('DiffChangeset', {
         return;
       }
 
-      e.prevent();
+      // NOTE: Don't prevent or kill the event. If the user has text selected,
+      // clicking a header should clear the selection (and dismiss any inline
+      // context menu, if one exists) as clicking elsewhere in the document
+      // normally would.
 
       if (this._isSelected) {
         this.getChangesetList().selectChangeset(null);

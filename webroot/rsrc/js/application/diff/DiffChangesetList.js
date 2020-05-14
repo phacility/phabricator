@@ -1131,9 +1131,8 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      // The user definitely clicked an inline, so we're going to handle the
-      // event.
-      e.kill();
+      // NOTE: Don't kill or prevent the event. In particular, we want this
+      // click to clear any text selection as it normally would.
 
       this.selectInline(inline);
     },
