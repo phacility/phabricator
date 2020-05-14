@@ -736,8 +736,6 @@ JX.install('DiffInline', {
         this._drawUneditRows(text);
       }
 
-      this.setEditing(false);
-
       // If this was an empty box and we typed some text and then hit cancel,
       // don't show the empty concrete inline.
       if (!this._originalText) {
@@ -764,6 +762,7 @@ JX.install('DiffInline', {
     },
 
     _onCancelResponse: function(response) {
+      this.setEditing(false);
       this.setLoading(false);
 
       // If the comment was empty when we started editing it (there's no
