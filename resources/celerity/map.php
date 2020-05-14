@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '0e3cf785',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => 'a560707d',
-    'core.pkg.js' => '0efaf0ac',
+    'core.pkg.js' => '845355f4',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => 'b042ee8b',
     'differential.pkg.js' => '5d560bda',
@@ -488,7 +488,7 @@ return array(
     'rsrc/js/core/behavior-linked-container.js' => '74446546',
     'rsrc/js/core/behavior-more.js' => '506aa3f4',
     'rsrc/js/core/behavior-object-selector.js' => '98ef467f',
-    'rsrc/js/core/behavior-oncopy.js' => 'b475aae5',
+    'rsrc/js/core/behavior-oncopy.js' => 'da8f5259',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => '54262396',
     'rsrc/js/core/behavior-read-only-warning.js' => 'b9109f8f',
     'rsrc/js/core/behavior-redirect.js' => '407ee861',
@@ -648,7 +648,7 @@ return array(
     'javelin-behavior-phabricator-line-linker' => '590e6527',
     'javelin-behavior-phabricator-notification-example' => '29819b75',
     'javelin-behavior-phabricator-object-selector' => '98ef467f',
-    'javelin-behavior-phabricator-oncopy' => 'b475aae5',
+    'javelin-behavior-phabricator-oncopy' => 'da8f5259',
     'javelin-behavior-phabricator-remarkup-assist' => '54262396',
     'javelin-behavior-phabricator-reveal-content' => 'b105a3a6',
     'javelin-behavior-phabricator-search-typeahead' => '1cb7d027',
@@ -1952,10 +1952,6 @@ return array(
       'javelin-workboard-card-template',
       'javelin-workboard-order-template',
     ),
-    'b475aae5' => array(
-      'javelin-behavior',
-      'javelin-dom',
-    ),
     'b49fd60c' => array(
       'multirow-row-manager',
       'trigger-rule',
@@ -2115,6 +2111,10 @@ return array(
     ),
     'da15d3dc' => array(
       'phui-oi-list-view-css',
+    ),
+    'da8f5259' => array(
+      'javelin-behavior',
+      'javelin-dom',
     ),
     'dae2d55b' => array(
       'javelin-behavior',
