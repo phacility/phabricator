@@ -50,8 +50,14 @@ JX.install('DiffChangeset', {
       this._loadChangesetState(data.changesetState);
     }
 
+    JX.enableDispatch(window, 'selectstart');
+
     var onselect = JX.bind(this, this._onClickHeader);
-    JX.DOM.listen(this._node, 'mousedown', 'changeset-header', onselect);
+    JX.DOM.listen(
+      this._node,
+      ['mousedown', 'selectstart'],
+      'changeset-header',
+      onselect);
   },
 
   members: {
@@ -904,6 +910,13 @@ JX.install('DiffChangeset', {
       // a selection action: we want to let them select the path.
       var path_name = e.getNode('changeset-header-path-name');
       if (path_name) {
+        return;
+      }
+
+      // Don't allow repeatedly clicking a header to begin a "select word" or
+      // "select line" operation.
+      if (e.getType() === 'selectstart') {
+        e.kill();
         return;
       }
 

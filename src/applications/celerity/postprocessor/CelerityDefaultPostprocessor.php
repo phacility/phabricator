@@ -82,6 +82,7 @@ final class CelerityDefaultPostprocessor
       'alphablack'          => '0,0,0',
 
       // Base Greys
+      'thingreyborder'     => '#dadee8',
       'lightgreyborder'     => '#C7CCD9',
       'greyborder'          => '#A1A6B0',
       'darkgreyborder'      => '#676A70',
@@ -207,6 +208,7 @@ final class CelerityDefaultPostprocessor
       // Usually light yellow
       'gentle.highlight' => '#fdf3da',
       'gentle.highlight.border' => '#c9b8a8',
+      'gentle.highlight.background' => '#fffdf6',
 
       'highlight.bright' => '#fdf320',
 

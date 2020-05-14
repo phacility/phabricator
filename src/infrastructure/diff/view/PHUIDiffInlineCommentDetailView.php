@@ -79,10 +79,6 @@ final class PHUIDiffInlineCommentDetailView
     require_celerity_resource('phui-inline-comment-view-css');
     $inline = $this->getInlineComment();
 
-    $classes = array(
-      'differential-inline-comment',
-    );
-
     $is_synthetic = false;
     if ($inline->getSyntheticAuthor()) {
       $is_synthetic = true;
@@ -92,14 +88,18 @@ final class PHUIDiffInlineCommentDetailView
 
     $metadata = $this->getInlineCommentMetadata();
 
-    $sigil = 'differential-inline-comment';
-    if ($is_preview) {
-      $sigil = $sigil.' differential-inline-comment-preview';
-    }
-
     $classes = array(
       'differential-inline-comment',
     );
+
+    $sigil = 'differential-inline-comment';
+    if ($is_preview) {
+      $sigil = $sigil.' differential-inline-comment-preview';
+
+      $classes[] = 'inline-comment-preview';
+    } else {
+      $classes[] = 'inline-comment-element';
+    }
 
     $content = $inline->getContent();
     $handles = $this->handles;

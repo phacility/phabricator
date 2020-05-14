@@ -50,6 +50,7 @@ JX.install('DiffInline', {
 
     _startOffset: null,
     _endOffset: null,
+    _isSelected: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -161,6 +162,19 @@ JX.install('DiffInline', {
       return this._endOffset;
     },
 
+    setIsSelected: function(is_selected) {
+      this._isSelected = is_selected;
+
+      if (this._row) {
+        JX.DOM.alterClass(
+          this._row,
+          'inline-comment-selected',
+          this._isSelected);
+      }
+
+      return this;
+    },
+
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
       this._number = parseInt(data.number, 10);
@@ -168,8 +182,18 @@ JX.install('DiffInline', {
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
       this._isNew = true;
-      this._startOffset = null;
-      this._endOffset = null;
+
+      if (data.hasOwnProperty('startOffset')) {
+        this._startOffset = data.startOffset;
+      } else {
+        this._startOffset = null;
+      }
+
+      if (data.hasOwnProperty('endOffset')) {
+        this._endOffset = data.endOffset;
+      } else {
+        this._endOffset = null;
+      }
 
       // Insert the comment after any other comments which already appear on
       // the same row.

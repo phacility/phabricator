@@ -29,9 +29,11 @@ JX.install('DiffChangesetList', {
     var onscroll = JX.bind(this, this._ifawake, this._onscroll);
     JX.Stratcom.listen('scroll', null, onscroll);
 
+    JX.enableDispatch(window, 'selectstart');
+
     var onselect = JX.bind(this, this._ifawake, this._onselect);
     JX.Stratcom.listen(
-      'mousedown',
+      ['mousedown', 'selectstart'],
       ['differential-inline-comment', 'differential-inline-header'],
       onselect);
 
@@ -717,7 +719,22 @@ JX.install('DiffChangesetList', {
     },
 
     _setSelectionState: function(item, scroll) {
+      var old = this._cursorItem;
+
+      if (old) {
+        if (old.type === 'comment') {
+          old.target.setIsSelected(false);
+        }
+      }
+
       this._cursorItem = item;
+
+      if (item) {
+        if (item.type === 'comment') {
+          item.target.setIsSelected(true);
+        }
+      }
+
       this._redrawSelection(scroll);
 
       return this;
@@ -1123,6 +1140,14 @@ JX.install('DiffChangesetList', {
       // If the user clicked some element inside the header, like an action
       // icon, ignore the event. They have to click the header element itself.
       if (e.getTarget() !== e.getNode('differential-inline-header')) {
+        return;
+      }
+
+      // If the user has double-clicked or triple-clicked a header, we want to
+      // toggle the inline selection mode, not select text. Kill select events
+      // originating with this element as the target.
+      if (e.getType() === 'selectstart') {
+        e.kill();
         return;
       }
 
