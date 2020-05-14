@@ -1403,8 +1403,8 @@ JX.install('DiffChangesetList', {
     },
 
     _newHoverMap: function(top, bot, content_cell, inline) {
-      var start = inline.getStartOffset() || 0;
-      var end = inline.getEndOffset() || 0;
+      var start = inline.getStartOffset();
+      var end = inline.getEndOffset();
 
       var head_row = JX.DOM.findAbove(top, 'tr');
       var last_row = JX.DOM.findAbove(bot, 'tr');
@@ -1476,13 +1476,13 @@ JX.install('DiffChangesetList', {
         content = rows[ii].content;
         len = content.length;
 
-        if (ii === min) {
+        if (ii === min && (start !== null)) {
           offset_min = start;
         } else {
           offset_min = 0;
         }
 
-        if (ii === max) {
+        if (ii === max && (end !== null)) {
           offset_max = Math.min(end, len);
         } else {
           offset_max = len;

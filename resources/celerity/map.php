@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '0efaf0ac',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => 'b042ee8b',
-    'differential.pkg.js' => '4b2b5659',
+    'differential.pkg.js' => '79dfae6e',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -380,8 +380,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
     'rsrc/js/application/diff/DiffChangeset.js' => 'b6bb0240',
-    'rsrc/js/application/diff/DiffChangesetList.js' => '2347e0a6',
-    'rsrc/js/application/diff/DiffInline.js' => '417b3cdb',
+    'rsrc/js/application/diff/DiffChangesetList.js' => '1e8658bb',
+    'rsrc/js/application/diff/DiffInline.js' => '9bb6f2ad',
     'rsrc/js/application/diff/DiffPathView.js' => '8207abf9',
     'rsrc/js/application/diff/DiffTreeView.js' => '5d83623b',
     'rsrc/js/application/differential/behavior-diff-radios.js' => '925fe8cd',
@@ -775,8 +775,8 @@ return array(
     'phabricator-darkmessage' => '26cd4b73',
     'phabricator-dashboard-css' => '5a205b9d',
     'phabricator-diff-changeset' => 'b6bb0240',
-    'phabricator-diff-changeset-list' => '2347e0a6',
-    'phabricator-diff-inline' => '417b3cdb',
+    'phabricator-diff-changeset-list' => '1e8658bb',
+    'phabricator-diff-inline' => '9bb6f2ad',
     'phabricator-diff-path-view' => '8207abf9',
     'phabricator-diff-tree-view' => '5d83623b',
     'phabricator-drag-and-drop-file-upload' => '4370900d',
@@ -1069,6 +1069,11 @@ return array(
       'javelin-behavior',
       'javelin-dom',
     ),
+    '1e8658bb' => array(
+      'javelin-install',
+      'phuix-button-view',
+      'phabricator-diff-tree-view',
+    ),
     '1ff278aa' => array(
       'phui-button-css',
     ),
@@ -1097,11 +1102,6 @@ return array(
       'javelin-util',
       'javelin-request',
       'javelin-typeahead-source',
-    ),
-    '2347e0a6' => array(
-      'javelin-install',
-      'phuix-button-view',
-      'phabricator-diff-tree-view',
     ),
     23631304 => array(
       'phui-fontkit-css',
@@ -1250,9 +1250,6 @@ return array(
     '407ee861' => array(
       'javelin-behavior',
       'javelin-uri',
-    ),
-    '417b3cdb' => array(
-      'javelin-dom',
     ),
     '42c44e8b' => array(
       'javelin-behavior',
@@ -1794,6 +1791,9 @@ return array(
     '9aae2b66' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    '9bb6f2ad' => array(
+      'javelin-dom',
     ),
     '9c01e364' => array(
       'javelin-behavior',

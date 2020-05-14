@@ -96,6 +96,7 @@ JX.install('DiffInline', {
       this._snippet = data.snippet;
       this._menuItems = data.menuItems;
       this._documentEngineKey = data.documentEngineKey;
+
       this._startOffset = data.startOffset;
       this._endOffset = data.endOffset;
 
@@ -167,8 +168,8 @@ JX.install('DiffInline', {
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
       this._isNew = true;
-      this._startOffset = data.startOffset;
-      this._endOffset = data.endOffset;
+      this._startOffset = null;
+      this._endOffset = null;
 
       // Insert the comment after any other comments which already appear on
       // the same row.
