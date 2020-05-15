@@ -817,11 +817,18 @@ JX.install('DiffChangeset', {
     },
 
     getInlines: function() {
-      this._rebuildAllInlines();
+      if (this._inlines === null) {
+        this._rebuildAllInlines();
+      }
+
       return this._inlines;
     },
 
     _rebuildAllInlines: function() {
+      if (this._inlines === null) {
+        this._inlines = [];
+      }
+
       var rows = JX.DOM.scry(this._node, 'tr');
       var ii;
       for (ii = 0; ii < rows.length; ii++) {
