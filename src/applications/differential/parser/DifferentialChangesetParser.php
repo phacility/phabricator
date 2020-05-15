@@ -59,6 +59,7 @@ final class DifferentialChangesetParser extends Phobject {
   private $viewer;
 
   private $viewState;
+  private $availableDocumentEngines;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -1083,6 +1084,22 @@ final class DifferentialChangesetParser extends Phobject {
         $vs = $id;
       }
 
+      if ($mask_force) {
+        $engine_blocks->setRevealedIndexes(array_keys($mask_force));
+      }
+
+      if ($range_start !== null || $range_len !== null) {
+        $range_min = $range_start;
+
+        if ($range_len === null) {
+          $range_max = null;
+        } else {
+          $range_max = (int)$range_start + (int)$range_len;
+        }
+
+        $engine_blocks->setRange($range_min, $range_max);
+      }
+
       $renderer
         ->setDocumentEngine($engine)
         ->setDocumentEngineBlocks($engine_blocks);
@@ -1773,6 +1790,8 @@ final class DifferentialChangesetParser extends Phobject {
       }
     }
 
+    $this->availableDocumentEngines = $shared_engines;
+
     $viewstate = $this->getViewState();
 
     $engine_key = $viewstate->getDocumentEngineKey();
@@ -1871,12 +1890,39 @@ final class DifferentialChangesetParser extends Phobject {
       $undo_templates[$key] = hsprintf('%s', $undo_template);
     }
 
+    $document_engine = $renderer->getDocumentEngine();
+    if ($document_engine) {
+      $document_engine_key = $document_engine->getDocumentEngineKey();
+    } else {
+      $document_engine_key = null;
+    }
+
+    $available_keys = array();
+    $engines = $this->availableDocumentEngines;
+    if (!$engines) {
+      $engines = array();
+    }
+
+    $available_keys = mpull($engines, 'getDocumentEngineKey');
+
+    // TODO: Always include "source" as a usable engine to default to
+    // the buitin rendering. This is kind of a hack and does not actually
+    // use the source engine. The source engine isn't a diff engine, so
+    // selecting it causes us to fall through and render with builtin
+    // behavior. For now, overall behavir is reasonable.
+
+    $available_keys[] = PhabricatorSourceDocumentEngine::ENGINEKEY;
+    $available_keys = array_fuse($available_keys);
+    $available_keys = array_values($available_keys);
+
     $state = array(
       'undoTemplates' => $undo_templates,
       'rendererKey' => $renderer_key,
       'highlight' => $viewstate->getHighlightLanguage(),
       'characterEncoding' => $viewstate->getCharacterEncoding(),
-      'documentEngine' => $viewstate->getDocumentEngineKey(),
+      'requestDocumentEngineKey' => $viewstate->getDocumentEngineKey(),
+      'responseDocumentEngineKey' => $document_engine_key,
+      'availableDocumentEngineKeys' => $available_keys,
       'isHidden' => $viewstate->getHidden(),
     );
 

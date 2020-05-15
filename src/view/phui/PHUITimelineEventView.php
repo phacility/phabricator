@@ -705,7 +705,7 @@ final class PHUITimelineEventView extends AphrontView {
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-code')
         ->setHref('/transactions/raw/'.$xaction_phid.'/')
-        ->setName(pht('View Remarkup'))
+        ->setName(pht('View Raw Remarkup'))
         ->addSigil('transaction-raw')
         ->setMetadata(
           array(

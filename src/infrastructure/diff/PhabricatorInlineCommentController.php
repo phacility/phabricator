@@ -296,8 +296,6 @@ abstract class PhabricatorInlineCommentController
         $draft_engine = $this->newDraftEngine();
         if ($draft_engine) {
           $draft_engine->synchronize();
-        } else {
-          phlog('no draft engine');
         }
 
         return $this->buildEmptyResponse();
@@ -320,9 +318,16 @@ abstract class PhabricatorInlineCommentController
           ->setIsNewFile($is_new)
           ->setLineNumber($number)
           ->setLineLength($length)
-          ->setContent($this->getCommentText())
+          ->setContent((string)$this->getCommentText())
           ->setReplyToCommentPHID($this->getReplyToCommentPHID())
-          ->setIsEditing(true);
+          ->setIsEditing(true)
+          ->setStartOffset($request->getInt('startOffset'))
+          ->setEndOffset($request->getInt('endOffset'));
+
+        $document_engine_key = $request->getStr('documentEngineKey');
+        if ($document_engine_key !== null) {
+          $inline->setDocumentEngineKey($document_engine_key);
+        }
 
         // If you own this object, mark your own inlines as "Done" by default.
         $owner_phid = $this->loadObjectOwnerPHID($inline);

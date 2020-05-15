@@ -1069,29 +1069,54 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      'Show First %d Line(s)' => array(
+      'Show First %s Line(s)' => array(
         'Show First Line',
-        'Show First %d Lines',
+        'Show First %s Lines',
       ),
 
-      "\xE2\x96\xB2 Show %d Line(s)" => array(
+      'Show First %s Block(s)' => array(
+        'Show First Block',
+        'Show First %s Blocks',
+      ),
+
+      "\xE2\x96\xB2 Show %s Line(s)" => array(
         "\xE2\x96\xB2 Show Line",
-        "\xE2\x96\xB2 Show %d Lines",
+        "\xE2\x96\xB2 Show %s Lines",
       ),
 
-      'Show All %d Line(s)' => array(
+      "\xE2\x96\xB2 Show %s Block(s)" => array(
+        "\xE2\x96\xB2 Show Block",
+        "\xE2\x96\xB2 Show %s Blocks",
+      ),
+
+      'Show All %s Line(s)' => array(
         'Show Line',
-        'Show All %d Lines',
+        'Show All %s Lines',
       ),
 
-      "\xE2\x96\xBC Show %d Line(s)" => array(
+      'Show All %s Block(s)' => array(
+        'Show Block',
+        'Show All %s Blocks',
+      ),
+
+      "\xE2\x96\xBC Show %s Line(s)" => array(
         "\xE2\x96\xBC Show Line",
-        "\xE2\x96\xBC Show %d Lines",
+        "\xE2\x96\xBC Show %s Lines",
       ),
 
-      'Show Last %d Line(s)' => array(
+      "\xE2\x96\xBC Show %s Block(s)" => array(
+        "\xE2\x96\xBC Show Block",
+        "\xE2\x96\xBC Show %s Blocks",
+      ),
+
+      'Show Last %s Line(s)' => array(
         'Show Last Line',
-        'Show Last %d Lines',
+        'Show Last %s Lines',
+      ),
+
+      'Show Last %s Block(s)' => array(
+        'Show Last Block',
+        'Show Last %s Blocks',
       ),
 
       '%s marked %s inline comment(s) as done and %s inline comment(s) as '.

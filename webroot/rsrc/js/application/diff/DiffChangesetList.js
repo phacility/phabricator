@@ -20,9 +20,6 @@ JX.install('DiffChangesetList', {
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
 
-    var oncollapse = JX.bind(this, this._ifawake, this._oncollapse, true);
-    JX.Stratcom.listen('click', 'hide-inline', oncollapse);
-
     var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
     JX.Stratcom.listen('click', 'reveal-inline', onexpand);
 
@@ -32,9 +29,11 @@ JX.install('DiffChangesetList', {
     var onscroll = JX.bind(this, this._ifawake, this._onscroll);
     JX.Stratcom.listen('scroll', null, onscroll);
 
+    JX.enableDispatch(window, 'selectstart');
+
     var onselect = JX.bind(this, this._ifawake, this._onselect);
     JX.Stratcom.listen(
-      'mousedown',
+      ['mousedown', 'selectstart'],
       ['differential-inline-comment', 'differential-inline-header'],
       onselect);
 
@@ -62,6 +61,10 @@ JX.install('DiffChangesetList', {
       null,
       onrangeup);
 
+    var onrange = JX.bind(this, this._ifawake, this._onSelectRange);
+    JX.enableDispatch(window, 'selectionchange');
+    JX.Stratcom.listen('selectionchange', null, onrange);
+
     this._setupInlineCommentListeners();
   },
 
@@ -84,7 +87,6 @@ JX.install('DiffChangesetList', {
     _focusStart: null,
     _focusEnd: null,
 
-    _hoverNode: null,
     _hoverInline: null,
     _hoverOrigin: null,
     _hoverTarget: null,
@@ -196,6 +198,10 @@ JX.install('DiffChangesetList', {
       label = pht('Reply and quote selected inline comment.');
       this._installKey('R', 'inline', label,
         JX.bind(this, this._onkeyreply, true));
+
+      label = pht('Add new inline comment on selected source text.');
+      this._installKey('c', 'inline', label,
+        JX.bind(this, this._onKeyCreate));
 
       label = pht('Edit selected inline comment.');
       this._installKey('e', 'inline', label, this._onkeyedit);
@@ -336,16 +342,7 @@ JX.install('DiffChangesetList', {
           var inline = cursor.target;
           if (inline.canReply()) {
             this.setFocus(null);
-
-            var text;
-            if (is_quote) {
-              text = inline.getRawText();
-              text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
-            } else {
-              text = '';
-            }
-
-            inline.reply(text);
+            inline.reply(true);
             return;
           }
         }
@@ -427,6 +424,39 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment to edit.'));
+    },
+
+    _onKeyCreate: function() {
+      var start = this._sourceSelectionStart;
+      var end = this._sourceSelectionEnd;
+
+      if (!this._sourceSelectionStart) {
+        var pht = this.getTranslations();
+        this._warnUser(
+          pht(
+            'You must select source text to create a new inline comment.'));
+        return;
+      }
+
+      this._setSourceSelection(null, null);
+
+      var changeset = start.changeset;
+
+      var config = {};
+      if (changeset.getResponseDocumentEngineKey() === null) {
+        // If the changeset is using a document renderer, we ignore the
+        // selection range and just treat this as a comment from the first
+        // block to the last block.
+
+        // If we don't discard the range, we later render a bogus highlight
+        // if the block content is complex (like a Jupyter notebook cell
+        // with images).
+
+        config.startOffset = start.offset;
+        config.endOffset = end.offset;
+      }
+
+      changeset.newInlineForRange(start.targetNode, end.targetNode, config);
     },
 
     _onkeydone: function() {
@@ -698,7 +728,22 @@ JX.install('DiffChangesetList', {
     },
 
     _setSelectionState: function(item, scroll) {
+      var old = this._cursorItem;
+
+      if (old) {
+        if (old.type === 'comment') {
+          old.target.setIsSelected(false);
+        }
+      }
+
       this._cursorItem = item;
+
+      if (item) {
+        if (item.type === 'comment') {
+          item.target.setIsSelected(true);
+        }
+      }
+
       this._redrawSelection(scroll);
 
       return this;
@@ -944,8 +989,12 @@ JX.install('DiffChangesetList', {
         .setIcon('fa-file-image-o')
         .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
+          var options = changeset.getAvailableDocumentEngineKeys() || [];
+          options = options.join(',');
+
           var params = {
-            engine: changeset.getDocumentEngine(),
+            engine: changeset.getResponseDocumentEngineKey(),
+            options: options
           };
 
           new JX.Workflow('/services/viewas/', params)
@@ -1077,7 +1126,6 @@ JX.install('DiffChangesetList', {
     _onresize: function() {
       this._redrawFocus();
       this._redrawSelection();
-      this._redrawHover();
 
       // Force a banner redraw after a resize event. Particularly, this makes
       // sure the inline state updates immediately after an inline edit
@@ -1103,14 +1151,21 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      // If the user has double-clicked or triple-clicked a header, we want to
+      // toggle the inline selection mode, not select text. Kill select events
+      // originating with this element as the target.
+      if (e.getType() === 'selectstart') {
+        e.kill();
+        return;
+      }
+
       var inline = this._getInlineForEvent(e);
       if (!inline) {
         return;
       }
 
-      // The user definitely clicked an inline, so we're going to handle the
-      // event.
-      e.kill();
+      // NOTE: Don't kill or prevent the event. In particular, we want this
+      // click to clear any text selection as it normally would.
 
       this.selectInline(inline);
     },
@@ -1223,7 +1278,8 @@ JX.install('DiffChangesetList', {
     },
 
     _setHoverInline: function(inline) {
-      this._hoverInline = inline;
+      var origin = null;
+      var target = null;
 
       if (inline) {
         var changeset = inline.getChangeset();
@@ -1249,11 +1305,8 @@ JX.install('DiffChangesetList', {
         var length = inline.getLineLength();
 
         try {
-          var origin = JX.$(prefix + number);
-          var target = JX.$(prefix + (number + length));
-
-          this._hoverOrigin = origin;
-          this._hoverTarget = target;
+          origin = JX.$(prefix + number);
+          target = JX.$(prefix + (number + length));
         } catch (error) {
           // There may not be any nodes present in the document. A case where
           // this occurs is when you reply to a ghost inline which was made
@@ -1261,39 +1314,50 @@ JX.install('DiffChangesetList', {
           // the file was later shortened so those lines no longer exist. For
           // more details, see T11662.
 
-          this._hoverOrigin = null;
-          this._hoverTarget = null;
+          origin = null;
+          target = null;
         }
-      } else {
-        this._hoverOrigin = null;
-        this._hoverTarget = null;
       }
 
-      this._redrawHover();
+      this._setHoverRange(origin, target, inline);
     },
 
-    _setHoverRange: function(origin, target) {
-      this._hoverOrigin = origin;
-      this._hoverTarget = target;
+    _setHoverRange: function(origin, target, inline) {
+      inline = inline || null;
 
-      this._redrawHover();
+      var origin_dirty = (origin !== this._hoverOrigin);
+      var target_dirty = (target !== this._hoverTarget);
+      var inline_dirty = (inline !== this._hoverInline);
+
+      var any_dirty = (origin_dirty || target_dirty || inline_dirty);
+      if (any_dirty) {
+        this._hoverOrigin = origin;
+        this._hoverTarget = target;
+        this._hoverInline = inline;
+        this._redrawHover();
+      }
     },
 
     resetHover: function() {
-      this._setHoverInline(null);
-
-      this._hoverOrigin = null;
-      this._hoverTarget = null;
+      this._setHoverRange(null, null, null);
     },
 
     _redrawHover: function() {
-      var reticle = this._getHoverNode();
-      if (!this._hoverOrigin || this.isAsleep()) {
-        JX.DOM.remove(reticle);
-        return;
+      var map = this._hoverMap;
+      if (map) {
+        this._hoverMap = null;
+        this._applyHoverHighlight(map, false);
       }
 
-      JX.DOM.getContentFrame().appendChild(reticle);
+      var rows = this._hoverRows;
+      if (rows) {
+        this._hoverRows = null;
+        this._applyHoverHighlight(rows, false);
+      }
+
+      if (!this._hoverOrigin || this.isAsleep()) {
+        return;
+      }
 
       var top = this._hoverOrigin;
       var bot = this._hoverTarget;
@@ -1307,7 +1371,7 @@ JX.install('DiffChangesetList', {
       // next sibling with a "data-copy-mode" attribute, which is a marker
       // for the cell with actual content in it.
       var content_cell = top;
-      while (content_cell && !content_cell.getAttribute('data-copy-mode')) {
+      while (content_cell && !this._isContentCell(content_cell)) {
         content_cell = content_cell.nextSibling;
       }
 
@@ -1316,33 +1380,196 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      var pos = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell));
+      rows = this._findContentCells(top, bot, content_cell);
 
-      var dim = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell))
-        .add(-pos.x, -pos.y)
-        .add(JX.Vector.getDim(content_cell));
-
-      var bpos = JX.$V(bot)
-        .add(JX.Vector.getAggregateScrollForNode(bot));
-      dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
-
-      pos.setPos(reticle);
-      dim.setDim(reticle);
-
-      JX.DOM.show(reticle);
-    },
-
-    _getHoverNode: function() {
-      if (!this._hoverNode) {
-        var attributes = {
-          className: 'differential-reticle'
-        };
-        this._hoverNode = JX.$N('div', attributes);
+      var inline = this._hoverInline;
+      if (!inline) {
+        this._hoverRows = rows;
+        this._applyHoverHighlight(this._hoverRows, true);
+        return;
       }
 
-      return this._hoverNode;
+      if (!inline.hoverMap) {
+        inline.hoverMap = this._newHoverMap(rows, inline);
+      }
+
+      this._hoverMap = inline.hoverMap;
+      this._applyHoverHighlight(this._hoverMap, true);
+    },
+
+    _applyHoverHighlight: function(items, on) {
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
+
+        JX.DOM.alterClass(item.lineNode, 'inline-hover', on);
+        JX.DOM.alterClass(item.cellNode, 'inline-hover', on);
+
+        if (item.bright) {
+          JX.DOM.alterClass(item.cellNode, 'inline-hover-bright', on);
+        }
+
+        if (item.hoverNode) {
+          if (on) {
+            item.cellNode.insertBefore(
+              item.hoverNode,
+              item.cellNode.firstChild);
+          } else {
+            JX.DOM.remove(item.hoverNode);
+          }
+        }
+      }
+    },
+
+    _findContentCells: function(top, bot, content_cell) {
+      var head_row = JX.DOM.findAbove(top, 'tr');
+      var last_row = JX.DOM.findAbove(bot, 'tr');
+
+      var cursor = head_row;
+      var rows = [];
+      var idx = null;
+      var ii;
+      var line_cell = null;
+      do {
+        line_cell = null;
+        for (ii = 0; ii < cursor.childNodes.length; ii++) {
+          var child = cursor.childNodes[ii];
+          if (!JX.DOM.isType(child, 'td')) {
+            continue;
+          }
+
+          if (child.getAttribute('data-n')) {
+            line_cell = child;
+          }
+
+          if (child === content_cell) {
+            idx = ii;
+          }
+
+          if (ii !== idx) {
+            continue;
+          }
+
+          if (this._isContentCell(child)) {
+            rows.push({
+              lineNode: line_cell,
+              cellNode: child
+            });
+          }
+
+          break;
+        }
+
+        if (cursor === last_row) {
+          break;
+        }
+
+        cursor = cursor.nextSibling;
+      } while (cursor);
+
+      return rows;
+    },
+
+    _newHoverMap: function(rows, inline) {
+      var start = inline.getStartOffset();
+      var end = inline.getEndOffset();
+
+      var info;
+      var content;
+      for (ii = 0; ii < rows.length; ii++) {
+        info = this._getSelectionOffset(rows[ii].cellNode, null);
+
+        content = info.content;
+        content = content.replace(/\n+$/, '');
+
+        rows[ii].content = content;
+      }
+
+      var attr_dull = {
+        className: 'inline-hover-text'
+      };
+
+      var attr_bright = {
+        className: 'inline-hover-text inline-hover-text-bright'
+      };
+
+      var attr_container = {
+        className: 'inline-hover-container'
+      };
+
+      var min = 0;
+      var max = rows.length - 1;
+      var offset_min;
+      var offset_max;
+      var len;
+      var node;
+      var text;
+      var any_highlight = false;
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        len = content.length;
+
+        if (ii === min && (start !== null)) {
+          offset_min = start;
+        } else {
+          offset_min = 0;
+        }
+
+        if (ii === max && (end !== null)) {
+          offset_max = Math.min(end, len);
+        } else {
+          offset_max = len;
+        }
+
+        var has_min = (offset_min > 0);
+        var has_max = (offset_max < len);
+
+        if (has_min || has_max) {
+          any_highlight = true;
+        }
+
+        rows[ii].min = offset_min;
+        rows[ii].max = offset_max;
+        rows[ii].hasMin = has_min;
+        rows[ii].hasMax = has_max;
+      }
+
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        offset_min = rows[ii].min;
+        offset_max = rows[ii].max;
+
+        var has_highlight = (rows[ii].hasMin || rows[ii].hasMax);
+
+        if (any_highlight) {
+          var parts = [];
+
+          if (offset_min > 0) {
+            text = content.substring(0, offset_min);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          if (len) {
+            text = content.substring(offset_min, offset_max);
+            node = JX.$N('span', attr_bright, text);
+            parts.push(node);
+          }
+
+          if (offset_max < len) {
+            text = content.substring(offset_max, len);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          rows[ii].hoverNode = JX.$N('div', attr_container, parts);
+        } else {
+          rows[ii].hoverNode = null;
+        }
+
+        rows[ii].bright = (any_highlight && !has_highlight);
+      }
+
+      return rows;
     },
 
     _deleteInlineByID: function(id) {
@@ -2090,12 +2317,6 @@ JX.install('DiffChangesetList', {
         'differential-inline-comment-undo',
         onundo);
 
-      var onedit = JX.bind(this, this._onInlineEvent, 'edit');
-      JX.Stratcom.listen(
-        'click',
-        ['differential-inline-comment', 'differential-inline-edit'],
-        onedit);
-
       var ondone = JX.bind(this, this._onInlineEvent, 'done');
       JX.Stratcom.listen(
         'click',
@@ -2108,11 +2329,11 @@ JX.install('DiffChangesetList', {
         ['differential-inline-comment', 'differential-inline-delete'],
         ondelete);
 
-      var onreply = JX.bind(this, this._onInlineEvent, 'reply');
+      var onmenu = JX.bind(this, this._onInlineEvent, 'menu');
       JX.Stratcom.listen(
         'click',
-        ['differential-inline-comment', 'differential-inline-reply'],
-        onreply);
+        ['differential-inline-comment', 'inline-action-dropdown'],
+        onmenu);
 
       var ondraft = JX.bind(this, this._onInlineEvent, 'draft');
       JX.Stratcom.listen(
@@ -2152,7 +2373,7 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      if (action !== 'draft') {
+      if (action !== 'draft' && action !== 'menu') {
         e.kill();
       }
 
@@ -2197,21 +2418,368 @@ JX.install('DiffChangesetList', {
         case 'undo':
           inline.undo();
           break;
-        case 'edit':
-          inline.edit();
-          break;
         case 'done':
           inline.toggleDone();
           break;
         case 'delete':
           inline.delete(is_ref);
           break;
-        case 'reply':
-          inline.reply();
-          break;
         case 'draft':
           inline.triggerDraft();
           break;
+        case 'menu':
+          var node = e.getNode('inline-action-dropdown');
+          inline.activateMenu(node, e);
+          break;
+      }
+    },
+
+    _onSelectRange: function(e) {
+      this._updateSourceSelection();
+    },
+
+    _updateSourceSelection: function() {
+      var ranges = this._getSelectedRanges();
+
+      // In Firefox, selecting multiple rows gives us multiple ranges. In
+      // Safari and Chrome, we get a single range.
+      if (!ranges.length) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      var min = 0;
+      var max = ranges.length - 1;
+
+      var head = ranges[min].startContainer;
+      var last = ranges[max].endContainer;
+
+      var head_loc = this._getFragmentLocation(head);
+      var last_loc = this._getFragmentLocation(last);
+
+      if (head_loc === null || last_loc === null) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      if (head_loc.changesetID !== last_loc.changesetID) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      head_loc.offset += ranges[min].startOffset;
+      last_loc.offset += ranges[max].endOffset;
+
+      this._setSourceSelection(head_loc, last_loc);
+    },
+
+    _setSourceSelection: function(start, end) {
+      var start_updated =
+        !this._isSameSourceSelection(this._sourceSelectionStart, start);
+
+      var end_updated =
+        !this._isSameSourceSelection(this._sourceSelectionEnd, end);
+
+      if (!start_updated && !end_updated) {
+        return;
+      }
+
+      this._sourceSelectionStart = start;
+      this._sourceSelectionEnd = end;
+
+      if (!start) {
+        this._closeSourceSelectionMenu();
+        return;
+      }
+
+      var menu;
+      if (this._sourceSelectionMenu) {
+        menu = this._sourceSelectionMenu;
+      } else {
+        menu = this._newSourceSelectionMenu();
+        this._sourceSelectionMenu = menu;
+      }
+
+      var pos = JX.$V(start.node)
+        .add(0, -menu.getMenuNodeDimensions().y)
+        .add(0, -24);
+
+      menu.setPosition(pos);
+      menu.open();
+    },
+
+    _newSourceSelectionMenu: function() {
+      var pht = this.getTranslations();
+
+      var menu = new JX.PHUIXDropdownMenu(null)
+        .setWidth(240);
+
+      // We need to disable autofocus for this menu, since it operates on the
+      // text selection in the document. If we leave this enabled, opening the
+      // menu immediately discards the selection.
+      menu.setDisableAutofocus(true);
+
+      var list = new JX.PHUIXActionListView();
+      menu.setContent(list.getNode());
+
+      var oncreate = JX.bind(this, this._onSourceSelectionMenuAction, 'create');
+
+      var comment_item = new JX.PHUIXActionView()
+        .setIcon('fa-comment-o')
+        .setName(pht('New Inline Comment'))
+        .setKeyCommand('c')
+        .setHandler(oncreate);
+
+      list.addItem(comment_item);
+
+      return menu;
+    },
+
+    _onSourceSelectionMenuAction: function(action, e) {
+      e.kill();
+      this._closeSourceSelectionMenu();
+
+      switch (action) {
+        case 'create':
+          this._onKeyCreate();
+          break;
+      }
+    },
+
+    _closeSourceSelectionMenu: function() {
+      if (this._sourceSelectionMenu) {
+        this._sourceSelectionMenu.close();
+      }
+    },
+
+    _isSameSourceSelection: function(u, v) {
+      if (u === null && v === null) {
+        return true;
+      }
+
+      if (u === null && v !== null) {
+        return false;
+      }
+
+      if (u !== null && v === null) {
+        return false;
+      }
+
+      return (
+        (u.changesetID === v.changesetID) &&
+        (u.line === v.line) &&
+        (u.displayColumn === v.displayColumn) &&
+        (u.offset === v.offset)
+      );
+    },
+
+    _getFragmentLocation: function(fragment) {
+      // Find the changeset containing the fragment.
+      var changeset = null;
+      try {
+        var node = JX.DOM.findAbove(
+          fragment,
+          'div',
+          'differential-changeset');
+
+        changeset = this.getChangesetForNode(node);
+        if (!changeset) {
+          return null;
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      // Find the line number and display column for the fragment.
+      var line = null;
+      var column_count = -1;
+      var has_new = false;
+      var has_old = false;
+      var offset = null;
+      var target_node = null;
+      var td;
+      try {
+
+        // NOTE: In Safari, you can carefully select an entire line and then
+        // move your mouse down slightly, causing selection of an empty
+        // document fragment which is an immediate child of the next "<tr />".
+
+        // If the fragment is a direct child of a "<tr />" parent, assume the
+        // user has done this and select the last child of the previous row
+        // instead. It's possible there are other ways to do this, so this may
+        // not always be the right rule.
+
+        // Otherwise, select the containing "<td />".
+
+        var is_end;
+        if (JX.DOM.isType(fragment.parentNode, 'tr')) {
+          // Assume this is Safari, and that the user has carefully selected a
+          // row and then moved their mouse down a few pixels to select the
+          // invisible fragment at the beginning of the next row.
+          var cells = fragment.parentNode.previousSibling.childNodes;
+          td = cells[cells.length - 1];
+          is_end = true;
+        } else {
+          td = this._findContentCell(fragment);
+          is_end = false;
+        }
+
+        var cursor = td;
+        while (cursor) {
+          if (cursor.getAttribute('data-copy-mode')) {
+            column_count++;
+          } else {
+            // In unified mode, the content column isn't currently marked
+            // with an attribute, and we can't count content columns anyway.
+            // Keep track of whether or not we see a "NL" (New Line) column
+            // and/or an "OL" (Old Line) column to try to puzzle out which
+            // side of the display change we're on.
+
+            if (cursor.id.match(/NL/)) {
+              has_new = true;
+            } else if (cursor.id.match(/OL/)) {
+              has_old = true;
+            }
+          }
+
+          var n = parseInt(cursor.getAttribute('data-n'));
+
+          if (n) {
+            if (line === null) {
+              target_node = cursor;
+              line = n;
+            }
+          }
+
+          cursor = cursor.previousSibling;
+        }
+
+        if (!line) {
+          return null;
+        }
+
+        if (column_count < 0) {
+          if (has_new || has_old) {
+            if (has_new) {
+              column_count = 1;
+            } else {
+              column_count = 0;
+            }
+          } else {
+            return null;
+          }
+        }
+
+        var info = this._getSelectionOffset(td, fragment);
+
+        if (info.found) {
+          offset = info.offset;
+        } else {
+          if (is_end) {
+            offset = info.offset;
+          } else {
+            offset = 0;
+          }
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      var changeset_id;
+      if (column_count > 0) {
+        changeset_id = changeset.getRightChangesetID();
+      } else {
+        changeset_id = changeset.getLeftChangesetID();
+      }
+
+      return {
+        node: td,
+        changeset: changeset,
+        changesetID: changeset_id,
+        line: line,
+        displayColumn: column_count,
+        offset: offset,
+        targetNode: target_node
+      };
+    },
+
+    _getSelectionOffset: function(node, target) {
+      // If this is an aural hint node in a unified diff, ignore it when
+      // calculating the selection offset.
+      if (node.getAttribute && node.getAttribute('data-aural')) {
+        return {
+          offset: 0,
+          content: '',
+          found: false
+        };
+      }
+
+      if (!node.childNodes || !node.childNodes.length) {
+        return {
+          offset: node.textContent.length,
+          content: node.textContent,
+          found: false
+        };
+      }
+
+      var found = false;
+      var offset = 0;
+      var content = '';
+      for (var ii = 0; ii < node.childNodes.length; ii++) {
+        var child = node.childNodes[ii];
+
+        if (child === target) {
+          found = true;
+        }
+
+        var spec = this._getSelectionOffset(child, target);
+
+        content += spec.content;
+        if (!found) {
+          offset += spec.offset;
+        }
+
+        found = found || spec.found;
+      }
+
+      return {
+        offset: offset,
+        content: content,
+        found: found
+      };
+    },
+
+    _getSelectedRanges: function() {
+      var ranges = [];
+
+      if (!window.getSelection) {
+        return ranges;
+      }
+
+      var selection = window.getSelection();
+      for (var ii = 0; ii < selection.rangeCount; ii++) {
+        var range = selection.getRangeAt(ii);
+        if (range.collapsed) {
+          continue;
+        }
+
+        ranges.push(range);
+      }
+
+      return ranges;
+    },
+
+    _isContentCell: function(node) {
+      return !!node.getAttribute('data-copy-mode');
+    },
+
+    _findContentCell: function(node) {
+      var cursor = node;
+      while (true) {
+        cursor = JX.DOM.findAbove(cursor, 'td');
+        if (this._isContentCell(cursor)) {
+          return cursor;
+        }
       }
     }
 

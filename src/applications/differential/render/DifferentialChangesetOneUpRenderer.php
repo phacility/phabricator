@@ -45,6 +45,7 @@ final class DifferentialChangesetOneUpRenderer
       'span',
       array(
         'aural' => true,
+        'data-aural' => true,
       ),
       '- ');
 
@@ -52,6 +53,7 @@ final class DifferentialChangesetOneUpRenderer
       'span',
       array(
         'aural' => true,
+        'data-aural' => true,
       ),
       '+ ');
 
@@ -171,7 +173,15 @@ final class DifferentialChangesetOneUpRenderer
             }
 
             $cells[] = $no_copy;
-            $cells[] = phutil_tag('td', array('class' => $class), $render);
+
+            $cells[] = phutil_tag(
+              'td',
+              array(
+                'class' => $class,
+                'data-copy-mode' => 'copy-unified',
+              ),
+              $render);
+
             $cells[] = $no_coverage;
           }
 

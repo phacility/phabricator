@@ -90,6 +90,9 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
       'isSynthetic' => $is_synthetic,
       'isDraftDone' => $is_draft_done,
       'isEditing' => $inline->getIsEditing(),
+      'documentEngineKey' => $inline->getDocumentEngineKey(),
+      'startOffset' => $inline->getStartOffset(),
+      'endOffset' => $inline->getEndOffset(),
 
       'on_right' => $this->getIsOnRight(),
     );

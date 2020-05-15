@@ -381,22 +381,17 @@ final class DifferentialChangesetTwoUpRenderer
     $old_comments = $this->getOldComments();
     $new_comments = $this->getNewComments();
 
-    $gap_view = javelin_tag(
-      'tr',
-      array(
-        'sigil' => 'context-target',
-      ),
-      phutil_tag(
-        'td',
-        array(
-          'colspan' => 6,
-          'class' => 'show-more',
-        ),
-        pht("\xE2\x80\xA2 \xE2\x80\xA2 \xE2\x80\xA2")));
-
     $rows = array();
+    $gap = array();
     $in_gap = false;
-    foreach ($block_list->newTwoUpLayout() as $row) {
+
+    // NOTE: The generated layout is affected by range constraints, and may
+    // represent only a slice of the document.
+
+    $layout = $block_list->newTwoUpLayout();
+    $available_count = $block_list->getLayoutAvailableRowCount();
+
+    foreach ($layout as $idx => $row) {
       list($old, $new) = $row;
 
       if ($old) {
@@ -416,13 +411,17 @@ final class DifferentialChangesetTwoUpRenderer
       if (!$is_visible) {
         if (!$in_gap) {
           $in_gap = true;
-          $rows[] = $gap_view;
         }
+        $gap[$idx] = $row;
         continue;
       }
 
       if ($in_gap) {
         $in_gap = false;
+        $rows[] = $this->renderDocumentEngineGap(
+          $gap,
+          $available_count);
+        $gap = array();
       }
 
       if ($old) {
@@ -577,6 +576,12 @@ final class DifferentialChangesetTwoUpRenderer
       );
     }
 
+    if ($in_gap) {
+      $rows[] = $this->renderDocumentEngineGap(
+        $gap,
+        $available_count);
+    }
+
     $output = $this->wrapChangeInTable($rows);
 
     return $this->renderChangesetTable($output);
@@ -614,6 +619,27 @@ final class DifferentialChangesetTwoUpRenderer
     return array(
       'intercept-copy',
     );
+  }
+
+  private function renderDocumentEngineGap(array $gap, $available_count) {
+    $content = $this->renderShowContextLinks(
+      head_key($gap),
+      count($gap),
+      $available_count,
+      $is_blocks = true);
+
+    return javelin_tag(
+      'tr',
+      array(
+        'sigil' => 'context-target',
+      ),
+      phutil_tag(
+        'td',
+        array(
+          'colspan' => 6,
+          'class' => 'show-more',
+        ),
+        $content));
   }
 
 }

@@ -79,25 +79,27 @@ final class PHUIDiffInlineCommentDetailView
     require_celerity_resource('phui-inline-comment-view-css');
     $inline = $this->getInlineComment();
 
-    $classes = array(
-      'differential-inline-comment',
-    );
-
     $is_synthetic = false;
     if ($inline->getSyntheticAuthor()) {
       $is_synthetic = true;
     }
 
-    $metadata = $this->getInlineCommentMetadata();
+    $is_preview = $this->preview;
 
-    $sigil = 'differential-inline-comment';
-    if ($this->preview) {
-      $sigil = $sigil.' differential-inline-comment-preview';
-    }
+    $metadata = $this->getInlineCommentMetadata();
 
     $classes = array(
       'differential-inline-comment',
     );
+
+    $sigil = 'differential-inline-comment';
+    if ($is_preview) {
+      $sigil = $sigil.' differential-inline-comment-preview';
+
+      $classes[] = 'inline-comment-preview';
+    } else {
+      $classes[] = 'inline-comment-element';
+    }
 
     $content = $inline->getContent();
     $handles = $this->handles;
@@ -146,11 +148,6 @@ final class PHUIDiffInlineCommentDetailView
       $classes[] = 'inline-comment-ghost';
     }
 
-    // I think this is unused
-    if ($inline->getHasReplies()) {
-      $classes[] = 'inline-comment-has-reply';
-    }
-
     if ($inline->getReplyToCommentPHID()) {
       $classes[] = 'inline-comment-is-reply';
     }
@@ -167,47 +164,16 @@ final class PHUIDiffInlineCommentDetailView
     $anchor_name = $this->getAnchorName();
 
     $action_buttons = array();
+    $menu_items = array();
 
-    $can_reply =
-      (!$this->editable) &&
-      (!$this->preview) &&
-      ($this->allowReply) &&
-
-      // NOTE: No product reason why you can't reply to synthetic comments,
-      // but the reply mechanism currently sends the inline comment ID to the
-      // server, not file/line information, and synthetic comments don't have
-      // an inline comment ID.
-      (!$is_synthetic);
-
-
-    if ($can_reply) {
-      $action_buttons[] = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-reply')
-        ->setTooltip(pht('Reply'))
-        ->addSigil('differential-inline-reply')
-        ->setMustCapture(true)
-        ->setAuralLabel(pht('Reply'));
-    }
-
-    if ($this->editable && !$this->preview) {
-      $action_buttons[] = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-pencil')
-        ->setTooltip(pht('Edit'))
-        ->addSigil('differential-inline-edit')
-        ->setMustCapture(true)
-        ->setAuralLabel(pht('Edit'));
-
-      $action_buttons[] = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-trash-o')
-        ->setTooltip(pht('Delete'))
-        ->addSigil('differential-inline-delete')
-        ->setMustCapture(true)
-        ->setAuralLabel(pht('Delete'));
-
-    } else if ($this->preview) {
+    if ($this->editable && !$is_preview) {
+      $menu_items[] = array(
+        'label' => pht('Edit Comment'),
+        'icon' => 'fa-pencil',
+        'action' => 'edit',
+        'key' => 'e',
+      );
+    } else if ($is_preview) {
       $links[] = javelin_tag(
         'a',
         array(
@@ -228,14 +194,62 @@ final class PHUIDiffInlineCommentDetailView
         ->setAuralLabel(pht('Delete'));
     }
 
-    if (!$this->preview && $this->canHide()) {
-      $action_buttons[] = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setTooltip(pht('Collapse'))
-        ->setIcon('fa-times')
-        ->addSigil('hide-inline')
-        ->setMustCapture(true)
-        ->setAuralLabel(pht('Collapse'));
+    if (!$is_preview && $this->canHide()) {
+      $menu_items[] = array(
+        'label' => pht('Collapse'),
+        'icon' => 'fa-times',
+        'action' => 'collapse',
+        'key' => 'q',
+      );
+    }
+
+    $can_reply =
+      (!$this->editable) &&
+      (!$is_preview) &&
+      ($this->allowReply) &&
+
+      // NOTE: No product reason why you can't reply to synthetic comments,
+      // but the reply mechanism currently sends the inline comment ID to the
+      // server, not file/line information, and synthetic comments don't have
+      // an inline comment ID.
+      (!$is_synthetic);
+
+    if ($can_reply) {
+      $menu_items[] = array(
+        'label' => pht('Reply to Comment'),
+        'icon' => 'fa-reply',
+        'action' => 'reply',
+        'key' => 'r',
+      );
+
+      $menu_items[] = array(
+        'label' => pht('Quote Comment'),
+        'icon' => 'fa-quote-left',
+        'action' => 'quote',
+        'key' => 'R',
+      );
+    }
+
+    if (!$is_preview) {
+      $xaction_phid = $inline->getTransactionPHID();
+      $storage = $inline->getStorageObject();
+
+      if ($xaction_phid) {
+        $menu_items[] = array(
+          'label' => pht('View Raw Remarkup'),
+          'icon' => 'fa-code',
+          'action' => 'raw',
+          'uri' => $storage->getRawRemarkupURI(),
+        );
+      }
+    }
+
+    if ($this->editable && !$is_preview) {
+      $menu_items[] = array(
+        'label' => pht('Delete Comment'),
+        'icon' => 'fa-trash-o',
+        'action' => 'delete',
+      );
     }
 
     $done_button = null;
@@ -283,7 +297,7 @@ final class PHUIDiffInlineCommentDetailView
         $classes[] = 'inline-state-is-draft';
       }
 
-      if ($mark_done && !$this->preview) {
+      if ($mark_done && !$is_preview) {
         $done_input = javelin_tag(
           'input',
           array(
@@ -327,7 +341,7 @@ final class PHUIDiffInlineCommentDetailView
       $inline,
       PhabricatorInlineComment::MARKUP_FIELD_BODY);
 
-    if ($this->preview) {
+    if ($is_preview) {
       $anchor = null;
     } else {
       $anchor = phutil_tag(
@@ -364,12 +378,23 @@ final class PHUIDiffInlineCommentDetailView
     }
 
     $actions = null;
-    if ($action_buttons) {
+    if ($action_buttons || $menu_items) {
       $actions = new PHUIButtonBarView();
       $actions->setBorderless(true);
       $actions->addClass('inline-button-divider');
       foreach ($action_buttons as $button) {
         $actions->addButton($button);
+      }
+
+      if (!$is_preview) {
+        $menu_button = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setColor(PHUIButtonView::GREY)
+          ->setDropdown(true)
+          ->setAuralLabel(pht('Inline Actions'))
+          ->addSigil('inline-action-dropdown');
+
+        $actions->addButton($menu_button);
       }
     }
 
@@ -400,6 +425,8 @@ final class PHUIDiffInlineCommentDetailView
       ->setMaximumGlyphs(96)
       ->truncateString($inline->getContent());
     $metadata['snippet'] = pht('%s: %s', $author, $snippet);
+
+    $metadata['menuItems'] = $menu_items;
 
     $markup = javelin_tag(
       'div',

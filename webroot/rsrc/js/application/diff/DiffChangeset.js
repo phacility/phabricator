@@ -44,14 +44,20 @@ JX.install('DiffChangeset', {
     this._isOwned = data.isOwned;
     this._isLoading = true;
 
-    this._inlines = [];
+    this._inlines = null;
 
     if (data.changesetState) {
       this._loadChangesetState(data.changesetState);
     }
 
+    JX.enableDispatch(window, 'selectstart');
+
     var onselect = JX.bind(this, this._onClickHeader);
-    JX.DOM.listen(this._node, 'mousedown', 'changeset-header', onselect);
+    JX.DOM.listen(
+      this._node,
+      ['mousedown', 'selectstart'],
+      'changeset-header',
+      onselect);
   },
 
   members: {
@@ -64,7 +70,9 @@ JX.install('DiffChangeset', {
     _ref: null,
     _rendererKey: null,
     _highlight: null,
-    _documentEngine: null,
+    _requestDocumentEngineKey: null,
+    _responseDocumentEngineKey: null,
+    _availableDocumentEngineKeys: null,
     _characterEncoding: null,
     _undoTemplates: null,
 
@@ -411,8 +419,16 @@ JX.install('DiffChangeset', {
       return this._highlight;
     },
 
-    getDocumentEngine: function(engine) {
-      return this._documentEngine;
+    getRequestDocumentEngineKey: function() {
+      return this._requestDocumentEngineKey;
+    },
+
+    getResponseDocumentEngineKey: function() {
+      return this._responseDocumentEngineKey;
+    },
+
+    getAvailableDocumentEngineKeys: function() {
+      return this._availableDocumentEngineKeys;
     },
 
     getSelectableItems: function() {
@@ -665,7 +681,9 @@ JX.install('DiffChangeset', {
       this._rendererKey = state.rendererKey;
       this._highlight = state.highlight;
       this._characterEncoding = state.characterEncoding;
-      this._documentEngine = state.documentEngine;
+      this._requestDocumentEngineKey = state.requestDocumentEngineKey;
+      this._responseDocumentEngineKey = state.responseDocumentEngineKey;
+      this._availableDocumentEngineKeys = state.availableDocumentEngineKeys;
       this._isHidden = state.isHidden;
 
       var is_hidden = !this.isVisible();
@@ -699,7 +717,7 @@ JX.install('DiffChangeset', {
       return data.inline;
     },
 
-    newInlineForRange: function(origin, target) {
+    newInlineForRange: function(origin, target, options) {
       var list = this.getChangesetList();
 
       var src = list.getLineNumberFromHeader(origin);
@@ -729,6 +747,8 @@ JX.install('DiffChangeset', {
         displaySide: side,
         isNewFile: is_new
       };
+
+      JX.copy(data, options || {});
 
       var inline = new JX.DiffInline()
         .setChangeset(this)
@@ -797,11 +817,18 @@ JX.install('DiffChangeset', {
     },
 
     getInlines: function() {
-      this._rebuildAllInlines();
+      if (this._inlines === null) {
+        this._rebuildAllInlines();
+      }
+
       return this._inlines;
     },
 
     _rebuildAllInlines: function() {
+      if (this._inlines === null) {
+        this._inlines = [];
+      }
+
       var rows = JX.DOM.scry(this._node, 'tr');
       var ii;
       for (ii = 0; ii < rows.length; ii++) {
@@ -893,7 +920,17 @@ JX.install('DiffChangeset', {
         return;
       }
 
-      e.prevent();
+      // Don't allow repeatedly clicking a header to begin a "select word" or
+      // "select line" operation.
+      if (e.getType() === 'selectstart') {
+        e.kill();
+        return;
+      }
+
+      // NOTE: Don't prevent or kill the event. If the user has text selected,
+      // clicking a header should clear the selection (and dismiss any inline
+      // context menu, if one exists) as clicking elsewhere in the document
+      // normally would.
 
       if (this._isSelected) {
         this.getChangesetList().selectChangeset(null);

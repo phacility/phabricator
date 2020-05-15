@@ -59,6 +59,9 @@ final class DifferentialInlineCommentMailView
         $comment = $inline->getComment();
         $parent_phid = $comment->getReplyToCommentPHID();
 
+        $inline_object = $comment->newInlineCommentObject();
+        $document_engine_key = $inline_object->getDocumentEngineKey();
+
         $is_last_inline = ($inline_key == $last_inline_key);
 
         $context_text = null;
@@ -70,6 +73,17 @@ final class DifferentialInlineCommentMailView
             $context_text = $this->renderInline($parent, false, true);
             $context_html = $this->renderInline($parent, true, true);
           }
+        } else if ($document_engine_key !== null) {
+          // See T13513. If an inline was left on a rendered document, don't
+          // include the patch context. Document engines currently can not
+          // render to mail targets, and using the line numbers as raw source
+          // lines produces misleading context.
+
+          $patch_text = null;
+          $context_text = $this->renderPatch($comment, $patch_text, false);
+
+          $patch_html = null;
+          $context_html = $this->renderPatch($comment, $patch_html, true);
         } else {
           $patch_text = $this->getPatch($hunk_parser, $comment, false);
           $context_text = $this->renderPatch($comment, $patch_text, false);
@@ -374,16 +388,24 @@ final class DifferentialInlineCommentMailView
     $is_html) {
 
     if ($is_html) {
-      $patch = $this->renderCodeBlock($patch);
+      if ($patch !== null) {
+        $patch = $this->renderCodeBlock($patch);
+      }
     }
 
     $header = $this->renderHeader($comment, $is_html, false);
 
-    $patch = array(
-      $header,
-      "\n",
-      $patch,
-    );
+    if ($patch === null) {
+      $patch = array(
+        $header,
+      );
+    } else {
+      $patch = array(
+        $header,
+        "\n",
+        $patch,
+      );
+    }
 
     if (!$is_html) {
       $patch = implode('', $patch);

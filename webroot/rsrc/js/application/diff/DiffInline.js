@@ -21,6 +21,8 @@ JX.install('DiffInline', {
     _replyToCommentPHID: null,
     _originalText: null,
     _snippet: null,
+    _menuItems: null,
+    _documentEngineKey: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -44,6 +46,11 @@ JX.install('DiffInline', {
 
     _draftRequest: null,
     _skipFocus: false,
+    _menu: null,
+
+    _startOffset: null,
+    _endOffset: null,
+    _isSelected: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -88,6 +95,11 @@ JX.install('DiffInline', {
       this._changesetID = data.changesetID;
       this._isNew = false;
       this._snippet = data.snippet;
+      this._menuItems = data.menuItems;
+      this._documentEngineKey = data.documentEngineKey;
+
+      this._startOffset = data.startOffset;
+      this._endOffset = data.endOffset;
 
       this._isEditing = data.isEditing;
 
@@ -142,6 +154,27 @@ JX.install('DiffInline', {
       return this._isGhost;
     },
 
+    getStartOffset: function() {
+      return this._startOffset;
+    },
+
+    getEndOffset: function() {
+      return this._endOffset;
+    },
+
+    setIsSelected: function(is_selected) {
+      this._isSelected = is_selected;
+
+      if (this._row) {
+        JX.DOM.alterClass(
+          this._row,
+          'inline-comment-selected',
+          this._isSelected);
+      }
+
+      return this;
+    },
+
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
       this._number = parseInt(data.number, 10);
@@ -149,6 +182,18 @@ JX.install('DiffInline', {
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
       this._isNew = true;
+
+      if (data.hasOwnProperty('startOffset')) {
+        this._startOffset = data.startOffset;
+      } else {
+        this._startOffset = null;
+      }
+
+      if (data.hasOwnProperty('endOffset')) {
+        this._endOffset = data.endOffset;
+      } else {
+        this._endOffset = null;
+      }
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -174,6 +219,7 @@ JX.install('DiffInline', {
       this._isNewFile = inline._isNewFile;
       this._changesetID = inline._changesetID;
       this._isNew = true;
+      this._documentEngineKey = inline._documentEngineKey;
 
       this._replyToCommentPHID = inline._phid;
 
@@ -249,19 +295,11 @@ JX.install('DiffInline', {
     },
 
     canReply: function() {
-      if (!this._hasAction('reply')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('reply');
     },
 
     canEdit: function() {
-      if (!this._hasAction('edit')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('edit');
     },
 
     canDone: function() {
@@ -273,20 +311,11 @@ JX.install('DiffInline', {
     },
 
     canCollapse: function() {
-      if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('collapse');
     },
 
     getRawText: function() {
       return this._originalText;
-    },
-
-    _hasAction: function(action) {
-      var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
-      return (nodes.length > 0);
     },
 
     _newRow: function() {
@@ -309,6 +338,8 @@ JX.install('DiffInline', {
     },
 
     setCollapsed: function(collapsed) {
+      this._closeMenu();
+
       this._isCollapsed = collapsed;
 
       var op;
@@ -374,6 +405,11 @@ JX.install('DiffInline', {
     },
 
     create: function(text) {
+      var changeset = this.getChangeset();
+      if (!this._documentEngineKey) {
+        this._documentEngineKey = changeset.getResponseDocumentEngineKey();
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oncreateresponse);
       var data = this._newRequestData('new', text);
@@ -385,12 +421,24 @@ JX.install('DiffInline', {
         .send();
     },
 
-    reply: function(text) {
+    reply: function(with_quote) {
+      this._closeMenu();
+
+      var text;
+      if (with_quote) {
+        text = this.getRawText();
+        text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
+      } else {
+        text = '';
+      }
+
       var changeset = this.getChangeset();
       return changeset.newInlineReply(this, text);
     },
 
     edit: function(text, skip_focus) {
+      this._closeMenu();
+
       this._skipFocus = !!skip_focus;
 
       // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
@@ -498,18 +546,35 @@ JX.install('DiffInline', {
     },
 
     _newRequestData: function(operation, text) {
-      return {
+      var data = {
         op: operation,
-        id: this._id,
+        is_new: this.isNewFile(),
         on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
         renderer: this.getChangeset().getRendererKey(),
-        number: this.getLineNumber(),
-        length: this.getLineLength(),
-        is_new: this.isNewFile(),
-        changesetID: this.getChangesetID(),
-        replyToCommentPHID: this.getReplyToCommentPHID() || '',
-        text: text || ''
+        text: text || null
       };
+
+      if (operation === 'new') {
+        var create_data = {
+          changesetID: this.getChangesetID(),
+          documentEngineKey: this._documentEngineKey,
+          replyToCommentPHID: this.getReplyToCommentPHID(),
+          startOffset: this._startOffset,
+          endOffset: this._endOffset,
+          number: this.getLineNumber(),
+          length: this.getLineLength()
+        };
+
+        JX.copy(data, create_data);
+      } else {
+        var edit_data = {
+          id: this._id
+        };
+
+        JX.copy(data, edit_data);
+      }
+
+      return data;
     },
 
     _oneditresponse: function(response) {
@@ -695,8 +760,6 @@ JX.install('DiffInline', {
         this._drawUneditRows(text);
       }
 
-      this.setEditing(false);
-
       // If this was an empty box and we typed some text and then hit cancel,
       // don't show the empty concrete inline.
       if (!this._originalText) {
@@ -723,6 +786,7 @@ JX.install('DiffInline', {
     },
 
     _onCancelResponse: function(response) {
+      this.setEditing(false);
       this.setLoading(false);
 
       // If the comment was empty when we started editing it (there's no
@@ -871,6 +935,105 @@ JX.install('DiffInline', {
     triggerDraft: function() {
       if (this._draftRequest) {
         this._draftRequest.trigger();
+      }
+    },
+
+    activateMenu: function(button, e) {
+      // If we already have a menu for this button, let the menu handle the
+      // event.
+      var data = JX.Stratcom.getData(button);
+      if (data.menu) {
+        return;
+      }
+
+      e.prevent();
+
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
+
+      var list = new JX.PHUIXActionListView();
+      var items = this._newMenuItems(menu);
+      for (var ii = 0; ii < items.length; ii++) {
+        list.addItem(items[ii]);
+      }
+
+      menu.setContent(list.getNode());
+
+      data.menu = menu;
+      this._menu = menu;
+
+      menu.listen('open', JX.bind(this, function() {
+        var changeset_list = this.getChangeset().getChangesetList();
+        changeset_list.selectInline(this, true);
+      }));
+
+      menu.open();
+    },
+
+    _newMenuItems: function(menu) {
+      var items = [];
+
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+
+        var onmenu = JX.bind(this, this._onMenuItem, menu, spec.action, spec);
+
+        var item = new JX.PHUIXActionView()
+          .setIcon(spec.icon)
+          .setName(spec.label)
+          .setHandler(onmenu);
+
+        if (spec.key) {
+          item.setKeyCommand(spec.key);
+        }
+
+        items.push(item);
+      }
+
+      return items;
+    },
+
+    _onMenuItem: function(menu, action, spec, e) {
+      e.prevent();
+      menu.close();
+
+      switch (action) {
+        case 'reply':
+          this.reply();
+          break;
+        case 'quote':
+          this.reply(true);
+          break;
+        case 'collapse':
+          this.setCollapsed(true);
+          break;
+        case 'delete':
+          this.delete();
+          break;
+        case 'edit':
+          this.edit();
+          break;
+        case 'raw':
+          new JX.Workflow(spec.uri)
+            .start();
+          break;
+      }
+
+    },
+
+    _hasMenuAction: function(action) {
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+        if (spec.action === action) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    _closeMenu: function() {
+      if (this._menu) {
+        this._menu.close();
       }
     }
 
