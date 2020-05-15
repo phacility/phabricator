@@ -87,7 +87,6 @@ JX.install('DiffChangesetList', {
     _focusStart: null,
     _focusEnd: null,
 
-    _hoverNode: null,
     _hoverInline: null,
     _hoverOrigin: null,
     _hoverTarget: null,
@@ -1127,7 +1126,6 @@ JX.install('DiffChangesetList', {
     _onresize: function() {
       this._redrawFocus();
       this._redrawSelection();
-      this._redrawHover();
 
       // Force a banner redraw after a resize event. Particularly, this makes
       // sure the inline state updates immediately after an inline edit
@@ -1280,11 +1278,8 @@ JX.install('DiffChangesetList', {
     },
 
     _setHoverInline: function(inline) {
-      if (inline && (this._hoverInline === inline)) {
-        return;
-      }
-
-      this._hoverInline = inline;
+      var origin = null;
+      var target = null;
 
       if (inline) {
         var changeset = inline.getChangeset();
@@ -1310,11 +1305,8 @@ JX.install('DiffChangesetList', {
         var length = inline.getLineLength();
 
         try {
-          var origin = JX.$(prefix + number);
-          var target = JX.$(prefix + (number + length));
-
-          this._hoverOrigin = origin;
-          this._hoverTarget = target;
+          origin = JX.$(prefix + number);
+          target = JX.$(prefix + (number + length));
         } catch (error) {
           // There may not be any nodes present in the document. A case where
           // this occurs is when you reply to a ghost inline which was made
@@ -1322,52 +1314,46 @@ JX.install('DiffChangesetList', {
           // the file was later shortened so those lines no longer exist. For
           // more details, see T11662.
 
-          this._hoverOrigin = null;
-          this._hoverTarget = null;
+          origin = null;
+          target = null;
         }
-      } else {
-        this._hoverOrigin = null;
-        this._hoverTarget = null;
       }
 
-      this._redrawHover();
+      this._setHoverRange(origin, target, inline);
     },
 
-    _setHoverRange: function(origin, target) {
-      this._hoverOrigin = origin;
-      this._hoverTarget = target;
+    _setHoverRange: function(origin, target, inline) {
+      inline = inline || null;
 
-      this._redrawHover();
+      var origin_dirty = (origin !== this._hoverOrigin);
+      var target_dirty = (target !== this._hoverTarget);
+      var inline_dirty = (inline !== this._hoverInline);
+
+      var any_dirty = (origin_dirty || target_dirty || inline_dirty);
+      if (any_dirty) {
+        this._hoverOrigin = origin;
+        this._hoverTarget = target;
+        this._hoverInline = inline;
+        this._redrawHover();
+      }
     },
 
     resetHover: function() {
-      this._setHoverInline(null);
-
-      this._hoverOrigin = null;
-      this._hoverTarget = null;
+      this._setHoverRange(null, null, null);
     },
 
     _redrawHover: function() {
-      var ii;
-
       var map = this._hoverMap;
       if (map) {
-        for (ii = 0; ii < map.length; ii++) {
-          JX.DOM.alterClass(map[ii].cellNode, 'inline-hover', false);
-
-          if (map[ii].bright) {
-            JX.DOM.alterClass(map[ii].cellNode, 'inline-hover-bright', false);
-          }
-
-          if (map[ii].hoverNode) {
-            JX.DOM.remove(map[ii].hoverNode);
-          }
-        }
         this._hoverMap = null;
+        this._applyHoverHighlight(map, false);
       }
 
-      var reticle = this._getHoverNode();
-      JX.DOM.remove(reticle);
+      var rows = this._hoverRows;
+      if (rows) {
+        this._hoverRows = null;
+        this._applyHoverHighlight(rows, false);
+      }
 
       if (!this._hoverOrigin || this.isAsleep()) {
         return;
@@ -1394,52 +1380,47 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      rows = this._findContentCells(top, bot, content_cell);
+
       var inline = this._hoverInline;
       if (!inline) {
-        var pos = JX.$V(content_cell)
-          .add(JX.Vector.getAggregateScrollForNode(content_cell));
-
-        var dim = JX.$V(content_cell)
-          .add(JX.Vector.getAggregateScrollForNode(content_cell))
-          .add(-pos.x, -pos.y)
-          .add(JX.Vector.getDim(content_cell));
-
-        var bpos = JX.$V(bot)
-          .add(JX.Vector.getAggregateScrollForNode(bot));
-        dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
-
-        pos.setPos(reticle);
-        dim.setDim(reticle);
-
-        JX.DOM.getContentFrame().appendChild(reticle);
-        JX.DOM.show(reticle);
-
+        this._hoverRows = rows;
+        this._applyHoverHighlight(this._hoverRows, true);
         return;
       }
 
       if (!inline.hoverMap) {
-        inline.hoverMap = this._newHoverMap(top, bot, content_cell, inline);
+        inline.hoverMap = this._newHoverMap(rows, inline);
       }
 
-      map = inline.hoverMap;
-      for (ii = 0; ii < map.length; ii++) {
-        JX.DOM.alterClass(map[ii].cellNode, 'inline-hover', true);
-        if (map[ii].bright) {
-          JX.DOM.alterClass(map[ii].cellNode, 'inline-hover-bright', true);
-        }
-        if (map[ii].hoverNode) {
-          map[ii].cellNode.insertBefore(
-            map[ii].hoverNode,
-            map[ii].cellNode.firstChild);
-        }
-      }
-      this._hoverMap = map;
+      this._hoverMap = inline.hoverMap;
+      this._applyHoverHighlight(this._hoverMap, true);
     },
 
-    _newHoverMap: function(top, bot, content_cell, inline) {
-      var start = inline.getStartOffset();
-      var end = inline.getEndOffset();
+    _applyHoverHighlight: function(items, on) {
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
 
+        JX.DOM.alterClass(item.lineNode, 'inline-hover', on);
+        JX.DOM.alterClass(item.cellNode, 'inline-hover', on);
+
+        if (item.bright) {
+          JX.DOM.alterClass(item.cellNode, 'inline-hover-bright', on);
+        }
+
+        if (item.hoverNode) {
+          if (on) {
+            item.cellNode.insertBefore(
+              item.hoverNode,
+              item.cellNode.firstChild);
+          } else {
+            JX.DOM.remove(item.hoverNode);
+          }
+        }
+      }
+    },
+
+    _findContentCells: function(top, bot, content_cell) {
       var head_row = JX.DOM.findAbove(top, 'tr');
       var last_row = JX.DOM.findAbove(bot, 'tr');
 
@@ -1447,25 +1428,35 @@ JX.install('DiffChangesetList', {
       var rows = [];
       var idx = null;
       var ii;
+      var line_cell = null;
       do {
+        line_cell = null;
         for (ii = 0; ii < cursor.childNodes.length; ii++) {
           var child = cursor.childNodes[ii];
           if (!JX.DOM.isType(child, 'td')) {
             continue;
           }
 
+          if (child.getAttribute('data-n')) {
+            line_cell = child;
+          }
+
           if (child === content_cell) {
             idx = ii;
           }
 
-          if (ii === idx) {
-            if (!this._isContentCell(child)) {
-              break;
-            }
+          if (ii !== idx) {
+            continue;
+          }
+
+          if (this._isContentCell(child)) {
             rows.push({
+              lineNode: line_cell,
               cellNode: child
             });
           }
+
+          break;
         }
 
         if (cursor === last_row) {
@@ -1474,6 +1465,13 @@ JX.install('DiffChangesetList', {
 
         cursor = cursor.nextSibling;
       } while (cursor);
+
+      return rows;
+    },
+
+    _newHoverMap: function(rows, inline) {
+      var start = inline.getStartOffset();
+      var end = inline.getEndOffset();
 
       var info;
       var content;
@@ -1572,17 +1570,6 @@ JX.install('DiffChangesetList', {
       }
 
       return rows;
-    },
-
-    _getHoverNode: function() {
-      if (!this._hoverNode) {
-        var attributes = {
-          className: 'differential-reticle'
-        };
-        this._hoverNode = JX.$N('div', attributes);
-      }
-
-      return this._hoverNode;
     },
 
     _deleteInlineByID: function(id) {

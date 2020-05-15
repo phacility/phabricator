@@ -44,7 +44,7 @@ JX.install('DiffChangeset', {
     this._isOwned = data.isOwned;
     this._isLoading = true;
 
-    this._inlines = [];
+    this._inlines = null;
 
     if (data.changesetState) {
       this._loadChangesetState(data.changesetState);
