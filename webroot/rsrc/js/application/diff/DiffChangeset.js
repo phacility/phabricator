@@ -795,8 +795,10 @@ JX.install('DiffChangeset', {
     },
 
     _findInline: function(field, value) {
-      for (var ii = 0; ii < this._inlines.length; ii++) {
-        var inline = this._inlines[ii];
+      var inlines = this.getInlines();
+
+      for (var ii = 0; ii < inlines.length; ii++) {
+        var inline = inlines[ii];
 
         var target;
         switch (field) {
@@ -844,7 +846,7 @@ JX.install('DiffChangeset', {
     },
 
     redrawFileTree: function() {
-      var inlines = this._inlines;
+      var inlines = this.getInlines();
       var done = [];
       var undone = [];
       var inline;
