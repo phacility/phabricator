@@ -50,9 +50,12 @@ final class PhabricatorPeopleNewController
       if (!strlen($new_email)) {
         $errors[] = pht('Email is required.');
         $e_email = pht('Required');
-      } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
+      } else if (!PhabricatorUserEmail::isValidAddress($new_email)) {
+        $errors[] = PhabricatorUserEmail::describeValidAddresses();
         $e_email = pht('Invalid');
+      } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
         $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
+        $e_email = pht('Not Allowed');
       } else {
         $e_email = null;
       }
