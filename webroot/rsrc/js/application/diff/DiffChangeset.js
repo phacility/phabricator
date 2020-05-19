@@ -761,14 +761,14 @@ JX.install('DiffChangeset', {
       return inline;
     },
 
-    newInlineReply: function(original, text) {
+    newInlineReply: function(original, state) {
       var inline = new JX.DiffInline()
         .setChangeset(this)
         .bindToReply(original);
 
       this._inlines.push(inline);
 
-      inline.create(text);
+      inline.create(state);
 
       return inline;
     },

@@ -2410,7 +2410,7 @@ JX.install('DiffChangesetList', {
 
       switch (action) {
         case 'save':
-          inline.save(e.getTarget());
+          inline.save();
           break;
         case 'cancel':
           inline.cancel();

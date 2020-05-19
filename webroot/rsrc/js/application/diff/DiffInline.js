@@ -19,7 +19,7 @@ JX.install('DiffInline', {
     _displaySide: null,
     _isNewFile: null,
     _replyToCommentPHID: null,
-    _originalText: null,
+    _originalState: null,
     _snippet: null,
     _menuItems: null,
     _documentEngineKey: null,
@@ -42,7 +42,7 @@ JX.install('DiffInline', {
     _editRow: null,
     _undoRow: null,
     _undoType: null,
-    _undoText: null,
+    _undoState: null,
 
     _draftRequest: null,
     _skipFocus: false,
@@ -76,12 +76,7 @@ JX.install('DiffInline', {
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
 
-      var original = '' + data.original;
-      if (original.length) {
-        this._originalText = original;
-      } else {
-        this._originalText = null;
-      }
+      this._originalState = data.contentState;
       this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
@@ -314,10 +309,6 @@ JX.install('DiffInline', {
       return this._hasMenuAction('collapse');
     },
 
-    getRawText: function() {
-      return this._originalText;
-    },
-
     _newRow: function() {
       var attributes = {
         sigil: 'inline-row'
@@ -332,7 +323,7 @@ JX.install('DiffInline', {
       this._phid = null;
       this._isCollapsed = false;
 
-      this._originalText = null;
+      this._originalState = null;
 
       return row;
     },
@@ -404,7 +395,7 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    create: function(text) {
+    create: function(content_state) {
       var changeset = this.getChangeset();
       if (!this._documentEngineKey) {
         this._documentEngineKey = changeset.getResponseDocumentEngineKey();
@@ -412,7 +403,7 @@ JX.install('DiffInline', {
 
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oncreateresponse);
-      var data = this._newRequestData('new', text);
+      var data = this._newRequestData('new', content_state);
 
       this.setLoading(true);
 
@@ -421,22 +412,33 @@ JX.install('DiffInline', {
         .send();
     },
 
+    _getContentState: function() {
+      var state;
+
+      if (this._editRow) {
+        state = this._readFormState(this._editRow);
+      } else {
+        state = this._originalState;
+      }
+
+      return state;
+    },
+
     reply: function(with_quote) {
       this._closeMenu();
 
-      var text;
+      var content_state = this._newContentState();
       if (with_quote) {
-        text = this.getRawText();
+        var text = this._getContentState().text;
         text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
-      } else {
-        text = '';
+        content_state.text = text;
       }
 
       var changeset = this.getChangeset();
-      return changeset.newInlineReply(this, text);
+      return changeset.newInlineReply(this, content_state);
     },
 
-    edit: function(text, skip_focus) {
+    edit: function(content_state, skip_focus) {
       this._closeMenu();
 
       this._skipFocus = !!skip_focus;
@@ -456,7 +458,7 @@ JX.install('DiffInline', {
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
 
-      var data = this._newRequestData('edit', text || null);
+      var data = this._newRequestData('edit', content_state);
 
       this.setLoading(true);
 
@@ -545,13 +547,12 @@ JX.install('DiffInline', {
       return this;
     },
 
-    _newRequestData: function(operation, text) {
+    _newRequestData: function(operation, content_state) {
       var data = {
         op: operation,
         is_new: this.isNewFile(),
         on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
-        renderer: this.getChangeset().getRendererKey(),
-        text: text || null
+        renderer: this.getChangeset().getRendererKey()
       };
 
       if (operation === 'new') {
@@ -572,6 +573,11 @@ JX.install('DiffInline', {
         };
 
         JX.copy(data, edit_data);
+      }
+
+      if (content_state) {
+        data.hasContentState = 1;
+        JX.copy(data, content_state);
       }
 
       return data;
@@ -608,14 +614,14 @@ JX.install('DiffInline', {
       // If there's an existing editor, remove it. This happens when you
       // delete a comment from the comment preview area. In this case, we
       // read and preserve the text so "Undo" restores it.
-      var text;
+      var state = null;
       if (this._editRow) {
-        text = this._readText(this._editRow);
+        state = this._readFormState(this._editRow);
         JX.DOM.remove(this._editRow);
         this._editRow = null;
       }
 
-      this._drawUndeleteRows(text);
+      this._drawUndeleteRows(state);
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -623,21 +629,21 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _drawUndeleteRows: function(text) {
+    _drawUndeleteRows: function(content_state) {
       this._undoType = 'undelete';
-      this._undoText = text || null;
+      this._undoState = content_state || null;
 
       return this._drawUndoRows('undelete', this._row);
     },
 
-    _drawUneditRows: function(text) {
+    _drawUneditRows: function(content_state) {
       this._undoType = 'unedit';
-      this._undoText = text;
+      this._undoState = content_state;
 
-      return this._drawUndoRows('unedit', null, text);
+      return this._drawUndoRows('unedit', null);
     },
 
-    _drawUndoRows: function(mode, cursor, text) {
+    _drawUndoRows: function(mode, cursor) {
       var templates = this.getChangeset().getUndoTemplates();
 
       var template;
@@ -648,7 +654,7 @@ JX.install('DiffInline', {
       }
       template = JX.$H(template).getNode();
 
-      this._undoRow = this._drawRows(template, cursor, mode, text);
+      this._undoRow = this._drawRows(template, cursor, mode);
     },
 
     _drawContentRows: function(rows) {
@@ -660,7 +666,7 @@ JX.install('DiffInline', {
       this._editRow = this._drawRows(rows, null, 'edit');
     },
 
-    _drawRows: function(rows, cursor, type, text) {
+    _drawRows: function(rows, cursor, type) {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
       var row = first_row;
       var anchor = cursor || this._row;
@@ -713,14 +719,17 @@ JX.install('DiffInline', {
       return result_row;
     },
 
-    save: function(form) {
+    save: function() {
       var handler = JX.bind(this, this._onsubmitresponse);
 
       this.setLoading(true);
 
-      JX.Workflow.newFromForm(form)
-        .setHandler(handler)
-        .start();
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('save', this._getContentState());
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
     },
 
     undo: function() {
@@ -740,8 +749,8 @@ JX.install('DiffInline', {
           .send();
       }
 
-      if (this._undoText !== null) {
-        this.edit(this._undoText);
+      if (this._undoState !== null) {
+        this.edit(this._undoState);
       }
     },
 
@@ -751,18 +760,20 @@ JX.install('DiffInline', {
     },
 
     cancel: function() {
-      var text = this._readText(this._editRow);
+      var state = this._readFormState(this._editRow);
 
       JX.DOM.remove(this._editRow);
       this._editRow = null;
 
-      if (text && text.length && (text != this._originalText)) {
-        this._drawUneditRows(text);
+      var is_empty = this._isVoidContentState(state);
+      var is_same = this._isSameContentState(state, this._originalState);
+      if (!is_empty && !is_same) {
+        this._drawUneditRows(state);
       }
 
       // If this was an empty box and we typed some text and then hit cancel,
       // don't show the empty concrete inline.
-      if (!this._originalText) {
+      if (!this._isVoidContentState(this._originalState)) {
         this.setInvisible(true);
       } else {
         this.setInvisible(false);
@@ -773,7 +784,7 @@ JX.install('DiffInline', {
       // text ("A") to the server as the current persistent state.
 
       var uri = this._getInlineURI();
-      var data = this._newRequestData('cancel', this._originalText);
+      var data = this._newRequestData('cancel', this._originalState);
       var handler = JX.bind(this, this._onCancelResponse);
 
       this.setLoading(true);
@@ -792,7 +803,7 @@ JX.install('DiffInline', {
       // If the comment was empty when we started editing it (there's no
       // original text) and empty when we finished editing it (there's no
       // undo row), just delete the comment.
-      if (!this._originalText && !this.isUndo()) {
+      if (this._isVoidContentState(this._originalState) && !this.isUndo()) {
         this.setDeleted(true);
 
         JX.DOM.remove(this._row);
@@ -802,7 +813,7 @@ JX.install('DiffInline', {
       }
     },
 
-    _readText: function(row) {
+    _readFormState: function(row) {
       var textarea;
       try {
         textarea = JX.DOM.find(
@@ -813,7 +824,9 @@ JX.install('DiffInline', {
         return null;
       }
 
-      return textarea.value;
+      return {
+        text: textarea.value
+      };
     },
 
     _onsubmitresponse: function(response) {
@@ -920,16 +933,19 @@ JX.install('DiffInline', {
         return null;
       }
 
-      var text = this._readText(this._editRow);
-      if (text === null) {
+      var state = this._readFormState(this._editRow);
+      if (this._isVoidContentState(state)) {
         return null;
       }
 
-      return {
+      var draft_data = {
         op: 'draft',
         id: this.getID(),
-        text: text
       };
+
+      JX.copy(draft_data, state);
+
+      return draft_data;
     },
 
     triggerDraft: function() {
@@ -1035,6 +1051,20 @@ JX.install('DiffInline', {
       if (this._menu) {
         this._menu.close();
       }
+    },
+
+    _isVoidContentState: function(state) {
+      return !state.text.length;
+    },
+
+    _isSameContentState: function(u, v) {
+      return (u.text === v.text);
+    },
+
+    _newContentState: function() {
+      return {
+        text: ''
+      };
     }
 
   }

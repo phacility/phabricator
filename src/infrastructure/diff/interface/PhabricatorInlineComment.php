@@ -322,6 +322,11 @@ abstract class PhabricatorInlineComment
     return $draft_text;
   }
 
+  public function getContentState() {
+    return array(
+      'text' => $this->getContent(),
+    );
+  }
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

@@ -22,37 +22,10 @@ final class PHUIDiffInlineCommentEditView
         'sigil' => 'inline-edit-form',
       ),
       array(
-        $this->renderInputs(),
         $this->renderBody(),
       ));
 
     return $content;
-  }
-
-  private function renderInputs() {
-    $inputs = array();
-    $inline = $this->getInlineComment();
-
-    $inputs[] = array('op', 'edit');
-    $inputs[] = array('id', $inline->getID());
-
-    $inputs[] = array('on_right', $this->getIsOnRight());
-    $inputs[] = array('renderer', $this->getRenderer());
-
-    $out = array();
-
-    foreach ($inputs as $input) {
-      list($name, $value) = $input;
-      $out[] = phutil_tag(
-        'input',
-        array(
-          'type'  => 'hidden',
-          'name'  => $name,
-          'value' => $value,
-        ));
-    }
-
-    return $out;
   }
 
   private function renderBody() {
