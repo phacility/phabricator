@@ -82,13 +82,12 @@ final class PHUIDiffInlineCommentEditView
     $viewer = $this->getViewer();
     $inline = $this->getInlineComment();
 
-    $text = $inline->getContentForEdit($viewer);
+    $state = $inline->getContentStateForEdit($viewer);
 
     return id(new PhabricatorRemarkupControl())
       ->setViewer($viewer)
-      ->setSigil('differential-inline-comment-edit-textarea')
-      ->setName('text')
-      ->setValue($text)
+      ->setSigil('inline-content-text')
+      ->setValue($state->getContentText())
       ->setDisableFullScreen(true);
   }
 

@@ -299,34 +299,57 @@ abstract class PhabricatorInlineComment
   }
 
   public function isVoidComment(PhabricatorUser $viewer) {
-    return !strlen($this->getContentForEdit($viewer));
+    return $this->getContentStateForEdit($viewer)->isEmptyContentState();
   }
 
-  public function getContentForEdit(PhabricatorUser $viewer) {
-    $content = $this->getContent();
+  public function getContentStateForEdit(PhabricatorUser $viewer) {
+    $state = $this->getContentState();
 
-    if (!$this->hasVersionedDraftForViewer($viewer)) {
-      return $content;
+    if ($this->hasVersionedDraftForViewer($viewer)) {
+      $versioned_draft = $this->getVersionedDraftForViewer($viewer);
+      if ($versioned_draft) {
+        $storage_map = $versioned_draft->getProperty('inline.state');
+        if (is_array($storage_map)) {
+          $state->readStorageMap($storage_map);
+        }
+      }
     }
 
-    $versioned_draft = $this->getVersionedDraftForViewer($viewer);
-    if (!$versioned_draft) {
-      return $content;
-    }
+    return $state;
+  }
 
-    $draft_text = $versioned_draft->getProperty('inline.text');
-    if ($draft_text === null) {
-      return $content;
-    }
+  protected function newContentState() {
+    return new PhabricatorDiffInlineCommentContentState();
+  }
 
-    return $draft_text;
+  public function newContentStateFromRequest(AphrontRequest $request) {
+    return $this->newContentState()->readFromRequest($request);
   }
 
   public function getContentState() {
-    return array(
-      'text' => $this->getContent(),
-    );
+    $state = $this->newContentState();
+
+    $storage = $this->getStorageObject();
+    $storage_map = $storage->getAttribute('inline.state');
+    if (is_array($storage_map)) {
+      $state->readStorageMap($storage_map);
+    }
+
+    $state->setContentText($this->getContent());
+
+    return $state;
   }
+
+  public function setContentState(PhabricatorInlineCommentContentState $state) {
+    $storage = $this->getStorageObject();
+    $storage_map = $state->newStorageMap();
+    $storage->setAttribute('inline.state', $storage_map);
+
+    $this->setContent($state->getContentText());
+
+    return $this;
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

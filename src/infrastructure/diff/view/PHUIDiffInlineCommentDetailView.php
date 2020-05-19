@@ -101,7 +101,6 @@ final class PHUIDiffInlineCommentDetailView
       $classes[] = 'inline-comment-element';
     }
 
-    $content = $inline->getContent();
     $handles = $this->handles;
 
     $links = array();

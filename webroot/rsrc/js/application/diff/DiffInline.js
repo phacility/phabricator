@@ -701,7 +701,7 @@ JX.install('DiffInline', {
           var textareas = JX.DOM.scry(
             row,
             'textarea',
-            'differential-inline-comment-edit-textarea');
+            'inline-content-text');
           if (textareas.length) {
             var area = textareas[0];
             area.focus();
@@ -814,19 +814,25 @@ JX.install('DiffInline', {
     },
 
     _readFormState: function(row) {
-      var textarea;
+      var state = this._newContentState();
+
+      var node;
+
       try {
-        textarea = JX.DOM.find(
-          row,
-          'textarea',
-          'differential-inline-comment-edit-textarea');
+        node = JX.DOM.find(row, 'textarea', 'inline-content-text');
+        state.text = node.value;
       } catch (ex) {
-        return null;
+        // Ignore.
       }
 
-      return {
-        text: textarea.value
-      };
+      try {
+        node = JX.DOM.find(row, 'textarea', 'inline-content-suggestion');
+        state.suggestionText = node.value;
+      } catch (ex) {
+        // Ignore.
+      }
+
+      return state;
     },
 
     _onsubmitresponse: function(response) {
@@ -1053,20 +1059,24 @@ JX.install('DiffInline', {
       }
     },
 
+    _newContentState: function() {
+      return {
+        text: '',
+        suggestionText: '',
+        hasSuggestion: true
+      };
+    },
+
     _isVoidContentState: function(state) {
-      return !state.text.length;
+      return (!state.text.length && !state.suggestionText.length);
     },
 
     _isSameContentState: function(u, v) {
-      return (u.text === v.text);
-    },
-
-    _newContentState: function() {
-      return {
-        text: ''
-      };
+      return (
+        (u.text === v.text) &&
+        (u.suggestionText === v.suggestionText) &&
+        (u.hasSuggestion === v.hasSuggestion));
     }
-
   }
 
 });

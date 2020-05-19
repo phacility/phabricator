@@ -218,9 +218,9 @@ abstract class PhabricatorDiffInlineCommentQuery
           // as it is currently shown to the user, not as it was stored the last
           // time they clicked "Save".
 
-          $draft_content = $inline->getContentForEdit($viewer);
-          if (strlen($draft_content)) {
-            $inline->setContent($draft_content);
+          $draft_state = $inline->getContentStateForEdit($viewer);
+          if (!$draft_state->isEmptyContentState()) {
+            $inline->setContentState($draft_state);
           }
         }
       }

@@ -52,10 +52,6 @@ abstract class PhabricatorInlineCommentController
     return $this->operation;
   }
 
-  public function getCommentText() {
-    return $this->commentText;
-  }
-
   public function getLineLength() {
     return $this->lineLength;
   }
@@ -270,10 +266,8 @@ abstract class PhabricatorInlineCommentController
           $viewer->getPHID(),
           $inline->getID());
 
-        $map = $this->getContentState();
-        foreach ($map as $key => $value) {
-          $versioned_draft->setProperty($key, $value);
-        }
+        $map = $this->newRequestContentState($inline)->newStorageMap();
+        $versioned_draft->setProperty('inline.state', $map);
         $versioned_draft->save();
 
         // We have to synchronize the draft engine after saving a versioned
@@ -524,14 +518,9 @@ abstract class PhabricatorInlineCommentController
     return (bool)$request->getBool('hasContentState');
   }
 
-  private function getContentState() {
+  private function newRequestContentState($inline) {
     $request = $this->getRequest();
-
-    $comment_text = $request->getStr('text');
-
-    return array(
-      'inline.text' => (string)$comment_text,
-    );
+    return $inline->newContentStateFromRequest($request);
   }
 
   private function updateCommentContentState(PhabricatorInlineComment $inline) {
@@ -542,11 +531,8 @@ abstract class PhabricatorInlineCommentController
           'content state.'));
     }
 
-    $state = $this->getContentState();
-
-    $text = $state['inline.text'];
-
-    $inline->setContent($text);
+    $state = $this->newRequestContentState($inline);
+    $inline->setContentState($state);
   }
 
   private function saveComment(PhabricatorInlineComment $inline) {
