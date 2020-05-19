@@ -342,7 +342,7 @@ JX.install('DiffChangesetList', {
           var inline = cursor.target;
           if (inline.canReply()) {
             this.setFocus(null);
-            inline.reply(true);
+            inline.reply(is_quote);
             return;
           }
         }
