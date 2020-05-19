@@ -9,6 +9,7 @@ abstract class PhabricatorDiffInlineCommentQuery
   private $publishableComments;
   private $needHidden;
   private $needAppliedDrafts;
+  private $needInlineContext;
 
   abstract protected function buildInlineCommentWhereClauseParts(
     AphrontDatabaseConnection $conn);
@@ -39,6 +40,11 @@ abstract class PhabricatorDiffInlineCommentQuery
 
   final public function needHidden($need_hidden) {
     $this->needHidden = $need_hidden;
+    return $this;
+  }
+
+  final public function needInlineContext($need_context) {
+    $this->needInlineContext = $need_context;
     return $this;
   }
 
@@ -173,26 +179,6 @@ abstract class PhabricatorDiffInlineCommentQuery
       return $inlines;
     }
 
-    if ($this->needHidden) {
-      $viewer_phid = $viewer->getPHID();
-
-      if ($viewer_phid) {
-        $hidden = $this->loadHiddenCommentIDs(
-          $viewer_phid,
-          $inlines);
-      } else {
-        $hidden = array();
-      }
-
-      foreach ($inlines as $inline) {
-        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
-      }
-    }
-
-    if (!$inlines) {
-      return $inlines;
-    }
-
     $need_drafts = $this->needAppliedDrafts;
     $drop_void = $this->publishableComments;
     $convert_objects = ($need_drafts || $drop_void);
@@ -247,4 +233,133 @@ abstract class PhabricatorDiffInlineCommentQuery
     return $inlines;
   }
 
+  protected function didFilterPage(array $inlines) {
+    $viewer = $this->getViewer();
+
+    if ($this->needHidden) {
+      $viewer_phid = $viewer->getPHID();
+
+      if ($viewer_phid) {
+        $hidden = $this->loadHiddenCommentIDs(
+          $viewer_phid,
+          $inlines);
+      } else {
+        $hidden = array();
+      }
+
+      foreach ($inlines as $inline) {
+        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
+      }
+    }
+
+    if ($this->needInlineContext) {
+      $need_context = array();
+      foreach ($inlines as $inline) {
+        $object = $inline->newInlineCommentObject();
+
+        if ($object->getDocumentEngineKey() !== null) {
+          $inline->attachInlineContext(null);
+          continue;
+        }
+
+        $need_context[] = $inline;
+      }
+
+      foreach ($need_context as $inline) {
+        $changeset = id(new DifferentialChangesetQuery())
+          ->setViewer($viewer)
+          ->withIDs(array($inline->getChangesetID()))
+          ->needHunks(true)
+          ->executeOne();
+        if (!$changeset) {
+          $inline->attachInlineContext(null);
+          continue;
+        }
+
+        $hunks = $changeset->getHunks();
+
+        $is_simple =
+          (count($hunks) === 1) &&
+          ((int)head($hunks)->getOldOffset() <= 1) &&
+          ((int)head($hunks)->getNewOffset() <= 1);
+
+        if (!$is_simple) {
+          $inline->attachInlineContext(null);
+          continue;
+        }
+
+        if ($inline->getIsNewFile()) {
+          $corpus = $changeset->makeNewFile();
+        } else {
+          $corpus = $changeset->makeOldFile();
+        }
+
+        $corpus = phutil_split_lines($corpus);
+
+        // Adjust the line number into a 0-based offset.
+        $offset = $inline->getLineNumber();
+        $offset = $offset - 1;
+
+        // Adjust the inclusive range length into a row count.
+        $length = $inline->getLineLength();
+        $length = $length + 1;
+
+        $head_min = max(0, $offset - 3);
+        $head_max = $offset;
+        $head_len = $head_max - $head_min;
+
+        if ($head_len) {
+          $head = array_slice($corpus, $head_min, $head_len, true);
+          $head = $this->simplifyContext($head, true);
+        } else {
+          $head = array();
+        }
+
+        $body = array_slice($corpus, $offset, $length, true);
+
+        $tail = array_slice($corpus, $offset + $length, 3, true);
+        $tail = $this->simplifyContext($tail, false);
+
+        $context = id(new PhabricatorDiffInlineCommentContext())
+          ->setHeadLines($head)
+          ->setBodyLines($body)
+          ->setTailLines($tail);
+
+        $inline->attachInlineContext($context);
+      }
+
+    }
+
+    return $inlines;
+  }
+
+  private function simplifyContext(array $lines, $is_head) {
+    // We want to provide the smallest amount of context we can while still
+    // being useful, since the actual code is visible nearby and showing a
+    // ton of context is silly.
+
+    // Examine each line until we find one that looks "useful" (not just
+    // whitespace or a single bracket). Once we find a useful piece of context
+    // to anchor the text, discard the rest of the lines beyond it.
+
+    if ($is_head) {
+      $lines = array_reverse($lines, true);
+    }
+
+    $saw_context = false;
+    foreach ($lines as $key => $line) {
+      if ($saw_context) {
+        unset($lines[$key]);
+        continue;
+      }
+
+      $saw_context = (strlen(trim($line)) > 3);
+    }
+
+    if ($is_head) {
+      $lines = array_reverse($lines, true);
+    }
+
+    return $lines;
+  }
 }

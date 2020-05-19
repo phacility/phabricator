@@ -427,6 +427,15 @@ final class PHUIDiffInlineCommentDetailView
 
     $metadata['menuItems'] = $menu_items;
 
+    $suggestion_content = $this->newSuggestionView($inline);
+
+    $inline_content = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $content);
+
     $markup = javelin_tag(
       'div',
       array(
@@ -445,9 +454,15 @@ final class PHUIDiffInlineCommentDetailView
             $group_left,
             $group_right,
           )),
-        phutil_tag_div(
-          'differential-inline-comment-content',
-          phutil_tag_div('phabricator-remarkup', $content)),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-inline-comment-content',
+          ),
+          array(
+            $suggestion_content,
+            $inline_content,
+          )),
       ));
 
     $summary = phutil_tag(
@@ -490,5 +505,58 @@ final class PHUIDiffInlineCommentDetailView
 
     return true;
   }
+
+  private function newSuggestionView(PhabricatorInlineComment $inline) {
+    $content_state = $inline->getContentState();
+    if (!$content_state->getContentHasSuggestion()) {
+      return null;
+    }
+
+    $context = $inline->getInlineContext();
+    if (!$context) {
+      return null;
+    }
+
+    $head_lines = $context->getHeadLines();
+    $head_lines = implode('', $head_lines);
+
+    $tail_lines = $context->getTailLines();
+    $tail_lines = implode('', $tail_lines);
+
+    $old_lines = $context->getBodyLines();
+    $old_lines = implode('', $old_lines);
+    $old_lines = $head_lines.$old_lines.$tail_lines;
+    if (strlen($old_lines) && !preg_match('/\n\z/', $old_lines)) {
+      $old_lines .= "\n";
+    }
+
+    $new_lines = $content_state->getContentSuggestionText();
+    $new_lines = $head_lines.$new_lines.$tail_lines;
+    if (strlen($new_lines) && !preg_match('/\n\z/', $new_lines)) {
+      $new_lines .= "\n";
+    }
+
+    if ($old_lines === $new_lines) {
+      return null;
+    }
+
+
+    $raw_diff = id(new PhabricatorDifferenceEngine())
+      ->generateRawDiffFromFileContent($old_lines, $new_lines);
+
+    $raw_diff = phutil_split_lines($raw_diff);
+    $raw_diff = array_slice($raw_diff, 3);
+    $raw_diff = implode('', $raw_diff);
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'inline-suggestion-view PhabricatorMonospaced',
+      ),
+      $raw_diff);
+
+    return $view;
+  }
+
 
 }

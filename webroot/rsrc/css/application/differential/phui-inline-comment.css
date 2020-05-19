@@ -436,3 +436,60 @@
   background: {$lightyellow};
   border-color: {$yellow};
 }
+
+.inline-suggestion {
+  display: none;
+  margin: 0 -8px;
+}
+
+.has-suggestion .inline-suggestion {
+  display: block;
+}
+
+.differential-inline-comment-edit-buttons button.inline-button-left {
+  float: left;
+  margin: 0 6px 0 0;
+}
+
+.inline-suggestion-table {
+  table-layout: fixed;
+  width: 100%;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  background: {$greybackground};
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: {$lightgreyborder};
+}
+
+textarea.inline-suggestion-input {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.inline-suggestion-line-cell {
+  text-align: right;
+  background: {$darkgreybackground};
+  width: 36px;
+  color: {$greytext};
+  border-right: 1px solid {$lightgreyborder};
+}
+
+.inline-suggestion-input-cell {
+  padding: 8px;
+}
+
+.inline-suggestion-text-cell {
+  padding: 0 8px;
+}
+
+.inline-suggestion-view {
+  padding: 8px 12px;
+  white-space: pre-wrap;
+  background: {$greybackground};
+  margin: 0 -12px 8px;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: {$lightgreyborder};
+}

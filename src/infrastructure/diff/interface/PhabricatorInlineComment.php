@@ -350,6 +350,10 @@ abstract class PhabricatorInlineComment
     return $this;
   }
 
+  public function getInlineContext() {
+    return $this->getStorageObject()->getInlineContext();
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

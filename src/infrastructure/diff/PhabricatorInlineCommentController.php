@@ -240,7 +240,7 @@ abstract class PhabricatorInlineCommentController
 
         $view = $this->buildScaffoldForView($edit_dialog);
 
-        return $this->newInlineResponse($inline, $view);
+        return $this->newInlineResponse($inline, $view, true);
       case 'cancel':
         $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
@@ -325,6 +325,9 @@ abstract class PhabricatorInlineCommentController
 
         $this->saveComment($inline);
 
+        // Reload the inline to attach context.
+        $inline = $this->loadCommentByIDForEdit($inline->getID());
+
         $edit_dialog = $this->buildEditDialog($inline);
 
         if ($this->getOperation() == 'reply') {
@@ -335,7 +338,7 @@ abstract class PhabricatorInlineCommentController
 
         $view = $this->buildScaffoldForView($edit_dialog);
 
-        return $this->newInlineResponse($inline, $view);
+        return $this->newInlineResponse($inline, $view, true);
     }
   }
 
@@ -431,7 +434,7 @@ abstract class PhabricatorInlineCommentController
 
     $view = $this->buildScaffoldForView($view);
 
-    return $this->newInlineResponse($inline, $view);
+    return $this->newInlineResponse($inline, $view, false);
   }
 
   private function buildScaffoldForView(PHUIDiffInlineCommentView $view) {
@@ -446,11 +449,29 @@ abstract class PhabricatorInlineCommentController
 
   private function newInlineResponse(
     PhabricatorInlineComment $inline,
-    $view) {
+    $view,
+    $is_edit) {
+
+    if ($inline->getReplyToCommentPHID()) {
+      $can_suggest = false;
+    } else {
+      $can_suggest = (bool)$inline->getInlineContext();
+    }
+
+    if ($is_edit) {
+      $viewer = $this->getViewer();
+      $content_state = $inline->getContentStateForEdit($viewer);
+    } else {
+      $content_state = $inline->getContentState();
+    }
+
+    $state_map = $content_state->newStorageMap();
 
     $response = array(
       'inline' => array(
         'id' => $inline->getID(),
+        'contentState' => $state_map,
+        'canSuggestEdit' => $can_suggest,
       ),
       'view' => hsprintf('%s', $view),
     );
@@ -477,7 +498,8 @@ abstract class PhabricatorInlineCommentController
     $viewer = $this->getViewer();
 
     $query = $this->newInlineCommentQuery()
-      ->withIDs(array($id));
+      ->withIDs(array($id))
+      ->needInlineContext(true);
 
     $inline = $this->loadCommentByQuery($query);
 

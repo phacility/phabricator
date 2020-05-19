@@ -51,6 +51,7 @@ JX.install('DiffInline', {
     _startOffset: null,
     _endOffset: null,
     _isSelected: false,
+    _canSuggestEdit: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -76,7 +77,6 @@ JX.install('DiffInline', {
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
 
-      this._originalState = data.contentState;
       this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
@@ -602,6 +602,8 @@ JX.install('DiffInline', {
 
     _readInlineState: function(state) {
       this._id = state.id;
+      this._originalState = state.contentState;
+      this._canSuggestEdit = state.canSuggestEdit;
     },
 
     _ondeleteresponse: function() {
@@ -664,6 +666,11 @@ JX.install('DiffInline', {
     _drawEditRows: function(rows) {
       this.setEditing(true);
       this._editRow = this._drawRows(rows, null, 'edit');
+
+      this._drawSuggestionState(this._editRow);
+      JX.log(this._originalState);
+
+      this.setHasSuggestion(this._originalState.hasSuggestion);
     },
 
     _drawRows: function(rows, cursor, type) {
@@ -717,6 +724,91 @@ JX.install('DiffInline', {
       JX.Stratcom.invoke('resize');
 
       return result_row;
+    },
+
+    _drawSuggestionState: function(row) {
+      if (this._canSuggestEdit) {
+        var button = this._getSuggestionButton();
+        var node = button.getNode();
+
+        // As a side effect of form submission, the button may become
+        // visually disabled. Re-enable it. This is a bit hacky.
+        JX.DOM.alterClass(node, 'disabled', false);
+        node.disabled = false;
+
+        var container = JX.DOM.find(row, 'div', 'inline-edit-buttons');
+        container.appendChild(node);
+      }
+    },
+
+    _getSuggestionButton: function() {
+      if (!this._suggestionButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-pencil-square-o')
+          .setColor('grey');
+
+        var node = button.getNode();
+        JX.DOM.alterClass(node, 'inline-button-left', true);
+
+        var onclick = JX.bind(this, this._onSuggestEdit);
+        JX.DOM.listen(node, 'click', null, onclick);
+
+        this._suggestionButton = button;
+      }
+
+      return this._suggestionButton;
+    },
+
+    _onSuggestEdit: function(e) {
+      e.kill();
+
+      this.setHasSuggestion(!this.getHasSuggestion());
+
+      // The first time the user actually clicks the button and enables
+      // suggestions for a given editor state, fill the input with the
+      // underlying text if there isn't any text yet.
+      if (this.getHasSuggestion()) {
+        if (this._editRow) {
+          var node = this._getSuggestionNode(this._editRow);
+          if (node) {
+            if (!node.value.length) {
+              var data = JX.Stratcom.getData(node);
+              if (!data.hasSetDefault) {
+                data.hasSetDefault = true;
+                node.value = data.defaultText;
+                node.rows = Math.max(3, node.value.split('\n').length);
+              }
+            }
+          }
+        }
+      }
+
+      // Save the "hasSuggestion" part of the content state.
+      this.triggerDraft();
+    },
+
+    setHasSuggestion: function(has_suggestion) {
+      this._hasSuggestion = has_suggestion;
+
+      var button = this._getSuggestionButton();
+      var pht = this.getChangeset().getChangesetList().getTranslations();
+      if (has_suggestion) {
+        button
+          .setIcon('fa-times')
+          .setText(pht('Discard Edit'));
+      } else {
+        button
+          .setIcon('fa-plus')
+          .setText(pht('Suggest Edit'));
+      }
+
+      if (this._editRow) {
+        JX.DOM.alterClass(this._editRow, 'has-suggestion', has_suggestion);
+      }
+    },
+
+    getHasSuggestion: function() {
+      return this._hasSuggestion;
     },
 
     save: function() {
@@ -825,14 +917,22 @@ JX.install('DiffInline', {
         // Ignore.
       }
 
-      try {
-        node = JX.DOM.find(row, 'textarea', 'inline-content-suggestion');
+      node = this._getSuggestionNode(row);
+      if (node) {
         state.suggestionText = node.value;
-      } catch (ex) {
-        // Ignore.
       }
 
+      state.hasSuggestion = this.getHasSuggestion();
+
       return state;
+    },
+
+    _getSuggestionNode: function(row) {
+      try {
+        return JX.DOM.find(row, 'textarea', 'inline-content-suggestion');
+      } catch (ex) {
+        return null;
+      }
     },
 
     _onsubmitresponse: function(response) {
@@ -1063,7 +1163,7 @@ JX.install('DiffInline', {
       return {
         text: '',
         suggestionText: '',
-        hasSuggestion: true
+        hasSuggestion: false
       };
     },
 
@@ -1073,6 +1173,7 @@ JX.install('DiffInline', {
 
     _isSameContentState: function(u, v) {
       return (
+        ((u === null) === (v === null)) &&
         (u.text === v.text) &&
         (u.suggestionText === v.suggestionText) &&
         (u.hasSuggestion === v.hasSuggestion));

@@ -17,6 +17,7 @@ final class PhabricatorAuditTransactionComment
   protected $attributes = array();
 
   private $replyToComment = self::ATTACHABLE;
+  private $inlineContext = self::ATTACHABLE;
 
   public function getApplicationTransactionObject() {
     return new PhabricatorAuditTransaction();
@@ -83,12 +84,18 @@ final class PhabricatorAuditTransactionComment
     return $this;
   }
 
-  public function isEmptyInlineComment() {
-    return !strlen($this->getContent());
-  }
-
   public function newInlineCommentObject() {
     return PhabricatorAuditInlineComment::newFromModernComment($this);
+  }
+
+  public function getInlineContext() {
+    return $this->assertAttached($this->inlineContext);
+  }
+
+  public function attachInlineContext(
+    PhabricatorInlineCommentContext $context = null) {
+    $this->inlineContext = $context;
+    return $this;
   }
 
 }
