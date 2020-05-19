@@ -582,8 +582,13 @@ final class DifferentialHunkParser extends Phobject {
       $changes = $hunk->getSplitLines();
       foreach ($changes as $line) {
         $diff_type = $line[0]; // Change type in diff of diffs.
+        $is_same = ($diff_type === ' ');
+        $is_add = ($diff_type === '+');
+        $is_rem = ($diff_type === '-');
+
         $orig_type = $line[1]; // Change type in the original diff.
-        if ($diff_type == ' ') {
+
+        if ($is_same) {
           // Use the same key for lines that are next to each other.
           if ($olds_cursor > $news_cursor) {
             $key = $olds_cursor + 1;
@@ -594,17 +599,32 @@ final class DifferentialHunkParser extends Phobject {
           $news[$key] = null;
           $olds_cursor = $key;
           $news_cursor = $key;
-        } else if ($diff_type == '-') {
+        } else if ($is_rem) {
           $olds[] = array($n_old, $orig_type);
           $olds_cursor++;
-        } else if ($diff_type == '+') {
+        } else if ($is_add) {
           $news[] = array($n_new, $orig_type);
           $news_cursor++;
+        } else {
+          throw new Exception(
+            pht(
+              'Found unknown intradiff source line, expected a line '.
+              'beginning with "+", "-", or " " (space): %s.',
+              $line));
         }
-        if (($diff_type == '-' || $diff_type == ' ') && $orig_type != '-') {
+
+        // See T13539. Don't increment the line count if this line was removed,
+        // or if the line is a "No newline at end of file" marker.
+        $not_a_line = ($orig_type === '-' || $orig_type === '\\');
+        if ($not_a_line) {
+          continue;
+        }
+
+        if ($is_same || $is_rem) {
           $n_old++;
         }
-        if (($diff_type == '+' || $diff_type == ' ') && $orig_type != '-') {
+
+        if ($is_same || $is_add) {
           $n_new++;
         }
       }
@@ -623,14 +643,18 @@ final class DifferentialHunkParser extends Phobject {
         list($n, $type) = $olds[$i];
         if ($type == '+' ||
             ($type == ' ' && isset($news[$i]) && $news[$i][1] != ' ')) {
-          $highlight_old[] = $offsets_old[$n];
+          if (isset($offsets_old[$n])) {
+            $highlight_old[] = $offsets_old[$n];
+          }
         }
       }
       if (isset($news[$i])) {
         list($n, $type) = $news[$i];
         if ($type == '+' ||
             ($type == ' ' && isset($olds[$i]) && $olds[$i][1] != ' ')) {
-          $highlight_new[] = $offsets_new[$n];
+          if (isset($offsets_new[$n])) {
+            $highlight_new[] = $offsets_new[$n];
+          }
         }
       }
     }
