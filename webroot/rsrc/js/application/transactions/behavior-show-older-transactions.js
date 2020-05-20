@@ -114,6 +114,7 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
   check_hash();
 
   new JX.KeyboardShortcut(['@'], 'Show all older changes in the timeline.')
+    .setGroup('xactions')
     .setHandler(JX.bind(null, load_older, load_all_older_callback))
     .register();
 });

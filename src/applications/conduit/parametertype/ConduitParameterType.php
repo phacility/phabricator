@@ -129,8 +129,9 @@ abstract class ConduitParameterType extends Phobject {
       'true' => true,
     );
 
-    if (!$strict && is_string($value) && isset($bool_strings[$value])) {
-      $value = $bool_strings[$value];
+    $normal_value = phutil_utf8_strtolower($value);
+    if (!$strict && is_string($value) && isset($bool_strings[$normal_value])) {
+      $value = $bool_strings[$normal_value];
     } else if (!is_bool($value)) {
       $this->raiseValidationException(
         $request,

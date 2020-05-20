@@ -14,6 +14,12 @@ JX.install('AphlictLog', {
   members: {
     _consoles: null,
     _logs: null,
+    _trace: null,
+
+    setTrace: function(trace) {
+      this._trace = trace;
+      return this;
+    },
 
     addConsole: function(console) {
       this._consoles.push(console);
@@ -27,6 +33,14 @@ JX.install('AphlictLog', {
         mode: '0664',
       }));
       return this;
+    },
+
+    trace: function() {
+      if (!this._trace) {
+        return;
+      }
+
+      return this.log.apply(this, arguments);
     },
 
     log: function() {

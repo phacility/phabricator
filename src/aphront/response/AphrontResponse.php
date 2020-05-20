@@ -10,7 +10,7 @@ abstract class AphrontResponse extends Phobject {
   private $contentSecurityPolicyURIs;
   private $disableContentSecurityPolicy;
   protected $frameable;
-
+  private $headers = array();
 
   public function setRequest($request) {
     $this->request = $request;
@@ -46,6 +46,11 @@ abstract class AphrontResponse extends Phobject {
 
   final public function setDisableContentSecurityPolicy($disable) {
     $this->disableContentSecurityPolicy = $disable;
+    return $this;
+  }
+
+  final public function addHeader($key, $value) {
+    $this->headers[] = array($key, $value);
     return $this;
   }
 
@@ -104,6 +109,10 @@ abstract class AphrontResponse extends Phobject {
     }
 
     $headers[] = array('Referrer-Policy', 'no-referrer');
+
+    foreach ($this->headers as $header) {
+      $headers[] = $header;
+    }
 
     return $headers;
   }
@@ -417,13 +426,19 @@ abstract class AphrontResponse extends Phobject {
   }
 
   public function willBeginWrite() {
-    if ($this->shouldCompressResponse()) {
-      // Enable automatic compression here. Webservers sometimes do this for
-      // us, but we now detect the absence of compression and warn users about
-      // it so try to cover our bases more thoroughly.
-      ini_set('zlib.output_compression', 1);
-    } else {
-      ini_set('zlib.output_compression', 0);
+    // If we've already sent headers, these "ini_set()" calls will warn that
+    // they have no effect. Today, this always happens because we're inside
+    // a unit test, so just skip adjusting the setting.
+
+    if (!headers_sent()) {
+      if ($this->shouldCompressResponse()) {
+        // Enable automatic compression here. Webservers sometimes do this for
+        // us, but we now detect the absence of compression and warn users about
+        // it so try to cover our bases more thoroughly.
+        ini_set('zlib.output_compression', 1);
+      } else {
+        ini_set('zlib.output_compression', 0);
+      }
     }
   }
 

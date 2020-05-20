@@ -36,6 +36,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $count;
   private $rel;
   private $dropdownMenu;
+  private $keyCommand;
 
   public function setOpenInNewWindow($open_in_new_window) {
     $this->openInNewWindow = $open_in_new_window;
@@ -220,6 +221,15 @@ final class PHUIListItemView extends AphrontTagView {
     return 'li';
   }
 
+  public function setKeyCommand($key_command) {
+    $this->keyCommand = $key_command;
+    return $this;
+  }
+
+  public function getKeyCommand() {
+    return $this->keyCommand;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'phui-list-item-view';
@@ -277,12 +287,12 @@ final class PHUIListItemView extends AphrontTagView {
     $name = null;
     $icon = null;
     $meta = null;
-    $sigil = null;
+    $sigil = array();
 
     if ($this->name) {
       if ($this->getRenderNameAsTooltip()) {
         Javelin::initBehavior('phabricator-tooltips');
-        $sigil = 'has-tooltip';
+        $sigil[] = 'has-tooltip';
         $meta = array(
           'tip' => $this->name,
           'align' => 'E',
@@ -290,7 +300,7 @@ final class PHUIListItemView extends AphrontTagView {
       } else {
         if ($this->tooltip) {
           Javelin::initBehavior('phabricator-tooltips');
-          $sigil = 'has-tooltip';
+          $sigil[] = 'has-tooltip';
           $meta = array(
             'tip' => $this->tooltip,
             'align' => 'E',
@@ -383,13 +393,25 @@ final class PHUIListItemView extends AphrontTagView {
 
     $icons = $this->getIcons();
 
+    $key_command = null;
+    if ($this->keyCommand) {
+      $key_command = phutil_tag(
+        'span',
+        array(
+          'class' => 'keyboard-shortcut-key',
+        ),
+        $this->keyCommand);
+      $sigil[] = 'has-key-command';
+      $meta['keyCommand'] = $this->keyCommand;
+    }
+
     $list_item = javelin_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
         'class' => implode(' ', $classes),
         'meta' => $meta,
-        'sigil' => $sigil,
+        'sigil' => implode(' ', $sigil),
         'target' => $this->getOpenInNewWindow() ? '_blank' : null,
         'rel' => $this->rel,
       ),
@@ -400,6 +422,7 @@ final class PHUIListItemView extends AphrontTagView {
         $this->renderChildren(),
         $name,
         $count,
+        $key_command,
         $caret,
       ));
 

@@ -51,16 +51,19 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $timeline->setQuoteRef($monogram);
     $comment_view->setTransactionTimeline($timeline);
 
+    $recommendation_view = $this->newDocumentRecommendationView($paste);
+
     $paste_view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
-      ->setMainColumn(array(
+      ->setMainColumn(
+        array(
+          $recommendation_view,
           $source_code,
           $timeline,
           $comment_view,
         ))
-      ->setCurtain($curtain)
-      ->addClass('ponder-question-view');
+      ->setCurtain($curtain);
 
     return $this->newPage()
       ->setTitle($paste->getFullName())
@@ -168,6 +171,60 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setImage($image_uri)
       ->setImageHref($image_href)
       ->setContent($content);
+  }
+
+  private function newDocumentRecommendationView(PhabricatorPaste $paste) {
+    $viewer = $this->getViewer();
+
+    // See PHI1703. If a viewer is looking at a document in Paste which has
+    // a good rendering via a DocumentEngine, suggest they view the content
+    // in Files instead so they can see it rendered.
+
+    $ref = id(new PhabricatorDocumentRef())
+      ->setName($paste->getTitle())
+      ->setData($paste->getRawContent());
+
+    $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
+    if (!$engines) {
+      return null;
+    }
+
+    $engine = head($engines);
+    if (!$engine->shouldSuggestEngine($ref)) {
+      return null;
+    }
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($paste->getFilePHID()))
+      ->executeOne();
+    if (!$file) {
+      return null;
+    }
+
+    $file_ref = id(new PhabricatorDocumentRef())
+      ->setFile($file);
+
+    $view_uri = id(new PhabricatorFileDocumentRenderingEngine())
+      ->getRefViewURI($file_ref, $engine);
+
+    $view_as_label = $engine->getViewAsLabel($file_ref);
+
+    $view_as_hint = pht(
+      'This content can be rendered as a document in Files.');
+
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->addButton(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText($view_as_label)
+          ->setHref($view_uri)
+          ->setColor('grey'))
+      ->setErrors(
+        array(
+          $view_as_hint,
+        ));
   }
 
 }

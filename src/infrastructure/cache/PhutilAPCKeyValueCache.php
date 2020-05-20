@@ -47,11 +47,14 @@ final class PhutilAPCKeyValueCache extends PhutilKeyValueCache {
     // NOTE: Although modern APC supports passing an array to `apc_store()`,
     // it is not supported by older version of APC or by HPHP.
 
+    // See T13525 for discussion of use of "@" to silence this warning:
+    // > GC cache entry "<some-key-name>" was on gc-list for <X> seconds
+
     foreach ($keys as $key => $value) {
       if ($is_apcu) {
-        apcu_store($key, $value, $ttl);
+        @apcu_store($key, $value, $ttl);
       } else {
-        apc_store($key, $value, $ttl);
+        @apc_store($key, $value, $ttl);
       }
     }
 

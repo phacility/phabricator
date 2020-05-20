@@ -1,0 +1,103 @@
+/**
+ * @provides diff-tree-view-css
+ */
+
+.diff-tree-view {
+  margin: 0 4px;
+}
+
+.diff-tree-path {
+  height: 20px;
+  line-height: 20px;
+  color: {$greytext};
+  border-left: 4px solid transparent;
+}
+
+.diff-tree-path-indent {
+  position: relative;
+}
+
+.diff-tree-path-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+
+.diff-tree-path-icon .phui-icon-view {
+  color: {$greytext};
+}
+
+.diff-tree-path-name {
+  margin-left: 22px;
+  margin-right: 44px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diff-tree-path-changeset {
+  cursor: pointer;
+  color: {$darkbluetext};
+}
+
+.diff-tree-path-focused {
+  background: {$darkgreybackground};
+}
+
+.device-desktop .diff-tree-path-changeset:hover {
+  background: {$lightblueborder};
+  transition: 0.1s;
+}
+
+.diff-tree-view .diff-tree-path-changeset.diff-tree-path-selected {
+  /* Rule is intentionally more specific than "hover". */
+  background: {$yellow};
+}
+
+.diff-tree-path-low-importance .diff-tree-path-name {
+  opacity: 0.5;
+}
+
+.diff-tree-path-hidden {
+  opacity: 0.25;
+}
+
+.diff-tree-path-icon-hidden,
+.diff-tree-path-hidden .diff-tree-path-icon-kind {
+  display: none;
+}
+
+.diff-tree-path-hidden .diff-tree-path-icon-hidden {
+  display: block;
+}
+
+.diff-tree-path-owned {
+  border-left-color: {$orange};
+  box-shadow: inset 2px 0 {$lightorange};
+}
+
+.diff-tree-path-inlines {
+  display: none;
+  position: absolute;
+  right: 4px;
+  border-radius: 4px;
+  text-align: center;
+  top: 2px;
+  height: 16px;
+  line-height: 14px;
+  width: 36px;
+  font-size: {$smallerfontsize};
+  color: {$greytext};
+}
+
+.diff-tree-path-inlines-visible {
+  display: block;
+  background: {$lightblueborder};
+}
+
+.diff-tree-path-inlines-completed {
+  background: {$darkgreybackground};
+  color: {$lightgreytext};
+  opacity: 0.75;
+}

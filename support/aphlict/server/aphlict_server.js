@@ -9,6 +9,7 @@ var fs = require('fs');
 function parse_command_line_arguments(argv) {
   var args = {
     test: false,
+    debug: false,
     config: null
   };
 
@@ -34,11 +35,15 @@ function parse_config(args) {
 
 require('./lib/AphlictLog');
 
-var debug = new JX.AphlictLog()
-  .addConsole(console);
+var debug = new JX.AphlictLog();
 
 var args = parse_command_line_arguments(process.argv);
 var config = parse_config(args);
+
+if (args.test || args.debug) {
+  debug.addConsole(console);
+  debug.setTrace(true);
+}
 
 function set_exit_code(code) {
   process.on('exit', function() {

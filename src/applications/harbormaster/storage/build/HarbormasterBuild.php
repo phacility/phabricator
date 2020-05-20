@@ -235,6 +235,16 @@ final class HarbormasterBuild extends HarbormasterDAO
     $restartable = HarbormasterBuildPlanBehavior::BEHAVIOR_RESTARTABLE;
     $plan = $this->getBuildPlan();
 
+    // See T13526. Users who can't see the "BuildPlan" can end up here with
+    // no object. This is highly questionable.
+    if (!$plan) {
+      throw new HarbormasterRestartException(
+        pht('No Build Plan Permission'),
+        pht(
+          'You can not restart this build because you do not have '.
+          'permission to access the build plan.'));
+    }
+
     $option = HarbormasterBuildPlanBehavior::getBehavior($restartable)
       ->getPlanOption($plan);
     $option_key = $option->getKey();
@@ -388,6 +398,12 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function assertCanIssueCommand(PhabricatorUser $viewer, $command) {
     $plan = $this->getBuildPlan();
+
+    // See T13526. Users without permission to access the build plan can
+    // currently end up here with no "BuildPlan" object.
+    if (!$plan) {
+      return false;
+    }
 
     $need_edit = true;
     switch ($command) {

@@ -11,7 +11,9 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSpacesInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorFerretInterface,
+    PhabricatorFulltextInterface {
 
   protected $title;
   protected $authorPHID;
@@ -242,6 +244,10 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
         ->setType('string')
         ->setDescription(pht('The title of the paste.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('uri')
+        ->setType('uri')
+        ->setDescription(pht('View URI for the paste.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('User PHID of the author.')),
@@ -259,6 +265,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getFieldValuesForConduit() {
     return array(
       'title' => $this->getTitle(),
+      'uri' => PhabricatorEnv::getURI($this->getURI()),
       'authorPHID' => $this->getAuthorPHID(),
       'language' => nonempty($this->getLanguage(), null),
       'status' => $this->getStatus(),
@@ -270,6 +277,21 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       id(new PhabricatorPasteContentSearchEngineAttachment())
         ->setAttachmentKey('content'),
     );
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorPasteFerretEngine();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhabricatorPasteFulltextEngine();
   }
 
 }

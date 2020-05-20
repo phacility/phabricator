@@ -4,11 +4,21 @@ final class PHUITabGroupView extends AphrontTagView {
 
   private $tabs = array();
   private $selectedTab;
+  private $vertical;
 
   private $hideSingleTab;
 
   protected function canAppendChild() {
     return false;
+  }
+
+  public function setVertical($vertical) {
+    $this->vertical = $vertical;
+    return $this;
+  }
+
+  public function getVertical() {
+    return $this->vertical;
   }
 
   public function setHideSingleTab($hide_single_tab) {
@@ -65,7 +75,13 @@ final class PHUITabGroupView extends AphrontTagView {
   protected function getTagAttributes() {
     $tab_map = mpull($this->tabs, 'getContentID', 'getKey');
 
+    $classes = array();
+    if ($this->getVertical()) {
+      $classes[] = 'phui-tab-group-view-vertical';
+    }
+
     return array(
+      'class' => $classes,
       'sigil' => 'phui-tab-group-view',
       'meta' => array(
         'tabMap' => $tab_map,
@@ -76,8 +92,14 @@ final class PHUITabGroupView extends AphrontTagView {
   protected function getTagContent() {
     Javelin::initBehavior('phui-tab-group');
 
-    $tabs = id(new PHUIListView())
-      ->setType(PHUIListView::NAVBAR_LIST);
+    $tabs = new PHUIListView();
+
+    if ($this->getVertical()) {
+      $tabs->setType(PHUIListView::NAVBAR_VERTICAL);
+    } else {
+      $tabs->setType(PHUIListView::NAVBAR_LIST);
+    }
+
     $content = array();
 
     $selected_tab = $this->getSelectedTabKey();
@@ -104,6 +126,33 @@ final class PHUITabGroupView extends AphrontTagView {
     }
 
     if ($this->hideSingleTab && (count($this->tabs) == 1)) {
+      $tabs = null;
+    }
+
+    if ($tabs && $this->getVertical()) {
+      $content = phutil_tag(
+        'table',
+        array(
+          'style' => 'width: 100%',
+        ),
+        phutil_tag(
+          'tbody',
+          array(),
+          phutil_tag(
+            'tr',
+            array(),
+            array(
+              phutil_tag(
+                'td',
+                array(
+                  'class' => 'phui-tab-group-view-tab-column',
+                ),
+                $tabs),
+              phutil_tag(
+                'td',
+                array(),
+                $content),
+            ))));
       $tabs = null;
     }
 

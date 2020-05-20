@@ -62,7 +62,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
   final protected function updateCommitData(DiffusionCommitRef $ref) {
     $commit = $this->commit;
     $author = $ref->getAuthor();
-    $message = $ref->getMessage();
     $committer = $ref->getCommitter();
     $hashes = $ref->getHashes();
     $has_committer = (bool)strlen($committer);
@@ -72,6 +71,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $identity_engine = id(new DiffusionRepositoryIdentityEngine())
       ->setViewer($viewer)
       ->setSourcePHID($commit->getPHID());
+
+    // See T13538. It is possible to synthetically construct a Git commit with
+    // no author and arrive here with NULL for the author value.
+
+    // This is distinct from a commit with an empty author. Because both these
+    // cases are degenerate and we can't resolve NULL into an identity, cast
+    // NULL to the empty string and merge the flows.
+    $author = phutil_string_cast($author);
 
     $author_identity = $identity_engine->newResolvedIdentity($author);
 
@@ -102,6 +109,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       'authorPHID',
       $author_identity->getCurrentEffectiveUserPHID());
 
+    // See T13538. It is possible to synthetically construct a Git commit with
+    // no message. As above, treat this as though it is the same as the empty
+    // message.
+    $message = $ref->getMessage();
+    $message = phutil_string_cast($message);
     $data->setCommitMessage($message);
 
     if ($has_committer) {

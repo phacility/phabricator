@@ -206,7 +206,6 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     $algo_box = $this->newBox(pht('Password Algorithms'), $properties);
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Password'))
-      ->setFormSaved($request->getStr('saved'))
       ->setFormErrors($errors)
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);

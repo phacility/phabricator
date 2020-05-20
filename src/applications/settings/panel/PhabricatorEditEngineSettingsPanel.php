@@ -22,6 +22,7 @@ abstract class PhabricatorEditEngineSettingsPanel
     $engine = id(new PhabricatorSettingsEditEngine())
       ->setController($this->getController())
       ->setNavigation($this->getNavigation())
+      ->setSettingsPanel($this)
       ->setIsSelfEdit($is_self)
       ->setProfileURI($profile_uri);
 
@@ -69,6 +70,16 @@ abstract class PhabricatorEditEngineSettingsPanel
     }
 
     return mpull($panel_settings, 'getSettingKey');
+  }
+
+  public function newSettingsPanelEditFormHeadContent(
+    PhabricatorEditEnginePageState $state) {
+    return null;
+  }
+
+  public function newSettingsPanelEditFormTailContent(
+    PhabricatorEditEnginePageState $state) {
+    return null;
   }
 
 }

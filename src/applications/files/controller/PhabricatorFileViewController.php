@@ -81,8 +81,8 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
-          $object_box,
           $file_content,
+          $object_box,
           $timeline,
         ));
 
@@ -171,6 +171,47 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
         ->setIcon('fa-crop')
         ->setHref($this->getApplicationURI("/transforms/{$id}/")));
 
+    $phids = array();
+
+    $viewer_phid = $viewer->getPHID();
+    $author_phid = $file->getAuthorPHID();
+    if ($author_phid) {
+      $phids[] = $author_phid;
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    if ($author_phid) {
+      $author_refs = id(new PHUICurtainObjectRefListView())
+        ->setViewer($viewer);
+
+      $author_ref = $author_refs->newObjectRefView()
+        ->setHandle($handles[$author_phid])
+        ->setEpoch($file->getDateCreated())
+        ->setHighlighted($author_phid === $viewer_phid);
+
+      $curtain->newPanel()
+        ->setHeaderText(pht('Authored By'))
+        ->appendChild($author_refs);
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Size'))
+      ->appendChild(phutil_format_bytes($file->getByteSize()));
+
+    $width = $file->getImageWidth();
+    $height = $file->getImageHeight();
+
+    if ($width || $height) {
+      $curtain->newPanel()
+        ->setHeaderText(pht('Dimensions'))
+        ->appendChild(
+          pht(
+            "%spx \xC3\x97 %spx",
+            new PhutilNumber($width),
+            new PhutilNumber($height)));
+    }
+
     return $curtain;
   }
 
@@ -183,35 +224,13 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
     $tab_group = id(new PHUITabGroupView());
     $box->addTabGroup($tab_group);
 
-    $properties = id(new PHUIPropertyListView());
+    $finfo = new PHUIPropertyListView();
 
     $tab_group->addTab(
       id(new PHUITabView())
         ->setName(pht('Details'))
         ->setKey('details')
-        ->appendChild($properties));
-
-    if ($file->getAuthorPHID()) {
-      $properties->addProperty(
-        pht('Author'),
-        $viewer->renderHandle($file->getAuthorPHID()));
-    }
-
-    $properties->addProperty(
-      pht('Created'),
-      phabricator_datetime($file->getDateCreated(), $viewer));
-
-    $finfo = id(new PHUIPropertyListView());
-
-    $tab_group->addTab(
-      id(new PHUITabView())
-        ->setName(pht('File Info'))
-        ->setKey('info')
         ->appendChild($finfo));
-
-    $finfo->addProperty(
-      pht('Size'),
-      phutil_format_bytes($file->getByteSize()));
 
     $finfo->addProperty(
       pht('Mime Type'),
@@ -227,20 +246,6 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
           '%s (%s)',
           phabricator_datetime($ttl, $viewer),
           phutil_format_relative_time_detailed($delta)));
-    }
-
-    $width = $file->getImageWidth();
-    if ($width) {
-      $finfo->addProperty(
-        pht('Width'),
-        pht('%s px', new PhutilNumber($width)));
-    }
-
-    $height = $file->getImageHeight();
-    if ($height) {
-      $finfo->addProperty(
-        pht('Height'),
-        pht('%s px', new PhutilNumber($height)));
     }
 
     $is_image = $file->isViewableImage();
@@ -283,16 +288,8 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
       $finfo->addProperty(pht('Attributes'), $types);
     }
 
-    $storage_properties = new PHUIPropertyListView();
-
-    $tab_group->addTab(
-      id(new PHUITabView())
-        ->setName(pht('Storage'))
-        ->setKey('storage')
-        ->appendChild($storage_properties));
-
-    $storage_properties->addProperty(
-      pht('Engine'),
+    $finfo->addProperty(
+      pht('Storage Engine'),
       $file->getStorageEngine());
 
     $engine = $this->loadStorageEngine($file);
@@ -307,10 +304,10 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
         $format_name = pht('Unknown ("%s")', $format_key);
       }
     }
-    $storage_properties->addProperty(pht('Format'), $format_name);
+    $finfo->addProperty(pht('Storage Format'), $format_name);
 
-    $storage_properties->addProperty(
-      pht('Handle'),
+    $finfo->addProperty(
+      pht('Storage Handle'),
       $file->getStorageHandle());
 
 

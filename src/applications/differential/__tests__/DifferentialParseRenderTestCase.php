@@ -89,13 +89,16 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer(new PhabricatorUser());
 
+    $viewstate = new PhabricatorChangesetViewState();
+
     $parsers = array();
     foreach ($changesets as $changeset) {
-      $cparser = new DifferentialChangesetParser();
-      $cparser->setUser(new PhabricatorUser());
-      $cparser->setDisableCache(true);
-      $cparser->setChangeset($changeset);
-      $cparser->setMarkupEngine($engine);
+      $cparser = id(new DifferentialChangesetParser())
+        ->setViewer(new PhabricatorUser())
+        ->setDisableCache(true)
+        ->setChangeset($changeset)
+        ->setMarkupEngine($engine)
+        ->setViewState($viewstate);
 
       if ($type == 'one') {
         $cparser->setRenderer(new DifferentialChangesetOneUpTestRenderer());

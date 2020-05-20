@@ -216,9 +216,9 @@ abstract class PhabricatorClientLimit {
     $bucket[$client_key] += $score;
 
     if ($is_apcu) {
-      apcu_store($bucket_key, $bucket);
+      @apcu_store($bucket_key, $bucket);
     } else {
-      apc_store($bucket_key, $bucket);
+      @apc_store($bucket_key, $bucket);
     }
 
     return $this;
@@ -247,9 +247,9 @@ abstract class PhabricatorClientLimit {
     $cur = $this->getCurrentBucketID();
     if (!$min) {
       if ($is_apcu) {
-        apcu_store($min_key, $cur);
+        @apcu_store($min_key, $cur);
       } else {
-        apc_store($min_key, $cur);
+        @apc_store($min_key, $cur);
       }
       $min = $cur;
     }
@@ -262,10 +262,10 @@ abstract class PhabricatorClientLimit {
       $bucket_key = $this->getBucketCacheKey($cursor);
       if ($is_apcu) {
         apcu_delete($bucket_key);
-        apcu_store($min_key, $cursor + 1);
+        @apcu_store($min_key, $cursor + 1);
       } else {
         apc_delete($bucket_key);
-        apc_store($min_key, $cursor + 1);
+        @apc_store($min_key, $cursor + 1);
       }
     }
 

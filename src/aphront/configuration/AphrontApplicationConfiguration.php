@@ -27,6 +27,8 @@ final class AphrontApplicationConfiguration
     $request->setApplicationConfiguration($this);
     $request->setCookiePrefix($cookie_prefix);
 
+    $request->updateEphemeralCookies();
+
     return $request;
   }
 
@@ -771,11 +773,20 @@ final class AphrontApplicationConfiguration
       );
     }
 
+    $raw_input = @file_get_contents('php://input');
+    if ($raw_input !== false) {
+      $base64_input = base64_encode($raw_input);
+    } else {
+      $base64_input = null;
+    }
+
     $result = array(
       'path' => $path,
       'params' => $params,
       'user' => idx($_SERVER, 'PHP_AUTH_USER'),
       'pass' => idx($_SERVER, 'PHP_AUTH_PW'),
+
+      'raw.base64' => $base64_input,
 
       // This just makes sure that the response compresses well, so reasonable
       // algorithms should want to gzip or deflate it.
@@ -801,27 +812,22 @@ final class AphrontApplicationConfiguration
     // if we can. Among other things, this corrects variable names with
     // the "." character in them, which PHP normally converts into "_".
 
-    // There are two major considerations here: whether the
-    // `enable_post_data_reading` option is set, and whether the content
-    // type is "multipart/form-data" or not.
-
-    // If `enable_post_data_reading` is off, we're free to read the entire
-    // raw request body and parse it -- and we must, because $_POST and
-    // $_FILES are not built for us. If `enable_post_data_reading` is on,
-    // which is the default, we may not be able to read the body (the
-    // documentation says we can't, but empirically we can at least some
-    // of the time).
+    // If "enable_post_data_reading" is on, the documentation suggests we
+    // can not read the body. In practice, we seem to be able to. This may
+    // need to be resolved at some point, likely by instructing installs
+    // to disable this option.
 
     // If the content type is "multipart/form-data", we need to build both
     // $_POST and $_FILES, which is involved. The body itself is also more
     // difficult to parse than other requests.
+
     $raw_input = PhabricatorStartup::getRawInput();
     $parser = new PhutilQueryStringParser();
 
     if (strlen($raw_input)) {
       $content_type = idx($_SERVER, 'CONTENT_TYPE');
       $is_multipart = preg_match('@^multipart/form-data@i', $content_type);
-      if ($is_multipart && !ini_get('enable_post_data_reading')) {
+      if ($is_multipart) {
         $multipart_parser = id(new AphrontMultipartParser())
           ->setContentType($content_type);
 

@@ -126,25 +126,14 @@ final class DiffusionCommitEditEngine
 
   protected function newAutomaticCommentTransactions($object) {
     $viewer = $this->getViewer();
-    $xactions = array();
-
-    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
-      $viewer,
-      $object->getPHID(),
-      $raw = true);
-    $inlines = msort($inlines, 'getID');
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer);
 
-    $query_template = id(new DiffusionDiffInlineCommentQuery())
-      ->withCommitPHIDs(array($object->getPHID()));
-
     $xactions = $editor->newAutomaticInlineTransactions(
       $object,
-      $inlines,
       PhabricatorAuditActionConstants::INLINE,
-      $query_template);
+      new DiffusionDiffInlineCommentQuery());
 
     return $xactions;
   }

@@ -156,7 +156,8 @@ Verifying Server Status
 =======================
 
 After configuring `notification.servers`, navigate to
-{nav Config > Notification Servers} to verify that things are operational.
+{nav Config > Services > Notification Servers} to verify that things are
+operational.
 
 
 Troubleshooting

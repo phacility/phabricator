@@ -5,6 +5,29 @@ final class PhabricatorDocumentEngineBlocks
 
   private $lists = array();
   private $messages = array();
+  private $rangeMin;
+  private $rangeMax;
+  private $revealedIndexes;
+  private $layoutAvailableRowCount;
+
+  public function setRange($min, $max) {
+    $this->rangeMin = $min;
+    $this->rangeMax = $max;
+    return $this;
+  }
+
+  public function setRevealedIndexes(array $indexes) {
+    $this->revealedIndexes = $indexes;
+    return $this;
+  }
+
+  public function getLayoutAvailableRowCount() {
+    if ($this->layoutAvailableRowCount === null) {
+      throw new PhutilInvalidStateException('new...Layout');
+    }
+
+    return $this->layoutAvailableRowCount;
+  }
 
   public function addMessage($message) {
     $this->messages[] = $message;
@@ -115,6 +138,11 @@ final class PhabricatorDocumentEngineBlocks
       );
     }
 
+    $this->layoutAvailableRowCount = count($rows);
+
+    $rows = $this->revealIndexes($rows, true);
+    $rows = $this->sliceRows($rows);
+
     return $rows;
   }
 
@@ -147,6 +175,11 @@ final class PhabricatorDocumentEngineBlocks
       $idx++;
     }
 
+    $this->layoutAvailableRowCount = count($rows);
+
+    $rows = $this->revealIndexes($rows, false);
+    $rows = $this->sliceRows($rows);
+
     return $rows;
   }
 
@@ -170,6 +203,49 @@ final class PhabricatorDocumentEngineBlocks
       'map' => $map,
       'list' => implode("\n", $list)."\n",
     );
+  }
+
+  private function sliceRows(array $rows) {
+    $min = $this->rangeMin;
+    $max = $this->rangeMax;
+
+    if ($min === null && $max === null) {
+      return $rows;
+    }
+
+    if ($max === null) {
+      return array_slice($rows, $min, null, true);
+    }
+
+    if ($min === null) {
+      $min = 0;
+    }
+
+    return array_slice($rows, $min, $max - $min, true);
+  }
+
+  private function revealIndexes(array $rows, $is_vector) {
+    if ($this->revealedIndexes === null) {
+      return $rows;
+    }
+
+    foreach ($this->revealedIndexes as $index) {
+      if (!isset($rows[$index])) {
+        continue;
+      }
+
+      if ($is_vector) {
+        foreach ($rows[$index] as $block) {
+          if ($block !== null) {
+            $block->setIsVisible(true);
+          }
+        }
+      } else {
+        $rows[$index]->setIsVisible(true);
+      }
+    }
+
+    return $rows;
   }
 
 }

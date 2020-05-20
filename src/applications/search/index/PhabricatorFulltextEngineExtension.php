@@ -39,4 +39,8 @@ abstract class PhabricatorFulltextEngineExtension extends Phobject {
       ->execute();
   }
 
+  public function newFerretSearchFunctions() {
+    return array();
+  }
+
 }

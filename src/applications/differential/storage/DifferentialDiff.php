@@ -232,7 +232,12 @@ final class DifferentialDiff
 
     $changesets = $diff->getChangesets();
 
+    // TODO: This is "safe", but it would be better to propagate a real user
+    // down the stack.
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     id(new DifferentialChangesetEngine())
+      ->setViewer($viewer)
       ->rebuildChangesets($changesets);
 
     return $diff;
@@ -470,6 +475,11 @@ final class DifferentialDiff
         if ($this->hasRevision()) {
           $extended[] = array(
             $this->getRevision(),
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        } else if ($this->getRepositoryPHID()) {
+          $extended[] = array(
+            $this->getRepositoryPHID(),
             PhabricatorPolicyCapability::CAN_VIEW,
           );
         }
@@ -711,6 +721,8 @@ final class DifferentialDiff
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $viewer = $engine->getViewer();
+
     $this->openTransaction();
       $this->delete();
 
@@ -723,6 +735,13 @@ final class DifferentialDiff
         $this->getID());
       foreach ($properties as $prop) {
         $prop->delete();
+      }
+
+      $viewstates = id(new DifferentialViewStateQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($this->getPHID()));
+      foreach ($viewstates as $viewstate) {
+        $viewstate->delete();
       }
 
     $this->saveTransaction();

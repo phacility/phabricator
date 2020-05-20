@@ -748,4 +748,8 @@ final class PhabricatorJupyterDocumentEngine
     return $content;
   }
 
+  public function shouldSuggestEngine(PhabricatorDocumentRef $ref) {
+    return true;
+  }
+
 }
