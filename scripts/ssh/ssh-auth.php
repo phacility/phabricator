@@ -4,6 +4,24 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/init/init-script.php';
 
+// TODO: For now, this is using "parseParital()", not "parse()". This allows
+// the script to accept (and ignore) additional arguments. This preserves
+// backward compatibility until installs have time to migrate to the new
+// syntax.
+
+$args = id(new PhutilArgumentParser($argv))
+  ->parsePartial(
+    array(
+      array(
+        'name' => 'sshd-key',
+        'param' => 'k',
+        'help' => pht(
+          'Accepts the "%%k" parameter from "AuthorizedKeysCommand".'),
+      ),
+    ));
+
+$sshd_key = $args->getArg('sshd-key');
+
 // NOTE: We are caching a datastructure rather than the flat key file because
 // the path on disk to "ssh-exec" is arbitrarily mutable at runtime. See T12397.
 
@@ -83,6 +101,22 @@ if ($authstruct === null) {
   $authstruct_raw = phutil_json_encode($authstruct);
   $ttl = phutil_units('24 hours in seconds');
   $cache->setKey($authstruct_key, $authstruct_raw, $ttl);
+}
+
+// If we've received an "--sshd-key" argument and it matches some known key,
+// only emit that key. (For now, if the key doesn't match, we'll fall back to
+// emitting all keys.)
+if ($sshd_key !== null) {
+  $matches = array();
+  foreach ($authstruct['keys'] as $key => $key_struct) {
+    if ($key_struct['key'] === $sshd_key) {
+      $matches[$key] = $key_struct;
+    }
+  }
+
+  if ($matches) {
+    $authstruct['keys'] = $matches;
+  }
 }
 
 $bin = $root.'/bin/ssh-exec';

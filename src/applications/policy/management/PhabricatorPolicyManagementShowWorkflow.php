@@ -60,8 +60,10 @@ final class PhabricatorPolicyManagementShowWorkflow
 
     $console->writeOut("__%s__\n\n", pht('CAPABILITIES'));
     foreach ($policies as $capability => $policy) {
+      $ref = $policy->newRef($viewer);
+
       $console->writeOut("  **%s**\n", $capability);
-      $console->writeOut("    %s\n", $policy->renderDescription());
+      $console->writeOut("    %s\n", $ref->getPolicyDisplayName());
       $console->writeOut("    %s\n",
         PhabricatorPolicy::getPolicyExplanation($viewer, $policy->getPHID()));
       $console->writeOut("\n");

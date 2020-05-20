@@ -30,9 +30,10 @@ final class PhabricatorSearchApplication extends PhabricatorApplication {
     return array(
       '/search/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorSearchController',
-        'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
         'hovercard/'
           => 'PhabricatorSearchHovercardController',
+        'handle/(?P<phid>[^/]+)/'
+          => 'PhabricatorSearchHandleController',
         'edit/' => array(
           'key/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchEditController',
           'id/(?P<id>[^/]+)/' => 'PhabricatorSearchEditController',

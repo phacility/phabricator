@@ -119,8 +119,11 @@ final class DifferentialCreateDiffConduitAPIMethod
         break;
     }
 
+    $source_path = $request->getValue('sourcePath');
+    $source_path = $this->normalizeSourcePath($source_path);
+
     $diff_data_dict = array(
-      'sourcePath' => $request->getValue('sourcePath'),
+      'sourcePath' => $source_path,
       'sourceMachine' => $request->getValue('sourceMachine'),
       'branch' => $request->getValue('branch'),
       'creationMethod' => $request->getValue('creationMethod'),
@@ -156,6 +159,20 @@ final class DifferentialCreateDiffConduitAPIMethod
       'phid' => $diff->getPHID(),
       'uri' => $uri,
     );
+  }
+
+  private function normalizeSourcePath($source_path) {
+    // See T13385. This property is probably headed for deletion. Until we get
+    // there, stop errors arising from running "arc diff" in a working copy
+    // with too many characters.
+
+    $max_size = id(new DifferentialDiff())
+      ->getColumnMaximumByteLength('sourcePath');
+
+    return id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes($max_size)
+      ->setTerminator('')
+      ->truncateString($source_path);
   }
 
 }

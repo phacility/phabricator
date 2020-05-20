@@ -14,9 +14,17 @@ abstract class PhabricatorDestructionEngineExtension extends Phobject {
     return true;
   }
 
-  abstract public function destroyObject(
+  public function destroyObject(
     PhabricatorDestructionEngine $engine,
-    $object);
+    $object) {
+    return null;
+  }
+
+  public function didDestroyObject(
+    PhabricatorDestructionEngine $engine,
+    $object) {
+    return null;
+  }
 
   final public static function getAllExtensions() {
     return id(new PhutilClassMapQuery())

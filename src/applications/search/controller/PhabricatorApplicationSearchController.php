@@ -194,9 +194,10 @@ final class PhabricatorApplicationSearchController
     if ($run_query && !$named_query && $user->isLoggedIn()) {
       $save_button = id(new PHUIButtonView())
         ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
         ->setHref('/search/edit/key/'.$saved_query->getQueryKey().'/')
         ->setText(pht('Save Query'))
-        ->setIcon('fa-floppy-o');
+        ->setIcon('fa-bookmark');
       $submit->addButton($save_button);
     }
 

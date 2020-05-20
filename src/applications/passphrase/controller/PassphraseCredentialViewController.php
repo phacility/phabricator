@@ -154,7 +154,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
             ->setName(pht('Show Public Key'))
             ->setIcon('fa-download')
             ->setHref($this->getApplicationURI("public/{$id}/"))
-            ->setDisabled(!$can_edit)
             ->setWorkflow(true));
       }
 
@@ -189,14 +188,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $properties->addProperty(
       pht('Credential Type'),
       $type->getCredentialTypeName());
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $credential);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
     if ($type->shouldRequireUsername()) {
       $properties->addProperty(

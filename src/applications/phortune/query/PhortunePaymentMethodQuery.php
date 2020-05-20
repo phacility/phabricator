@@ -53,6 +53,7 @@ final class PhortunePaymentMethodQuery
       $account = idx($accounts, $method->getAccountPHID());
       if (!$account) {
         unset($methods[$key]);
+        $this->didRejectResult($method);
         continue;
       }
       $method->attachAccount($account);
@@ -72,6 +73,7 @@ final class PhortunePaymentMethodQuery
       $merchant = idx($merchants, $method->getMerchantPHID());
       if (!$merchant) {
         unset($methods[$key]);
+        $this->didRejectResult($method);
         continue;
       }
       $method->attachMerchant($merchant);
@@ -91,6 +93,7 @@ final class PhortunePaymentMethodQuery
       $provider_config = idx($provider_configs, $method->getProviderPHID());
       if (!$provider_config) {
         unset($methods[$key]);
+        $this->didRejectResult($method);
         continue;
       }
       $method->attachProviderConfig($provider_config);

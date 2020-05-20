@@ -26,7 +26,7 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getConfigureInstructions() {
-    return pht('This providers does not require any special configuration.');
+    return pht('This provider does not require any special configuration.');
   }
 
   public function canRunConfigurationTest() {

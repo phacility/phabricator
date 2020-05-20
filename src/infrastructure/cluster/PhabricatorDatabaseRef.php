@@ -221,6 +221,9 @@ final class PhabricatorDatabaseRef
     return $this->replicaRefs;
   }
 
+  public function getDisplayName() {
+    return $this->getRefKey();
+  }
 
   public function getRefKey() {
     $host = $this->getHost();

@@ -1,0 +1,35 @@
+http://www.example.com/
+
+(http://www.example.com/)
+
+<http://www.example.com/>
+
+http://www.example.com/wiki/example_(disambiguation)
+
+(example http://www.example.com/)
+
+Quick! http://www.example.com/!
+~~~~~~~~~~
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a></p>
+
+<p>(<a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>)</p>
+
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a></p>
+
+<p><a href="http://www.example.com/wiki/example_(disambiguation)" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/wiki/example_(disambiguation)</a></p>
+
+<p>(example <a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>)</p>
+
+<p>Quick! <a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>!</p>
+~~~~~~~~~~
+http://www.example.com/
+
+(http://www.example.com/)
+
+http://www.example.com/
+
+http://www.example.com/wiki/example_(disambiguation)
+
+(example http://www.example.com/)
+
+Quick! http://www.example.com/!

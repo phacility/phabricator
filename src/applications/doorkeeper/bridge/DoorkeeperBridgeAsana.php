@@ -35,8 +35,10 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->withAccountTypes(array($provider->getProviderType()))
-      ->withAccountDomains(array($provider->getProviderDomain()))
+      ->withProviderConfigPHIDs(
+        array(
+          $provider->getProviderConfigPHID(),
+        ))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -123,8 +125,11 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
   }
 
   public function fillObjectFromData(DoorkeeperExternalObject $obj, $result) {
-    $id = $result['id'];
-    $uri = "https://app.asana.com/0/{$id}/{$id}";
+    $gid = $result['gid'];
+    $uri = urisprintf(
+      'https://app.asana.com/0/%s/%s',
+      $gid,
+      $gid);
     $obj->setObjectURI($uri);
   }
 

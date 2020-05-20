@@ -68,6 +68,37 @@ final class PhabricatorConfigColumnSchema
     return $this->characterSet;
   }
 
+  public function hasSameColumnTypeAs(PhabricatorConfigColumnSchema $other) {
+    $u_type = $this->getColumnType();
+    $v_type = $other->getColumnType();
+
+    if ($u_type === $v_type) {
+      return true;
+    }
+
+    // See T13536. Display widths for integers were deprecated in MySQL 8.0.17
+    // and removed from some display contexts in or around 8.0.19. Older
+    // MySQL versions will report "int(10)"; newer versions will report "int".
+    // Accept these as equivalent.
+
+    static $map = array(
+      'int(10) unsigned' => 'int unsigned',
+      'int(10)' => 'int',
+      'bigint(20) unsigned' => 'bigint unsigned',
+      'bigint(20)' => 'bigint',
+    );
+
+    if (isset($map[$u_type])) {
+      $u_type = $map[$u_type];
+    }
+
+    if (isset($map[$v_type])) {
+      $v_type = $map[$v_type];
+    }
+
+    return ($u_type === $v_type);
+  }
+
   public function getKeyByteLength($prefix = null) {
     $type = $this->getColumnType();
 
@@ -138,7 +169,7 @@ final class PhabricatorConfigColumnSchema
         $issues[] = self::ISSUE_COLLATION;
       }
 
-      if ($this->getColumnType() != $expect->getColumnType()) {
+      if (!$this->hasSameColumnTypeAs($expect)) {
         $issues[] = self::ISSUE_COLUMNTYPE;
       }
 

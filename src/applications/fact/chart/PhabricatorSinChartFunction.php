@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorSinChartFunction
-  extends PhabricatorChartFunction {
+  extends PhabricatorPureChartFunction {
 
   const FUNCTIONKEY = 'sin';
 

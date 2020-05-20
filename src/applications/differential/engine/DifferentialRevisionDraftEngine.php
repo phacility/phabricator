@@ -7,9 +7,12 @@ final class DifferentialRevisionDraftEngine
     $viewer = $this->getViewer();
     $revision = $this->getObject();
 
-    $inlines = DifferentialTransactionQuery::loadUnsubmittedInlineComments(
-      $viewer,
-      $revision);
+    $inlines = id(new DifferentialDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withRevisionPHIDs(array($revision->getPHID()))
+      ->withPublishableComments(true)
+      ->setLimit(1)
+      ->execute();
 
     return (bool)$inlines;
   }

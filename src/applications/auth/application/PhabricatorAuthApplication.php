@@ -73,7 +73,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         'session/downgrade/'
           => 'PhabricatorAuthDowngradeSessionController',
         'enroll/' => array(
-          '(?:(?P<pageKey>[^/]+)/)?(?:(?P<formSaved>saved)/)?'
+          '(?:(?P<pageKey>[^/]+)/)?'
             => 'PhabricatorAuthNeedsMultiFactorController',
         ),
         'sshkey/' => array(

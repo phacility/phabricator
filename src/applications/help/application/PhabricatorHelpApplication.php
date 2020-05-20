@@ -18,7 +18,6 @@ final class PhabricatorHelpApplication extends PhabricatorApplication {
     return array(
       '/help/' => array(
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
-        'editorprotocol/' => 'PhabricatorHelpEditorProtocolController',
         'documentation/(?P<application>\w+)/'
           => 'PhabricatorHelpDocumentationController',
       ),

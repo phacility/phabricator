@@ -62,7 +62,11 @@ final class PhortuneAccountEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    return $object->getURI();
+    if ($this->getIsCreate()) {
+      return $object->getURI();
+    } else {
+      return $object->getDetailsURI();
+    }
   }
 
   protected function buildCustomEditFields($object) {

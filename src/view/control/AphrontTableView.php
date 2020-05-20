@@ -24,6 +24,8 @@ final class AphrontTableView extends AphrontView {
   protected $sortValues = array();
   private $deviceReadyTable;
 
+  private $rowDividers = array();
+
   public function __construct(array $data) {
     $this->data = $data;
   }
@@ -50,6 +52,11 @@ final class AphrontTableView extends AphrontView {
 
   public function setColumnWidths(array $widths) {
     $this->columnWidths = $widths;
+    return $this;
+  }
+
+  public function setRowDividers(array $dividers) {
+    $this->rowDividers = $dividers;
     return $this;
   }
 
@@ -258,10 +265,15 @@ final class AphrontTableView extends AphrontView {
       }
     }
 
+    $dividers = $this->rowDividers;
+
     $data = $this->data;
     if ($data) {
       $row_num = 0;
+      $row_idx = 0;
       foreach ($data as $row) {
+        $is_divider = !empty($dividers[$row_num]);
+
         $row_size = count($row);
         while (count($row) > count($col_classes)) {
           $col_classes[] = null;
@@ -289,6 +301,18 @@ final class AphrontTableView extends AphrontView {
             $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
           }
 
+          if ($is_divider) {
+            $tr[] = phutil_tag(
+              'td',
+              array(
+                'class' => 'row-divider',
+                'colspan' => count($visibility),
+              ),
+              $value);
+            $row_idx = -1;
+            break;
+          }
+
           $tr[] = phutil_tag(
             'td',
             array(
@@ -299,7 +323,7 @@ final class AphrontTableView extends AphrontView {
         }
 
         $class = idx($this->rowClasses, $row_num);
-        if ($this->zebraStripes && ($row_num % 2)) {
+        if ($this->zebraStripes && ($row_idx % 2)) {
           if ($class !== null) {
             $class = 'alt alt-'.$class;
           } else {
@@ -309,6 +333,7 @@ final class AphrontTableView extends AphrontView {
 
         $table[] = phutil_tag('tr', array('class' => $class), $tr);
         ++$row_num;
+        ++$row_idx;
       }
     } else {
       $colspan = max(count(array_filter($visibility)), 1);

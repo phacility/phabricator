@@ -65,8 +65,10 @@ final class PhabricatorAsanaConfigOptions
     $account = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->withAccountTypes(array($provider->getProviderType()))
-      ->withAccountDomains(array($provider->getProviderDomain()))
+      ->withProviderConfigPHIDs(
+        array(
+          $provider->getProviderConfigPHID(),
+        ))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -102,7 +104,10 @@ final class PhabricatorAsanaConfigOptions
       pht('Workspace Name'));
     $out[] = '| ------------ | -------------- |';
     foreach ($workspaces as $workspace) {
-      $out[] = sprintf('| `%s` | `%s` |', $workspace['id'], $workspace['name']);
+      $out[] = sprintf(
+        '| `%s` | `%s` |',
+        $workspace['gid'],
+        $workspace['name']);
     }
 
     $out = implode("\n", $out);

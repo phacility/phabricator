@@ -1,0 +1,18 @@
+[[ mailto:alincoln@example.com | mail me ]]
+
+[ mail me ]( mailto:alincoln@example.com )
+
+[[mailto:alincoln@example.com]]
+
+~~~~~~~~~~
+<p><a href="mailto:alincoln@example.com" class="remarkup-link" target="_blank" rel="noreferrer">mail me</a></p>
+
+<p><a href="mailto:alincoln@example.com" class="remarkup-link" target="_blank" rel="noreferrer">mail me</a></p>
+
+<p><a href="mailto:alincoln@example.com" class="remarkup-link" target="_blank" rel="noreferrer">alincoln@example.com</a></p>
+~~~~~~~~~~
+mail me <alincoln@example.com>
+
+mail me <alincoln@example.com>
+
+alincoln@example.com

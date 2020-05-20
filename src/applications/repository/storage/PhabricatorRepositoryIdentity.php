@@ -13,6 +13,7 @@ final class PhabricatorRepositoryIdentity
   protected $automaticGuessedUserPHID;
   protected $manuallySetUserPHID;
   protected $currentEffectiveUserPHID;
+  protected $emailAddress;
 
   protected function getConfiguration() {
     return array(
@@ -26,11 +27,15 @@ final class PhabricatorRepositoryIdentity
         'automaticGuessedUserPHID' => 'phid?',
         'manuallySetUserPHID' => 'phid?',
         'currentEffectiveUserPHID' => 'phid?',
+        'emailAddress' => 'sort255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_identity' => array(
           'columns' => array('identityNameHash'),
           'unique' => true,
+        ),
+        'key_email' => array(
+          'columns' => array('emailAddress(64)'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -69,6 +74,10 @@ final class PhabricatorRepositoryIdentity
     return $this->getIdentityName();
   }
 
+  public function getObjectName() {
+    return pht('Identity %d', $this->getID());
+  }
+
   public function getURI() {
     return '/diffusion/identity/view/'.$this->getID().'/';
   }
@@ -87,10 +96,36 @@ final class PhabricatorRepositoryIdentity
 
   public function save() {
     if ($this->manuallySetUserPHID) {
-      $this->currentEffectiveUserPHID = $this->manuallySetUserPHID;
+      $unassigned = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
+      if ($this->manuallySetUserPHID === $unassigned) {
+        $effective_phid = null;
+      } else {
+        $effective_phid = $this->manuallySetUserPHID;
+      }
     } else {
-      $this->currentEffectiveUserPHID = $this->automaticGuessedUserPHID;
+      $effective_phid = $this->automaticGuessedUserPHID;
     }
+
+    $this->setCurrentEffectiveUserPHID($effective_phid);
+
+    $email_address = $this->getIdentityEmailAddress();
+
+    // Raw identities are unrestricted binary data, and may consequently
+    // have arbitrarily long, binary email address information. We can't
+    // store this kind of information in the "emailAddress" column, which
+    // has column type "sort255".
+
+    // This kind of address almost certainly not legitimate and users can
+    // manually set the target of the identity, so just discard it rather
+    // than trying especially hard to make it work.
+
+    $byte_limit = $this->getColumnMaximumByteLength('emailAddress');
+    $email_address = phutil_utf8ize($email_address);
+    if (strlen($email_address) > $byte_limit) {
+      $email_address = null;
+    }
+
+    $this->setEmailAddress($email_address);
 
     return parent::save();
   }
@@ -111,7 +146,8 @@ final class PhabricatorRepositoryIdentity
   }
 
   public function hasAutomaticCapability(
-    $capability, PhabricatorUser $viewer) {
+    $capability,
+    PhabricatorUser $viewer) {
     return false;
   }
 

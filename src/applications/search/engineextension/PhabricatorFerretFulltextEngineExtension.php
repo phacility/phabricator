@@ -131,7 +131,8 @@ final class PhabricatorFerretFulltextEngineExtension
     }
     $ngrams_source = implode("\n", $ngrams_source);
 
-    $ngrams = $engine->getTermNgramsFromString($ngrams_source);
+    $ngram_engine = new PhabricatorSearchNgramEngine();
+    $ngrams = $ngram_engine->getTermNgramsFromString($ngrams_source);
 
     $object->openTransaction();
 
@@ -250,6 +251,26 @@ final class PhabricatorFerretFulltextEngineExtension
       'DELETE FROM %T WHERE documentID = %d',
       $engine->getNgramsTableName(),
       $old_id);
+  }
+
+  public function newFerretSearchFunctions() {
+    return array(
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('all')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_ALL),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('title')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_TITLE),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('body')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_BODY),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('core')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_CORE),
+      id(new FerretConfigurableSearchFunction())
+        ->setFerretFunctionName('comment')
+        ->setFerretFieldKey(PhabricatorSearchDocumentFieldType::FIELD_COMMENT),
+    );
   }
 
 }

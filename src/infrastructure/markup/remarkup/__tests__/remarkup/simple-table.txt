@@ -1,0 +1,24 @@
+| analyze_resources | original | mobile only | www only | both |
+|                   | -------- | ----------- | -------- | ---- |
+| //real//          | 31 s     | 24 s        | 31 s     | 31 s
+| --------
+| //user//          | 49 s     | 25 s        | 31 s     | 49 s
+| --------
+| //sys//           | 24 s     | 12 s        | 13 s     | 24 s
+| -------
+~~~~~~~~~~
+<div class="remarkup-table-wrap"><table class="remarkup-table">
+<tr><td>analyze_resources</td><th>original</th><th>mobile only</th><th>www only</th><th>both</th></tr>
+<tr><th><em>real</em></th><td>31 s</td><td>24 s</td><td>31 s</td><td>31 s</td></tr>
+<tr><th><em>user</em></th><td>49 s</td><td>25 s</td><td>31 s</td><td>49 s</td></tr>
+<tr><th><em>sys</em></th><td>24 s</td><td>12 s</td><td>13 s</td><td>24 s</td></tr>
+</table></div>
+~~~~~~~~~~
+| analyze_resources | original | mobile only | www only | both |
+|                   | -------- | ----------- | -------- | ---- |
+| //real//          | 31 s     | 24 s        | 31 s     | 31 s |
+| ----------------- |          |             |          |      |
+| //user//          | 49 s     | 25 s        | 31 s     | 49 s |
+| ----------------- |          |             |          |      |
+| //sys//           | 24 s     | 12 s        | 13 s     | 24 s |
+| ----------------- |          |             |          |      |

@@ -44,8 +44,6 @@ final class DifferentialChangesetParser extends Phobject {
   private $highlightErrors;
   private $disableCache;
   private $renderer;
-  private $characterEncoding;
-  private $highlightAs;
   private $highlightingDisabled;
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
@@ -58,6 +56,10 @@ final class DifferentialChangesetParser extends Phobject {
   private $linesOfContext = 8;
 
   private $highlightEngine;
+  private $viewer;
+
+  private $viewState;
+  private $availableDocumentEngines;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -83,22 +85,13 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->showEditAndReplyLinks;
   }
 
-  public function setHighlightAs($highlight_as) {
-    $this->highlightAs = $highlight_as;
+  public function setViewState(PhabricatorChangesetViewState $view_state) {
+    $this->viewState = $view_state;
     return $this;
   }
 
-  public function getHighlightAs() {
-    return $this->highlightAs;
-  }
-
-  public function setCharacterEncoding($character_encoding) {
-    $this->characterEncoding = $character_encoding;
-    return $this;
-  }
-
-  public function getCharacterEncoding() {
-    return $this->characterEncoding;
+  public function getViewState() {
+    return $this->viewState;
   }
 
   public function setRenderer(DifferentialChangesetRenderer $renderer) {
@@ -107,9 +100,6 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function getRenderer() {
-    if (!$this->renderer) {
-      return new DifferentialChangesetTwoUpRenderer();
-    }
     return $this->renderer;
   }
 
@@ -149,44 +139,43 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->offsetMode;
   }
 
-  public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
-    $is_unified = $viewer->compareUserSetting(
-      PhabricatorUnifiedDiffsSetting::SETTINGKEY,
-      PhabricatorUnifiedDiffsSetting::VALUE_ALWAYS_UNIFIED);
-
-    if ($is_unified) {
-      return '1up';
-    }
-
-    return null;
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
   }
 
-  public function readParametersFromRequest(AphrontRequest $request) {
-    $this->setCharacterEncoding($request->getStr('encoding'));
-    $this->setHighlightAs($request->getStr('highlight'));
+  public function getViewer() {
+    return $this->viewer;
+  }
 
-    $renderer = null;
+  private function newRenderer() {
+    $viewer = $this->getViewer();
+    $viewstate = $this->getViewstate();
 
-    // If the viewer prefers unified diffs, always set the renderer to unified.
-    // Otherwise, we leave it unspecified and the client will choose a
-    // renderer based on the screen size.
+    $renderer_key = $viewstate->getRendererKey();
 
-    if ($request->getStr('renderer')) {
-      $renderer = $request->getStr('renderer');
-    } else {
-      $renderer = self::getDefaultRendererForViewer($request->getViewer());
+    if ($renderer_key === null) {
+      $is_unified = $viewer->compareUserSetting(
+        PhabricatorUnifiedDiffsSetting::SETTINGKEY,
+        PhabricatorUnifiedDiffsSetting::VALUE_ALWAYS_UNIFIED);
+
+      if ($is_unified) {
+        $renderer_key = '1up';
+      } else {
+        $renderer_key = $viewstate->getDefaultDeviceRendererKey();
+      }
     }
 
-    switch ($renderer) {
+    switch ($renderer_key) {
       case '1up':
-        $this->setRenderer(new DifferentialChangesetOneUpRenderer());
+        $renderer = new DifferentialChangesetOneUpRenderer();
         break;
       default:
-        $this->setRenderer(new DifferentialChangesetTwoUpRenderer());
+        $renderer = new DifferentialChangesetTwoUpRenderer();
         break;
     }
 
-    return $this;
+    return $renderer;
   }
 
   const CACHE_VERSION = 14;
@@ -226,7 +215,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->depthOnlyLines;
   }
 
-  public function setVisibileLinesMask(array $mask) {
+  public function setVisibleLinesMask(array $mask) {
     $this->visible = $mask;
     return $this;
   }
@@ -357,15 +346,6 @@ final class DifferentialChangesetParser extends Phobject {
     return $this;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
-  }
-
   public function setCoverage($coverage) {
     $this->coverage = $coverage;
     return $this;
@@ -375,7 +355,7 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function parseInlineComment(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     // Parse only comments which are actually visible.
     if ($this->isCommentVisibleOnRenderedDiff($comment)) {
@@ -571,7 +551,7 @@ final class DifferentialChangesetParser extends Phobject {
       $result = $text;
 
       if (isset($intra[$key])) {
-        $result = ArcanistDiffUtils::applyIntralineDiff(
+        $result = PhabricatorDifferenceEngine::applyIntralineDiff(
           $result,
           $intra[$key]);
       }
@@ -583,7 +563,7 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function getHighlightFuture($corpus) {
-    $language = $this->highlightAs;
+    $language = $this->getViewState()->getHighlightLanguage();
 
     if (!$language) {
       $language = $this->highlightEngine->getLanguageFromFilename(
@@ -613,33 +593,39 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function tryCacheStuff() {
+    $changeset = $this->getChangeset();
+    if (!$changeset->hasSourceTextBody()) {
+
+      // TODO: This isn't really correct (the change is not "generated"), the
+      // intent is just to not render a text body for Subversion directory
+      // changes, etc.
+      $this->markGenerated();
+
+      return;
+    }
+
+    $viewstate = $this->getViewState();
+
     $skip_cache = false;
 
     if ($this->disableCache) {
       $skip_cache = true;
     }
 
-    if ($this->characterEncoding) {
+    $character_encoding = $viewstate->getCharacterEncoding();
+    if ($character_encoding !== null) {
       $skip_cache = true;
     }
 
-    if ($this->highlightAs) {
+    $highlight_language = $viewstate->getHighlightLanguage();
+    if ($highlight_language !== null) {
       $skip_cache = true;
     }
 
-    $changeset = $this->changeset;
-
-    if ($changeset->getFileType() != DifferentialChangeType::FILE_TEXT &&
-        $changeset->getFileType() != DifferentialChangeType::FILE_SYMLINK) {
-
-      $this->markGenerated();
-
-    } else {
-      if ($skip_cache || !$this->loadCache()) {
-        $this->process();
-        if (!$skip_cache) {
-          $this->saveCache();
-        }
+    if ($skip_cache || !$this->loadCache()) {
+      $this->process();
+      if (!$skip_cache) {
+        $this->saveCache();
       }
     }
   }
@@ -678,13 +664,13 @@ final class DifferentialChangesetParser extends Phobject {
     $lines_context = $this->getLinesOfContext();
 
     $hunk_parser->generateIntraLineDiffs();
-    $hunk_parser->generateVisibileLinesMask($lines_context);
+    $hunk_parser->generateVisibleLinesMask($lines_context);
 
     $this->setOldLines($hunk_parser->getOldLines());
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
     $this->setDepthOnlyLines($hunk_parser->getDepthOnlyLines());
-    $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
+    $this->setVisibleLinesMask($hunk_parser->getVisibleLinesMask());
     $this->hunkStartLines = $hunk_parser->getHunkStartLines(
       $changeset->getHunks());
 
@@ -767,6 +753,14 @@ final class DifferentialChangesetParser extends Phobject {
     $range_len    = null,
     $mask_force   = array()) {
 
+    $viewer = $this->getViewer();
+
+    $renderer = $this->getRenderer();
+    if (!$renderer) {
+      $renderer = $this->newRenderer();
+      $this->setRenderer($renderer);
+    }
+
     // "Top level" renders are initial requests for the whole file, versus
     // requests for a specific range generated by clicking "show more". We
     // generate property changes and "shield" UI elements only for toplevel
@@ -774,14 +768,18 @@ final class DifferentialChangesetParser extends Phobject {
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
+    $viewstate = $this->getViewState();
+
     $encoding = null;
-    if ($this->characterEncoding) {
+
+    $character_encoding = $viewstate->getCharacterEncoding();
+    if ($character_encoding) {
       // We are forcing this changeset to be interpreted with a specific
       // character encoding, so force all the hunks into that encoding and
       // propagate it to the renderer.
-      $encoding = $this->characterEncoding;
+      $encoding = $character_encoding;
       foreach ($this->changeset->getHunks() as $hunk) {
-        $hunk->forceEncoding($this->characterEncoding);
+        $hunk->forceEncoding($character_encoding);
       }
     } else {
       // We're just using the default, so tell the renderer what that is
@@ -823,7 +821,7 @@ final class DifferentialChangesetParser extends Phobject {
       count($this->new));
 
     $renderer = $this->getRenderer()
-      ->setUser($this->getUser())
+      ->setUser($this->getViewer())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
       ->setIsTopLevel($this->isTopLevel)
@@ -847,13 +845,52 @@ final class DifferentialChangesetParser extends Phobject {
       ->setHighlightingDisabled($this->highlightingDisabled)
       ->setDepthOnlyLines($this->getDepthOnlyLines());
 
-    $shield = null;
-    if ($this->isTopLevel && !$this->comments) {
+    list($engine, $old_ref, $new_ref) = $this->newDocumentEngine();
+    if ($engine) {
+      $engine_blocks = $engine->newEngineBlocks(
+        $old_ref,
+        $new_ref);
+    } else {
+      $engine_blocks = null;
+    }
+
+    $has_document_engine = ($engine_blocks !== null);
+
+    // Remove empty comments that don't have any unsaved draft data.
+    PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+      $viewer,
+      $this->comments);
+    foreach ($this->comments as $key => $comment) {
+      if ($comment->isVoidComment($viewer)) {
+        unset($this->comments[$key]);
+      }
+    }
+
+    // See T13515. Sometimes, we collapse file content by default: for
+    // example, if the file is marked as containing generated code.
+
+    // If a file has inline comments, that normally means we never collapse
+    // it. However, if the viewer has already collapsed all of the inlines,
+    // it's fine to collapse the file.
+
+    $expanded_comments = array();
+    foreach ($this->comments as $comment) {
+      if ($comment->isHidden()) {
+        continue;
+      }
+      $expanded_comments[] = $comment;
+    }
+
+    $collapsed_count = (count($this->comments) - count($expanded_comments));
+
+    $shield_raw = null;
+    $shield_text = null;
+    $shield_type = null;
+    if ($this->isTopLevel && !$expanded_comments && !$has_document_engine) {
       if ($this->isGenerated()) {
-        $shield = $renderer->renderShield(
-          pht(
-            'This file contains generated code, which does not normally '.
-            'need to be reviewed.'));
+        $shield_text = pht(
+          'This file contains generated code, which does not normally '.
+          'need to be reviewed.');
       } else if ($this->isMoveAway()) {
         // We put an empty shield on these files. Normally, they do not have
         // any diff content anyway. However, if they come through `arc`, they
@@ -863,7 +900,7 @@ final class DifferentialChangesetParser extends Phobject {
         // We could show a message like "this file was moved", but we show
         // that as a change header anyway, so it would be redundant. Instead,
         // just render an empty shield to skip rendering the diff body.
-        $shield = '';
+        $shield_raw = '';
       } else if ($this->isUnchanged()) {
         $type = 'text';
         if (!$rows) {
@@ -877,27 +914,50 @@ final class DifferentialChangesetParser extends Phobject {
           $type = 'none';
         }
 
+        $shield_type = $type;
+
         $type_add = DifferentialChangeType::TYPE_ADD;
         if ($this->changeset->getChangeType() == $type_add) {
           // Although the generic message is sort of accurate in a technical
           // sense, this more-tailored message is less confusing.
-          $shield = $renderer->renderShield(
-            pht('This is an empty file.'),
-            $type);
+          $shield_text = pht('This is an empty file.');
         } else {
-          $shield = $renderer->renderShield(
-            pht('The contents of this file were not changed.'),
-            $type);
+          $shield_text = pht('The contents of this file were not changed.');
         }
       } else if ($this->isDeleted()) {
-        $shield = $renderer->renderShield(
-          pht('This file was completely deleted.'));
+        $shield_text = pht('This file was completely deleted.');
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $shield = $renderer->renderShield(
-          pht(
-            'This file has a very large number of changes (%s lines).',
-            new PhutilNumber($this->changeset->getAffectedLineCount())));
+        $shield_text = pht(
+          'This file has a very large number of changes (%s lines).',
+          new PhutilNumber($this->changeset->getAffectedLineCount()));
       }
+    }
+
+    $shield = null;
+    if ($shield_raw !== null) {
+      $shield = $shield_raw;
+    } else if ($shield_text !== null) {
+      if ($shield_type === null) {
+        $shield_type = 'default';
+      }
+
+      // If we have inlines and the shield would normally show the whole file,
+      // downgrade it to show only text around the inlines.
+      if ($collapsed_count) {
+        if ($shield_type === 'text') {
+          $shield_type = 'default';
+        }
+
+        $shield_text = array(
+          $shield_text,
+          ' ',
+          pht(
+            'This file has %d collapsed inline comment(s).',
+            new PhutilNumber($collapsed_count)),
+        );
+      }
+
+      $shield = $renderer->renderShield($shield_text, $shield_type);
     }
 
     if ($shield !== null) {
@@ -935,10 +995,15 @@ final class DifferentialChangesetParser extends Phobject {
         $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
 
         $line = $comment->getLineNumber();
-        if ($new_side) {
-          $back_line = $new_backmap[$line];
+
+        // See T13524. Lint inlines from Harbormaster may not have a line
+        // number.
+        if ($line === null) {
+          $back_line = null;
+        } else if ($new_side) {
+          $back_line = idx($new_backmap, $line);
         } else {
-          $back_line = $old_backmap[$line];
+          $back_line = idx($old_backmap, $line);
         }
 
         if ($back_line != $line) {
@@ -957,7 +1022,6 @@ final class DifferentialChangesetParser extends Phobject {
 
           $comment->setLineNumber($back_line);
           $comment->setLineLength(0);
-
         }
 
         $start = max($comment->getLineNumber() - $lines_context, 0);
@@ -999,83 +1063,60 @@ final class DifferentialChangesetParser extends Phobject {
         }
       }
     }
+
     $renderer
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);
 
+    if ($engine_blocks !== null) {
+      $reference = $this->getRenderingReference();
+      $parts = explode('/', $reference);
+      if (count($parts) == 2) {
+        list($id, $vs) = $parts;
+      } else {
+        $id = $parts[0];
+        $vs = 0;
+      }
+
+      // If we don't have an explicit "vs" changeset, it's the left side of
+      // the "id" changeset.
+      if (!$vs) {
+        $vs = $id;
+      }
+
+      if ($mask_force) {
+        $engine_blocks->setRevealedIndexes(array_keys($mask_force));
+      }
+
+      if ($range_start !== null || $range_len !== null) {
+        $range_min = $range_start;
+
+        if ($range_len === null) {
+          $range_max = null;
+        } else {
+          $range_max = (int)$range_start + (int)$range_len;
+        }
+
+        $engine_blocks->setRange($range_min, $range_max);
+      }
+
+      $renderer
+        ->setDocumentEngine($engine)
+        ->setDocumentEngineBlocks($engine_blocks);
+
+      return $renderer->renderDocumentEngineBlocks(
+        $engine_blocks,
+        (string)$id,
+        (string)$vs);
+    }
+
+    // If we've made it here with a type of file we don't know how to render,
+    // bail out with a default empty rendering. Normally, we'd expect a
+    // document engine to catch these changes before we make it this far.
     switch ($this->changeset->getFileType()) {
-      case DifferentialChangeType::FILE_IMAGE:
-        $old = null;
-        $new = null;
-        // TODO: Improve the architectural issue as discussed in D955
-        // https://secure.phabricator.com/D955
-        $reference = $this->getRenderingReference();
-        $parts = explode('/', $reference);
-        if (count($parts) == 2) {
-          list($id, $vs) = $parts;
-        } else {
-          $id = $parts[0];
-          $vs = 0;
-        }
-        $id = (int)$id;
-        $vs = (int)$vs;
-
-        if (!$vs) {
-          $metadata = $this->changeset->getMetadata();
-          $data = idx($metadata, 'attachment-data');
-
-          $old_phid = idx($metadata, 'old:binary-phid');
-          $new_phid = idx($metadata, 'new:binary-phid');
-        } else {
-          $vs_changeset = id(new DifferentialChangeset())->load($vs);
-          $old_phid = null;
-          $new_phid = null;
-
-          // TODO: This is spooky, see D6851
-          if ($vs_changeset) {
-            $vs_metadata = $vs_changeset->getMetadata();
-            $old_phid = idx($vs_metadata, 'new:binary-phid');
-          }
-
-          $changeset = id(new DifferentialChangeset())->load($id);
-          if ($changeset) {
-            $metadata = $changeset->getMetadata();
-            $new_phid = idx($metadata, 'new:binary-phid');
-          }
-        }
-
-        if ($old_phid || $new_phid) {
-          // grab the files, (micro) optimization for 1 query not 2
-          $file_phids = array();
-          if ($old_phid) {
-            $file_phids[] = $old_phid;
-          }
-          if ($new_phid) {
-            $file_phids[] = $new_phid;
-          }
-
-          $files = id(new PhabricatorFileQuery())
-            ->setViewer($this->getUser())
-            ->withPHIDs($file_phids)
-            ->execute();
-          foreach ($files as $file) {
-            if (empty($file)) {
-              continue;
-            }
-            if ($file->getPHID() == $old_phid) {
-              $old = $file;
-            } else if ($file->getPHID() == $new_phid) {
-              $new = $file;
-            }
-          }
-        }
-
-        $renderer->attachOldFile($old);
-        $renderer->attachNewFile($new);
-
-        return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
+      case DifferentialChangeType::FILE_IMAGE:
         $output = $renderer->renderChangesetTable(null);
         return $output;
     }
@@ -1180,11 +1221,11 @@ final class DifferentialChangesetParser extends Phobject {
    * taking into consideration which halves of which changesets will actually
    * be shown.
    *
-   * @param PhabricatorInlineCommentInterface Comment to test for visibility.
+   * @param PhabricatorInlineComment Comment to test for visibility.
    * @return bool True if the comment is visible on the rendered diff.
    */
   private function isCommentVisibleOnRenderedDiff(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     $changeset_id = $comment->getChangesetID();
     $is_new = $comment->getIsNewFile();
@@ -1208,12 +1249,12 @@ final class DifferentialChangesetParser extends Phobject {
    * Note that the comment must appear somewhere on the rendered changeset, as
    * per isCommentVisibleOnRenderedDiff().
    *
-   * @param PhabricatorInlineCommentInterface Comment to test for display
+   * @param PhabricatorInlineComment Comment to test for display
    *              location.
    * @return bool True for right, false for left.
    */
   private function isCommentOnRightSideWhenDisplayed(
-    PhabricatorInlineCommentInterface $comment) {
+    PhabricatorInlineComment $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
       throw new Exception(pht('Comment is not visible on changeset!'));
@@ -1321,9 +1362,15 @@ final class DifferentialChangesetParser extends Phobject {
     $old_back = array();
     $new_back = array();
     foreach ($this->old as $ii => $old) {
+      if ($old === null) {
+        continue;
+      }
       $old_back[$old['line']] = $old['line'];
     }
     foreach ($this->new as $ii => $new) {
+      if ($new === null) {
+        continue;
+      }
       $new_back[$new['line']] = $new['line'];
     }
 
@@ -1673,6 +1720,235 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     return $prefix.$line;
+  }
+
+  private function newDocumentEngine() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    list($old_file, $new_file) = $this->loadFileObjectsForChangeset();
+
+    $no_old = !$changeset->hasOldState();
+    $no_new = !$changeset->hasNewState();
+
+    if ($no_old) {
+      $old_ref = null;
+    } else {
+      $old_ref = id(new PhabricatorDocumentRef())
+        ->setName($changeset->getOldFile());
+      if ($old_file) {
+        $old_ref->setFile($old_file);
+      } else {
+        $old_data = $this->getRawDocumentEngineData($this->old);
+        $old_ref->setData($old_data);
+      }
+    }
+
+    if ($no_new) {
+      $new_ref = null;
+    } else {
+      $new_ref = id(new PhabricatorDocumentRef())
+        ->setName($changeset->getFilename());
+      if ($new_file) {
+        $new_ref->setFile($new_file);
+      } else {
+        $new_data = $this->getRawDocumentEngineData($this->new);
+        $new_ref->setData($new_data);
+      }
+    }
+
+    $old_engines = null;
+    if ($old_ref) {
+      $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
+        $viewer,
+        $old_ref);
+    }
+
+    $new_engines = null;
+    if ($new_ref) {
+      $new_engines = PhabricatorDocumentEngine::getEnginesForRef(
+        $viewer,
+        $new_ref);
+    }
+
+    if ($new_engines !== null && $old_engines !== null) {
+      $shared_engines = array_intersect_key($new_engines, $old_engines);
+      $default_engine = head_key($new_engines);
+    } else if ($new_engines !== null) {
+      $shared_engines = $new_engines;
+      $default_engine = head_key($shared_engines);
+    } else if ($old_engines !== null) {
+      $shared_engines = $old_engines;
+      $default_engine = head_key($shared_engines);
+    } else {
+      return null;
+    }
+
+    foreach ($shared_engines as $key => $shared_engine) {
+      if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
+        unset($shared_engines[$key]);
+      }
+    }
+
+    $this->availableDocumentEngines = $shared_engines;
+
+    $viewstate = $this->getViewState();
+
+    $engine_key = $viewstate->getDocumentEngineKey();
+    if (strlen($engine_key)) {
+      if (isset($shared_engines[$engine_key])) {
+        $document_engine = $shared_engines[$engine_key];
+      } else {
+        $document_engine = null;
+      }
+    } else {
+      // If we aren't rendering with a specific engine, only use a default
+      // engine if the best engine for the new file is a shared engine which
+      // can diff files. If we're less picky (for example, by accepting any
+      // shared engine) we can end up with silly behavior (like ".json" files
+      // rendering as Jupyter documents).
+
+      if (isset($shared_engines[$default_engine])) {
+        $document_engine = $shared_engines[$default_engine];
+      } else {
+        $document_engine = null;
+      }
+    }
+
+    if ($document_engine) {
+      return array(
+        $document_engine,
+        $old_ref,
+        $new_ref);
+    }
+
+    return null;
+  }
+
+  private function loadFileObjectsForChangeset() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    $old_phid = $changeset->getOldFileObjectPHID();
+    $new_phid = $changeset->getNewFileObjectPHID();
+
+    $old_file = null;
+    $new_file = null;
+
+    if ($old_phid || $new_phid) {
+      $file_phids = array();
+      if ($old_phid) {
+        $file_phids[] = $old_phid;
+      }
+      if ($new_phid) {
+        $file_phids[] = $new_phid;
+      }
+
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
+
+      if ($old_phid) {
+        $old_file = idx($files, $old_phid);
+        if (!$old_file) {
+          throw new Exception(
+            pht(
+              'Failed to load file data for changeset ("%s").',
+              $old_phid));
+        }
+        $changeset->attachOldFileObject($old_file);
+      }
+
+      if ($new_phid) {
+        $new_file = idx($files, $new_phid);
+        if (!$new_file) {
+          throw new Exception(
+            pht(
+              'Failed to load file data for changeset ("%s").',
+              $new_phid));
+        }
+        $changeset->attachNewFileObject($new_file);
+      }
+    }
+
+    return array($old_file, $new_file);
+  }
+
+  public function newChangesetResponse() {
+    // NOTE: This has to happen first because it has side effects. Yuck.
+    $rendered_changeset = $this->renderChangeset();
+
+    $renderer = $this->getRenderer();
+    $renderer_key = $renderer->getRendererKey();
+
+    $viewstate = $this->getViewState();
+
+    $undo_templates = $renderer->renderUndoTemplates();
+    foreach ($undo_templates as $key => $undo_template) {
+      $undo_templates[$key] = hsprintf('%s', $undo_template);
+    }
+
+    $document_engine = $renderer->getDocumentEngine();
+    if ($document_engine) {
+      $document_engine_key = $document_engine->getDocumentEngineKey();
+    } else {
+      $document_engine_key = null;
+    }
+
+    $available_keys = array();
+    $engines = $this->availableDocumentEngines;
+    if (!$engines) {
+      $engines = array();
+    }
+
+    $available_keys = mpull($engines, 'getDocumentEngineKey');
+
+    // TODO: Always include "source" as a usable engine to default to
+    // the buitin rendering. This is kind of a hack and does not actually
+    // use the source engine. The source engine isn't a diff engine, so
+    // selecting it causes us to fall through and render with builtin
+    // behavior. For now, overall behavir is reasonable.
+
+    $available_keys[] = PhabricatorSourceDocumentEngine::ENGINEKEY;
+    $available_keys = array_fuse($available_keys);
+    $available_keys = array_values($available_keys);
+
+    $state = array(
+      'undoTemplates' => $undo_templates,
+      'rendererKey' => $renderer_key,
+      'highlight' => $viewstate->getHighlightLanguage(),
+      'characterEncoding' => $viewstate->getCharacterEncoding(),
+      'requestDocumentEngineKey' => $viewstate->getDocumentEngineKey(),
+      'responseDocumentEngineKey' => $document_engine_key,
+      'availableDocumentEngineKeys' => $available_keys,
+      'isHidden' => $viewstate->getHidden(),
+    );
+
+    return id(new PhabricatorChangesetResponse())
+      ->setRenderedChangeset($rendered_changeset)
+      ->setChangesetState($state);
+  }
+
+  private function getRawDocumentEngineData(array $lines) {
+    $text = array();
+
+    foreach ($lines as $line) {
+      if ($line === null) {
+        continue;
+      }
+
+      // If this is a "No newline at end of file." annotation, don't hand it
+      // off to the DocumentEngine.
+      if ($line['type'] === '\\') {
+        continue;
+      }
+
+      $text[] = $line['text'];
+    }
+
+    return implode('', $text);
   }
 
 }

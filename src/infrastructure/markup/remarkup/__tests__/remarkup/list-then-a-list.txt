@@ -1,0 +1,15 @@
+1) one
+
+- a
+~~~~~~~~~~
+<ol class="remarkup-list">
+<li class="remarkup-list-item">one</li>
+</ol>
+
+<ul class="remarkup-list">
+<li class="remarkup-list-item">a</li>
+</ul>
+~~~~~~~~~~
+1. one
+
+- a

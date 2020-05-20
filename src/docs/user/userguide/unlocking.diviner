@@ -1,0 +1,123 @@
+@title User Guide: Unlocking Objects
+@group userguide
+
+Explains how to access locked or invisible objects and accounts.
+
+Overview
+========
+
+Phabricator tries to make it difficult for users to lock themselves out of
+things, but you can occasionally end up in situations where no one has access
+to an object that you need access to.
+
+For example, sometimes the only user who had edit permission for something has
+left the organization, or you configured a "Phase of the Moon" policy rule and
+the stars aren't currently aligned.
+
+You can use various CLI tools to unlock objects and accounts if you need to
+regain access.
+
+
+Unlocking Accounts
+==================
+
+If you need to regain access to an object, the easiest approach is usually to
+recover access to the account which owns it, then change the object policies
+to be more open using the web UI.
+
+For example, if an important task was accidentally locked so that only a user
+who is currently on vacation can edit it, you can log in as that user and
+change the edit policy to something more permissive.
+
+To regain access to an account:
+
+```
+$ ./bin/auth recover <username>
+```
+
+If the account you're recovering access to has MFA or other session prompts,
+use the `--force-full-session` to bypass them:
+
+```
+$ ./bin/auth recover <username> --force-full-session
+```
+
+In either case, the command will give you a link you a one-time link you can
+use to access the account from the web UI. From there, you can open up objects
+or change settings.
+
+
+Unlocking MFA
+=============
+
+You can completely strip MFA from a user account with:
+
+```
+$ ./bin/auth strip --user <username> ...
+```
+
+For detailed help on managing and stripping MFA, see the instructions in
+@{article:User Guide: Multi-Factor Authentication}
+
+
+Unlocking Objects
+=================
+
+If you aren't sure who owns an object, you can inspect the policies from the
+CLI:
+
+```
+$ ./bin/policy show <object>
+```
+
+To identify the object you want to examine, you can specify an object
+name (like `T123`) or a PHID as the `<object>` parameter.
+
+If examining the policy isn't helpful, or no user account has access to an
+object, you can then directly change object policies from the CLI:
+
+```
+$ ./bin/policy unlock <object> [--view ...] [--edit ...] [--owner ...]
+```
+
+Use the `--view` and `--edit` flags (and, for some objects, the `--owner`
+flag) to specify new policies for the object.
+
+For example, to make task `T123` editable by user `@alice`, run:
+
+```
+$ ./bin/policy unlock T123 --edit alice
+```
+
+Not every object has mutable view and edit policies, and not every object has
+an owner, so each flag only works on some types of objects.
+
+From here, you can log in to the web UI and change the relevant policies to
+whatever you want to set them to.
+
+
+No Enabled Users
+================
+
+If you accidentally disabled all administrator accounts, you can enable a
+disabled account from the CLI like this:
+
+```
+$ ./bin/user enable --user <username>
+```
+
+From here, recover the account or log in normally.
+
+
+No Administrators
+=================
+
+If you accidentally deleted all the administrator accounts, you can empower
+a user as an administrator from the CLI like this:
+
+```
+$ ./bin/user empower --user <username>
+```
+
+This will upgrade the user account from a regular account to an administrator
+account.

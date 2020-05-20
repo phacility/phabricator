@@ -50,22 +50,22 @@ final class DifferentialRevisionTimelineEngine
     }
 
     foreach ($inlines as $key => $inline) {
-      $inlines[$key] = DifferentialInlineComment::newFromModernComment(
-        $inline);
+      $inlines[$key] = $inline->newInlineCommentObject();
     }
-
-    $query = id(new DifferentialInlineCommentQuery())
-      ->needHidden(true)
-      ->setViewer($viewer);
 
     // NOTE: This is a bit sketchy: this method adjusts the inlines as a
     // side effect, which means it will ultimately adjust the transaction
     // comments and affect timeline rendering.
-    $query->adjustInlinesForChangesets(
-      $inlines,
-      array_select_keys($changesets, $old_ids),
-      array_select_keys($changesets, $new_ids),
-      $revision);
+
+    $old = array_select_keys($changesets, $old_ids);
+    $new = array_select_keys($changesets, $new_ids);
+    id(new PhabricatorInlineCommentAdjustmentEngine())
+      ->setViewer($viewer)
+      ->setRevision($revision)
+      ->setOldChangesets($old)
+      ->setNewChangesets($new)
+      ->setInlines($inlines)
+      ->execute();
 
     return id(new DifferentialTransactionView())
       ->setViewData($view_data)

@@ -8,16 +8,19 @@ final class Aphront404Response extends AphrontHTMLResponse {
 
   public function buildResponseString() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setViewer($viewer)
       ->setTitle(pht('404 Not Found'))
-      ->addCancelButton('/', pht('Focus'))
+      ->addCancelButton('/', pht('Return to Charted Waters'))
       ->appendParagraph(
         pht(
-          'Do not dwell in the past, do not dream of the future, '.
-          'concentrate the mind on the present moment.'));
+          'You arrive at your destination, but there is nothing here.'))
+      ->appendParagraph(
+        pht(
+          'Perhaps the real treasure was the friends you made '.
+          'along the way.'));
 
     $view = id(new PhabricatorStandardPageView())
       ->setTitle(pht('404 Not Found'))

@@ -152,7 +152,16 @@ JX.behavior('repository-crossreference', function(config, statics) {
       query.char = char;
     }
 
-    var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
+    var uri_symbol = symbol;
+
+    // In some cases, lexers may include whitespace in symbol tags. Trim it,
+    // since symbols with semantic whitespace aren't supported.
+    uri_symbol = uri_symbol.trim();
+
+    // See T13437. Symbols like "#define" need to be encoded.
+    uri_symbol = encodeURIComponent(uri_symbol);
+
+    var uri = JX.$U('/diffusion/symbol/' + uri_symbol + '/');
     uri.addQueryParams(query);
 
     window.open(uri.toString());
@@ -210,7 +219,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
   }
 
   function getPath(target) {
-    // This method works in Differential, when browsing a changset.
+    // This method works in Differential, when browsing a changeset.
     var changeset;
     try {
       changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');

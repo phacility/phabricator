@@ -1,0 +1,62 @@
+/**
+ * @provides phui-policy-section-view-css
+ */
+
+.phui-policy-section-view {
+  margin-bottom: 24px;
+}
+
+.phui-policy-section-view-header {
+  background: {$bluebackground};
+  border-bottom: 1px solid {$lightblueborder};
+  padding: 4px 8px;
+  color: {$darkbluetext};
+  margin-bottom: 8px;
+}
+
+.phui-policy-section-view-header-text {
+  font-weight: bold;
+}
+
+.phui-policy-section-view-header .phui-icon-view {
+  margin-right: 8px;
+}
+
+.phui-policy-section-view-link {
+  float: right;
+}
+
+.phui-policy-section-view-link .phui-icon-view {
+  color: {$bluetext};
+}
+
+.phui-policy-section-view-hint {
+  color: {$greytext};
+  background: {$lightbluebackground};
+  padding: 8px;
+}
+
+.phui-policy-section-view-body {
+  padding: 0 12px;
+}
+
+.phui-policy-section-view-inactive-rule {
+  color: {$greytext};
+}
+
+.phui-policy-section-view-rules {
+  margin: 8px 0;
+  padding: 8px;
+  background: {$lightbluebackground};
+  border: 1px solid {$lightblueborder};
+}
+
+.phui-policy-section-view .phui-policy-section-view-body ul {
+  margin: 8px 0;
+  padding: 0 16px 0 24px;
+  list-style: disc;
+}
+
+.phui-policy-section-view .phui-policy-section-view-body p + p {
+  margin-top: 8px;
+}

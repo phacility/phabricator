@@ -34,7 +34,7 @@ final class HarbormasterBuildView
     $list = new PHUIObjectItemListView();
     foreach ($builds as $build) {
       $id = $build->getID();
-      $initiator = $handles[$build->getInitiatorPHID()];
+
       $buildable_object = $handles[$build->getBuildable()->getBuildablePHID()];
 
       $item = id(new PHUIObjectItemView())
@@ -46,7 +46,9 @@ final class HarbormasterBuildView
         ->setEpoch($build->getDateCreated())
         ->addAttribute($buildable_object->getName());
 
-      if ($initiator) {
+      $initiator_phid = $build->getInitiatorPHID();
+      if ($initiator_phid) {
+        $initiator = $handles[$initiator_phid];
         $item->addByline($initiator->renderLink());
       }
 

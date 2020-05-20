@@ -3,18 +3,17 @@
 final class PhortuneCartCheckoutController
   extends PhortuneCartController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+  protected function shouldRequireAccountAuthority() {
+    return true;
+  }
 
-    $cart = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needPurchases(true)
-      ->executeOne();
-    if (!$cart) {
-      return new Aphront404Response();
-    }
+  protected function shouldRequireMerchantAuthority() {
+    return false;
+  }
+
+  protected function handleCartRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $cart = $this->getCart();
 
     $cancel_uri = $cart->getCancelURI();
     $merchant = $cart->getMerchant();
@@ -102,13 +101,9 @@ final class PhortuneCartCheckoutController
       }
     }
 
-    $cart_table = $this->buildCartContentTable($cart);
-
-    $cart_box = id(new PHUIObjectBoxView())
-      ->setFormErrors($errors)
-      ->setHeaderText(pht('Cart Contents'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($cart_table);
+    $cart_box = id(new PhortuneOrderItemsView())
+      ->setViewer($viewer)
+      ->setOrder($cart);
 
     $title = $cart->getName();
 
@@ -139,7 +134,10 @@ final class PhortuneCartCheckoutController
       'cartID' => $cart->getID(),
     );
 
-    $payment_method_uri = $this->getApplicationURI("{$account_id}/card/new/");
+    $payment_method_uri = urisprintf(
+      'account/%d/methods/new/',
+      $account->getID());
+    $payment_method_uri = $this->getApplicationURI($payment_method_uri);
     $payment_method_uri = new PhutilURI($payment_method_uri, $params);
 
     $form = id(new AphrontFormView())
@@ -205,7 +203,9 @@ final class PhortuneCartCheckoutController
       ->appendChild($form)
       ->appendChild($provider_form);
 
-    $description_box = $this->renderCartDescription($cart);
+    $description_view = id(new PhortuneOrderDescriptionView())
+      ->setViewer($viewer)
+      ->setOrder($cart);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Checkout'));
@@ -218,11 +218,12 @@ final class PhortuneCartCheckoutController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $cart_box,
-        $description_box,
-        $payment_box,
-      ));
+      ->setFooter(
+        array(
+          $description_view,
+          $cart_box,
+          $payment_box,
+        ));
 
     return $this->newPage()
       ->setTitle($title)

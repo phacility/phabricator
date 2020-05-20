@@ -1,7 +1,8 @@
 {
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/(?!javelin/))"
+    "(^webroot/rsrc/externals/(?!javelin/))",
+    "(/__tests__/data/)"
   ],
   "linters": {
     "chmod": {
@@ -63,13 +64,13 @@
     "text": {
       "type": "text",
       "exclude": [
-        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json))"
+        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json|expect))"
       ]
     },
     "text-without-length": {
       "type": "text",
       "include": [
-        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json))"
+        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json|expect))"
       ],
       "severity": {
         "3": "disabled"

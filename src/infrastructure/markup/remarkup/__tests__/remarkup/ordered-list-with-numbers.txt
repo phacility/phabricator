@@ -1,0 +1,64 @@
+# aasdx
+# asdf
+
+1. asa
+ # asdf
+234) asdf
+
+234) asd
+
+1. asd
+234) asd
+
+10. ten
+11. eleven
+12. twelve
+
+1/ This explicitly should not be formatted as a list.
+~~~~~~~~~~
+<ol class="remarkup-list">
+<li class="remarkup-list-item">aasdx</li>
+<li class="remarkup-list-item">asdf</li>
+</ol>
+
+<ol class="remarkup-list">
+<li class="remarkup-list-item">asa<ol class="remarkup-list">
+<li class="remarkup-list-item">asdf</li>
+</ol></li>
+<li class="remarkup-list-item">asdf</li>
+</ol>
+
+<ol class="remarkup-list" start="234">
+<li class="remarkup-list-item">asd</li>
+</ol>
+
+<ol class="remarkup-list">
+<li class="remarkup-list-item">asd</li>
+<li class="remarkup-list-item">asd</li>
+</ol>
+
+<ol class="remarkup-list" start="10">
+<li class="remarkup-list-item">ten</li>
+<li class="remarkup-list-item">eleven</li>
+<li class="remarkup-list-item">twelve</li>
+</ol>
+
+<p>1/ This explicitly should not be formatted as a list.</p>
+~~~~~~~~~~
+1. aasdx
+2. asdf
+
+1. asa
+  1. asdf
+2. asdf
+
+234. asd
+
+1. asd
+2. asd
+
+10. ten
+11. eleven
+12. twelve
+
+1/ This explicitly should not be formatted as a list.

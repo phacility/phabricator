@@ -50,10 +50,17 @@ final class PhabricatorPasteContentTransaction
   }
 
   private function newFileForPaste(PhabricatorUser $actor, $data) {
+    $editor = $this->getEditor();
+
+    $file_name = $editor->getNewPasteTitle();
+    if (!strlen($file_name)) {
+      $file_name = 'raw-paste-data.txt';
+    }
+
     return PhabricatorFile::newFromFileData(
       $data,
       array(
-        'name' => 'raw.txt',
+        'name' => $file_name,
         'mime-type' => 'text/plain; charset=utf-8',
         'authorPHID' => $actor->getPHID(),
         'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,

@@ -197,22 +197,6 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       return array($account, $provider, $response);
     }
 
-    $other_account = id(new PhabricatorExternalAccount())->loadAllWhere(
-      'accountType = %s AND accountDomain = %s AND accountID = %s
-        AND id != %d',
-      $account->getAccountType(),
-      $account->getAccountDomain(),
-      $account->getAccountID(),
-      $account->getID());
-
-    if ($other_account) {
-      $response = $this->renderError(
-        pht(
-          'The account you are attempting to register with already belongs '.
-          'to another user.'));
-      return array($account, $provider, $response);
-    }
-
     $config = $account->getProviderConfig();
     if (!$config->getIsEnabled()) {
       $response = $this->renderError(
@@ -284,6 +268,28 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     return id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
       ->appendChild($invite_list);
+  }
+
+
+  final protected function newCustomStartMessage() {
+    $viewer = $this->getViewer();
+
+    $text = PhabricatorAuthMessage::loadMessageText(
+      $viewer,
+      PhabricatorAuthLoginMessageType::MESSAGEKEY);
+
+    if (!strlen($text)) {
+      return null;
+    }
+
+    $remarkup_view = new PHUIRemarkupView($viewer, $text);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-custom-message',
+      ),
+      $remarkup_view);
   }
 
 }

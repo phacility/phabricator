@@ -37,13 +37,8 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/config/' => array(
-        '' => 'PhabricatorConfigListController',
-        'application/' => 'PhabricatorConfigApplicationController',
-        'all/' => 'PhabricatorConfigAllController',
-        'history/' => 'PhabricatorConfigHistoryController',
+        '' => 'PhabricatorConfigConsoleController',
         'edit/(?P<key>[\w\.\-]+)/' => 'PhabricatorConfigEditController',
-        'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
-        'version/' => 'PhabricatorConfigVersionController',
         'database/'.
           '(?:(?P<ref>[^/]+)/'.
           '(?:(?P<database>[^/]+)/'.
@@ -63,13 +58,19 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           'purge/' => 'PhabricatorConfigPurgeCacheController',
         ),
         'module/' => array(
-          '(?P<module>[^/]+)/' => 'PhabricatorConfigModuleController',
+          '(?:(?P<module>[^/]+)/)?' => 'PhabricatorConfigModuleController',
         ),
         'cluster/' => array(
           'databases/' => 'PhabricatorConfigClusterDatabasesController',
           'notifications/' => 'PhabricatorConfigClusterNotificationsController',
           'repositories/' => 'PhabricatorConfigClusterRepositoriesController',
           'search/' => 'PhabricatorConfigClusterSearchController',
+        ),
+        'settings/' => array(
+          '' => 'PhabricatorConfigSettingsListController',
+          '(?P<filter>advanced|all)/'
+            => 'PhabricatorConfigSettingsListController',
+          'history/' => 'PhabricatorConfigSettingsHistoryController',
         ),
       ),
     );

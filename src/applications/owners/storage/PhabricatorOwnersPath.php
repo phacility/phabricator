@@ -91,11 +91,22 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   }
 
   private static function getScalarKeyForRef(array $ref) {
+    // See T13464. When building refs from raw transactions, the path has
+    // not been normalized yet and doesn't have a separate "display" path.
+    // If the "display" path isn't populated, just use the actual path to
+    // build the ref key.
+
+    if (isset($ref['display'])) {
+      $display = $ref['display'];
+    } else {
+      $display = $ref['path'];
+    }
+
     return sprintf(
       'repository=%s path=%s display=%s excluded=%d',
       $ref['repositoryPHID'],
       $ref['path'],
-      $ref['display'],
+      $display,
       $ref['excluded']);
   }
 

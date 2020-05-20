@@ -40,11 +40,13 @@ final class DifferentialChangeDetailMailView
     $diff = $this->getDiff();
 
     $engine = new PhabricatorMarkupEngine();
+    $viewstate = new PhabricatorChangesetViewState();
 
     $out = array();
     foreach ($diff->getChangesets() as $changeset) {
       $parser = id(new DifferentialChangesetParser())
-        ->setUser($viewer)
+        ->setViewer($viewer)
+        ->setViewState($viewstate)
         ->setChangeset($changeset)
         ->setLinesOfContext(2)
         ->setMarkupEngine($engine);

@@ -63,6 +63,13 @@ final class PhabricatorCookies extends Phobject {
   const COOKIE_INVITE = 'invite';
 
 
+  /**
+   * Stores a workflow completion across a redirect-after-POST following a
+   * form submission. This can be used to show "Changes Saved" messages.
+   */
+  const COOKIE_SUBMIT = 'phfrm';
+
+
 /* -(  Client ID Cookie  )--------------------------------------------------- */
 
 

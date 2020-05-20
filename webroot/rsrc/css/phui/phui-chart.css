@@ -36,16 +36,17 @@
 }
 
 .chart .point {
-  fill: {$lightblue};
+  fill: #ffffff;
   stroke: {$blue};
-  stroke-width: 1px;
+  stroke-width: 2px;
+  position: relative;
+  cursor: pointer;
 }
 
 .chart-tooltip {
   position: absolute;
   text-align: center;
   width: 120px;
-  height: 16px;
   overflow: hidden;
   padding: 2px;
   background: {$lightbluebackground};

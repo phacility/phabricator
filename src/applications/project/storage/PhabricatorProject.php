@@ -13,7 +13,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorConduitResultInterface,
     PhabricatorColumnProxyInterface,
     PhabricatorSpacesInterface,
-    PhabricatorEditEngineSubtypeInterface {
+    PhabricatorEditEngineSubtypeInterface,
+    PhabricatorWorkboardInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -106,7 +107,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setHasMilestones(0)
       ->setHasSubprojects(0)
       ->setSubtype(PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT)
-      ->attachParentProject(null);
+      ->attachParentProject($parent);
   }
 
   public function getCapabilities() {
@@ -904,7 +905,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function newEditEngineSubtypeMap() {
     $config = PhabricatorEnv::getEnvConfig('projects.subtypes');
-    return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+    return PhabricatorEditEngineSubtype::newSubtypeMap($config)
+      ->setDatasource(new PhabricatorProjectSubtypeDatasource());
   }
 
   public function newSubtypeObject() {

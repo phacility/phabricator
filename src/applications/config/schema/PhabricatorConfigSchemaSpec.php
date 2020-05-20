@@ -48,11 +48,19 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   abstract public function buildSchemata();
 
   protected function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
+    $index_options = array();
+
+    $persistence = $object->getSchemaPersistence();
+    if ($persistence !== null) {
+      $index_options['persistence'] = $persistence;
+    }
+
     $this->buildRawSchema(
       $object->getApplicationName(),
       $object->getTableName(),
       $object->getSchemaColumns(),
-      $object->getSchemaKeys());
+      $object->getSchemaKeys(),
+      $index_options);
   }
 
   protected function buildFerretIndexSchema(PhabricatorFerretEngine $engine) {

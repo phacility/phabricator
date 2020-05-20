@@ -1,0 +1,4 @@
+<?php
+
+PhabricatorRebuildIndexesWorker::rebuildObjectsWithQuery(
+  'PhabricatorRepositoryQuery');

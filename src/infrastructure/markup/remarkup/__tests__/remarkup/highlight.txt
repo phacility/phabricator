@@ -1,0 +1,9 @@
+how about we !!highlight!! some !!TEXT!!!
+wow this must be **!!very important!!**
+omg!!!!!
+~~~~~~~~~~
+<p>how about we <span class="remarkup-highlight">highlight</span> some <span class="remarkup-highlight">TEXT!</span>
+wow this must be <strong><span class="remarkup-highlight">very important</span></strong>
+omg!!!!!</p>
+~~~~~~~~~~
+how about we !!highlight!! some !!TEXT!!! wow this must be **!!very important!!** omg!!!!!

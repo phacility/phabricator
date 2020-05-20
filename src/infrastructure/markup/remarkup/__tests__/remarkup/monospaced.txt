@@ -1,0 +1,5 @@
+cmd ##ls --color > /dev/null##
+~~~~~~~~~~
+<p>cmd <tt class="remarkup-monospaced">ls --color &gt; /dev/null</tt></p>
+~~~~~~~~~~
+cmd ##ls --color > /dev/null##

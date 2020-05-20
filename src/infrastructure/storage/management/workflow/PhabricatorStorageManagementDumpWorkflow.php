@@ -14,7 +14,8 @@ final class PhabricatorStorageManagementDumpWorkflow
             'name' => 'for-replica',
             'help' => pht(
               'Add __--master-data__ to the __mysqldump__ command, '.
-              'generating a CHANGE MASTER statement in the output.'),
+              'generating a CHANGE MASTER statement in the output. This '.
+              'option also dumps all data, including caches.'),
           ),
           array(
             'name' => 'output',
@@ -54,6 +55,8 @@ final class PhabricatorStorageManagementDumpWorkflow
     $output_file = $args->getArg('output');
     $is_compress = $args->getArg('compress');
     $is_overwrite = $args->getArg('overwrite');
+    $is_noindex = $args->getArg('no-indexes');
+    $is_replica = $args->getArg('for-replica');
 
     if ($is_compress) {
       if ($output_file === null) {
@@ -79,6 +82,14 @@ final class PhabricatorStorageManagementDumpWorkflow
       }
     }
 
+    if ($is_replica && $is_noindex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'The "--for-replica" flag can not be used with the '.
+          '"--no-indexes" flag. Replication dumps must contain a complete '.
+          'representation of database state.'));
+    }
+
     if ($output_file !== null) {
       if (Filesystem::pathExists($output_file)) {
         if (!$is_overwrite) {
@@ -93,8 +104,6 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     $api = $this->getSingleAPI();
     $patches = $this->getPatches();
-
-    $with_indexes = !$args->getArg('no-indexes');
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
@@ -118,6 +127,9 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     $schemata = $actual_map[$ref_key];
     $expect = $expect_map[$ref_key];
+
+    $with_caches = $is_replica;
+    $with_indexes = !$is_noindex;
 
     $targets = array();
     foreach ($schemata->getDatabases() as $database_name => $database) {
@@ -143,7 +155,7 @@ final class PhabricatorStorageManagementDumpWorkflow
             // When dumping tables, leave the data in cache tables in the
             // database. This will be automatically rebuild after the data
             // is restored and does not need to be persisted in backups.
-            $with_data = false;
+            $with_data = $with_caches;
             break;
           case PhabricatorConfigTableSchema::PERSISTENCE_INDEX:
             // When dumping tables, leave index data behind of the caller
@@ -179,9 +191,11 @@ final class PhabricatorStorageManagementDumpWorkflow
     $argv = array();
     $argv[] = '--hex-blob';
     $argv[] = '--single-transaction';
-    $argv[] = '--default-character-set=utf8';
 
-    if ($args->getArg('for-replica')) {
+    $argv[] = '--default-character-set';
+    $argv[] = $api->getClientCharset();
+
+    if ($is_replica) {
       $argv[] = '--master-data';
     }
 
@@ -339,7 +353,6 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     return 0;
   }
-
 
   private function writeData($data, $file, $is_compress, $output_file) {
     if (!strlen($data)) {

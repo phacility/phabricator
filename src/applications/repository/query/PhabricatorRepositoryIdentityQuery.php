@@ -6,10 +6,12 @@ final class PhabricatorRepositoryIdentityQuery
   private $ids;
   private $phids;
   private $identityNames;
-  private $emailAddress;
-  private $assigneePHIDs;
+  private $emailAddresses;
+  private $assignedPHIDs;
+  private $effectivePHIDs;
   private $identityNameLike;
   private $hasEffectivePHID;
+  private $relatedPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,13 +33,23 @@ final class PhabricatorRepositoryIdentityQuery
     return $this;
   }
 
-  public function withEmailAddress($address) {
-    $this->emailAddress = $address;
+  public function withEmailAddresses(array $addresses) {
+    $this->emailAddresses = $addresses;
     return $this;
   }
 
-  public function withAssigneePHIDs(array $assignees) {
-    $this->assigneePHIDs = $assignees;
+  public function withAssignedPHIDs(array $assigned) {
+    $this->assignedPHIDs = $assigned;
+    return $this;
+  }
+
+  public function withEffectivePHIDs(array $effective) {
+    $this->effectivePHIDs = $effective;
+    return $this;
+  }
+
+  public function withRelatedPHIDs(array $related) {
+    $this->relatedPHIDs = $related;
     return $this;
   }
 
@@ -51,7 +63,7 @@ final class PhabricatorRepositoryIdentityQuery
   }
 
   protected function getPrimaryTableAlias() {
-     return 'repository_identity';
+     return 'identity';
    }
 
   protected function loadPage() {
@@ -64,33 +76,40 @@ final class PhabricatorRepositoryIdentityQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.id IN (%Ld)',
+        'identity.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.phid IN (%Ls)',
+        'identity.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->assigneePHIDs !== null) {
+    if ($this->assignedPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.currentEffectiveUserPHID IN (%Ls)',
-        $this->assigneePHIDs);
+        'identity.manuallySetUserPHID IN (%Ls)',
+        $this->assignedPHIDs);
+    }
+
+    if ($this->effectivePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'identity.currentEffectiveUserPHID IN (%Ls)',
+        $this->effectivePHIDs);
     }
 
     if ($this->hasEffectivePHID !== null) {
       if ($this->hasEffectivePHID) {
         $where[] = qsprintf(
           $conn,
-          'repository_identity.currentEffectiveUserPHID IS NOT NULL');
+          'identity.currentEffectiveUserPHID IS NOT NULL');
       } else {
         $where[] = qsprintf(
           $conn,
-          'repository_identity.currentEffectiveUserPHID IS NULL');
+          'identity.currentEffectiveUserPHID IS NULL');
       }
     }
 
@@ -102,23 +121,33 @@ final class PhabricatorRepositoryIdentityQuery
 
       $where[] = qsprintf(
         $conn,
-        'repository_identity.identityNameHash IN (%Ls)',
+        'identity.identityNameHash IN (%Ls)',
         $name_hashes);
     }
 
-    if ($this->emailAddress !== null) {
-      $identity_style = "<{$this->emailAddress}>";
+    if ($this->emailAddresses !== null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.identityNameRaw LIKE %<',
-        $identity_style);
+        'identity.emailAddress IN (%Ls)',
+        $this->emailAddresses);
     }
 
     if ($this->identityNameLike != null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.identityNameRaw LIKE %~',
+        'identity.identityNameRaw LIKE %~',
         $this->identityNameLike);
+    }
+
+    if ($this->relatedPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        '(identity.manuallySetUserPHID IN (%Ls) OR
+          identity.currentEffectiveUserPHID IN (%Ls) OR
+          identity.automaticGuessedUserPHID IN (%Ls))',
+        $this->relatedPHIDs,
+        $this->relatedPHIDs,
+        $this->relatedPHIDs);
     }
 
     return $where;

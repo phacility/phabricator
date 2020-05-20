@@ -3,19 +3,10 @@
 final class PhortuneOrderTableView extends AphrontView {
 
   private $carts;
-  private $handles;
   private $noDataString;
   private $isInvoices;
   private $isMerchantView;
-
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->handles;
-  }
+  private $accountEmail;
 
   public function setCarts(array $carts) {
     $this->carts = $carts;
@@ -53,30 +44,65 @@ final class PhortuneOrderTableView extends AphrontView {
     return $this->isMerchantView;
   }
 
+  public function setAccountEmail(PhortuneAccountEmail $account_email) {
+    $this->accountEmail = $account_email;
+    return $this;
+  }
+
+  public function getAccountEmail() {
+    return $this->accountEmail;
+  }
+
   public function render() {
     $carts = $this->getCarts();
-    $handles = $this->getHandles();
     $viewer = $this->getUser();
 
     $is_invoices = $this->getIsInvoices();
     $is_merchant = $this->getIsMerchantView();
+    $is_external = (bool)$this->getAccountEmail();
+
+    $email = $this->getAccountEmail();
+
+    $phids = array();
+    foreach ($carts as $cart) {
+      $phids[] = $cart->getPHID();
+      foreach ($cart->getPurchases() as $purchase) {
+        $phids[] = $purchase->getPHID();
+      }
+      $phids[] = $cart->getMerchantPHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
 
     $rows = array();
     $rowc = array();
     foreach ($carts as $cart) {
-      $cart_link = $handles[$cart->getPHID()]->renderLink();
+      if ($is_external) {
+        $cart_link = phutil_tag(
+          'a',
+          array(
+            'href' => $email->getExternalOrderURI($cart),
+          ),
+          $handles[$cart->getPHID()]->getName());
+      } else {
+        $cart_link = $handles[$cart->getPHID()]->renderLink();
+      }
       $purchases = $cart->getPurchases();
 
       if (count($purchases) == 1) {
         $purchase = head($purchases);
-        $purchase_name = $handles[$purchase->getPHID()]->renderLink();
+        $purchase_name = $handles[$purchase->getPHID()]->getName();
         $purchases = array();
       } else {
         $purchase_name = '';
       }
 
       if ($is_invoices) {
-        $merchant_link = $handles[$cart->getMerchantPHID()]->renderLink();
+        if ($is_external) {
+          $merchant_link = $handles[$cart->getMerchantPHID()]->getName();
+        } else {
+          $merchant_link = $handles[$cart->getMerchantPHID()]->renderLink();
+        }
       } else {
         $merchant_link = null;
       }
@@ -97,13 +123,12 @@ final class PhortuneOrderTableView extends AphrontView {
         PhortuneCart::getNameForStatus($cart->getStatus()),
         phabricator_datetime($cart->getDateModified(), $viewer),
         phabricator_datetime($cart->getDateCreated(), $viewer),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $cart->getCheckoutURI(),
-            'class' => 'small button button-green',
-          ),
-          pht('Pay Now')),
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setColor('green')
+          ->setHref($cart->getCheckoutURI())
+          ->setText(pht('Pay Now'))
+          ->setIcon('fa-credit-card'),
       );
       foreach ($purchases as $purchase) {
         $id = $purchase->getID();
@@ -164,7 +189,7 @@ final class PhortuneOrderTableView extends AphrontView {
 
           // We show "Pay Now" for due invoices, but not if the viewer is the
           // merchant, since it doesn't make sense for them to pay.
-          ($is_invoices && !$is_merchant),
+          ($is_invoices && !$is_merchant && !$is_external),
         ));
 
     return $table;

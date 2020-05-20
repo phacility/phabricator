@@ -3,26 +3,21 @@
 final class PhortuneCartCancelController
   extends PhortuneCartController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountAuthority() {
+    return false;
+  }
+
+  protected function shouldRequireMerchantAuthority() {
+    return false;
+  }
+
+  protected function handleCartRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
     $action = $request->getURIData('action');
 
-    $authority = $this->loadMerchantAuthority();
-
-    $cart_query = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needPurchases(true);
-
-    if ($authority) {
-      $cart_query->withMerchantPHIDs(array($authority->getPHID()));
-    }
-
-    $cart = $cart_query->executeOne();
-    if (!$cart) {
-      return new Aphront404Response();
-    }
+    $cart = $this->getCart();
+    $authority = $this->getMerchantAuthority();
 
     switch ($action) {
       case 'cancel':
@@ -45,7 +40,7 @@ final class PhortuneCartCancelController
         return new Aphront404Response();
     }
 
-    $cancel_uri = $cart->getDetailURI($authority);
+    $cancel_uri = $cart->getDetailURI();
     $merchant = $cart->getMerchant();
 
     try {
@@ -60,7 +55,7 @@ final class PhortuneCartCancelController
       return $this->newDialog()
         ->setTitle($title)
         ->appendChild($ex->getMessage())
-        ->addCancelButton($cancel_uri);
+        ->addCancelButton($cancel_uri, pht('Rats'));
     }
 
     $charges = id(new PhortuneChargeQuery())

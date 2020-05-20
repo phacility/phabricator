@@ -1,0 +1,5 @@
+BEGIN:VCALENDAR
+BEGIN:VEVENT
+STORY:The duck coughed up an unescaped backslash: \
+END:VEVENT
+END:VCALENDAR

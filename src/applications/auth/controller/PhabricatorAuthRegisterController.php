@@ -457,7 +457,6 @@ final class PhabricatorAuthRegisterController
 
             if (!$is_setup) {
               $account->setUserPHID($user->getPHID());
-              $provider->willRegisterAccount($account);
               $account->save();
             }
 

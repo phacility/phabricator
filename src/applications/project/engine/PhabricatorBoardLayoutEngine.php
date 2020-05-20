@@ -4,7 +4,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
 
   private $viewer;
   private $boardPHIDs;
-  private $objectPHIDs;
+  private $objectPHIDs = array();
   private $boards;
   private $columnMap = array();
   private $objectColumnMap = array();
@@ -300,6 +300,12 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       ->withPHIDs($board_phids)
       ->execute();
     $boards = mpull($boards, null, 'getPHID');
+
+    foreach ($boards as $key => $board) {
+      if (!($board instanceof PhabricatorWorkboardInterface)) {
+        unset($boards[$key]);
+      }
+    }
 
     if (!$this->fetchAllBoards) {
       foreach ($boards as $key => $board) {

@@ -49,7 +49,7 @@ final class PhrictionDocumentMoveToTransaction
     $new = $this->getNewValue();
 
     return pht(
-      '%s moved this document from %s',
+      '%s moved this document from %s.',
       $this->renderAuthor(),
       $this->renderHandle($new['phid']));
   }

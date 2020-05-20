@@ -15,12 +15,4 @@ final class DifferentialRevisionFerretEngine
     return new DifferentialRevisionSearchEngine();
   }
 
-  protected function getFunctionMap() {
-    $map = parent::getFunctionMap();
-
-    $map['body']['aliases'][] = 'summary';
-
-    return $map;
-  }
-
 }

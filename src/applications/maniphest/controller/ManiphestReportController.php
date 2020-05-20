@@ -35,8 +35,12 @@ final class ManiphestReportController extends ManiphestController {
     $nav->addLabel(pht('Open Tasks'));
     $nav->addFilter('user', pht('By User'));
     $nav->addFilter('project', pht('By Project'));
-    $nav->addLabel(pht('Burnup'));
-    $nav->addFilter('burn', pht('Burnup Rate'));
+
+    $class = 'PhabricatorFactApplication';
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $nav->addLabel(pht('Burnup'));
+      $nav->addFilter('burn', pht('Burnup Rate'));
+    }
 
     $this->view = $nav->selectFilter($this->view, 'user');
 
@@ -394,15 +398,15 @@ final class ManiphestReportController extends ManiphestController {
       ->setProjects($projects)
       ->buildChartPanel();
 
-    $chart_panel = $panel->setName(pht('Burnup Rate'));
+    $panel->setName(pht('Burnup Rate'));
 
     $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
-      ->setPanel($chart_panel)
+      ->setPanel($panel)
       ->setParentPanelPHIDs(array())
       ->renderPanel();
 
-    return array($filter, $chart_view, $panel);
+    return array($filter, $chart_view);
   }
 
   private function renderReportFilters(array $tokens, $has_window) {

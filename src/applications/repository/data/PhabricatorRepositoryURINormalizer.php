@@ -130,10 +130,35 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     $domain = $uri->getDomain();
 
     if (!strlen($domain)) {
-      $domain = '<void>';
+      return '<void>';
     }
 
-    return phutil_utf8_strtolower($domain);
+    $domain = phutil_utf8_strtolower($domain);
+
+    // See T13435. If the domain for a repository URI is same as the install
+    // base URI, store it as a "<base-uri>" token instead of the actual domain
+    // so that the index does not fall out of date if the install moves.
+
+    $base_uri = PhabricatorEnv::getURI('/');
+    $base_uri = new PhutilURI($base_uri);
+    $base_domain = $base_uri->getDomain();
+    $base_domain = phutil_utf8_strtolower($base_domain);
+    if ($domain === $base_domain) {
+      return '<base-uri>';
+    }
+
+    // Likewise, store a token for the "SSH Host" domain so it can be changed
+    // without requiring an index rebuild.
+
+    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
+    if (strlen($ssh_host)) {
+      $ssh_host = phutil_utf8_strtolower($ssh_host);
+      if ($domain === $ssh_host) {
+        return '<ssh-host>';
+      }
+    }
+
+    return $domain;
   }
 
 

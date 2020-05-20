@@ -1,0 +1,13 @@
+omg__ wtf_____ bbq___ lol__
+__underlined text__
+__This is a great idea___ die forever please
+__
+/__notunderlined__/ and also /__notunderlined__.c
+~~~~~~~~~~
+<p>omg__ wtf_____ bbq___ lol__
+<u>underlined text</u>
+<u>This is a great idea_</u> die forever please
+__
+/__notunderlined__/ and also /__notunderlined__.c</p>
+~~~~~~~~~~
+omg__ wtf_____ bbq___ lol__ __underlined text__ __This is a great idea___ die forever please __ /__notunderlined__/ and also /__notunderlined__.c

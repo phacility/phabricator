@@ -25,11 +25,30 @@ final class PhabricatorEditEngineSubtypeTransaction
   }
 
   public function validateTransactions($object, array $xactions) {
-    $map = $object->getEngine()
+    $errors = array();
+
+    if (!$xactions) {
+      return $errors;
+    }
+
+    $engine = $object->getEngine();
+
+    if (!$engine->supportsSubtypes()) {
+      foreach ($xactions as $xaction) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Edit engine (of class "%s") does not support subtypes, so '.
+            'subtype transactions can not be applied to it.',
+            get_class($engine)),
+          $xaction);
+      }
+      return $errors;
+    }
+
+    $map = $engine
       ->setViewer($this->getActor())
       ->newSubtypeMap();
 
-    $errors = array();
     foreach ($xactions as $xaction) {
       $new = $xaction->getNewValue();
 

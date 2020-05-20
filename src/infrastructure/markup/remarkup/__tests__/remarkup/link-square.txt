@@ -1,0 +1,29 @@
+[[http://www.example.com/]]
+
+[[http://www.example.com/ | example.com]]
+
+[[/x/]]
+
+[[#anchor]]
+
+[[#anchor | Anchors ]]
+~~~~~~~~~~
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a></p>
+
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">example.com</a></p>
+
+<p><a href="http://www.example.com/x/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/x/</a></p>
+
+<p><a href="http://www.example.com/page/#anchor" class="remarkup-link" rel="noreferrer">http://www.example.com/page/#anchor</a></p>
+
+<p><a href="http://www.example.com/page/#anchor" class="remarkup-link" rel="noreferrer">Anchors</a></p>
+~~~~~~~~~~
+http://www.example.com/
+
+example.com <http://www.example.com/>
+
+http://www.example.com/x/
+
+http://www.example.com/page/#anchor
+
+Anchors <http://www.example.com/page/#anchor>

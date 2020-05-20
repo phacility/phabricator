@@ -34,7 +34,7 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
     ) + parent::getConfiguration();
   }
 
-  final public function setExecutionException(Exception $execution_exception) {
+  final public function setExecutionException($execution_exception) {
     $this->executionException = $execution_exception;
     return $this;
   }

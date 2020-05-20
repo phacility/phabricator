@@ -36,9 +36,6 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
         case PhabricatorPeopleUserPHIDType::TYPECONST:
           $this->loadUserActors($actors, $phids);
           break;
-        case PhabricatorPeopleExternalPHIDType::TYPECONST:
-          $this->loadExternalUserActors($actors, $phids);
-          break;
         default:
           $this->loadUnknownActors($actors, $phids);
           break;
@@ -93,43 +90,6 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
       }
     }
   }
-
-  private function loadExternalUserActors(array $actors, array $phids) {
-    assert_instances_of($actors, 'PhabricatorMetaMTAActor');
-
-    $xusers = id(new PhabricatorExternalAccountQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($phids)
-      ->execute();
-    $xusers = mpull($xusers, null, 'getPHID');
-
-    foreach ($phids as $phid) {
-      $actor = $actors[$phid];
-
-      $xuser = idx($xusers, $phid);
-      if (!$xuser) {
-        $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_UNLOADABLE);
-        continue;
-      }
-
-      $actor->setName($xuser->getDisplayName());
-
-      if ($xuser->getAccountType() != 'email') {
-        $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_EXTERNAL_TYPE);
-        continue;
-      }
-
-      $actor->setEmailAddress($xuser->getAccountID());
-
-      // Circa T7477, it appears that we never intentionally send email to
-      // external users (even when they email "bugs@" to create a task).
-      // Mark these users as unverified so mail to them is always dropped.
-      // See also T12237. In the future, we might change this behavior.
-
-      $actor->setIsVerified(false);
-    }
-  }
-
 
   private function loadUnknownActors(array $actors, array $phids) {
     foreach ($phids as $phid) {

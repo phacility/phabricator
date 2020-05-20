@@ -16,11 +16,13 @@ final class PhortuneAccount extends PhortuneDAO
   protected $billingAddress;
 
   private $memberPHIDs = self::ATTACHABLE;
+  private $merchantPHIDs = self::ATTACHABLE;
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
     return id(new self())
       ->setBillingName('')
       ->setBillingAddress('')
+      ->attachMerchantPHIDs(array())
       ->attachMemberPHIDs(array());
   }
 
@@ -100,9 +102,92 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getURI() {
-    return '/phortune/'.$this->getID().'/';
+    return urisprintf(
+      '/phortune/account/%d/',
+      $this->getID());
   }
 
+  public function getDetailsURI() {
+    return urisprintf(
+      '/phortune/account/%d/details/',
+      $this->getID());
+  }
+
+  public function getOrdersURI() {
+    return urisprintf(
+      '/phortune/account/%d/orders/',
+      $this->getID());
+  }
+
+  public function getOrderListURI($path = '') {
+    return urisprintf(
+      '/phortune/account/%d/orders/list/%s',
+      $this->getID(),
+      $path);
+  }
+
+  public function getSubscriptionsURI() {
+    return urisprintf(
+      '/phortune/account/%d/subscriptions/',
+      $this->getID());
+  }
+
+  public function getEmailAddressesURI() {
+    return urisprintf(
+      '/phortune/account/%d/addresses/',
+      $this->getID());
+  }
+
+  public function getPaymentMethodsURI() {
+    return urisprintf(
+      '/phortune/account/%d/methods/',
+      $this->getID());
+  }
+
+  public function getChargesURI() {
+    return urisprintf(
+      '/phortune/account/%d/charges/',
+      $this->getID());
+  }
+
+  public function getChargeListURI($path = '') {
+    return urisprintf(
+      '/phortune/account/%d/charges/list/%s',
+      $this->getID(),
+      $path);
+  }
+
+  public function attachMerchantPHIDs(array $merchant_phids) {
+    $this->merchantPHIDs = $merchant_phids;
+    return $this;
+  }
+
+  public function getMerchantPHIDs() {
+    return $this->assertAttached($this->merchantPHIDs);
+  }
+
+  public function writeMerchantEdge(PhortuneMerchant $merchant) {
+    $edge_src = $this->getPHID();
+    $edge_type = PhortuneAccountHasMerchantEdgeType::EDGECONST;
+    $edge_dst = $merchant->getPHID();
+
+    id(new PhabricatorEdgeEditor())
+      ->addEdge($edge_src, $edge_type, $edge_dst)
+      ->save();
+
+    return $this;
+  }
+
+  public function isUserAccountMember(PhabricatorUser $user) {
+    $user_phid = $user->getPHID();
+    if (!$user_phid) {
+      return null;
+    }
+
+    $member_map = array_fuse($this->getMemberPHIDs());
+
+    return isset($member_map[$user_phid]);
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -140,18 +225,22 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    $members = array_fuse($this->getMemberPHIDs());
-    if (isset($members[$viewer->getPHID()])) {
+    if ($this->isUserAccountMember($viewer)) {
       return true;
     }
 
-    // If the viewer is acting on behalf of a merchant, they can see
-    // payment accounts.
+    // See T13366. If the viewer can edit any merchant that this payment
+    // account has a relationship with, they can see the payment account.
     if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      foreach ($viewer->getAuthorities() as $authority) {
-        if ($authority instanceof PhortuneMerchant) {
-          return true;
-        }
+      $viewer_phids = array($viewer->getPHID());
+      $merchant_phids = $this->getMerchantPHIDs();
+
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        $viewer_phids,
+        $merchant_phids);
+
+      if ($any_edit) {
+        return true;
       }
     }
 
@@ -159,7 +248,10 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Members of an account can always view and edit it.');
+    return array(
+      pht('Members of an account can always view and edit it.'),
+      pht('Merchants an account has established a relationship can view it.'),
+    );
   }
 
 

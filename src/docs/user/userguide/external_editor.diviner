@@ -3,42 +3,76 @@
 
 Setting up an external editor to integrate with Diffusion and Differential.
 
-= Overview =
+Overview
+========
 
-You can configure a URI handler to allow you to open files from Differential
-and Diffusion in your preferred text editor.
+You can configure a URI handler to allow you to open files referenced in
+Differential and Diffusion in your preferred text editor on your local
+machine.
 
-= Configuring Editors =
+
+Configuring Editors
+===================
 
 To configure an external editor, go to {nav Settings > Application Settings >
-Display Preferences} and set "Editor Link" to a URI pattern (see below). This
+External Editor} and set "Editor Link" to a URI pattern (see below). This
 will enable an "Open in Editor" link in Differential, and an "Edit" button in
 Diffusion.
 
-In general, you'll set this field to something like:
+In general, you'll set this field to something like this, although the
+particular pattern to use depends on your editor and environment:
 
-  lang=uri
-  editor://open/?file=%f
+```lang=uri
+editor://open/?file=%f
+```
 
-Some editors support opening multiple files at once when filenames are separated
-by spaces. If your editor supports this feature, set "Edit Multiple Files" to
-"Supported". Otherwise, you can set it to "Not Supported" to disable "Open All"
-buttons in the interface.
 
-== Configuring: TextMate on OS X ==
+Mapping Repositories
+====================
+
+When you open a file in an external editor, Phabricator needs to be able to
+build a URI which includes the correct absolute path on disk to the local
+version of the file, including the repository directory.
+
+If all your repositories are named consistently in a single directory, you
+may be able to use the `%n` (repository short name) variable to do this.
+For example:
+
+```lang=uri
+editor://open/?file=/Users/alice/repositories/%n/%f
+```
+
+If your repositories aren't named consistently or aren't in a single location,
+you can build a local directory of symlinks which map a repositoriy identifier
+to the right location on disk:
+
+```
+/Users/alice/editor_links/ $ ls -l
+... search-service/ -> /Users/alice/backend/search/
+... site-templates/ -> /Users/alice/frontend/site/
+```
+
+Then use this directory in your editor URI:
+
+```lang=uri
+editor://open/?file=/Users/alice/editor_links/%n/%f
+```
+
+Instead of `%n` (repository short name), you can also use `%d` (repository ID)
+or `%p` (repository PHID). These identifiers are immutable and all repositories
+always have both identifiers, but they're less human-readable.
+
+
+Configuring: TextMate on macOS
+==============================
 
 TextMate installs a `txmt://` handler by default, so it's easy to configure
 this feature if you use TextMate.
 
-First, create a local directory with symlinks for each repository callsign. For
-example, if you're developing Phabricator, it might look like this:
+First, identify the parent directory where your repositories are stored
+(for example, `/Users/alice/repositories/`). Then, configure your editor
+pattern like this:
 
-  /Users/alincoln/editor_links/ $ ls -l
-  ... ARC -> /Users/alincoln/workspace/arcanist/
-  ... P -> /Users/alincoln/workspace/phabricator/
-  ... PHU -> /Users/alincoln/workspace/libphutil/
-
-Then set your "Editor Link" to:
-
-  lang=uri
-  txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l
+```lang=uri
+txmt://open/?url=file:///Users/alice/repositories/%n/%f&line=%l
+```

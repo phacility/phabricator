@@ -7,7 +7,9 @@
  * charge followed by a successful charge.
  */
 final class PhortuneCharge extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
   const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
@@ -162,19 +164,42 @@ final class PhortuneCharge extends PhortuneDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return $this->getAccount()->getPolicy($capability);
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getAccount()->hasAutomaticCapability($capability, $viewer);
+    if ($capability === PhabricatorPolicyCapability::CAN_VIEW) {
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        array($viewer->getPHID()),
+        array($this->getMerchantPHID()));
+      if ($any_edit) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return pht('Charges inherit the policies of the associated account.');
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->hasAutomaticCapability($capability, $viewer)) {
+      return array();
+    }
+
+    return array(
+      array(
+        $this->getAccount(),
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
   }
 
 }

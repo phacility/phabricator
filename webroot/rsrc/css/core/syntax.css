@@ -6,9 +6,13 @@
   color: #aa0066;
 }
 
+.remarkup-code .language-tag {
+  color: {$lightgreytext};
+}
+
 .remarkup-code td > span {
   display: inline;
-  word-break: break-all;
+  line-break: anywhere;
 }
 
 .remarkup-code .rbw_r { color: red; }
