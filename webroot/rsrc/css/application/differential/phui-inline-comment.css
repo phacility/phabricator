@@ -476,20 +476,32 @@ textarea.inline-suggestion-input {
   border-right: 1px solid {$lightgreyborder};
 }
 
-.inline-suggestion-input-cell {
-  padding: 8px;
+.inline-suggestion-table td.inline-suggestion-input-cell {
+  padding: 8px 4px;
 }
 
-.inline-suggestion-text-cell {
-  padding: 0 8px;
+.inline-suggestion-table td.inline-suggestion-text-cell {
+  /* This is attempting to align the text in the textarea with the text on
+     the surrounding context lines. */
+  padding: 0 8px 0 11px;
 }
 
 .inline-suggestion-view {
-  padding: 8px 12px;
+  padding: 4px 0;
   white-space: pre-wrap;
-  background: {$greybackground};
+  background: {$lightgreybackground};
   margin: 0 -12px 8px;
   border-width: 1px 0;
   border-style: solid;
   border-color: {$lightgreyborder};
+}
+
+.diff-1up-simple-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.diff-1up-simple-table > tbody > tr > td {
+  padding-left: 12px;
+  padding-right: 12px;
 }

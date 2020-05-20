@@ -3,9 +3,19 @@
 final class PhabricatorDiffInlineCommentContext
   extends PhabricatorInlineCommentContext {
 
+  private $filename;
   private $headLines;
   private $bodyLines;
   private $tailLines;
+
+  public function setFilename($filename) {
+    $this->filename = $filename;
+    return $this;
+  }
+
+  public function getFilename() {
+    return $this->filename;
+  }
 
   public function setHeadLines(array $head_lines) {
     $this->headLines = $head_lines;

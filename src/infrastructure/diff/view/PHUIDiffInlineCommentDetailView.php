@@ -540,20 +540,35 @@ final class PHUIDiffInlineCommentDetailView
       return null;
     }
 
+    $viewer = $this->getViewer();
 
-    $raw_diff = id(new PhabricatorDifferenceEngine())
-      ->generateRawDiffFromFileContent($old_lines, $new_lines);
+    $changeset = id(new PhabricatorDifferenceEngine())
+      ->generateChangesetFromFileContent($old_lines, $new_lines);
 
-    $raw_diff = phutil_split_lines($raw_diff);
-    $raw_diff = array_slice($raw_diff, 3);
-    $raw_diff = implode('', $raw_diff);
+    $changeset->setFilename($context->getFilename());
+
+    // TODO: This isn't cached!
+
+    $viewstate = new PhabricatorChangesetViewState();
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setViewstate($viewstate)
+      ->setChangeset($changeset);
+
+    $renderer = new DifferentialChangesetOneUpRenderer();
+    $renderer->setSimpleMode(true);
+
+    $parser->setRenderer($renderer);
+
+    $diff_view = $parser->render(0, 0xFFFF, array());
 
     $view = phutil_tag(
       'div',
       array(
         'class' => 'inline-suggestion-view PhabricatorMonospaced',
       ),
-      $raw_diff);
+      $diff_view);
 
     return $view;
   }

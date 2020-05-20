@@ -289,8 +289,12 @@ abstract class PhabricatorDiffInlineCommentQuery
         }
 
         if ($inline->getIsNewFile()) {
+          $vector = $changeset->getNewStatePathVector();
+          $filename = last($vector);
           $corpus = $changeset->makeNewFile();
         } else {
+          $vector = $changeset->getOldStatePathVector();
+          $filename = last($vector);
           $corpus = $changeset->makeOldFile();
         }
 
@@ -321,6 +325,7 @@ abstract class PhabricatorDiffInlineCommentQuery
         $tail = $this->simplifyContext($tail, false);
 
         $context = id(new PhabricatorDiffInlineCommentContext())
+          ->setFilename($filename)
           ->setHeadLines($head)
           ->setBodyLines($body)
           ->setTailLines($tail);

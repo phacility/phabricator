@@ -834,7 +834,6 @@ final class DifferentialChangesetParser extends Phobject {
       ->setNewAttachesToNewFile($this->rightSideAttachesToNewFile)
       ->setCodeCoverage($this->getCoverage())
       ->setRenderingReference($this->getRenderingReference())
-      ->setMarkupEngine($this->markupEngine)
       ->setHandles($this->handles)
       ->setOldLines($this->old)
       ->setNewLines($this->new)
@@ -844,6 +843,10 @@ final class DifferentialChangesetParser extends Phobject {
       ->setObjectOwnerPHID($this->getObjectOwnerPHID())
       ->setHighlightingDisabled($this->highlightingDisabled)
       ->setDepthOnlyLines($this->getDepthOnlyLines());
+
+    if ($this->markupEngine) {
+      $renderer->setMarkupEngine($this->markupEngine);
+    }
 
     list($engine, $old_ref, $new_ref) = $this->newDocumentEngine();
     if ($engine) {
