@@ -2,8 +2,21 @@
 
 final class DifferentialChangesetEngine extends Phobject {
 
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public function rebuildChangesets(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $changesets = $this->loadChangesetFiles($changesets);
 
     foreach ($changesets as $changeset) {
       $this->detectGeneratedCode($changeset);
@@ -11,6 +24,45 @@ final class DifferentialChangesetEngine extends Phobject {
     }
 
     $this->detectCopiedCode($changesets);
+  }
+
+  private function loadChangesetFiles(array $changesets) {
+    $viewer = $this->getViewer();
+
+    $file_phids = array();
+    foreach ($changesets as $changeset) {
+      $file_phid = $changeset->getNewFileObjectPHID();
+      if ($file_phid !== null) {
+        $file_phids[] = $file_phid;
+      }
+    }
+
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
+    } else {
+      $files = array();
+    }
+
+    foreach ($changesets as $changeset_key => $changeset) {
+      $file_phid = $changeset->getNewFileObjectPHID();
+      if ($file_phid === null) {
+        continue;
+      }
+
+      $file = idx($files, $file_phid);
+      if (!$file) {
+        unset($changesets[$changeset_key]);
+        continue;
+      }
+
+      $changeset->attachNewFileObject($file);
+    }
+
+    return $changesets;
   }
 
 
@@ -84,6 +136,20 @@ final class DifferentialChangesetEngine extends Phobject {
     if ($changeset->getHunks()) {
       $new_data = $changeset->makeNewFile();
       return PhabricatorHash::digestForIndex($new_data);
+    }
+
+    if ($changeset->getNewFileObjectPHID()) {
+      $file = $changeset->getNewFileObject();
+
+      // See T13522. For now, the "contentHash" is not really a content hash
+      // for files >4MB. This is okay: we will just always detect them as
+      // changed, which is the safer behavior.
+
+      $hash = $file->getContentHash();
+      if ($hash !== null) {
+        $hash = sprintf('file-hash:%s', $hash);
+        return PhabricatorHash::digestForIndex($hash);
+      }
     }
 
     return null;

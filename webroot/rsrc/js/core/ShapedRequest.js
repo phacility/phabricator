@@ -81,6 +81,10 @@ JX.install('PhabricatorShapedRequest', {
     },
 
     shouldSendRequest : function(last, data) {
+      if (data === null) {
+        return false;
+      }
+
       if (last === null) {
         return true;
       }

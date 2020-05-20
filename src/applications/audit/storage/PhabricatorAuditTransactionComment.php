@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorAuditTransactionComment
-  extends PhabricatorApplicationTransactionComment {
+  extends PhabricatorApplicationTransactionComment
+  implements
+    PhabricatorInlineCommentInterface {
 
   protected $commitPHID;
   protected $pathID;
@@ -12,6 +14,7 @@ final class PhabricatorAuditTransactionComment
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
   protected $legacyCommentID;
+  protected $attributes = array();
 
   private $replyToComment = self::ATTACHABLE;
 
@@ -54,6 +57,10 @@ final class PhabricatorAuditTransactionComment
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
 
+    $config[self::CONFIG_SERIALIZATION] = array(
+      'attributes' => self::SERIALIZATION_JSON,
+    ) + idx($config, self::CONFIG_SERIALIZATION, array());
+
     return $config;
   }
 
@@ -65,6 +72,23 @@ final class PhabricatorAuditTransactionComment
 
   public function getReplyToComment() {
     return $this->assertAttached($this->replyToComment);
+  }
+
+  public function getAttribute($key, $default = null) {
+    return idx($this->attributes, $key, $default);
+  }
+
+  public function setAttribute($key, $value) {
+    $this->attributes[$key] = $value;
+    return $this;
+  }
+
+  public function isEmptyInlineComment() {
+    return !strlen($this->getContent());
+  }
+
+  public function newInlineCommentObject() {
+    return PhabricatorAuditInlineComment::newFromModernComment($this);
   }
 
 }

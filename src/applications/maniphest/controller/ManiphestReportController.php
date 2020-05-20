@@ -398,15 +398,15 @@ final class ManiphestReportController extends ManiphestController {
       ->setProjects($projects)
       ->buildChartPanel();
 
-    $chart_panel = $panel->setName(pht('Burnup Rate'));
+    $panel->setName(pht('Burnup Rate'));
 
     $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
-      ->setPanel($chart_panel)
+      ->setPanel($panel)
       ->setParentPanelPHIDs(array())
       ->renderPanel();
 
-    return array($filter, $chart_view, $panel);
+    return array($filter, $chart_view);
   }
 
   private function renderReportFilters(array $tokens, $has_window) {

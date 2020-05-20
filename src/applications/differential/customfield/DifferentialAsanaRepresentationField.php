@@ -44,6 +44,10 @@ final class DifferentialAsanaRepresentationField
 
     $edge = head($edges[$src_phid][$edge_type]);
 
+    if (!$edge) {
+      return null;
+    }
+
     if (!empty($edge['data']['gone'])) {
       return phutil_tag(
         'em',

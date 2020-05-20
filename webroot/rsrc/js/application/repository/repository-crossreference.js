@@ -219,7 +219,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
   }
 
   function getPath(target) {
-    // This method works in Differential, when browsing a changset.
+    // This method works in Differential, when browsing a changeset.
     var changeset;
     try {
       changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');

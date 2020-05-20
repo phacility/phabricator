@@ -52,6 +52,7 @@ EOTEXT
 
     return array(
       $this->newOption('notification.servers', $servers_type, array())
+        ->setHidden(true)
         ->setSummary(pht('Configure real-time notifications.'))
         ->setDescription($servers_help)
         ->addExample(

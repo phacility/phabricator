@@ -4,17 +4,19 @@ final class DiffusionDiffInlineCommentQuery
   extends PhabricatorDiffInlineCommentQuery {
 
   private $commitPHIDs;
-  private $hasPath;
   private $pathIDs;
+
+  protected function newApplicationTransactionCommentTemplate() {
+    return new PhabricatorAuditTransactionComment();
+  }
 
   public function withCommitPHIDs(array $phids) {
     $this->commitPHIDs = $phids;
     return $this;
   }
 
-  public function withHasPath($has_path) {
-    $this->hasPath = $has_path;
-    return $this;
+  public function withObjectPHIDs(array $phids) {
+    return $this->withCommitPHIDs($phids);
   }
 
   public function withPathIDs(array $path_ids) {
@@ -22,41 +24,46 @@ final class DiffusionDiffInlineCommentQuery
     return $this;
   }
 
-  protected function getTemplate() {
-    return new PhabricatorAuditTransactionComment();
+  protected function buildInlineCommentWhereClauseParts(
+    AphrontDatabaseConnection $conn) {
+    $where = array();
+    $alias = $this->getPrimaryTableAlias();
+
+    $where[] = qsprintf(
+      $conn,
+      '%T.pathID IS NOT NULL',
+      $alias);
+
+    return $where;
   }
 
-  protected function buildWhereClauseComponents(
-    AphrontDatabaseConnection $conn_r) {
-    $where = parent::buildWhereClauseComponents($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+    $alias = $this->getPrimaryTableAlias();
 
     if ($this->commitPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'xcomment.commitPHID IN (%Ls)',
+        $conn,
+        '%T.commitPHID IN (%Ls)',
+        $alias,
         $this->commitPHIDs);
-    }
-
-    if ($this->hasPath !== null) {
-      if ($this->hasPath) {
-        $where[] = qsprintf(
-          $conn_r,
-          'xcomment.pathID IS NOT NULL');
-      } else {
-        $where[] = qsprintf(
-          $conn_r,
-          'xcomment.pathID IS NULL');
-      }
     }
 
     if ($this->pathIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'xcomment.pathID IN (%Ld)',
+        $conn,
+        '%T.pathID IN (%Ld)',
+        $alias,
         $this->pathIDs);
     }
 
     return $where;
+  }
+
+  protected function loadHiddenCommentIDs(
+    $viewer_phid,
+    array $comments) {
+    return array();
   }
 
 }

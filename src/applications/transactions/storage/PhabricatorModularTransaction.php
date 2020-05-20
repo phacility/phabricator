@@ -196,4 +196,10 @@ abstract class PhabricatorModularTransaction
     return $this->getTransactionImplementation()->newRemarkupChanges();
   }
 
+  /* final */ public function newWarningForTransactions(
+    $object,
+    array $xactions) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
 }

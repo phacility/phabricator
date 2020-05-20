@@ -48,10 +48,17 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
     $expect_user = PhabricatorEnv::getEnvConfig('phd.user');
     if (strlen($expect_user)) {
-      $all_daemons = id(new PhabricatorDaemonLogQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
-        ->execute();
+
+      try {
+        $all_daemons = id(new PhabricatorDaemonLogQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+          ->execute();
+      } catch (Exception $ex) {
+        // If this query fails for some reason, just skip this check.
+        $all_daemons = array();
+      }
+
       foreach ($all_daemons as $daemon) {
         $actual_user = $daemon->getRunningAsUser();
         if ($actual_user == $expect_user) {

@@ -32,6 +32,8 @@ final class PhutilDaemonOverseer extends Phobject {
   private $inAbruptShutdown;
   private $inGracefulShutdown;
 
+  private $futurePool;
+
   public function __construct(array $argv) {
     PhutilServiceProfiler::getInstance()->enableDiscardMode();
 
@@ -160,12 +162,12 @@ EOHELP
   public function run() {
     $this->createDaemonPools();
 
+    $future_pool = $this->getFuturePool();
+
     while (true) {
       if ($this->shouldReloadDaemons()) {
         $this->didReceiveSignal(SIGHUP);
       }
-
-      $futures = array();
 
       $running_pools = false;
       foreach ($this->getDaemonPools() as $pool) {
@@ -180,7 +182,7 @@ EOHELP
         }
 
         foreach ($pool->getFutures() as $future) {
-          $futures[] = $future;
+          $future_pool->addFuture($future);
         }
 
         if ($pool->getDaemons()) {
@@ -190,9 +192,15 @@ EOHELP
 
       $this->updateMemory();
 
-      $this->waitForDaemonFutures($futures);
+      if ($future_pool->hasFutures()) {
+        $future_pool->resolve();
+      } else {
+        if (!$this->shouldShutdown()) {
+          sleep(1);
+        }
+      }
 
-      if (!$futures && !$running_pools) {
+      if (!$future_pool->hasFutures() && !$running_pools) {
         if ($this->shouldShutdown()) {
           break;
         }
@@ -202,23 +210,20 @@ EOHELP
     exit($this->err);
   }
 
+  private function getFuturePool() {
+    if (!$this->futurePool) {
+      $pool = new FuturePool();
 
-  private function waitForDaemonFutures(array $futures) {
-    assert_instances_of($futures, 'ExecFuture');
+      // TODO: This only wakes if any daemons actually exit, or 1 second
+      // passes. It would be a bit cleaner to wait on any I/O, but Futures
+      // currently can't do that.
 
-    if ($futures) {
-      // TODO: This only wakes if any daemons actually exit. It would be a bit
-      // cleaner to wait on any I/O with Channels.
-      $iter = id(new FutureIterator($futures))
+      $pool->getIteratorTemplate()
         ->setUpdateInterval(1);
-      foreach ($iter as $future) {
-        break;
-      }
-    } else {
-      if (!$this->shouldShutdown()) {
-        sleep(1);
-      }
+
+      $this->futurePool = $pool;
     }
+    return $this->futurePool;
   }
 
   private function createDaemonPools() {

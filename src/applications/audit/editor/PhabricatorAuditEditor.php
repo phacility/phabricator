@@ -105,6 +105,14 @@ final class PhabricatorAuditEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditActionConstants::INLINE:
+        $comment = $xaction->getComment();
+
+        $comment->setAttribute('editing', false);
+
+        PhabricatorVersionedDraft::purgeDrafts(
+          $comment->getPHID(),
+          $this->getActingAsPHID());
+        return;
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;
     }
@@ -232,14 +240,22 @@ final class PhabricatorAuditEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $auditors_type = DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE;
+
     $xactions = parent::expandTransaction($object, $xaction);
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditTransaction::TYPE_COMMIT:
-        $request = $this->createAuditRequestTransactionFromCommitMessage(
+        $phids = $this->getAuditRequestTransactionPHIDsFromCommitMessage(
           $object);
-        if ($request) {
-          $xactions[] = $request;
-          $this->addUnmentionablePHIDs($request->getNewValue());
+        if ($phids) {
+          $xactions[] = $object->getApplicationTransactionTemplate()
+            ->setTransactionType($auditors_type)
+            ->setNewValue(
+              array(
+                '+' => array_fuse($phids),
+              ));
+          $this->addUnmentionablePHIDs($phids);
         }
         break;
       default:
@@ -268,7 +284,7 @@ final class PhabricatorAuditEditor
     return $xactions;
   }
 
-  private function createAuditRequestTransactionFromCommitMessage(
+  private function getAuditRequestTransactionPHIDsFromCommitMessage(
     PhabricatorRepositoryCommit $commit) {
 
     $actor = $this->getActor();
@@ -297,12 +313,7 @@ final class PhabricatorAuditEditor
       return array();
     }
 
-    return $commit->getApplicationTransactionTemplate()
-      ->setTransactionType(DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
-      ->setNewValue(
-        array(
-          '+' => array_fuse($phids),
-        ));
+    return $phids;
   }
 
   protected function sortTransactions(array $xactions) {

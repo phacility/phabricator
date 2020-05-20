@@ -18,17 +18,24 @@ final class PhabricatorSystemSelectViewAsController
 
     $engines = PhabricatorDocumentEngine::getAllEngines();
 
+    $options = $request->getStrList('options');
+    $options = array_fuse($options);
 
-    // TODO: This controller isn't very good because the valid options depend
-    // on the file being rendered and most of them can't even diff anything,
-    // and this ref is completely bogus.
+    // TODO: This controller is a bit rough because it isn't really using the
+    // file ref to figure out which engines should work. See also T13513.
+    // Callers can pass a list of "options" to control which options are
+    // presented, at least.
 
-    // For now, we just show everything.
     $ref = new PhabricatorDocumentRef();
 
     $map = array();
     foreach ($engines as $engine) {
       $key = $engine->getDocumentEngineKey();
+
+      if ($options && !isset($options[$key])) {
+        continue;
+      }
+
       $label = $engine->getViewAsLabel($ref);
 
       if (!strlen($label)) {

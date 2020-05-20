@@ -20,6 +20,7 @@ JX.install('KeyboardShortcut', {
 
   properties : {
     keys : null,
+    group: null,
     description : null,
     handler : null,
     tooltipHandler : null

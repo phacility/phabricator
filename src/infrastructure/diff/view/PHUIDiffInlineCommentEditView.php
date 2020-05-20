@@ -3,90 +3,23 @@
 final class PHUIDiffInlineCommentEditView
   extends PHUIDiffInlineCommentView {
 
-  private $inputs = array();
-  private $uri;
   private $title;
-  private $number;
-  private $length;
-  private $renderer;
-  private $isNewFile;
-  private $replyToCommentPHID;
-  private $changesetID;
-
-  public function setIsNewFile($is_new_file) {
-    $this->isNewFile = $is_new_file;
-    return $this;
-  }
-
-  public function getIsNewFile() {
-    return $this->isNewFile;
-  }
-
-  public function setRenderer($renderer) {
-    $this->renderer = $renderer;
-    return $this;
-  }
-
-  public function getRenderer() {
-    return $this->renderer;
-  }
-
-  public function addHiddenInput($key, $value) {
-    $this->inputs[] = array($key, $value);
-    return $this;
-  }
-
-  public function setSubmitURI($uri) {
-    $this->uri = $uri;
-    return $this;
-  }
 
   public function setTitle($title) {
     $this->title = $title;
     return $this;
   }
 
-  public function setReplyToCommentPHID($reply_to_phid) {
-    $this->replyToCommentPHID = $reply_to_phid;
-    return $this;
-  }
-
-  public function getReplyToCommentPHID() {
-    return $this->replyToCommentPHID;
-  }
-
-  public function setChangesetID($changeset_id) {
-    $this->changesetID = $changeset_id;
-    return $this;
-  }
-
-  public function getChangesetID() {
-    return $this->changesetID;
-  }
-
-  public function setNumber($number) {
-    $this->number = $number;
-    return $this;
-  }
-
-  public function setLength($length) {
-    $this->length = $length;
-    return $this;
-  }
-
   public function render() {
-    if (!$this->uri) {
-      throw new PhutilInvalidStateException('setSubmitURI');
-    }
-
     $viewer = $this->getViewer();
+    $inline = $this->getInlineComment();
 
     $content = phabricator_form(
       $viewer,
       array(
-        'action'    => $this->uri,
-        'method'    => 'POST',
-        'sigil'     => 'inline-edit-form',
+        'action' => $inline->getControllerURI(),
+        'method' => 'POST',
+        'sigil' => 'inline-edit-form',
       ),
       array(
         $this->renderInputs(),
@@ -97,13 +30,16 @@ final class PHUIDiffInlineCommentEditView
   }
 
   private function renderInputs() {
-    $inputs = $this->inputs;
-    $out = array();
+    $inputs = array();
+    $inline = $this->getInlineComment();
 
-    $inputs[] = array('on_right', (bool)$this->getIsOnRight());
-    $inputs[] = array('replyToCommentPHID', $this->getReplyToCommentPHID());
+    $inputs[] = array('op', 'edit');
+    $inputs[] = array('id', $inline->getID());
+
+    $inputs[] = array('on_right', $this->getIsOnRight());
     $inputs[] = array('renderer', $this->getRenderer());
-    $inputs[] = array('changesetID', $this->getChangesetID());
+
+    $out = array();
 
     foreach ($inputs as $input) {
       list($name, $value) = $input;
@@ -115,6 +51,7 @@ final class PHUIDiffInlineCommentEditView
           'value' => $value,
         ));
     }
+
     return $out;
   }
 
@@ -141,7 +78,7 @@ final class PHUIDiffInlineCommentEditView
       array(
         'class' => 'differential-inline-comment-edit-body',
       ),
-      $this->renderChildren());
+      $this->newTextarea());
 
     $edit = phutil_tag(
       'div',
@@ -152,25 +89,34 @@ final class PHUIDiffInlineCommentEditView
         $buttons,
       ));
 
+    $inline = $this->getInlineComment();
+
     return javelin_tag(
       'div',
       array(
         'class' => 'differential-inline-comment-edit',
         'sigil' => 'differential-inline-comment',
-        'meta' => array(
-          'changesetID' => $this->getChangesetID(),
-          'on_right' => $this->getIsOnRight(),
-          'isNewFile' => (bool)$this->getIsNewFile(),
-          'number' => $this->number,
-          'length' => $this->length,
-          'replyToCommentPHID' => $this->getReplyToCommentPHID(),
-        ),
+        'meta' => $this->getInlineCommentMetadata(),
       ),
       array(
         $title,
         $body,
         $edit,
       ));
+  }
+
+  private function newTextarea() {
+    $viewer = $this->getViewer();
+    $inline = $this->getInlineComment();
+
+    $text = $inline->getContentForEdit($viewer);
+
+    return id(new PhabricatorRemarkupControl())
+      ->setViewer($viewer)
+      ->setSigil('differential-inline-comment-edit-textarea')
+      ->setName('text')
+      ->setValue($text)
+      ->setDisableFullScreen(true);
   }
 
 }

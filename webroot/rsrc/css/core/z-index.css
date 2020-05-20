@@ -16,10 +16,6 @@
   z-index: 2;
 }
 
-.differential-reticle {
-  z-index: 2;
-}
-
 .differential-changeset {
   z-index: 2;
 }
@@ -61,10 +57,6 @@ div.phui-calendar-day-event {
 }
 
 .conpherence-menu-pane {
-  z-index: 4;
-}
-
-.phabricator-nav-drag {
   z-index: 4;
 }
 

@@ -259,6 +259,7 @@ JX.behavior('dark-console', function(config, statics) {
   function install_shortcut() {
     var desc = 'Toggle visibility of DarkConsole.';
     new JX.KeyboardShortcut('`', desc)
+      .setGroup('global')
       .setHandler(function() {
         statics.visible = !statics.visible;
 

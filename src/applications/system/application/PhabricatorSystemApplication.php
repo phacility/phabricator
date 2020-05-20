@@ -24,6 +24,7 @@ final class PhabricatorSystemApplication extends PhabricatorApplication {
     return array(
       '/status/' => 'PhabricatorStatusController',
       '/debug/' => 'PhabricatorDebugController',
+      '/favicon.ico' => 'PhabricatorFaviconController',
       '/robots.txt' => 'PhabricatorRobotsController',
       '/services/' => array(
         'encoding/' => 'PhabricatorSystemSelectEncodingController',

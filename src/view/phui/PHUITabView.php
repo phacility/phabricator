@@ -2,6 +2,7 @@
 
 final class PHUITabView extends AphrontTagView {
 
+  private $icon;
   private $name;
   private $key;
   private $keyLocked;
@@ -51,6 +52,15 @@ final class PHUITabView extends AphrontTagView {
     return $this->name;
   }
 
+  public function setIcon(PHUIIconView $icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
+  }
+
   public function getContentID() {
     if ($this->contentID === null) {
       $this->contentID = celerity_generate_unique_node_id();
@@ -79,6 +89,11 @@ final class PHUITabView extends AphrontTagView {
         array(
           'tabKey' => $this->getKey(),
         ));
+
+    $icon = $this->getIcon();
+    if ($icon) {
+      $item->setIcon($icon->getIconName());
+    }
 
     $color = $this->getColor();
     if ($color !== null) {

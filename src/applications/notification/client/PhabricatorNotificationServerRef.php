@@ -209,8 +209,7 @@ final class PhabricatorNotificationServerRef
 
     $server_uri = $this->getURI('/status/');
 
-    list($body) = id(new HTTPSFuture($server_uri))
-      ->setTimeout(2)
+    list($body) = $this->newFuture($server_uri)
       ->resolvex();
 
     return phutil_json_decode($body);
@@ -225,10 +224,32 @@ final class PhabricatorNotificationServerRef
     $server_uri = $this->getURI('/');
     $payload = phutil_json_encode($data);
 
-    id(new HTTPSFuture($server_uri, $payload))
+    $this->newFuture($server_uri, $payload)
       ->setMethod('POST')
-      ->setTimeout(2)
       ->resolvex();
+  }
+
+  private function newFuture($uri, $data = null) {
+    if ($data === null) {
+      $future = new HTTPSFuture($uri);
+    } else {
+      $future = new HTTPSFuture($uri, $data);
+    }
+
+    $future->setTimeout(2);
+
+    // At one point, a HackerOne researcher reported a "Location:" redirect
+    // attack here (if the attacker can gain control of the notification
+    // server or the configuration).
+
+    // Although this attack is not particularly concerning, we don't expect
+    // Aphlict to ever issue a "Location:" header, so receiving one indicates
+    // something is wrong and declining to follow the header may make debugging
+    // easier.
+
+    $future->setFollowLocation(false);
+
+    return $future;
   }
 
 }

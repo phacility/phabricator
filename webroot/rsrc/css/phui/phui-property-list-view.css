@@ -364,7 +364,7 @@ td.old .jupyter-cell-code-line {
   margin: 4px 0;
   padding: 8px;
   white-space: pre-wrap;
-  word-break: break-all;
+  line-break: anywhere;
 }
 
 .jupyter-output-stderr {

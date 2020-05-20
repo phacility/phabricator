@@ -23,6 +23,7 @@ JX.behavior('phabricator-watch-anchor', function() {
   var wait_ms = 100;
 
   var target;
+  var display_target;
   var retry_ms;
 
   function try_anchor() {
@@ -74,8 +75,9 @@ JX.behavior('phabricator-watch-anchor', function() {
     // If we already have an anchor highlighted, unhighlight it and throw
     // it away if it doesn't match the new target.
     if (target && (target !== node)) {
-      JX.DOM.alterClass(target, 'anchor-target', false);
+      JX.DOM.alterClass(display_target, 'anchor-target', false);
       target = null;
+      display_target = null;
     }
 
     // If we didn't find a matching anchor, try again soon. This allows
@@ -92,7 +94,26 @@ JX.behavior('phabricator-watch-anchor', function() {
     // If we've found a new target, highlight it.
     if (target !== node) {
       target = node;
-      JX.DOM.alterClass(target, 'anchor-target', true);
+
+      // If there's an "anchor-container" parent element, we'll make the
+      // display adjustment to that node instead. For example, this is used
+      // by the timeline to highlight timeline stories.
+
+      var container;
+
+      try {
+        container = JX.DOM.findAbove(node, null, 'anchor-container');
+      } catch (ex) {
+        // Ignore.
+      }
+
+      if (container) {
+        display_target = container;
+      } else {
+        display_target = node;
+      }
+
+      JX.DOM.alterClass(display_target, 'anchor-target', true);
     }
 
     // Try to scroll to the new target.

@@ -840,6 +840,13 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $seen[$target_identifier] = true;
 
+      // See PHI1688. If this commit is already marked as unreachable, we don't
+      // need to consider its ancestors. This may skip a lot of work if many
+      // branches with a lot of shared ancestry are deleted at the same time.
+      if ($target->isUnreachable()) {
+        continue;
+      }
+
       try {
         $stream->getCommitDate($target_identifier);
         $reachable = true;

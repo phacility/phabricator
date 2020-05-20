@@ -471,54 +471,6 @@ final class PhabricatorUser
     return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 
-  public function loadEditorLink(
-    $path,
-    $line,
-    PhabricatorRepository $repository = null) {
-
-    $editor = $this->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
-
-    if (is_array($path)) {
-      $multi_key = PhabricatorEditorMultipleSetting::SETTINGKEY;
-      $multiedit = $this->getUserSetting($multi_key);
-      switch ($multiedit) {
-        case PhabricatorEditorMultipleSetting::VALUE_SPACES:
-          $path = implode(' ', $path);
-          break;
-        case PhabricatorEditorMultipleSetting::VALUE_SINGLE:
-        default:
-          return null;
-      }
-    }
-
-    if (!strlen($editor)) {
-      return null;
-    }
-
-    if ($repository) {
-      $callsign = $repository->getCallsign();
-    } else {
-      $callsign = null;
-    }
-
-    $uri = strtr($editor, array(
-      '%%' => '%',
-      '%f' => phutil_escape_uri($path),
-      '%l' => phutil_escape_uri($line),
-      '%r' => phutil_escape_uri($callsign),
-    ));
-
-    // The resulting URI must have an allowed protocol. Otherwise, we'll return
-    // a link to an error page explaining the misconfiguration.
-
-    $ok = PhabricatorHelpEditorProtocolController::hasAllowedProtocol($uri);
-    if (!$ok) {
-      return '/help/editorprotocol/';
-    }
-
-    return (string)$uri;
-  }
-
   /**
    * Populate the nametoken table, which used to fetch typeahead results. When
    * a user types "linc", we want to match "Abraham Lincoln" from on-demand
