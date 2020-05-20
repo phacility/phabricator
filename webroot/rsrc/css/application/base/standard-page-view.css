@@ -49,9 +49,13 @@ body.white-background {
   display: none;
 }
 
+.keyboard-shortcut-help {
+  margin: 4px 12px;
+}
+
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
-  padding: 8px;
+  padding: 6px;
   vertical-align: middle;
 }
 
@@ -60,11 +64,30 @@ body.white-background {
   color: {$greytext};
 }
 
+.keyboard-shortcut-key {
+  display: inline-block;
+  min-width: 1em;
+  min-height: 1em;
+  padding: 4px 6px;
+  font-weight: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 rgba({$alphablue}, 0.08);
+  user-select: none;
+  color: {$darkgreytext};
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+}
+
 .keyboard-focus-focus-reticle {
-  background: rgba(255, 255, 211, 0.15);
   position: absolute;
-  border: 1px solid {$yellow};
-  pointer-events: none;
+
+  box-sizing: border-box;
+  border-width: 0 6px 0 0;
+  border-style: solid;
+  border-color: {$yellow};
+  background: {$lightyellow};
 }
 
 a.handle-status-closed {

@@ -12,6 +12,8 @@ final class PhutilSearchQueryCompiler
   const OPERATOR_AND = 'and';
   const OPERATOR_SUBSTRING = 'sub';
   const OPERATOR_EXACT = 'exact';
+  const OPERATOR_ABSENT = 'absent';
+  const OPERATOR_PRESENT = 'present';
 
   public function setOperators($operators) {
     $this->operators = $operators;
@@ -146,7 +148,7 @@ final class PhutilSearchQueryCompiler
         if ($enable_functions) {
           $found = false;
           for ($jj = $ii; $jj < $length; $jj++) {
-            if (preg_match('/^[a-zA-Z]\z/u', $query[$jj])) {
+            if (preg_match('/^[a-zA-Z-]\z/u', $query[$jj])) {
               continue;
             }
             if ($query[$jj] == ':') {
@@ -170,8 +172,10 @@ final class PhutilSearchQueryCompiler
       }
 
       if ($mode == 'operator') {
-        if (preg_match('/^\s\z/u', $character)) {
-          continue;
+        if (!$current_operator) {
+          if (preg_match('/^\s\z/u', $character)) {
+            continue;
+          }
         }
 
         if (preg_match('/^'.$operator_characters.'\z/', $character)) {
@@ -243,34 +247,27 @@ final class PhutilSearchQueryCompiler
           'Query contains unmatched double quotes.'));
     }
 
-    if ($mode == 'operator') {
-      throw new PhutilSearchQueryCompilerSyntaxException(
-        pht(
-          'Query contains operator ("%s") with no search term.',
-          implode('', $current_operator)));
+    // If the input query has trailing space, like "a b ", we may exit the
+    // parser without a final token.
+    if ($current_function !== null || $current_operator || $current_token) {
+      $token = array(
+        'operator' => $current_operator,
+        'quoted' => false,
+        'value' => $current_token,
+      );
+
+      if ($enable_functions) {
+        $token['function'] = $current_function;
+      }
+
+      $tokens[] = $token;
     }
-
-    $token = array(
-      'operator' => $current_operator,
-      'quoted' => false,
-      'value' => $current_token,
-    );
-
-    if ($enable_functions) {
-      $token['function'] = $current_function;
-    }
-
-    $tokens[] = $token;
 
     $results = array();
+    $last_function = null;
     foreach ($tokens as $token) {
       $value = implode('', $token['value']);
       $operator_string = implode('', $token['operator']);
-
-      if (!strlen($value)) {
-        continue;
-      }
-
       $is_quoted = $token['quoted'];
 
       switch ($operator_string) {
@@ -304,17 +301,120 @@ final class PhutilSearchQueryCompiler
               $operator_string));
       }
 
+      if (!strlen($value)) {
+        $require_value = $is_quoted;
+
+        switch ($operator) {
+          case self::OPERATOR_NOT:
+            if ($enable_functions && ($token['function'] !== null)) {
+              $operator = self::OPERATOR_ABSENT;
+              $value = null;
+            } else {
+              $require_value = true;
+            }
+            break;
+          case self::OPERATOR_SUBSTRING:
+            if ($enable_functions && ($token['function'] !== null)) {
+              $operator = self::OPERATOR_PRESENT;
+              $value = null;
+            } else {
+              $require_value = true;
+            }
+            break;
+          default:
+            $require_value = true;
+            break;
+        }
+
+        if ($require_value) {
+          throw new PhutilSearchQueryCompilerSyntaxException(
+            pht(
+              'Query contains a token ("%s") with no search term. Query '.
+              'tokens specify text to search for.',
+              $this->getDisplayToken($token)));
+        }
+      }
+
       $result = array(
         'operator' => $operator,
         'quoted' => $is_quoted,
         'value' => $value,
+        'raw' => $this->getDisplayToken($token),
       );
 
       if ($enable_functions) {
-        $result['function'] = $token['function'];
+        // If a user provides a query like "title:a b c", we interpret all
+        // of the terms to be title terms: the "title:" function sticks
+        // until we encounter another function.
+
+        // If a user provides a query like "title:"a"" (with a quoted term),
+        // the function is not sticky.
+
+        if ($token['function'] !== null) {
+          $function = $token['function'];
+        } else {
+          $function = $last_function;
+        }
+
+        $result['function'] = $function;
+
+        // Note that the function remains sticky across quoted terms appearing
+        // after the function term. For example, all of these terms are title
+        // terms:
+        //
+        //   title:a "b c" d
+
+        $is_sticky = (!$result['quoted'] || ($token['function'] === null));
+
+        switch ($operator) {
+          case self::OPERATOR_ABSENT:
+          case self::OPERATOR_PRESENT:
+            $is_sticky = false;
+            break;
+        }
+
+        if ($is_sticky) {
+          $last_function = $function;
+        } else {
+          $last_function = null;
+        }
       }
 
       $results[] = $result;
+    }
+
+    if ($enable_functions) {
+      // If any function is required to be "absent", there must be no other
+      // terms which make assertions about it.
+
+      $present_tokens = array();
+      $absent_tokens = array();
+      foreach ($results as $result) {
+        $function = $result['function'];
+
+        if ($result['operator'] === self::OPERATOR_ABSENT) {
+          $absent_tokens[$function][] = $result;
+        } else {
+          $present_tokens[$function][] = $result;
+        }
+      }
+
+      foreach ($absent_tokens as $function => $tokens) {
+        $absent_token = head($tokens);
+
+        if (empty($present_tokens[$function])) {
+          continue;
+        }
+
+        $present_token = head($present_tokens[$function]);
+
+        throw new PhutilSearchQueryCompilerSyntaxException(
+          pht(
+            'Query field must be absent ("%s") and present ("%s"). This '.
+            'is impossible, so the query is not valid.',
+            $absent_token['raw'],
+            $present_token['raw']));
+      }
     }
 
     return $results;
@@ -369,6 +469,25 @@ final class PhutilSearchQueryCompiler
     $close_quote = $this->operators[11];
 
     return $open_quote.$value.$close_quote;
+  }
+
+  private function getDisplayToken(array $token) {
+    if (isset($token['function'])) {
+      $function = $token['function'].':';
+    } else {
+      $function = '';
+    }
+
+    $operator_string = implode('', $token['operator']);
+
+    $value = implode('', $token['value']);
+
+    $is_quoted = $token['quoted'];
+    if ($is_quoted) {
+      $value = $this->quoteToken($value);
+    }
+
+    return sprintf('%s%s%s', $function, $operator_string, $value);
   }
 
 }

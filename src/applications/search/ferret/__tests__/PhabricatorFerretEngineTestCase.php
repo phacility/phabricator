@@ -43,10 +43,10 @@ final class PhabricatorFerretEngineTestCase
       ),
     );
 
-    $engine = new ManiphestTaskFerretEngine();
+    $ngram_engine = new PhabricatorSearchNgramEngine();
 
     foreach ($map as $input => $expect) {
-      $actual = $engine->getTermNgramsFromString($input);
+      $actual = $ngram_engine->getTermNgramsFromString($input);
       $this->assertEqual(
         $actual,
         $expect,

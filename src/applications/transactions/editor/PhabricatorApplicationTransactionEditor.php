@@ -4975,11 +4975,18 @@ abstract class PhabricatorApplicationTransactionEditor
       return false;
     }
 
+    $type = $xaction->getTransactionType();
+
+    // TODO: This doesn't warn for inlines in Audit, even though they have
+    // the same overall workflow.
+    if ($type === DifferentialTransaction::TYPE_INLINE) {
+      return (bool)$xaction->getComment()->getAttribute('editing', false);
+    }
+
     if (!$object->isDraft()) {
       return false;
     }
 
-    $type = $xaction->getTransactionType();
     if ($type != PhabricatorTransactions::TYPE_SUBSCRIBERS) {
       return false;
     }
@@ -5020,13 +5027,23 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function newAutomaticInlineTransactions(
     PhabricatorLiskDAO $object,
-    array $inlines,
     $transaction_type,
     PhabricatorCursorPagedPolicyAwareQuery $query_template) {
 
+    $actor = $this->getActor();
+
+    $inlines = id(clone $query_template)
+      ->setViewer($actor)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withPublishableComments(true)
+      ->needAppliedDrafts(true)
+      ->needReplyToComments(true)
+      ->execute();
+    $inlines = msort($inlines, 'getID');
+
     $xactions = array();
 
-    foreach ($inlines as $inline) {
+    foreach ($inlines as $key => $inline) {
       $xactions[] = $object->getApplicationTransactionTemplate()
         ->setTransactionType($transaction_type)
         ->attachComment($inline);
@@ -5053,24 +5070,17 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $state_map = PhabricatorTransactions::getInlineStateMap();
 
-    $query = id(clone $query_template)
+    $inline_query = id(clone $query_template)
       ->setViewer($this->getActor())
-      ->withFixedStates(array_keys($state_map));
-
-    $inlines = array();
-
-    $inlines[] = id(clone $query)
-      ->withAuthorPHIDs(array($actor_phid))
-      ->withHasTransaction(false)
-      ->execute();
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withFixedStates(array_keys($state_map))
+      ->withPublishableComments(true);
 
     if ($actor_is_author) {
-      $inlines[] = id(clone $query)
-        ->withHasTransaction(true)
-        ->execute();
+      $inline_query->withPublishedComments(true);
     }
 
-    $inlines = array_mergev($inlines);
+    $inlines = $inline_query->execute();
 
     if (!$inlines) {
       return null;

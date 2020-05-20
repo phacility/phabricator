@@ -22,6 +22,19 @@ final class DifferentialChangeset
   private $hunks = self::ATTACHABLE;
   private $diff = self::ATTACHABLE;
 
+  private $authorityPackages;
+  private $changesetPackages;
+
+  private $newFileObject = self::ATTACHABLE;
+  private $oldFileObject = self::ATTACHABLE;
+
+  private $hasOldState;
+  private $hasNewState;
+  private $oldStateMetadata;
+  private $newStateMetadata;
+  private $oldFileType;
+  private $newFileType;
+
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
   const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
@@ -108,6 +121,52 @@ final class DifferentialChangeset
     $this->hunks[] = $hunk;
     $this->unsavedHunks[] = $hunk;
     return $this;
+  }
+
+  public function setAuthorityPackages(array $authority_packages) {
+    $this->authorityPackages = mpull($authority_packages, null, 'getPHID');
+    return $this;
+  }
+
+  public function getAuthorityPackages() {
+    return $this->authorityPackages;
+  }
+
+  public function setChangesetPackages($changeset_packages) {
+    $this->changesetPackages = mpull($changeset_packages, null, 'getPHID');
+    return $this;
+  }
+
+  public function getChangesetPackages() {
+    return $this->changesetPackages;
+  }
+
+  public function setHasOldState($has_old_state) {
+    $this->hasOldState = $has_old_state;
+    return $this;
+  }
+
+  public function setHasNewState($has_new_state) {
+    $this->hasNewState = $has_new_state;
+    return $this;
+  }
+
+  public function hasOldState() {
+    if ($this->hasOldState !== null) {
+      return $this->hasOldState;
+    }
+
+    $change_type = $this->getChangeType();
+    return !DifferentialChangeType::isCreateChangeType($change_type);
+  }
+
+  public function hasNewState() {
+    if ($this->hasNewState !== null) {
+      return $this->hasNewState;
+    }
+
+    $change_type = $this->getChangeType();
+    return !DifferentialChangeType::isDeleteChangeType($change_type);
   }
 
   public function save() {
@@ -258,49 +317,116 @@ final class DifferentialChangeset
     return $this->assertAttached($this->diff);
   }
 
-  public function newFileTreeIcon() {
-    $file_type = $this->getFileType();
-    $change_type = $this->getChangeType();
-
-    $change_icons = array(
-      DifferentialChangeType::TYPE_DELETE => 'fa-file-o',
-    );
-
-    if (isset($change_icons[$change_type])) {
-      $icon = $change_icons[$change_type];
-    } else {
-      $icon = DifferentialChangeType::getIconForFileType($file_type);
+  public function getOldStatePathVector() {
+    $path = $this->getOldFile();
+    if (!strlen($path)) {
+      $path = $this->getFilename();
     }
 
-    $change_colors = array(
-      DifferentialChangeType::TYPE_ADD => 'green',
-      DifferentialChangeType::TYPE_DELETE => 'red',
-      DifferentialChangeType::TYPE_MOVE_AWAY => 'orange',
-      DifferentialChangeType::TYPE_MOVE_HERE => 'orange',
-      DifferentialChangeType::TYPE_COPY_HERE => 'orange',
-      DifferentialChangeType::TYPE_MULTICOPY => 'orange',
-    );
+    $path = trim($path, '/');
+    $path = explode('/', $path);
 
-    $color = idx($change_colors, $change_type, 'bluetext');
-
-    return id(new PHUIIconView())
-      ->setIcon($icon.' '.$color);
+    return $path;
   }
 
-  public function getFileTreeClass() {
-    switch ($this->getChangeType()) {
-      case DifferentialChangeType::TYPE_ADD:
-        return 'filetree-added';
-      case DifferentialChangeType::TYPE_DELETE:
-        return 'filetree-deleted';
-      case DifferentialChangeType::TYPE_MOVE_AWAY:
-      case DifferentialChangeType::TYPE_MOVE_HERE:
-      case DifferentialChangeType::TYPE_COPY_HERE:
-      case DifferentialChangeType::TYPE_MULTICOPY:
-        return 'filetree-movecopy';
+  public function getNewStatePathVector() {
+    if (!$this->hasNewState()) {
+      return null;
     }
 
-    return null;
+    $path = $this->getFilename();
+    $path = trim($path, '/');
+    $path = explode('/', $path);
+
+    return $path;
+  }
+
+  public function newFileTreeIcon() {
+    $icon = $this->getPathIconIcon();
+    $color = $this->getPathIconColor();
+
+    return id(new PHUIIconView())
+      ->setIcon("{$icon} {$color}");
+  }
+
+  public function getIsOwnedChangeset() {
+    $authority_packages = $this->getAuthorityPackages();
+    $changeset_packages = $this->getChangesetPackages();
+
+    if (!$authority_packages || !$changeset_packages) {
+      return false;
+    }
+
+    return (bool)array_intersect_key($authority_packages, $changeset_packages);
+  }
+
+  public function getIsLowImportanceChangeset() {
+    if (!$this->hasNewState()) {
+      return true;
+    }
+
+    if ($this->isGeneratedChangeset()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public function getPathIconIcon() {
+    return idx($this->getPathIconDetails(), 'icon');
+  }
+
+  public function getPathIconColor() {
+    return idx($this->getPathIconDetails(), 'color');
+  }
+
+  private function getPathIconDetails() {
+    $change_icons = array(
+      DifferentialChangeType::TYPE_DELETE => array(
+        'icon' => 'fa-times',
+        'color' => 'delete-color',
+      ),
+      DifferentialChangeType::TYPE_ADD => array(
+        'icon' => 'fa-plus',
+        'color' => 'create-color',
+      ),
+      DifferentialChangeType::TYPE_MOVE_AWAY => array(
+        'icon' => 'fa-circle-o',
+        'color' => 'grey',
+      ),
+      DifferentialChangeType::TYPE_MULTICOPY => array(
+        'icon' => 'fa-circle-o',
+        'color' => 'grey',
+      ),
+      DifferentialChangeType::TYPE_MOVE_HERE => array(
+        'icon' => 'fa-plus-circle',
+        'color' => 'create-color',
+      ),
+      DifferentialChangeType::TYPE_COPY_HERE => array(
+        'icon' => 'fa-plus-circle',
+        'color' => 'create-color',
+      ),
+    );
+
+    $change_type = $this->getChangeType();
+    if (isset($change_icons[$change_type])) {
+      return $change_icons[$change_type];
+    }
+
+    if ($this->isGeneratedChangeset()) {
+      return array(
+        'icon' => 'fa-cogs',
+        'color' => 'grey',
+      );
+    }
+
+    $file_type = $this->getFileType();
+    $icon = DifferentialChangeType::getIconForFileType($file_type);
+
+    return array(
+      'icon' => $icon,
+      'color' => 'bluetext',
+    );
   }
 
   public function setChangesetMetadata($key, $value) {
@@ -385,6 +511,185 @@ final class DifferentialChangeset
 
   public function isGeneratedChangeset() {
     return $this->getChangesetAttribute(self::ATTRIBUTE_GENERATED);
+  }
+
+  public function getNewFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'new:binary-phid');
+  }
+
+  public function getOldFileObjectPHID() {
+    $metadata = $this->getMetadata();
+    return idx($metadata, 'old:binary-phid');
+  }
+
+  public function attachNewFileObject(PhabricatorFile $file) {
+    $this->newFileObject = $file;
+    return $this;
+  }
+
+  public function getNewFileObject() {
+    return $this->assertAttached($this->newFileObject);
+  }
+
+  public function attachOldFileObject(PhabricatorFile $file) {
+    $this->oldFileObject = $file;
+    return $this;
+  }
+
+  public function getOldFileObject() {
+    return $this->assertAttached($this->oldFileObject);
+  }
+
+  public function newComparisonChangeset(
+    DifferentialChangeset $against = null) {
+
+    $left = $this;
+    $right = $against;
+
+    $left_data = $left->makeNewFile();
+    $left_properties = $left->getNewProperties();
+    $left_metadata = $left->getNewStateMetadata();
+    $left_state = $left->hasNewState();
+    $shared_metadata = $left->getMetadata();
+    $left_type = $left->getNewFileType();
+    if ($right) {
+      $right_data = $right->makeNewFile();
+      $right_properties = $right->getNewProperties();
+      $right_metadata = $right->getNewStateMetadata();
+      $right_state = $right->hasNewState();
+      $shared_metadata = $right->getMetadata();
+      $right_type = $right->getNewFileType();
+
+      $file_name = $right->getFilename();
+    } else {
+      $right_data = $left->makeOldFile();
+      $right_properties = $left->getOldProperties();
+      $right_metadata = $left->getOldStateMetadata();
+      $right_state = $left->hasOldState();
+      $right_type = $left->getOldFileType();
+
+      $file_name = $left->getFilename();
+    }
+
+    $engine = new PhabricatorDifferenceEngine();
+
+    $synthetic = $engine->generateChangesetFromFileContent(
+      $left_data,
+      $right_data);
+
+    $comparison = id(new self())
+      ->makeEphemeral(true)
+      ->attachDiff($left->getDiff())
+      ->setOldFile($left->getFilename())
+      ->setFilename($file_name);
+
+    // TODO: Change type?
+    // TODO: Away paths?
+    // TODO: View state key?
+
+    $comparison->attachHunks($synthetic->getHunks());
+
+    $comparison->setOldProperties($left_properties);
+    $comparison->setNewProperties($right_properties);
+
+    $comparison
+      ->setOldStateMetadata($left_metadata)
+      ->setNewStateMetadata($right_metadata)
+      ->setHasOldState($left_state)
+      ->setHasNewState($right_state)
+      ->setOldFileType($left_type)
+      ->setNewFileType($right_type);
+
+    // NOTE: Some metadata is not stored statefully, like the "generated"
+    // flag. For now, use the rightmost "new state" metadata to fill in these
+    // values.
+
+    $metadata = $comparison->getMetadata();
+    $metadata = $metadata + $shared_metadata;
+    $comparison->setMetadata($metadata);
+
+    return $comparison;
+  }
+
+
+  public function setNewFileType($new_file_type) {
+    $this->newFileType = $new_file_type;
+    return $this;
+  }
+
+  public function getNewFileType() {
+    if ($this->newFileType !== null) {
+      return $this->newFileType;
+    }
+
+    return $this->getFiletype();
+  }
+
+  public function setOldFileType($old_file_type) {
+    $this->oldFileType = $old_file_type;
+    return $this;
+  }
+
+  public function getOldFileType() {
+    if ($this->oldFileType !== null) {
+      return $this->oldFileType;
+    }
+
+    return $this->getFileType();
+  }
+
+  public function hasSourceTextBody() {
+    $type_map = array(
+      DifferentialChangeType::FILE_TEXT => true,
+      DifferentialChangeType::FILE_SYMLINK => true,
+    );
+
+    $old_body = isset($type_map[$this->getOldFileType()]);
+    $new_body = isset($type_map[$this->getNewFileType()]);
+
+    return ($old_body || $new_body);
+  }
+
+  public function getNewStateMetadata() {
+    return $this->getMetadataWithPrefix('new:');
+  }
+
+  public function setNewStateMetadata(array $metadata) {
+    return $this->setMetadataWithPrefix($metadata, 'new:');
+  }
+
+  public function getOldStateMetadata() {
+    return $this->getMetadataWithPrefix('old:');
+  }
+
+  public function setOldStateMetadata(array $metadata) {
+    return $this->setMetadataWithPrefix($metadata, 'old:');
+  }
+
+  private function getMetadataWithPrefix($prefix) {
+    $length = strlen($prefix);
+
+    $result = array();
+    foreach ($this->getMetadata() as $key => $value) {
+      if (strncmp($key, $prefix, $length)) {
+        continue;
+      }
+
+      $key = substr($key, $length);
+      $result[$key] = $value;
+    }
+
+    return $result;
+  }
+
+  private function setMetadataWithPrefix(array $metadata, $prefix) {
+    foreach ($metadata as $key => $value) {
+      $key = $prefix.$key;
+      $this->metadata[$key] = $value;
+    }
+
+    return $this;
   }
 
 

@@ -81,9 +81,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
 
     $cells[] = $this->getContext();
 
-    $cells[] = $this->renderPathChangeCharacter();
-    $cells[] = $this->renderPropertyChangeCharacter();
-    $cells[] = $this->renderPropertyChangeDescription();
+    $cells[] = $changeset->newFileTreeIcon();
 
     $link = $this->renderChangesetLink();
     $lines = $this->renderChangesetLines();
@@ -103,82 +101,12 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return $cells;
   }
 
-  private function renderPathChangeCharacter() {
-    $changeset = $this->getChangeset();
-    $type = $changeset->getChangeType();
-
-    $color = DifferentialChangeType::getSummaryColorForChangeType($type);
-    $char = DifferentialChangeType::getSummaryCharacterForChangeType($type);
-    $title = DifferentialChangeType::getFullNameForChangeType($type);
-
-    return javelin_tag(
-      'span',
-      array(
-        'sigil' => 'has-tooltip',
-        'meta' => array(
-          'tip' => $title,
-          'align' => 'E',
-        ),
-        'class' => 'phui-text-'.$color,
-      ),
-      $char);
-  }
-
-  private function renderPropertyChangeCharacter() {
-    $changeset = $this->getChangeset();
-
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
-
-    if ($old === $new) {
-      return null;
-    }
-
-    return javelin_tag(
-      'span',
-      array(
-        'sigil' => 'has-tooltip',
-        'meta' => array(
-          'tip' => pht('Properties Modified'),
-          'align' => 'E',
-          'size' => 200,
-        ),
-      ),
-      'M');
-  }
-
-  private function renderPropertyChangeDescription() {
-    $changeset = $this->getChangeset();
-
-    $file_type = $changeset->getFileType();
-
-    $desc = DifferentialChangeType::getShortNameForFileType($file_type);
-    if ($desc === null) {
-      return null;
-    }
-
-    return pht('(%s)', $desc);
-  }
-
-  private function renderChangesetLink() {
+  public function newLink() {
     $anchor = $this->getAnchor();
 
     $changeset = $this->getChangeset();
     $name = $changeset->getDisplayFilename();
-
-    $change_type = $changeset->getChangeType();
-    if (DifferentialChangeType::isOldLocationChangeType($change_type)) {
-      $away = $changeset->getAwayPaths();
-      if (count($away) == 1) {
-        if ($change_type == DifferentialChangeType::TYPE_MOVE_AWAY) {
-          $right_arrow = "\xE2\x86\x92";
-          $name = $this->renderRename($name, head($away), $right_arrow);
-        }
-      }
-    } else if ($change_type == DifferentialChangeType::TYPE_MOVE_HERE) {
-      $left_arrow = "\xE2\x86\x90";
-      $name = $this->renderRename($name, $changeset->getOldFile(), $left_arrow);
-    }
+    $name = basename($name);
 
     return javelin_tag(
       'a',
@@ -192,18 +120,22 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
       $name);
   }
 
-  private function renderChangesetLines() {
+  public function renderChangesetLines() {
     $changeset = $this->getChangeset();
+
+    if ($changeset->getIsLowImportanceChangeset()) {
+      return null;
+    }
 
     $line_count = $changeset->getAffectedLineCount();
     if (!$line_count) {
       return null;
     }
 
-    return ' '.pht('(%d line(s))', $line_count);
+    return pht('%d line(s)', $line_count);
   }
 
-  private function renderCoverage() {
+  public function renderCoverage() {
     $not_applicable = '-';
 
     $coverage = $this->getCoverage();
@@ -221,7 +153,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return sprintf('%d%%', 100 * ($covered / ($covered + $not_covered)));
   }
 
-  private function renderModifiedCoverage() {
+  public function renderModifiedCoverage() {
     $not_applicable = '-';
 
     $coverage = $this->getCoverage();
@@ -285,50 +217,18 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
       $meta);
   }
 
-  private function renderPackages() {
+  public function renderPackages() {
     $packages = $this->getPackages();
+
     if (!$packages) {
       return null;
     }
 
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     $package_phids = mpull($packages, 'getPHID');
 
     return $viewer->renderHandleList($package_phids)
       ->setGlyphLimit(48);
-  }
-
-  private function renderRename($self, $other, $arrow) {
-    $old = explode('/', $self);
-    $new = explode('/', $other);
-
-    $start = count($old);
-    foreach ($old as $index => $part) {
-      if (!isset($new[$index]) || $part != $new[$index]) {
-        $start = $index;
-        break;
-      }
-    }
-
-    $end = count($old);
-    foreach (array_reverse($old) as $from_end => $part) {
-      $index = count($new) - $from_end - 1;
-      if (!isset($new[$index]) || $part != $new[$index]) {
-        $end = $from_end;
-        break;
-      }
-    }
-
-    $rename =
-      '{'.
-      implode('/', array_slice($old, $start, count($old) - $end - $start)).
-      ' '.$arrow.' '.
-      implode('/', array_slice($new, $start, count($new) - $end - $start)).
-      '}';
-
-    array_splice($new, $start, count($new) - $end - $start, $rename);
-
-    return implode('/', $new);
   }
 
 }

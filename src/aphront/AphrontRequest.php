@@ -30,6 +30,7 @@ final class AphrontRequest extends Phobject {
   private $controller;
   private $uriData = array();
   private $cookiePrefix;
+  private $submitKey;
 
   public function __construct($host, $path) {
     $this->host = $host;
@@ -914,5 +915,19 @@ final class AphrontRequest extends Phobject {
     return $future;
   }
 
+  public function updateEphemeralCookies() {
+    $submit_cookie = PhabricatorCookies::COOKIE_SUBMIT;
+
+    $submit_key = $this->getCookie($submit_cookie);
+    if (strlen($submit_key)) {
+      $this->clearCookie($submit_cookie);
+      $this->submitKey = $submit_key;
+    }
+
+  }
+
+  public function getSubmitKey() {
+    return $this->submitKey;
+  }
 
 }

@@ -134,9 +134,17 @@ final class PhabricatorConduitAPIController
           $method_implementation);
       case 'json':
       default:
-        return id(new AphrontJSONResponse())
+        $response = id(new AphrontJSONResponse())
           ->setAddJSONShield(false)
           ->setContent($response->toDictionary());
+
+        $capabilities = $this->getConduitCapabilities();
+        if ($capabilities) {
+          $capabilities = implode(' ', $capabilities);
+          $response->addHeader('X-Conduit-Capabilities', $capabilities);
+        }
+
+        return $response;
     }
   }
 
@@ -716,5 +724,14 @@ final class PhabricatorConduitAPIController
     return false;
   }
 
+  private function getConduitCapabilities() {
+    $capabilities = array();
+
+    if (AphrontRequestStream::supportsGzip()) {
+      $capabilities[] = 'gzip';
+    }
+
+    return $capabilities;
+  }
 
 }

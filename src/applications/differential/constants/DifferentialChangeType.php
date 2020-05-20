@@ -22,50 +22,6 @@ final class DifferentialChangeType extends Phobject {
   const FILE_NORMAL     = 7;
   const FILE_SUBMODULE  = 8;
 
-  public static function getSummaryCharacterForChangeType($type) {
-    static $types = array(
-      self::TYPE_ADD        => 'A',
-      self::TYPE_CHANGE     => 'M',
-      self::TYPE_DELETE     => 'D',
-      self::TYPE_MOVE_AWAY  => 'V',
-      self::TYPE_COPY_AWAY  => 'P',
-      self::TYPE_MOVE_HERE  => 'V',
-      self::TYPE_COPY_HERE  => 'P',
-      self::TYPE_MULTICOPY  => 'P',
-      self::TYPE_MESSAGE    => 'Q',
-      self::TYPE_CHILD      => '@',
-    );
-    return idx($types, coalesce($type, '?'), '~');
-  }
-
-  public static function getSummaryColorForChangeType($type) {
-    static $types = array(
-      self::TYPE_ADD        => 'green',
-      self::TYPE_CHANGE     => 'black',
-      self::TYPE_DELETE     => 'red',
-      self::TYPE_MOVE_AWAY  => 'orange',
-      self::TYPE_COPY_AWAY  => 'black',
-      self::TYPE_MOVE_HERE  => 'green',
-      self::TYPE_COPY_HERE  => 'green',
-      self::TYPE_MULTICOPY  => 'orange',
-      self::TYPE_MESSAGE    => 'black',
-      self::TYPE_CHILD      => 'black',
-    );
-    return idx($types, coalesce($type, '?'), 'black');
-  }
-
-  public static function getShortNameForFileType($type) {
-    static $names = array(
-      self::FILE_TEXT       => null,
-      self::FILE_DIRECTORY  => 'dir',
-      self::FILE_IMAGE      => 'img',
-      self::FILE_BINARY     => 'bin',
-      self::FILE_SYMLINK    => 'sym',
-      self::FILE_SUBMODULE  => 'sub',
-    );
-    return idx($names, coalesce($type, '?'), '???');
-  }
-
   public static function getIconForFileType($type) {
     static $icons = array(
       self::FILE_TEXT => 'fa-file-text-o',

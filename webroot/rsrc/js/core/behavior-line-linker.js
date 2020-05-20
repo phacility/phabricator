@@ -169,10 +169,33 @@ JX.behavior('phabricator-line-linker', function() {
       JX.History.replace(uri);
 
       if (editor_link) {
-        if (editor_link.href) {
-          var editdata = JX.Stratcom.getData(editor_link);
-          editor_link.href = editdata.link_template.replace('%25l', o);
+        var data = JX.Stratcom.getData(editor_link);
+        var template = data.template;
+
+        var variables = {
+          l: parseInt(Math.min(o, t), 10),
+        };
+
+        var parts = [];
+        for (var ii = 0; ii < template.length; ii++) {
+          var part = template[ii];
+          var value = part.value;
+
+          if (part.type === 'literal') {
+            parts.push(value);
+            continue;
+          }
+
+          if (part.type === 'variable') {
+            if (variables.hasOwnProperty(value)) {
+              var replacement = variables[value];
+              replacement = encodeURIComponent(replacement);
+              parts.push(replacement);
+            }
+          }
         }
+
+        editor_link.href = parts.join('');
       }
     });
 
@@ -186,6 +209,18 @@ JX.behavior('phabricator-line-linker', function() {
     } catch (ex) {
       // If we didn't hit an element on the page, just move on.
     }
+  }
+
+  if (editor_link) {
+    // TODO: This should be pht()'d, but this behavior is weird enough to
+    // make that a bit tricky.
+
+    new JX.KeyboardShortcut('\\', 'Open File in External Editor')
+        .setGroup('diff-nav')
+        .setHandler(function() {
+          JX.$U(editor_link.href).go();
+        })
+        .register();
   }
 
 });

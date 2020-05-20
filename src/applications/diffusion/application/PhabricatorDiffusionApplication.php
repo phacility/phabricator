@@ -140,8 +140,6 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
-          'preview/(?P<phid>[^/]+)/'
-            => 'DiffusionInlineCommentPreviewController',
         ),
         'services/' => array(
           'path/' => array(

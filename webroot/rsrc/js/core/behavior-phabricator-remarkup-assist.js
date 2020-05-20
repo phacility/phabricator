@@ -379,6 +379,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
   if (config.canPin) {
     new JX.KeyboardShortcut('z', pht('key-help'))
+      .setGroup('xactions')
       .setHandler(function() {
         set_pinned_mode(root, !pinned);
       })

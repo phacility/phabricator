@@ -11,6 +11,17 @@ JX.behavior('phabricator-oncopy', function() {
   function onstartselect(e) {
     var target = e.getTarget();
 
+    // See T13513. If the user selects multiple lines in a 2-up diff and then
+    // clicks "New Inline Comment" in the context menu that pops up, the
+    // mousedown causes us to arrive here and remove the "selectable" CSS
+    // styles, and creates a flash of selected content across both sides of
+    // the diff, which is distracting. To attempt to avoid this, bail out if
+    // the user clicked a link.
+
+    if (JX.DOM.isType(target, 'a')) {
+      return;
+    }
+
     var container;
     try {
       // NOTE: For now, all elements with custom oncopy behavior are tables,
@@ -119,7 +130,7 @@ JX.behavior('phabricator-oncopy', function() {
 
   // When the selection range changes, apply CSS classes if the selection is
   // nonempty. We don't want to make visual changes to the document immediately
-  // when the user press the mouse button, since we aren't yet sure that
+  // when the user presses the mouse button, since we aren't yet sure that
   // they are starting a selection: instead, wait for them to actually select
   // something.
   function onchangeselect() {

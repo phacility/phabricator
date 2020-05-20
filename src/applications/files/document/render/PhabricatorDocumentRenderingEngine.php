@@ -305,6 +305,12 @@ abstract class PhabricatorDocumentRenderingEngine
     return $crumbs;
   }
 
+  public function getRefViewURI(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngine $engine) {
+    return $this->newRefViewURI($ref, $engine);
+  }
+
   abstract protected function newRefViewURI(
     PhabricatorDocumentRef $ref,
     PhabricatorDocumentEngine $engine);

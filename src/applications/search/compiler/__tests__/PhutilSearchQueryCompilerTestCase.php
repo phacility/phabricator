@@ -10,10 +10,6 @@ final class PhutilSearchQueryCompilerTestCase
       'cat -dog' => '+"cat" -"dog"',
       'cat-dog' => '+"cat-dog"',
 
-      // If there are spaces after an operator, the operator applies to the
-      // next search term.
-      'cat - dog' => '+"cat" -"dog"',
-
       // Double quotes serve as delimiters even if there is no whitespace
       // between terms.
       '"cat"dog' => '+"cat" +"dog"',
@@ -36,6 +32,20 @@ final class PhutilSearchQueryCompilerTestCase
       '"cat' => false,
       'A"' => false,
       'A"B"' => '+"A" +"B"',
+
+      // Trailing whitespace should be discarded.
+      'a b ' => '+"a" +"b"',
+
+      // Tokens must have search text.
+      '""' => false,
+      '-' => false,
+
+      // Previously, we permitted spaces to appear inside or after operators.
+
+      // Now that "title:-" is now a valid construction meaning "title is
+      // absent", this had to be tightened. We want "title:- duck" to mean
+      // "title is absent, and any other field matches 'duck'".
+      'cat - dog' => false,
     );
 
     $this->assertCompileQueries($tests);
@@ -56,7 +66,6 @@ final class PhutilSearchQueryCompilerTestCase
       'cat -dog' => '+[cat] -[dog]',
     );
     $this->assertCompileQueries($quote_tests, '+ -><()~*:[]&|');
-
   }
 
   public function testCompileQueriesWithStemming() {
@@ -91,6 +100,8 @@ final class PhutilSearchQueryCompilerTestCase
     $op_and = PhutilSearchQueryCompiler::OPERATOR_AND;
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_exact = PhutilSearchQueryCompiler::OPERATOR_EXACT;
+    $op_present = PhutilSearchQueryCompiler::OPERATOR_PRESENT;
+    $op_absent = PhutilSearchQueryCompiler::OPERATOR_ABSENT;
 
     $mao = "\xE7\x8C\xAB";
 
@@ -132,6 +143,67 @@ final class PhutilSearchQueryCompilerTestCase
       ),
       '"'.$mao.'"' => array(
         array(null, $op_and, $mao),
+      ),
+      'title:' => false,
+      'title:+' => false,
+      'title:+""' => false,
+      'title:""' => false,
+
+      'title:~' => array(
+        array('title', $op_present, null),
+      ),
+
+      'title:-' => array(
+        array('title', $op_absent, null),
+      ),
+
+      '~' => false,
+      '-' => false,
+
+      // Functions like "title:" apply to following terms if their term is
+      // not specified with double quotes.
+      'title:x y' => array(
+        array('title', $op_and, 'x'),
+        array('title', $op_and, 'y'),
+      ),
+      'title: x y' => array(
+        array('title', $op_and, 'x'),
+        array('title', $op_and, 'y'),
+      ),
+      'title:"x" y' => array(
+        array('title', $op_and, 'x'),
+        array(null, $op_and, 'y'),
+      ),
+
+      // The "present" and "absent" functions are not sticky.
+      'title:~ x' => array(
+        array('title', $op_present, null),
+        array(null, $op_and, 'x'),
+      ),
+      'title:- x' => array(
+        array('title', $op_absent, null),
+        array(null, $op_and, 'x'),
+      ),
+
+      // Functions like "title:" continue to stick across quotes if the
+      // quotes aren't the initial argument.
+      'title:a "b c" d' => array(
+        array('title', $op_and, 'a'),
+        array('title', $op_and, 'b c'),
+        array('title', $op_and, 'd'),
+      ),
+
+      // These queries require a field be both present and absent, which is
+      // impossible.
+      'title:- title:x' => false,
+      'title:- title:~' => false,
+
+      'abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ:xyz' => array(
+        array(
+          'abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          $op_and,
+          'xyz',
+        ),
       ),
     );
 
@@ -199,15 +271,19 @@ final class PhutilSearchQueryCompilerTestCase
       $compiler = id(new PhutilSearchQueryCompiler())
         ->setEnableFunctions(true);
 
-      $tokens = $compiler->newTokens($input);
+      try {
+        $tokens = $compiler->newTokens($input);
 
-      $result = array();
-      foreach ($tokens as $token) {
-        $result[] = array(
-          $token->getFunction(),
-          $token->getOperator(),
-          $token->getValue(),
-        );
+        $result = array();
+        foreach ($tokens as $token) {
+          $result[] = array(
+            $token->getFunction(),
+            $token->getOperator(),
+            $token->getValue(),
+          );
+        }
+      } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
+        $result = false;
       }
 
       $this->assertEqual(
