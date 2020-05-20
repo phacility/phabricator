@@ -9,7 +9,8 @@ final class DifferentialSchemaSpec extends PhabricatorConfigSchemaSpec {
       id(new DifferentialRevision())->getApplicationName(),
       DifferentialChangeset::TABLE_CACHE,
       array(
-        'id' => 'id',
+        'id' => 'auto',
+        'cacheIndex' => 'bytes12',
         'cache' => 'bytes',
         'dateCreated' => 'epoch',
       ),
@@ -18,7 +19,11 @@ final class DifferentialSchemaSpec extends PhabricatorConfigSchemaSpec {
           'columns' => array('id'),
           'unique' => true,
         ),
-        'dateCreated' => array(
+        'key_cacheIndex' => array(
+          'columns' => array('cacheIndex'),
+          'unique' => true,
+        ),
+        'key_created' => array(
           'columns' => array('dateCreated'),
         ),
       ),

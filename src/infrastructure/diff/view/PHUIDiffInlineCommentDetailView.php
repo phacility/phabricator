@@ -547,14 +547,21 @@ final class PHUIDiffInlineCommentDetailView
 
     $changeset->setFilename($context->getFilename());
 
-    // TODO: This isn't cached!
-
     $viewstate = new PhabricatorChangesetViewState();
 
     $parser = id(new DifferentialChangesetParser())
       ->setViewer($viewer)
       ->setViewstate($viewstate)
       ->setChangeset($changeset);
+
+    $fragment = $inline->getInlineCommentCacheFragment();
+    if ($fragment !== null) {
+      $cache_key = sprintf(
+        '%s.suggestion-view(v1, %s)',
+        $fragment,
+        PhabricatorHash::digestForIndex($new_lines));
+      $parser->setRenderCacheKey($cache_key);
+    }
 
     $renderer = new DifferentialChangesetOneUpRenderer();
     $renderer->setSimpleMode(true);
@@ -572,6 +579,4 @@ final class PHUIDiffInlineCommentDetailView
 
     return $view;
   }
-
-
 }

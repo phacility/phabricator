@@ -295,8 +295,6 @@ final class DifferentialChangesetParser extends Phobject {
    * By default, there is no render cache key and parsers do not use the cache.
    * This is appropriate for rarely-viewed changesets.
    *
-   * NOTE: Currently, this key must be a valid Differential Changeset ID.
-   *
    * @param   string  Key for identifying this changeset in the render cache.
    * @return  this
    */
@@ -376,9 +374,9 @@ final class DifferentialChangesetParser extends Phobject {
     $conn_r = $changeset->establishConnection('r');
     $data = queryfx_one(
       $conn_r,
-      'SELECT * FROM %T WHERE id = %d',
-      $changeset->getTableName().'_parse_cache',
-      $render_cache_key);
+      'SELECT * FROM %T WHERE cacheIndex = %s',
+      DifferentialChangeset::TABLE_CACHE,
+      PhabricatorHash::digestForIndex($render_cache_key));
 
     if (!$data) {
       return false;
@@ -480,12 +478,12 @@ final class DifferentialChangesetParser extends Phobject {
       try {
         queryfx(
           $conn_w,
-          'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %B, %d)
+          'INSERT INTO %T (cacheIndex, cache, dateCreated) VALUES (%s, %B, %d)
             ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
           DifferentialChangeset::TABLE_CACHE,
-          $render_cache_key,
+          PhabricatorHash::digestForIndex($render_cache_key),
           $cache,
-          time());
+          PhabricatorTime::getNow());
       } catch (AphrontQueryException $ex) {
         // Ignore these exceptions. A common cause is that the cache is
         // larger than 'max_allowed_packet', in which case we're better off
