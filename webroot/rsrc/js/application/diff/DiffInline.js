@@ -668,8 +668,6 @@ JX.install('DiffInline', {
       this._editRow = this._drawRows(rows, null, 'edit');
 
       this._drawSuggestionState(this._editRow);
-      JX.log(this._originalState);
-
       this.setHasSuggestion(this._originalState.hasSuggestion);
     },
 

@@ -66,4 +66,8 @@ final class DiffusionDiffInlineCommentQuery
     return array();
   }
 
+  protected function newInlineContextMap(array $inlines) {
+    return array();
+  }
+
 }
