@@ -67,17 +67,26 @@ final class DifferentialDiffInlineCommentQuery
     return $id_map;
   }
 
+  protected function newInlineContextFromCacheData(array $map) {
+    return PhabricatorDiffInlineCommentContext::newFromCacheData($map);
+  }
+
   protected function newInlineContextMap(array $inlines) {
     $viewer = $this->getViewer();
-
     $map = array();
 
+    $changeset_ids = mpull($inlines, 'getChangesetID');
+
+    $changesets = id(new DifferentialChangesetQuery())
+      ->setViewer($viewer)
+      ->withIDs($changeset_ids)
+      ->needHunks(true)
+      ->execute();
+    $changesets = mpull($changesets, null, 'getID');
+
     foreach ($inlines as $key => $inline) {
-      $changeset = id(new DifferentialChangesetQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($inline->getChangesetID()))
-        ->needHunks(true)
-        ->executeOne();
+      $changeset = idx($changesets, $inline->getChangesetID());
+
       if (!$changeset) {
         continue;
       }

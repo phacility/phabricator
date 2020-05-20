@@ -3,6 +3,8 @@
 abstract class PhabricatorDiffInlineCommentQuery
   extends PhabricatorApplicationTransactionCommentQuery {
 
+  const INLINE_CONTEXT_CACHE_VERSION = 1;
+
   private $fixedStates;
   private $needReplyToComments;
   private $publishedComments;
@@ -19,6 +21,7 @@ abstract class PhabricatorDiffInlineCommentQuery
     array $comments);
 
   abstract protected function newInlineContextMap(array $inlines);
+  abstract protected function newInlineContextFromCacheData(array $map);
 
   final public function withFixedStates(array $states) {
     $this->fixedStates = $states;
@@ -268,16 +271,83 @@ abstract class PhabricatorDiffInlineCommentQuery
       }
 
       if ($need_context) {
-        $context_map = $this->newInlineContextMap($need_context);
-
-        foreach ($need_context as $key => $inline) {
-          $inline->attachInlineContext(idx($context_map, $key));
-        }
+        $this->loadInlineCommentContext($need_context);
       }
-
     }
 
     return $inlines;
+  }
+
+  private function loadInlineCommentContext(array $inlines) {
+    $cache_keys = array();
+    foreach ($inlines as $key => $inline) {
+      $object = $inline->newInlineCommentObject();
+      $fragment = $object->getInlineCommentCacheFragment();
+
+      if ($fragment === null) {
+        continue;
+      }
+
+      $cache_keys[$key] = sprintf(
+        '%s.context(v%d)',
+        $fragment,
+        self::INLINE_CONTEXT_CACHE_VERSION);
+    }
+
+    $cache = PhabricatorCaches::getMutableStructureCache();
+
+    $cache_map = $cache->getKeys($cache_keys);
+
+    $context_map = array();
+    $need_construct = array();
+
+    foreach ($inlines as $key => $inline) {
+      $cache_key = idx($cache_keys, $key);
+
+      if ($cache_key !== null) {
+        if (array_key_exists($cache_key, $cache_map)) {
+          $cache_data = $cache_map[$cache_key];
+          $context_map[$key] = $this->newInlineContextFromCacheData(
+            $cache_data);
+          continue;
+        }
+      }
+
+      $need_construct[$key] = $inline;
+    }
+
+    if ($need_construct) {
+      $construct_map = $this->newInlineContextMap($need_construct);
+
+      $write_map = array();
+      foreach ($construct_map as $key => $context) {
+        if ($context === null) {
+          $cache_data = $context;
+        } else {
+          $cache_data = $this->newCacheDataFromInlineContext($context);
+        }
+
+        $cache_key = idx($cache_keys, $key);
+        if ($cache_key !== null) {
+          $write_map[$cache_key] = $cache_data;
+        }
+      }
+
+      if ($write_map) {
+        $cache->setKeys($write_map);
+      }
+
+      $context_map += $construct_map;
+    }
+
+    foreach ($inlines as $key => $inline) {
+      $inline->attachInlineContext(idx($context_map, $key));
+    }
+  }
+
+  protected function newCacheDataFromInlineContext(
+    PhabricatorInlineCommentContext $context) {
+    return $context->newCacheDataMap();
   }
 
   final protected function simplifyContext(array $lines, $is_head) {

@@ -8,6 +8,26 @@ final class PhabricatorDiffInlineCommentContext
   private $bodyLines;
   private $tailLines;
 
+  public static function newFromCacheData(array $map) {
+    $context = new self();
+
+    $context->setFilename(idx($map, 'filename'));
+    $context->setHeadLines(idx($map, 'headLines'));
+    $context->setBodyLines(idx($map, 'bodyLines'));
+    $context->setTailLines(idx($map, 'tailLines'));
+
+    return $context;
+  }
+
+  public function newCacheDataMap() {
+    return array(
+      'filename' => $this->getFilename(),
+      'headLines' => $this->getHeadLines(),
+      'bodyLines' => $this->getBodyLines(),
+      'tailLines' => $this->getTailLines(),
+    );
+  }
+
   public function setFilename($filename) {
     $this->filename = $filename;
     return $this;

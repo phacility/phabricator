@@ -70,4 +70,8 @@ final class DiffusionDiffInlineCommentQuery
     return array();
   }
 
+  protected function newInlineContextFromCacheData(array $map) {
+    return PhabricatorDiffInlineCommentContext::newFromCacheData($map);
+  }
+
 }

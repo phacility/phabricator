@@ -82,6 +82,16 @@ abstract class PhabricatorInlineComment
     return $this->storageObject;
   }
 
+  public function getInlineCommentCacheFragment() {
+    $phid = $this->getPHID();
+
+    if ($phid === null) {
+      return null;
+    }
+
+    return sprintf('inline(%s)', $phid);
+  }
+
   abstract protected function newStorageObject();
   abstract public function getControllerURI();
 
