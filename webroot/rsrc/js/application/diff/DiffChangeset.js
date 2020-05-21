@@ -454,8 +454,23 @@ JX.install('DiffChangeset', {
       var blocks = [];
       var block;
       var ii;
+      var parent_node = null;
       for (ii = 0; ii < rows.length; ii++) {
         var type = this._getRowType(rows[ii]);
+
+        // This row might be part of a diff inside an inline comment, showing
+        // an inline edit suggestion. Before we accept it as a possible target
+        // for selection, make sure it's a child of the right parent.
+
+        if (parent_node === null) {
+          parent_node = rows[ii].parentNode;
+        }
+
+        if (type !== null) {
+          if (rows[ii].parentNode !== parent_node) {
+            type = null;
+          }
+        }
 
         if (!block || (block.type !== type)) {
           block = {
