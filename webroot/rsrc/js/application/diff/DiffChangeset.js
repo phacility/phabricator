@@ -11,6 +11,7 @@
  *           phabricator-diff-inline
  *           phabricator-diff-path-view
  *           phuix-button-view
+ *           javelin-external-editor-link-engine
  * @javelin
  */
 
@@ -33,7 +34,7 @@ JX.install('DiffChangeset', {
     this._pathParts = data.pathParts;
     this._icon = data.icon;
 
-    this._editorURI = data.editorURI;
+    this._editorURITemplate = data.editorURITemplate;
     this._editorConfigureURI = data.editorConfigureURI;
     this._showPathURI = data.showPathURI;
     this._showDirectoryURI = data.showDirectoryURI;
@@ -87,7 +88,7 @@ JX.install('DiffChangeset', {
     _changesetList: null,
     _icon: null,
 
-    _editorURI: null,
+    _editorURITemplate: null,
     _editorConfigureURI: null,
     _showPathURI: null,
     _showDirectoryURI: null,
@@ -102,8 +103,8 @@ JX.install('DiffChangeset', {
     _isSelected: false,
     _viewMenu: null,
 
-    getEditorURI: function() {
-      return this._editorURI;
+    getEditorURITemplate: function() {
+      return this._editorURITemplate;
     },
 
     getEditorConfigureURI: function() {
