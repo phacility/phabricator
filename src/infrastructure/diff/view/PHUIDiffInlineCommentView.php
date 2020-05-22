@@ -82,7 +82,6 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'isNewFile' => (bool)$inline->getIsNewFile(),
-      'original' => $inline->getContent(),
       'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
       'isDraft' => $inline->isDraft(),
       'isFixed' => $is_fixed,
@@ -93,8 +92,8 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
       'documentEngineKey' => $inline->getDocumentEngineKey(),
       'startOffset' => $inline->getStartOffset(),
       'endOffset' => $inline->getEndOffset(),
-
       'on_right' => $this->getIsOnRight(),
+      'contentState' => $inline->getContentState()->newStorageMap(),
     );
   }
 

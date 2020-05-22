@@ -3,12 +3,15 @@
 abstract class PhabricatorDiffInlineCommentQuery
   extends PhabricatorApplicationTransactionCommentQuery {
 
+  const INLINE_CONTEXT_CACHE_VERSION = 1;
+
   private $fixedStates;
   private $needReplyToComments;
   private $publishedComments;
   private $publishableComments;
   private $needHidden;
   private $needAppliedDrafts;
+  private $needInlineContext;
 
   abstract protected function buildInlineCommentWhereClauseParts(
     AphrontDatabaseConnection $conn);
@@ -16,6 +19,9 @@ abstract class PhabricatorDiffInlineCommentQuery
   abstract protected function loadHiddenCommentIDs(
     $viewer_phid,
     array $comments);
+
+  abstract protected function newInlineContextMap(array $inlines);
+  abstract protected function newInlineContextFromCacheData(array $map);
 
   final public function withFixedStates(array $states) {
     $this->fixedStates = $states;
@@ -39,6 +45,11 @@ abstract class PhabricatorDiffInlineCommentQuery
 
   final public function needHidden($need_hidden) {
     $this->needHidden = $need_hidden;
+    return $this;
+  }
+
+  final public function needInlineContext($need_context) {
+    $this->needInlineContext = $need_context;
     return $this;
   }
 
@@ -173,26 +184,6 @@ abstract class PhabricatorDiffInlineCommentQuery
       return $inlines;
     }
 
-    if ($this->needHidden) {
-      $viewer_phid = $viewer->getPHID();
-
-      if ($viewer_phid) {
-        $hidden = $this->loadHiddenCommentIDs(
-          $viewer_phid,
-          $inlines);
-      } else {
-        $hidden = array();
-      }
-
-      foreach ($inlines as $inline) {
-        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
-      }
-    }
-
-    if (!$inlines) {
-      return $inlines;
-    }
-
     $need_drafts = $this->needAppliedDrafts;
     $drop_void = $this->publishableComments;
     $convert_objects = ($need_drafts || $drop_void);
@@ -218,9 +209,9 @@ abstract class PhabricatorDiffInlineCommentQuery
           // as it is currently shown to the user, not as it was stored the last
           // time they clicked "Save".
 
-          $draft_content = $inline->getContentForEdit($viewer);
-          if (strlen($draft_content)) {
-            $inline->setContent($draft_content);
+          $draft_state = $inline->getContentStateForEdit($viewer);
+          if (!$draft_state->isEmptyContentState()) {
+            $inline->setContentState($draft_state);
           }
         }
       }
@@ -247,4 +238,145 @@ abstract class PhabricatorDiffInlineCommentQuery
     return $inlines;
   }
 
+  protected function didFilterPage(array $inlines) {
+    $viewer = $this->getViewer();
+
+    if ($this->needHidden) {
+      $viewer_phid = $viewer->getPHID();
+
+      if ($viewer_phid) {
+        $hidden = $this->loadHiddenCommentIDs(
+          $viewer_phid,
+          $inlines);
+      } else {
+        $hidden = array();
+      }
+
+      foreach ($inlines as $inline) {
+        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
+      }
+    }
+
+    if ($this->needInlineContext) {
+      $need_context = array();
+      foreach ($inlines as $inline) {
+        $object = $inline->newInlineCommentObject();
+
+        if ($object->getDocumentEngineKey() !== null) {
+          $inline->attachInlineContext(null);
+          continue;
+        }
+
+        $need_context[] = $inline;
+      }
+
+      if ($need_context) {
+        $this->loadInlineCommentContext($need_context);
+      }
+    }
+
+    return $inlines;
+  }
+
+  private function loadInlineCommentContext(array $inlines) {
+    $cache_keys = array();
+    foreach ($inlines as $key => $inline) {
+      $object = $inline->newInlineCommentObject();
+      $fragment = $object->getInlineCommentCacheFragment();
+
+      if ($fragment === null) {
+        continue;
+      }
+
+      $cache_keys[$key] = sprintf(
+        '%s.context(v%d)',
+        $fragment,
+        self::INLINE_CONTEXT_CACHE_VERSION);
+    }
+
+    $cache = PhabricatorCaches::getMutableStructureCache();
+
+    $cache_map = $cache->getKeys($cache_keys);
+
+    $context_map = array();
+    $need_construct = array();
+
+    foreach ($inlines as $key => $inline) {
+      $cache_key = idx($cache_keys, $key);
+
+      if ($cache_key !== null) {
+        if (array_key_exists($cache_key, $cache_map)) {
+          $cache_data = $cache_map[$cache_key];
+          $context_map[$key] = $this->newInlineContextFromCacheData(
+            $cache_data);
+          continue;
+        }
+      }
+
+      $need_construct[$key] = $inline;
+    }
+
+    if ($need_construct) {
+      $construct_map = $this->newInlineContextMap($need_construct);
+
+      $write_map = array();
+      foreach ($construct_map as $key => $context) {
+        if ($context === null) {
+          $cache_data = $context;
+        } else {
+          $cache_data = $this->newCacheDataFromInlineContext($context);
+        }
+
+        $cache_key = idx($cache_keys, $key);
+        if ($cache_key !== null) {
+          $write_map[$cache_key] = $cache_data;
+        }
+      }
+
+      if ($write_map) {
+        $cache->setKeys($write_map);
+      }
+
+      $context_map += $construct_map;
+    }
+
+    foreach ($inlines as $key => $inline) {
+      $inline->attachInlineContext(idx($context_map, $key));
+    }
+  }
+
+  protected function newCacheDataFromInlineContext(
+    PhabricatorInlineCommentContext $context) {
+    return $context->newCacheDataMap();
+  }
+
+  final protected function simplifyContext(array $lines, $is_head) {
+    // We want to provide the smallest amount of context we can while still
+    // being useful, since the actual code is visible nearby and showing a
+    // ton of context is silly.
+
+    // Examine each line until we find one that looks "useful" (not just
+    // whitespace or a single bracket). Once we find a useful piece of context
+    // to anchor the text, discard the rest of the lines beyond it.
+
+    if ($is_head) {
+      $lines = array_reverse($lines, true);
+    }
+
+    $saw_context = false;
+    foreach ($lines as $key => $line) {
+      if ($saw_context) {
+        unset($lines[$key]);
+        continue;
+      }
+
+      $saw_context = (strlen(trim($line)) > 3);
+    }
+
+    if ($is_head) {
+      $lines = array_reverse($lines, true);
+    }
+
+    return $lines;
+  }
 }

@@ -1110,8 +1110,6 @@ class PHPMailer {
 
     if($this->MessageID != '') {
       $result .= $this->HeaderLine('Message-ID',$this->MessageID);
-    } else {
-      $result .= sprintf("Message-ID: <%s@%s>%s", $uniq_id, $this->ServerHostname(), $this->LE);
     }
     $result .= $this->HeaderLine('X-Priority', $this->Priority);
     $result .= $this->HeaderLine('X-Mailer', 'PHPMailer '.$this->Version.' (phpmailer.sourceforge.net)');

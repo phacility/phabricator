@@ -18,6 +18,7 @@ final class DifferentialTransactionComment
   private $replyToComment = self::ATTACHABLE;
   private $isHidden = self::ATTACHABLE;
   private $changeset = self::ATTACHABLE;
+  private $inlineContext = self::ATTACHABLE;
 
   public function getApplicationTransactionObject() {
     return new DifferentialTransaction();
@@ -129,12 +130,18 @@ final class DifferentialTransactionComment
     return $this;
   }
 
-  public function isEmptyInlineComment() {
-    return !strlen($this->getContent());
-  }
-
   public function newInlineCommentObject() {
     return DifferentialInlineComment::newFromModernComment($this);
+  }
+
+  public function getInlineContext() {
+    return $this->assertAttached($this->inlineContext);
+  }
+
+  public function attachInlineContext(
+    PhabricatorInlineCommentContext $context = null) {
+    $this->inlineContext = $context;
+    return $this;
   }
 
 }
