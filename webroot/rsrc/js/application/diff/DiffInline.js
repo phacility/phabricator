@@ -863,7 +863,7 @@ JX.install('DiffInline', {
 
       // If this was an empty box and we typed some text and then hit cancel,
       // don't show the empty concrete inline.
-      if (!this._isVoidContentState(this._originalState)) {
+      if (this._isVoidContentState(this._originalState)) {
         this.setInvisible(true);
       } else {
         this.setInvisible(false);
