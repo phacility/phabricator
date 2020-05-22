@@ -61,6 +61,7 @@ final class PhabricatorDocumentEngineBlocks
     $lists = $this->lists;
 
     if (count($lists) != 2) {
+      $this->layoutAvailableRowCount = 0;
       return array();
     }
 
