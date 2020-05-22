@@ -63,6 +63,7 @@ final class PhabricatorJupyterDocumentEngine
       $blocks->addBlockList($uref, $u_blocks);
       $blocks->addBlockList($vref, $v_blocks);
     } catch (Exception $ex) {
+      phlog($ex);
       $blocks->addMessage($ex->getMessage());
     }
 
@@ -85,10 +86,14 @@ final class PhabricatorJupyterDocumentEngine
       switch ($utype) {
         case 'markdown':
           $usource = idx($ucell, 'source');
-          $usource = implode('', $usource);
+          if (is_array($usource)) {
+            $usource = implode('', $usource);
+          }
 
           $vsource = idx($vcell, 'source');
-          $vsource = implode('', $vsource);
+          if (is_array($vsource)) {
+            $vsource = implode('', $vsource);
+          }
 
           $diff = id(new PhutilProseDifferenceEngine())
             ->getDiff($usource, $vsource);
@@ -254,7 +259,10 @@ final class PhabricatorJupyterDocumentEngine
           $hash_input = $cell['raw'];
           break;
         case 'markdown':
-          $hash_input = implode('', $cell['source']);
+          $hash_input = $cell['source'];
+          if (is_array($hash_input)) {
+            $hash_input = implode('', $cell['source']);
+          }
           break;
         default:
           $hash_input = serialize($cell);
@@ -367,10 +375,11 @@ final class PhabricatorJupyterDocumentEngine
     $results = array();
     foreach ($cells as $cell) {
       $cell_type = idx($cell, 'cell_type');
-
       if ($cell_type === 'markdown') {
         $source = $cell['source'];
-        $source = implode('', $source);
+        if (is_array($source)) {
+          $source = implode('', $source);
+        }
 
         // Attempt to split contiguous blocks of markdown into smaller
         // pieces.
