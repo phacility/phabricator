@@ -144,4 +144,16 @@ final class DifferentialTransactionComment
     return $this;
   }
 
+
+  public function isEmptyComment() {
+    if (!parent::isEmptyComment()) {
+      return false;
+    }
+
+    return $this->newInlineCommentObject()
+      ->getContentState()
+      ->isEmptyContentState();
+  }
+
+
 }
