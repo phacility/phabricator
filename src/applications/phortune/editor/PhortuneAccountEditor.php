@@ -63,7 +63,7 @@ final class PhortuneAccountEditor
               }
 
               $actor_phid = $this->getActingAsPHID();
-              if (!isset($new[$actor_phid])) {
+              if (isset($old[$actor_phid]) && !isset($new[$actor_phid])) {
                 $error = new PhabricatorApplicationTransactionValidationError(
                   $type,
                   pht('Invalid'),
