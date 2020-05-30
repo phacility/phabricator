@@ -13,21 +13,21 @@ final class PhutilDefaultSyntaxHighlighterEnginePygmentsFuture
   }
 
   protected function didReceiveResult($result) {
-    list($err, $stdout, $stderr) = $result;
+    list($status, $body, $headers) = $result;
 
-    if (!$err && strlen($stdout)) {
+    if (!$status->isError() && strlen($body)) {
       // Strip off fluff Pygments adds.
-      $stdout = preg_replace(
+      $body = preg_replace(
         '@^<div class="highlight"><pre>(.*)</pre></div>\s*$@s',
         '\1',
-        $stdout);
+        $body);
       if ($this->scrub) {
-        $stdout = preg_replace('/^.*\n/', '', $stdout);
+        $body = preg_replace('/^.*\n/', '', $body);
       }
-      return phutil_safe_html($stdout);
+      return phutil_safe_html($body);
     }
 
-    throw new PhutilSyntaxHighlighterException($stderr, $err);
+    throw new PhutilSyntaxHighlighterException($body, $status->getStatusCode());
   }
 
 }
