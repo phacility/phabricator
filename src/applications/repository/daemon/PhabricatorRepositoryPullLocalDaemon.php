@@ -73,6 +73,11 @@ final class PhabricatorRepositoryPullLocalDaemon
     $futures = array();
     $queue = array();
 
+    $future_pool = new FuturePool();
+
+    $future_pool->getIteratorTemplate()
+      ->setUpdateInterval($min_sleep);
+
     $sync_wait = phutil_units('2 minutes in seconds');
     $last_sync = array();
 
@@ -214,10 +219,14 @@ final class PhabricatorRepositoryPullLocalDaemon
               $display_name));
 
           unset($queue[$id]);
-          $futures[$id] = $this->buildUpdateFuture(
+
+          $future = $this->buildUpdateFuture(
             $repository,
             $no_discovery);
 
+          $futures[$id] = $future->getFutureKey();
+
+          $future_pool->addFuture($future);
           break;
         }
       }
@@ -230,16 +239,14 @@ final class PhabricatorRepositoryPullLocalDaemon
             phutil_count($queue)));
       }
 
-      if ($futures) {
-        $iterator = id(new FutureIterator($futures))
-          ->setUpdateInterval($min_sleep);
+      if ($future_pool->hasFutures()) {
+        while ($future_pool->hasFutures()) {
+          $future = $future_pool->resolve();
 
-        foreach ($iterator as $id => $future) {
           $this->stillWorking();
 
           if ($future === null) {
             $this->log(pht('Waiting for updates to complete...'));
-            $this->stillWorking();
 
             if ($this->loadRepositoryUpdateMessages()) {
               $this->log(pht('Interrupted by pending updates!'));
@@ -249,9 +256,18 @@ final class PhabricatorRepositoryPullLocalDaemon
             continue;
           }
 
-          unset($futures[$id]);
-          $retry_after[$id] = $this->resolveUpdateFuture(
-            $pullable[$id],
+          $future_key = $future->getFutureKey();
+          $repository_id = null;
+          foreach ($futures as $id => $key) {
+            if ($key === $future_key) {
+              $repository_id = $id;
+              unset($futures[$id]);
+              break;
+            }
+          }
+
+          $retry_after[$repository_id] = $this->resolveUpdateFuture(
+            $pullable[$repository_id],
             $future,
             $min_sleep);
 

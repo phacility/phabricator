@@ -2,6 +2,9 @@
 
 abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
+  private $referencePattern;
+  private $embedPattern;
+
   const KEY_RULE_OBJECT = 'rule.object';
   const KEY_MENTIONED_OBJECTS = 'rule.object.mentioned';
 
@@ -192,38 +195,48 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   }
 
   private function getObjectEmbedPattern() {
-    $prefix = $this->getObjectNamePrefix();
-    $prefix = preg_quote($prefix);
-    $id = $this->getObjectIDPattern();
+    if ($this->embedPattern === null) {
+      $prefix = $this->getObjectNamePrefix();
+      $prefix = preg_quote($prefix);
+      $id = $this->getObjectIDPattern();
 
-    return '(\B{'.$prefix.'('.$id.')([,\s](?:[^}\\\\]|\\\\.)*)?}\B)u';
+      $this->embedPattern =
+        '(\B{'.$prefix.'('.$id.')([,\s](?:[^}\\\\]|\\\\.)*)?}\B)u';
+    }
+
+    return $this->embedPattern;
   }
 
   private function getObjectReferencePattern() {
-    $prefix = $this->getObjectNamePrefix();
-    $prefix = preg_quote($prefix);
+    if ($this->referencePattern === null) {
+      $prefix = $this->getObjectNamePrefix();
+      $prefix = preg_quote($prefix);
 
-    $id = $this->getObjectIDPattern();
+      $id = $this->getObjectIDPattern();
 
-    // If the prefix starts with a word character (like "D"), we want to
-    // require a word boundary so that we don't match "XD1" as "D1". If the
-    // prefix does not start with a word character, we want to require no word
-    // boundary for the same reasons. Test if the prefix starts with a word
-    // character.
-    if ($this->getObjectNamePrefixBeginsWithWordCharacter()) {
-      $boundary = '\\b';
-    } else {
-      $boundary = '\\B';
+      // If the prefix starts with a word character (like "D"), we want to
+      // require a word boundary so that we don't match "XD1" as "D1". If the
+      // prefix does not start with a word character, we want to require no word
+      // boundary for the same reasons. Test if the prefix starts with a word
+      // character.
+      if ($this->getObjectNamePrefixBeginsWithWordCharacter()) {
+        $boundary = '\\b';
+      } else {
+        $boundary = '\\B';
+      }
+
+      // The "(?<![#@-])" prevents us from linking "#abcdef" or similar, and
+      // "ABC-T1" (see T5714), and from matching "@T1" as a task (it is a user)
+      // (see T9479).
+
+      // The "\b" allows us to link "(abcdef)" or similar without linking things
+      // in the middle of words.
+
+      $this->referencePattern =
+        '((?<![#@-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
     }
 
-    // The "(?<![#@-])" prevents us from linking "#abcdef" or similar, and
-    // "ABC-T1" (see T5714), and from matching "@T1" as a task (it is a user)
-    // (see T9479).
-
-    // The "\b" allows us to link "(abcdef)" or similar without linking things
-    // in the middle of words.
-
-    return '((?<![#@-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
+    return $this->referencePattern;
   }
 
 

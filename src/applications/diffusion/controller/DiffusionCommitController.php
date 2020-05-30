@@ -414,9 +414,15 @@ final class DiffusionCommitController extends DiffusionController {
         $visible_changesets = $changesets;
       } else {
         $visible_changesets = array();
-        $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
-          $viewer,
-          $commit->getPHID());
+
+        $inlines = id(new DiffusionDiffInlineCommentQuery())
+          ->setViewer($viewer)
+          ->withCommitPHIDs(array($commit->getPHID()))
+          ->withPublishedComments(true)
+          ->withPublishableComments(true)
+          ->execute();
+        $inlines = mpull($inlines, 'newInlineCommentObject');
+
         $path_ids = mpull($inlines, null, 'getPathID');
         foreach ($changesets as $key => $changeset) {
           if (array_key_exists($changeset->getID(), $path_ids)) {
@@ -457,25 +463,12 @@ final class DiffusionCommitController extends DiffusionController {
       $commit,
       $timeline);
 
-    $filetree_on = $viewer->compareUserSetting(
-      PhabricatorShowFiletreeSetting::SETTINGKEY,
-      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
+    $filetree = id(new DifferentialFileTreeEngine())
+      ->setViewer($viewer)
+      ->setDisabled(!$show_changesets);
 
-    $nav = null;
-    if ($show_changesets && $filetree_on) {
-      $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
-      $collapsed = $viewer->getUserSetting($pref_collapse);
-
-      $pref_width = PhabricatorFiletreeWidthSetting::SETTINGKEY;
-      $width = $viewer->getUserSetting($pref_width);
-
-      $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle($commit->getDisplayName())
-        ->setBaseURI(new PhutilURI($commit->getURI()))
-        ->build($changesets)
-        ->setCrumbs($crumbs)
-        ->setCollapsed((bool)$collapsed)
-        ->setWidth((int)$width);
+    if ($show_changesets) {
+      $filetree->setChangesets($changesets);
     }
 
     $description_box = id(new PHUIObjectBoxView())
@@ -509,18 +502,20 @@ final class DiffusionCommitController extends DiffusionController {
           $add_comment,
         ));
 
+    $main_content = array(
+      $crumbs,
+      $view,
+    );
+
+    $main_content = $filetree->newView($main_content);
+    if (!$filetree->getDisabled()) {
+      $change_list->setFormationView($main_content);
+    }
+
     $page = $this->newPage()
       ->setTitle($commit->getDisplayName())
-      ->setCrumbs($crumbs)
       ->setPageObjectPHIDS(array($commit->getPHID()))
-      ->appendChild(
-        array(
-          $view,
-      ));
-
-    if ($nav) {
-      $page->setNavigation($nav);
-    }
+      ->appendChild($main_content);
 
     return $page;
 

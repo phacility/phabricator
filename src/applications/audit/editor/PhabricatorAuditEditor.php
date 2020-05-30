@@ -105,6 +105,14 @@ final class PhabricatorAuditEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditActionConstants::INLINE:
+        $comment = $xaction->getComment();
+
+        $comment->setAttribute('editing', false);
+
+        PhabricatorVersionedDraft::purgeDrafts(
+          $comment->getPHID(),
+          $this->getActingAsPHID());
+        return;
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;
     }
@@ -232,14 +240,22 @@ final class PhabricatorAuditEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $auditors_type = DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE;
+
     $xactions = parent::expandTransaction($object, $xaction);
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuditTransaction::TYPE_COMMIT:
-        $request = $this->createAuditRequestTransactionFromCommitMessage(
+        $phids = $this->getAuditRequestTransactionPHIDsFromCommitMessage(
           $object);
-        if ($request) {
-          $xactions[] = $request;
-          $this->addUnmentionablePHIDs($request->getNewValue());
+        if ($phids) {
+          $xactions[] = $object->getApplicationTransactionTemplate()
+            ->setTransactionType($auditors_type)
+            ->setNewValue(
+              array(
+                '+' => array_fuse($phids),
+              ));
+          $this->addUnmentionablePHIDs($phids);
         }
         break;
       default:
@@ -268,7 +284,7 @@ final class PhabricatorAuditEditor
     return $xactions;
   }
 
-  private function createAuditRequestTransactionFromCommitMessage(
+  private function getAuditRequestTransactionPHIDsFromCommitMessage(
     PhabricatorRepositoryCommit $commit) {
 
     $actor = $this->getActor();
@@ -297,12 +313,7 @@ final class PhabricatorAuditEditor
       return array();
     }
 
-    return $commit->getApplicationTransactionTemplate()
-      ->setTransactionType(DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
-      ->setNewValue(
-        array(
-          '+' => array_fuse($phids),
-        ));
+    return $phids;
   }
 
   protected function sortTransactions(array $xactions) {
@@ -403,6 +414,31 @@ final class PhabricatorAuditEditor
         ->setNewValue(array('+' => $reverted_phids));
 
       $phid_map[] = $reverted_phids;
+    }
+
+    // See T13463. Copy "related task" edges from the associated revision, if
+    // one exists.
+
+    $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
+      $actor,
+      $object);
+    if ($revision) {
+      $task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $revision->getPHID(),
+        DifferentialRevisionHasTaskEdgeType::EDGECONST);
+      $task_phids = array_fuse($task_phids);
+
+      if ($task_phids) {
+        $related_edge = DiffusionCommitHasTaskEdgeType::EDGECONST;
+        $result[] = id(new PhabricatorAuditTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $related_edge)
+          ->setNewValue(array('+' => $task_phids));
+      }
+
+      // Mark these objects as unmentionable, since the explicit relationship
+      // is stronger and any mentions are redundant.
+      $phid_map[] = $task_phids;
     }
 
     $phid_map = array_mergev($phid_map);

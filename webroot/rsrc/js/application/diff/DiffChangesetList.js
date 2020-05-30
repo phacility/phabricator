@@ -2,6 +2,7 @@
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
  *           phuix-button-view
+ *           phabricator-diff-tree-view
  * @javelin
  */
 
@@ -19,35 +20,8 @@ JX.install('DiffChangesetList', {
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
 
-    var oncollapse = JX.bind(this, this._ifawake, this._oncollapse, true);
-    JX.Stratcom.listen('click', 'hide-inline', oncollapse);
-
     var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
     JX.Stratcom.listen('click', 'reveal-inline', onexpand);
-
-    var onedit = JX.bind(this, this._ifawake, this._onaction, 'edit');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-edit'],
-      onedit);
-
-    var ondone = JX.bind(this, this._ifawake, this._onaction, 'done');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-done'],
-      ondone);
-
-    var ondelete = JX.bind(this, this._ifawake, this._onaction, 'delete');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-delete'],
-      ondelete);
-
-    var onreply = JX.bind(this, this._ifawake, this._onaction, 'reply');
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-reply'],
-      onreply);
 
     var onresize = JX.bind(this, this._ifawake, this._onresize);
     JX.Stratcom.listen('resize', null, onresize);
@@ -55,9 +29,11 @@ JX.install('DiffChangesetList', {
     var onscroll = JX.bind(this, this._ifawake, this._onscroll);
     JX.Stratcom.listen('scroll', null, onscroll);
 
+    JX.enableDispatch(window, 'selectstart');
+
     var onselect = JX.bind(this, this._ifawake, this._onselect);
     JX.Stratcom.listen(
-      'mousedown',
+      ['mousedown', 'selectstart'],
       ['differential-inline-comment', 'differential-inline-header'],
       onselect);
 
@@ -84,13 +60,20 @@ JX.install('DiffChangesetList', {
       'mouseup',
       null,
       onrangeup);
+
+    var onrange = JX.bind(this, this._ifawake, this._onSelectRange);
+    JX.enableDispatch(window, 'selectionchange');
+    JX.Stratcom.listen('selectionchange', null, onrange);
+
+    this._setupInlineCommentListeners();
   },
 
   properties: {
     translations: null,
     inlineURI: null,
     inlineListURI: null,
-    isStandalone: false
+    isStandalone: false,
+    formationView: null
   },
 
   members: {
@@ -104,7 +87,6 @@ JX.install('DiffChangesetList', {
     _focusStart: null,
     _focusEnd: null,
 
-    _hoverNode: null,
     _hoverInline: null,
     _hoverOrigin: null,
     _hoverTarget: null,
@@ -122,6 +104,7 @@ JX.install('DiffChangesetList', {
     _dropdownMenu: null,
     _menuButton: null,
     _menuItems: null,
+    _selectedChangeset: null,
 
     sleep: function() {
       this._asleep = true;
@@ -143,6 +126,8 @@ JX.install('DiffChangesetList', {
       this._bannerChangeset = null;
       this._redrawBanner();
 
+      this._redrawFiletree();
+
       if (this._initialized) {
         return;
       }
@@ -157,6 +142,14 @@ JX.install('DiffChangesetList', {
       var standalone = this.getIsStandalone();
 
       var label;
+
+      if (!standalone) {
+        label = pht('Jump to the table of contents.');
+        this._installKey('t', 'diff-nav', label, this._ontoc);
+
+        label = pht('Jump to the comment area.');
+        this._installKey('x', 'diff-nav', label, this._oncomments);
+      }
 
       label = pht('Jump to next change.');
       this._installJumpKey('j', label, 1);
@@ -185,32 +178,51 @@ JX.install('DiffChangesetList', {
         'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
-      if (!standalone) {
-        label = pht('Hide or show the current file.');
-        this._installKey('h', label, this._onkeytogglefile);
+      var formation = this.getFormationView();
+      if (formation) {
+        var filetree = formation.getColumn(0);
+        var toggletree = JX.bind(filetree, filetree.toggleVisibility);
+        label = pht('Hide or show the paths panel.');
+        this._installKey('f', 'diff-vis', label, toggletree);
+      }
 
-        label = pht('Jump to the table of contents.');
-        this._installKey('t', label, this._ontoc);
+      if (!standalone) {
+        label = pht('Hide or show the current changeset.');
+        this._installKey('h', 'diff-vis', label, this._onkeytogglefile);
       }
 
       label = pht('Reply to selected inline comment or change.');
-      this._installKey('r', label, JX.bind(this, this._onkeyreply, false));
+      this._installKey('r', 'inline', label,
+        JX.bind(this, this._onkeyreply, false));
 
       label = pht('Reply and quote selected inline comment.');
-      this._installKey('R', label, JX.bind(this, this._onkeyreply, true));
+      this._installKey('R', 'inline', label,
+        JX.bind(this, this._onkeyreply, true));
+
+      label = pht('Add new inline comment on selected source text.');
+      this._installKey('c', 'inline', label,
+        JX.bind(this, this._onKeyCreate));
 
       label = pht('Edit selected inline comment.');
-      this._installKey('e', label, this._onkeyedit);
+      this._installKey('e', 'inline', label, this._onkeyedit);
 
       label = pht('Mark or unmark selected inline comment as done.');
-      this._installKey('w', label, this._onkeydone);
+      this._installKey('w', 'inline', label, this._onkeydone);
 
       label = pht('Collapse or expand inline comment.');
-      this._installKey('q', label, this._onkeycollapse);
+      this._installKey('q', 'diff-vis', label, this._onkeycollapse);
 
       label = pht('Hide or show all inline comments.');
-      this._installKey('A', label, this._onkeyhideall);
+      this._installKey('A', 'diff-vis', label, this._onkeyhideall);
 
+      label = pht('Show path in repository.');
+      this._installKey('d', 'diff-nav', label, this._onkeyshowpath);
+
+      label = pht('Show directory in repository.');
+      this._installKey('D', 'diff-nav', label, this._onkeyshowdirectory);
+
+      label = pht('Open file in external editor.');
+      this._installKey('\\', 'diff-nav', label, this._onkeyopeneditor);
     },
 
     isAsleep: function() {
@@ -279,11 +291,12 @@ JX.install('DiffChangesetList', {
       }
     },
 
-    _installKey: function(key, label, handler) {
+    _installKey: function(key, group, label, handler) {
       handler = JX.bind(this, this._ifawake, handler);
 
       return new JX.KeyboardShortcut(key, label)
         .setHandler(handler)
+        .setGroup(group)
         .register();
     },
 
@@ -296,12 +309,17 @@ JX.install('DiffChangesetList', {
       };
 
       var handler = JX.bind(this, this._onjumpkey, delta, options);
-      return this._installKey(key, label, handler);
+      return this._installKey(key, 'diff-nav', label, handler);
     },
 
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    _oncomments: function(manager) {
+      var reply = JX.$('reply');
+      manager.scrollTo(reply);
     },
 
     getSelectedInline: function() {
@@ -324,16 +342,7 @@ JX.install('DiffChangesetList', {
           var inline = cursor.target;
           if (inline.canReply()) {
             this.setFocus(null);
-
-            var text;
-            if (is_quote) {
-              text = inline.getRawText();
-              text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
-            } else {
-              text = '';
-            }
-
-            inline.reply(text);
+            inline.reply(is_quote);
             return;
           }
         }
@@ -346,48 +355,11 @@ JX.install('DiffChangesetList', {
         // lines) reply on the old file.
 
         if (cursor.type == 'change') {
-          var origin = cursor.nodes.begin;
-          var target = cursor.nodes.end;
+          var cells = this._getLineNumberCellsForChangeBlock(
+            cursor.nodes.begin,
+            cursor.nodes.end);
 
-          // The "origin" and "target" are entire rows, but we need to find
-          // a range of "<th />" nodes to actually create an inline, so go
-          // fishing.
-
-          var old_list = [];
-          var new_list = [];
-
-          var row = origin;
-          while (row) {
-            var header = row.firstChild;
-            while (header) {
-              if (this.getLineNumberFromHeader(header)) {
-                if (header.className.indexOf('old') !== -1) {
-                  old_list.push(header);
-                } else if (header.className.indexOf('new') !== -1) {
-                  new_list.push(header);
-                }
-              }
-              header = header.nextSibling;
-            }
-
-            if (row == target) {
-              break;
-            }
-
-            row = row.nextSibling;
-          }
-
-          var use_list;
-          if (new_list.length) {
-            use_list = new_list;
-          } else {
-            use_list = old_list;
-          }
-
-          var src = use_list[0];
-          var dst = use_list[use_list.length - 1];
-
-          cursor.changeset.newInlineForRange(src, dst);
+          cursor.changeset.newInlineForRange(cells.src, cells.dst);
 
           this.setFocus(null);
           return;
@@ -396,6 +368,51 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment or change to reply to.'));
+    },
+
+    _getLineNumberCellsForChangeBlock: function(origin, target) {
+      // The "origin" and "target" are entire rows, but we need to find
+      // a range of cell nodes to actually create an inline, so go
+      // fishing.
+
+      var old_list = [];
+      var new_list = [];
+
+      var row = origin;
+      while (row) {
+        var header = row.firstChild;
+        while (header) {
+          if (this.getLineNumberFromHeader(header)) {
+            if (header.className.indexOf('old') !== -1) {
+              old_list.push(header);
+            } else if (header.className.indexOf('new') !== -1) {
+              new_list.push(header);
+            }
+          }
+          header = header.nextSibling;
+        }
+
+        if (row == target) {
+          break;
+        }
+
+        row = row.nextSibling;
+      }
+
+      var use_list;
+      if (new_list.length) {
+        use_list = new_list;
+      } else {
+        use_list = old_list;
+      }
+
+      var src = use_list[0];
+      var dst = use_list[use_list.length - 1];
+
+      return {
+        src: src,
+        dst: dst
+      };
     },
 
     _onkeyedit: function() {
@@ -415,6 +432,39 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment to edit.'));
+    },
+
+    _onKeyCreate: function() {
+      var start = this._sourceSelectionStart;
+      var end = this._sourceSelectionEnd;
+
+      if (!this._sourceSelectionStart) {
+        var pht = this.getTranslations();
+        this._warnUser(
+          pht(
+            'You must select source text to create a new inline comment.'));
+        return;
+      }
+
+      this._setSourceSelection(null, null);
+
+      var changeset = start.changeset;
+
+      var config = {};
+      if (changeset.getResponseDocumentEngineKey() === null) {
+        // If the changeset is using a document renderer, we ignore the
+        // selection range and just treat this as a comment from the first
+        // block to the last block.
+
+        // If we don't discard the range, we later render a bogus highlight
+        // if the block content is complex (like a Jupyter notebook cell
+        // with images).
+
+        config.startOffset = start.offset;
+        config.endOffset = end.offset;
+      }
+
+      changeset.newInlineForRange(start.targetNode, end.targetNode, config);
     },
 
     _onkeydone: function() {
@@ -437,17 +487,128 @@ JX.install('DiffChangesetList', {
     },
 
     _onkeytogglefile: function() {
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to hide or show.'));
+        return;
+      }
+
+      changeset.toggleVisibility();
+    },
+
+    _getChangesetForKeyCommand: function() {
       var cursor = this._cursorItem;
 
+      var changeset;
       if (cursor) {
-        if (cursor.type == 'file') {
-          cursor.changeset.toggleVisibility();
-          return;
+        changeset = cursor.changeset;
+      }
+
+      if (!changeset) {
+        changeset = this._getVisibleChangeset();
+      }
+
+      return changeset;
+    },
+
+    _onkeyopeneditor: function(e) {
+      var pht = this.getTranslations();
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to edit.'));
+        return;
+      }
+
+      this._openEditor(changeset);
+    },
+
+    _openEditor: function(changeset) {
+      var pht = this.getTranslations();
+
+      var editor_template = changeset.getEditorURITemplate();
+      if (editor_template === null) {
+        this._warnUser(pht('No external editor is configured.'));
+        return;
+      }
+
+      var line = null;
+
+      // See PHI1749. We aren't exactly sure what the user intends when they
+      // use the keyboard to select a change block and then activate the
+      // "Open in Editor" function: they might mean to open the old or new
+      // offset, and may have the old or new state (or some other state) in
+      // their working copy.
+
+      // For now, pick: the new state line number if one exists; or the old
+      // state line number if one does not. If nothing else, this behavior is
+      // simple.
+
+      // If there's a document engine, just open the file to the first line.
+      // We currently can not map display blocks to source lines.
+
+      // If there's an inline, open the file to that line.
+
+      if (changeset.getResponseDocumentEngineKey() === null) {
+        var cursor = this._cursorItem;
+        if (cursor && (cursor.changeset === changeset)) {
+          if (cursor.type == 'change') {
+            var cells = this._getLineNumberCellsForChangeBlock(
+              cursor.nodes.begin,
+              cursor.nodes.end);
+            line = this.getLineNumberFromHeader(cells.src);
+          }
+
+          if (cursor.type === 'comment') {
+            var inline = cursor.target;
+            line = inline.getLineNumber();
+          }
         }
       }
 
+      var variables = {
+        l: line || 1
+      };
+
+      var editor_uri = new JX.ExternalEditorLinkEngine()
+        .setTemplate(editor_template)
+        .setVariables(variables)
+        .newURI();
+
+      JX.$U(editor_uri).go();
+    },
+
+    _onkeyshowpath: function() {
+      this._onrepositorykey(false);
+    },
+
+    _onkeyshowdirectory: function() {
+      this._onrepositorykey(true);
+    },
+
+    _onrepositorykey: function(is_directory) {
       var pht = this.getTranslations();
-      this._warnUser(pht('You must select a file to hide or show.'));
+      var changeset = this._getChangesetForKeyCommand();
+
+      if (!changeset) {
+        this._warnUser(pht('You must select a file to open.'));
+        return;
+      }
+
+      var show_uri;
+      if (is_directory) {
+        show_uri = changeset.getShowDirectoryURI();
+      } else {
+        show_uri = changeset.getShowPathURI();
+      }
+
+      if (show_uri === null) {
+        return;
+      }
+
+      window.open(show_uri);
     },
 
     _onkeycollapse: function() {
@@ -601,8 +762,44 @@ JX.install('DiffChangesetList', {
       };
     },
 
+    selectChangeset: function(changeset, scroll) {
+      var items = this._getSelectableItems();
+
+      var cursor = null;
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
+        if (changeset === item.target) {
+          cursor = ii;
+          break;
+        }
+      }
+
+      if (cursor !== null) {
+        this._setSelectionState(items[cursor], scroll);
+      } else {
+        this._setSelectionState(null, false);
+      }
+
+      return this;
+    },
+
     _setSelectionState: function(item, scroll) {
+      var old = this._cursorItem;
+
+      if (old) {
+        if (old.type === 'comment') {
+          old.target.setIsSelected(false);
+        }
+      }
+
       this._cursorItem = item;
+
+      if (item) {
+        if (item.type === 'comment') {
+          item.target.setIsSelected(true);
+        }
+      }
+
       this._redrawSelection(scroll);
 
       return this;
@@ -623,6 +820,17 @@ JX.install('DiffChangesetList', {
         this.setFocus(null);
         return;
       }
+
+      var changeset = cursor.changeset;
+
+      var tree = this._getTreeView();
+      if (changeset) {
+        tree.setSelectedPath(cursor.changeset.getPathView());
+      } else {
+        tree.setSelectedPath(null);
+      }
+
+      this._selectChangeset(changeset);
 
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
@@ -711,18 +919,14 @@ JX.install('DiffChangesetList', {
       var changeset_list = this;
       var changeset = this.getChangesetForNode(node);
 
-      var menu = new JX.PHUIXDropdownMenu(button);
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
       var list = new JX.PHUIXActionListView();
 
       var add_link = function(icon, name, href, local) {
-        if (!href) {
-          return;
-        }
-
         var link = new JX.PHUIXActionView()
           .setIcon(icon)
           .setName(name)
-          .setHref(href)
           .setHandler(function(e) {
             if (local) {
               window.location.assign(href);
@@ -733,25 +937,36 @@ JX.install('DiffChangesetList', {
             e.prevent();
           });
 
+        if (href) {
+          link.setHref(href);
+        } else {
+          link
+            .setDisabled(true)
+            .setUnresponsive(true);
+        }
+
         list.addItem(link);
         return link;
       };
+
+      var visible_item = new JX.PHUIXActionView()
+        .setKeyCommand('h')
+        .setHandler(function(e) {
+          e.prevent();
+          menu.close();
+
+          changeset.select(false);
+          changeset.toggleVisibility();
+        });
+      list.addItem(visible_item);
 
       var reveal_item = new JX.PHUIXActionView()
         .setIcon('fa-eye');
       list.addItem(reveal_item);
 
-      var visible_item = new JX.PHUIXActionView()
-        .setHandler(function(e) {
-          e.prevent();
-          menu.close();
-
-          changeset.toggleVisibility();
-        });
-      list.addItem(visible_item);
-
-      add_link('fa-file-text', pht('Browse in Diffusion'), data.diffusionURI);
-      add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
 
       var up_item = new JX.PHUIXActionView()
         .setHandler(function(e) {
@@ -772,15 +987,16 @@ JX.install('DiffChangesetList', {
               }
             }
 
-            var renderer = changeset.getRenderer();
+            var renderer = changeset.getRendererKey();
             if (renderer == '1up') {
               renderer = '2up';
             } else {
               renderer = '1up';
             }
-            changeset.setRenderer(renderer);
+            changeset.reload({renderer: renderer});
+          } else {
+            changeset.reload();
           }
-          changeset.reload();
 
           e.prevent();
           menu.close();
@@ -792,13 +1008,12 @@ JX.install('DiffChangesetList', {
         .setName(pht('Change Text Encoding...'))
         .setHandler(function(e) {
           var params = {
-            encoding: changeset.getEncoding()
+            encoding: changeset.getCharacterEncoding()
           };
 
           new JX.Workflow('/services/encoding/', params)
             .setHandler(function(r) {
-              changeset.setEncoding(r.encoding);
-              changeset.reload();
+              changeset.reload({encoding: r.encoding});
             })
             .start();
 
@@ -817,8 +1032,7 @@ JX.install('DiffChangesetList', {
 
           new JX.Workflow('/services/highlight/', params)
             .setHandler(function(r) {
-              changeset.setHighlight(r.highlight);
-              changeset.reload();
+              changeset.reload({highlight: r.highlight});
             })
             .start();
 
@@ -829,16 +1043,19 @@ JX.install('DiffChangesetList', {
 
       var engine_item = new JX.PHUIXActionView()
         .setIcon('fa-file-image-o')
-        .setName(pht('View As...'))
+        .setName(pht('View As Document Type...'))
         .setHandler(function(e) {
+          var options = changeset.getAvailableDocumentEngineKeys() || [];
+          options = options.join(',');
+
           var params = {
-            engine: changeset.getDocumentEngine(),
+            engine: changeset.getResponseDocumentEngineKey(),
+            options: options
           };
 
           new JX.Workflow('/services/viewas/', params)
             .setHandler(function(r) {
-              changeset.setDocumentEngine(r.engine);
-              changeset.reload();
+              changeset.reload({engine: r.engine});
             })
             .start();
 
@@ -847,10 +1064,48 @@ JX.install('DiffChangesetList', {
         });
       list.addItem(engine_item);
 
+      list.addItem(
+        new JX.PHUIXActionView()
+          .setDivider(true));
+
+      add_link('fa-external-link', pht('View Standalone'), data.standaloneURI);
+
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
-      add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
-      add_link('fa-wrench', pht('Configure Editor'), data.editorConfigure);
+
+      add_link(
+        'fa-folder-open-o',
+        pht('Show Directory in Repository'),
+        changeset.getShowDirectoryURI())
+        .setKeyCommand('D');
+
+      add_link(
+        'fa-file-text-o',
+        pht('Show Path in Repository'),
+        changeset.getShowPathURI())
+        .setKeyCommand('d');
+
+      var editor_template = changeset.getEditorURITemplate();
+      if (editor_template !== null) {
+        var editor_item = new JX.PHUIXActionView()
+          .setIcon('fa-i-cursor')
+          .setName(pht('Open in Editor'))
+          .setKeyCommand('\\')
+          .setHandler(function(e) {
+
+            changeset_list._openEditor(changeset);
+
+            e.prevent();
+            menu.close();
+          });
+
+        list.addItem(editor_item);
+      } else {
+        var configure_uri = changeset.getEditorConfigureURI();
+        if (configure_uri !== null) {
+          add_link('fa-wrench', pht('Configure Editor'), configure_uri);
+        }
+      }
 
       menu.setContent(list.getNode());
 
@@ -864,7 +1119,7 @@ JX.install('DiffChangesetList', {
           reveal_item
             .setDisabled(false)
             .setName(pht('Show All Context'))
-            .setIcon('fa-file-o')
+            .setIcon('fa-arrows-v')
             .setHandler(function(e) {
               changeset.loadAllContext();
               e.prevent();
@@ -873,9 +1128,10 @@ JX.install('DiffChangesetList', {
         } else {
           reveal_item
             .setDisabled(true)
+            .setUnresponsive(true)
             .setIcon('fa-file')
             .setName(pht('All Context Shown'))
-            .setHandler(function(e) { e.prevent(); });
+            .setHref(null);
         }
 
         encoding_item.setDisabled(!changeset.isLoaded());
@@ -883,14 +1139,14 @@ JX.install('DiffChangesetList', {
         engine_item.setDisabled(!changeset.isLoaded());
 
         if (changeset.isLoaded()) {
-          if (changeset.getRenderer() == '2up') {
+          if (changeset.getRendererKey() == '2up') {
             up_item
               .setIcon('fa-list-alt')
-              .setName(pht('View Unified'));
+              .setName(pht('View Unified Diff'));
           } else {
             up_item
-              .setIcon('fa-files-o')
-              .setName(pht('View Side-by-Side'));
+              .setIcon('fa-columns')
+              .setName(pht('View Side-by-Side Diff'));
           }
         } else {
           up_item
@@ -900,8 +1156,9 @@ JX.install('DiffChangesetList', {
 
         visible_item
           .setDisabled(true)
-          .setIcon('fa-expand')
-          .setName(pht('Can\'t Toggle Unloaded File'));
+          .setIcon('fa-eye-slash')
+          .setName(pht('Hide Changeset'));
+
         var diffs = JX.DOM.scry(
           JX.$(data.containerID),
           'table',
@@ -912,17 +1169,7 @@ JX.install('DiffChangesetList', {
             'More than one node with sigil "differential-diff" was found in "'+
             data.containerID+'."');
         } else if (diffs.length == 1) {
-          var diff = diffs[0];
           visible_item.setDisabled(false);
-          if (!changeset.isVisible()) {
-            visible_item
-              .setName(pht('Expand File'))
-              .setIcon('fa-expand');
-          } else {
-            visible_item
-              .setName(pht('Collapse File'))
-              .setIcon('fa-compress');
-          }
         } else {
           // Do nothing when there is no diff shown in the table. For example,
           // the file is binary.
@@ -931,6 +1178,7 @@ JX.install('DiffChangesetList', {
       });
 
       data.menu = menu;
+      changeset.setViewMenu(menu);
       menu.open();
     },
 
@@ -945,7 +1193,6 @@ JX.install('DiffChangesetList', {
     _onresize: function() {
       this._redrawFocus();
       this._redrawSelection();
-      this._redrawHover();
 
       // Force a banner redraw after a resize event. Particularly, this makes
       // sure the inline state updates immediately after an inline edit
@@ -971,29 +1218,38 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      // If the user has double-clicked or triple-clicked a header, we want to
+      // toggle the inline selection mode, not select text. Kill select events
+      // originating with this element as the target.
+      if (e.getType() === 'selectstart') {
+        e.kill();
+        return;
+      }
+
       var inline = this._getInlineForEvent(e);
       if (!inline) {
         return;
       }
 
-      // The user definitely clicked an inline, so we're going to handle the
-      // event.
-      e.kill();
+      // NOTE: Don't kill or prevent the event. In particular, we want this
+      // click to clear any text selection as it normally would.
 
       this.selectInline(inline);
     },
 
-    selectInline: function(inline) {
+    selectInline: function(inline, force, scroll) {
       var selection = this._getSelectionState();
       var item;
 
-      // If the comment the user clicked is currently selected, deselect it.
-      // This makes it easy to undo things if you clicked by mistake.
-      if (selection.cursor !== null) {
-        item = selection.items[selection.cursor];
-        if (item.target === inline) {
-          this._setSelectionState(null, false);
-          return;
+      if (!force) {
+        // If the comment the user clicked is currently selected, deselect it.
+        // This makes it easy to undo things if you clicked by mistake.
+        if (selection.cursor !== null) {
+          item = selection.items[selection.cursor];
+          if (item.target === inline) {
+            this._setSelectionState(null, false);
+            return;
+          }
         }
       }
 
@@ -1004,59 +1260,10 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < items.length; ii++) {
         item = items[ii];
         if (item.target === inline) {
-          this._setSelectionState(item, false);
-        }
-      }
-    },
-
-    _onaction: function(action, e) {
-      e.kill();
-
-      var inline = this._getInlineForEvent(e);
-      var is_ref = false;
-
-      // If we don't have a natural inline object, the user may have clicked
-      // an action (like "Delete") inside a preview element at the bottom of
-      // the page.
-
-      // If they did, try to find an associated normal inline to act on, and
-      // pretend they clicked that instead. This makes the overall state of
-      // the page more consistent.
-
-      // However, there may be no normal inline (for example, because it is
-      // on a version of the diff which is not visible). In this case, we
-      // act by reference.
-
-      if (inline === null) {
-        var data = e.getNodeData('differential-inline-comment');
-        inline = this.getInlineByID(data.id);
-        if (inline) {
-          is_ref = true;
-        } else {
-          switch (action) {
-            case 'delete':
-              this._deleteInlineByID(data.id);
-              return;
-          }
+          this._setSelectionState(item, scroll);
         }
       }
 
-      // TODO: For normal operations, highlight the inline range here.
-
-      switch (action) {
-        case 'edit':
-          inline.edit();
-          break;
-        case 'done':
-          inline.toggleDone();
-          break;
-        case 'delete':
-          inline.delete(is_ref);
-          break;
-        case 'reply':
-          inline.reply();
-          break;
-      }
     },
 
     redrawPreview: function() {
@@ -1074,9 +1281,31 @@ JX.install('DiffChangesetList', {
     },
 
     setFocus: function(node, extended_node) {
+      if (!node) {
+        var tree = this._getTreeView();
+        tree.setSelectedPath(null);
+        this._selectChangeset(null);
+      }
+
       this._focusStart = node;
       this._focusEnd = extended_node;
       this._redrawFocus();
+    },
+
+    _selectChangeset: function(changeset) {
+      if (this._selectedChangeset === changeset) {
+        return;
+      }
+
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(false);
+        this._selectedChangeset = null;
+      }
+
+      this._selectedChangeset = changeset;
+      if (this._selectedChangeset !== null) {
+        this._selectedChangeset.setIsSelected(true);
+      }
     },
 
     _redrawFocus: function() {
@@ -1093,14 +1322,15 @@ JX.install('DiffChangesetList', {
       // space between the focused element and the outline.
       var p = JX.Vector.getPos(node);
       var s = JX.Vector.getAggregateScrollForNode(node);
+      var d = JX.Vector.getDim(node);
 
-      p.add(s).add(-4, -4).setPos(reticle);
+      p.add(s).add(d.x + 1, 4).setPos(reticle);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
         .add(-p.x, -p.y)
-        .add(JX.Vector.getDim(extended_node))
-        .add(8, 8)
+        .add(0, JX.Vector.getDim(extended_node).y)
+        .add(10, -4)
         .setDim(reticle);
 
       JX.DOM.getContentFrame().appendChild(reticle);
@@ -1115,7 +1345,8 @@ JX.install('DiffChangesetList', {
     },
 
     _setHoverInline: function(inline) {
-      this._hoverInline = inline;
+      var origin = null;
+      var target = null;
 
       if (inline) {
         var changeset = inline.getChangeset();
@@ -1141,11 +1372,8 @@ JX.install('DiffChangesetList', {
         var length = inline.getLineLength();
 
         try {
-          var origin = JX.$(prefix + number);
-          var target = JX.$(prefix + (number + length));
-
-          this._hoverOrigin = origin;
-          this._hoverTarget = target;
+          origin = JX.$(prefix + number);
+          target = JX.$(prefix + (number + length));
         } catch (error) {
           // There may not be any nodes present in the document. A case where
           // this occurs is when you reply to a ghost inline which was made
@@ -1153,39 +1381,50 @@ JX.install('DiffChangesetList', {
           // the file was later shortened so those lines no longer exist. For
           // more details, see T11662.
 
-          this._hoverOrigin = null;
-          this._hoverTarget = null;
+          origin = null;
+          target = null;
         }
-      } else {
-        this._hoverOrigin = null;
-        this._hoverTarget = null;
       }
 
-      this._redrawHover();
+      this._setHoverRange(origin, target, inline);
     },
 
-    _setHoverRange: function(origin, target) {
-      this._hoverOrigin = origin;
-      this._hoverTarget = target;
+    _setHoverRange: function(origin, target, inline) {
+      inline = inline || null;
 
-      this._redrawHover();
+      var origin_dirty = (origin !== this._hoverOrigin);
+      var target_dirty = (target !== this._hoverTarget);
+      var inline_dirty = (inline !== this._hoverInline);
+
+      var any_dirty = (origin_dirty || target_dirty || inline_dirty);
+      if (any_dirty) {
+        this._hoverOrigin = origin;
+        this._hoverTarget = target;
+        this._hoverInline = inline;
+        this._redrawHover();
+      }
     },
 
     resetHover: function() {
-      this._setHoverInline(null);
-
-      this._hoverOrigin = null;
-      this._hoverTarget = null;
+      this._setHoverRange(null, null, null);
     },
 
     _redrawHover: function() {
-      var reticle = this._getHoverNode();
-      if (!this._hoverOrigin || this.isAsleep()) {
-        JX.DOM.remove(reticle);
-        return;
+      var map = this._hoverMap;
+      if (map) {
+        this._hoverMap = null;
+        this._applyHoverHighlight(map, false);
       }
 
-      JX.DOM.getContentFrame().appendChild(reticle);
+      var rows = this._hoverRows;
+      if (rows) {
+        this._hoverRows = null;
+        this._applyHoverHighlight(rows, false);
+      }
+
+      if (!this._hoverOrigin || this.isAsleep()) {
+        return;
+      }
 
       var top = this._hoverOrigin;
       var bot = this._hoverTarget;
@@ -1199,7 +1438,7 @@ JX.install('DiffChangesetList', {
       // next sibling with a "data-copy-mode" attribute, which is a marker
       // for the cell with actual content in it.
       var content_cell = top;
-      while (content_cell && !content_cell.getAttribute('data-copy-mode')) {
+      while (content_cell && !this._isContentCell(content_cell)) {
         content_cell = content_cell.nextSibling;
       }
 
@@ -1208,33 +1447,196 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      var pos = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell));
+      rows = this._findContentCells(top, bot, content_cell);
 
-      var dim = JX.$V(content_cell)
-        .add(JX.Vector.getAggregateScrollForNode(content_cell))
-        .add(-pos.x, -pos.y)
-        .add(JX.Vector.getDim(content_cell));
-
-      var bpos = JX.$V(bot)
-        .add(JX.Vector.getAggregateScrollForNode(bot));
-      dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
-
-      pos.setPos(reticle);
-      dim.setDim(reticle);
-
-      JX.DOM.show(reticle);
-    },
-
-    _getHoverNode: function() {
-      if (!this._hoverNode) {
-        var attributes = {
-          className: 'differential-reticle'
-        };
-        this._hoverNode = JX.$N('div', attributes);
+      var inline = this._hoverInline;
+      if (!inline) {
+        this._hoverRows = rows;
+        this._applyHoverHighlight(this._hoverRows, true);
+        return;
       }
 
-      return this._hoverNode;
+      if (!inline.hoverMap) {
+        inline.hoverMap = this._newHoverMap(rows, inline);
+      }
+
+      this._hoverMap = inline.hoverMap;
+      this._applyHoverHighlight(this._hoverMap, true);
+    },
+
+    _applyHoverHighlight: function(items, on) {
+      for (var ii = 0; ii < items.length; ii++) {
+        var item = items[ii];
+
+        JX.DOM.alterClass(item.lineNode, 'inline-hover', on);
+        JX.DOM.alterClass(item.cellNode, 'inline-hover', on);
+
+        if (item.bright) {
+          JX.DOM.alterClass(item.cellNode, 'inline-hover-bright', on);
+        }
+
+        if (item.hoverNode) {
+          if (on) {
+            item.cellNode.insertBefore(
+              item.hoverNode,
+              item.cellNode.firstChild);
+          } else {
+            JX.DOM.remove(item.hoverNode);
+          }
+        }
+      }
+    },
+
+    _findContentCells: function(top, bot, content_cell) {
+      var head_row = JX.DOM.findAbove(top, 'tr');
+      var last_row = JX.DOM.findAbove(bot, 'tr');
+
+      var cursor = head_row;
+      var rows = [];
+      var idx = null;
+      var ii;
+      var line_cell = null;
+      do {
+        line_cell = null;
+        for (ii = 0; ii < cursor.childNodes.length; ii++) {
+          var child = cursor.childNodes[ii];
+          if (!JX.DOM.isType(child, 'td')) {
+            continue;
+          }
+
+          if (child.getAttribute('data-n')) {
+            line_cell = child;
+          }
+
+          if (child === content_cell) {
+            idx = ii;
+          }
+
+          if (ii !== idx) {
+            continue;
+          }
+
+          if (this._isContentCell(child)) {
+            rows.push({
+              lineNode: line_cell,
+              cellNode: child
+            });
+          }
+
+          break;
+        }
+
+        if (cursor === last_row) {
+          break;
+        }
+
+        cursor = cursor.nextSibling;
+      } while (cursor);
+
+      return rows;
+    },
+
+    _newHoverMap: function(rows, inline) {
+      var start = inline.getStartOffset();
+      var end = inline.getEndOffset();
+
+      var info;
+      var content;
+      for (ii = 0; ii < rows.length; ii++) {
+        info = this._getSelectionOffset(rows[ii].cellNode, null);
+
+        content = info.content;
+        content = content.replace(/\n+$/, '');
+
+        rows[ii].content = content;
+      }
+
+      var attr_dull = {
+        className: 'inline-hover-text'
+      };
+
+      var attr_bright = {
+        className: 'inline-hover-text inline-hover-text-bright'
+      };
+
+      var attr_container = {
+        className: 'inline-hover-container'
+      };
+
+      var min = 0;
+      var max = rows.length - 1;
+      var offset_min;
+      var offset_max;
+      var len;
+      var node;
+      var text;
+      var any_highlight = false;
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        len = content.length;
+
+        if (ii === min && (start !== null)) {
+          offset_min = start;
+        } else {
+          offset_min = 0;
+        }
+
+        if (ii === max && (end !== null)) {
+          offset_max = Math.min(end, len);
+        } else {
+          offset_max = len;
+        }
+
+        var has_min = (offset_min > 0);
+        var has_max = (offset_max < len);
+
+        if (has_min || has_max) {
+          any_highlight = true;
+        }
+
+        rows[ii].min = offset_min;
+        rows[ii].max = offset_max;
+        rows[ii].hasMin = has_min;
+        rows[ii].hasMax = has_max;
+      }
+
+      for (ii = 0; ii < rows.length; ii++) {
+        content = rows[ii].content;
+        offset_min = rows[ii].min;
+        offset_max = rows[ii].max;
+
+        var has_highlight = (rows[ii].hasMin || rows[ii].hasMax);
+
+        if (any_highlight) {
+          var parts = [];
+
+          if (offset_min > 0) {
+            text = content.substring(0, offset_min);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          if (len) {
+            text = content.substring(offset_min, offset_max);
+            node = JX.$N('span', attr_bright, text);
+            parts.push(node);
+          }
+
+          if (offset_max < len) {
+            text = content.substring(offset_max, len);
+            node = JX.$N('span', attr_dull, text);
+            parts.push(node);
+          }
+
+          rows[ii].hoverNode = JX.$N('div', attr_container, parts);
+        } else {
+          rows[ii].hoverNode = null;
+        }
+
+        rows[ii].bright = (any_highlight && !has_highlight);
+      }
+
+      return rows;
     },
 
     _deleteInlineByID: function(id) {
@@ -1422,10 +1824,18 @@ JX.install('DiffChangesetList', {
 
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
+      var tree = this._getTreeView();
+      var formation = this.getFormationView();
 
       if (!changeset) {
         this._bannerChangeset = null;
         JX.DOM.remove(node);
+        tree.setFocusedPath(null);
+
+        if (formation) {
+          formation.repaint();
+        }
+
         return;
       }
 
@@ -1435,6 +1845,14 @@ JX.install('DiffChangesetList', {
         return;
       }
       this._bannerChangeset = changeset;
+
+      var paths = tree.getPaths();
+      for (var ii = 0; ii < paths.length; ii++) {
+        var path = paths[ii];
+        if (path.getChangeset() === changeset) {
+          tree.setFocusedPath(path);
+        }
+      }
 
       var inlines = this._getInlinesByType();
 
@@ -1541,6 +1959,10 @@ JX.install('DiffChangesetList', {
       JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+
+      if (formation) {
+        formation.repaint();
+      }
     },
 
     _getInlinesByType: function() {
@@ -1911,7 +2333,523 @@ JX.install('DiffChangesetList', {
       }
 
       return null;
+    },
+
+    _getTreeView: function() {
+      if (!this._treeView) {
+        var tree = new JX.DiffTreeView();
+
+        for (var ii = 0; ii < this._changesets.length; ii++) {
+          var changeset = this._changesets[ii];
+          tree.addPath(changeset.getPathView());
+        }
+
+        this._treeView = tree;
+      }
+      return this._treeView;
+    },
+
+    _redrawFiletree : function() {
+      var formation = this.getFormationView();
+
+      if (!formation) {
+        return;
+      }
+
+      var filetree = formation.getColumn(0);
+      var flank = filetree.getFlank();
+
+      var flank_body = flank.getBodyNode();
+
+      var tree = this._getTreeView();
+      JX.DOM.setContent(flank_body, tree.getNode());
+    },
+
+    _setupInlineCommentListeners: function() {
+      var onsave = JX.bind(this, this._onInlineEvent, 'save');
+      JX.Stratcom.listen(
+        ['submit', 'didSyntheticSubmit'],
+        'inline-edit-form',
+        onsave);
+
+      var oncancel = JX.bind(this, this._onInlineEvent, 'cancel');
+      JX.Stratcom.listen(
+        'click',
+        'inline-edit-cancel',
+        oncancel);
+
+      var onundo = JX.bind(this, this._onInlineEvent, 'undo');
+      JX.Stratcom.listen(
+        'click',
+        'differential-inline-comment-undo',
+        onundo);
+
+      var ondone = JX.bind(this, this._onInlineEvent, 'done');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-done'],
+        ondone);
+
+      var ondelete = JX.bind(this, this._onInlineEvent, 'delete');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'differential-inline-delete'],
+        ondelete);
+
+      var onmenu = JX.bind(this, this._onInlineEvent, 'menu');
+      JX.Stratcom.listen(
+        'click',
+        ['differential-inline-comment', 'inline-action-dropdown'],
+        onmenu);
+
+      var ondraft = JX.bind(this, this._onInlineEvent, 'draft');
+      JX.Stratcom.listen(
+        'keydown',
+        ['differential-inline-comment', 'tag:textarea'],
+        ondraft);
+
+      var on_preview_view = JX.bind(this, this._onPreviewEvent, 'view');
+      JX.Stratcom.listen(
+        'click',
+        'differential-inline-preview-jump',
+        on_preview_view);
+    },
+
+    _onPreviewEvent: function(action, e) {
+      if (this.isAsleep()) {
+        return;
+      }
+
+      var data = e.getNodeData('differential-inline-preview-jump');
+      var inline = this.getInlineByID(data.inlineCommentID);
+      if (!inline) {
+        return;
+      }
+
+      e.kill();
+
+      switch (action) {
+        case 'view':
+          this.selectInline(inline, true, true);
+          break;
+      }
+    },
+
+    _onInlineEvent: function(action, e) {
+      if (this.isAsleep()) {
+        return;
+      }
+
+      if (action !== 'draft' && action !== 'menu') {
+        e.kill();
+      }
+
+      var inline = this._getInlineForEvent(e);
+      var is_ref = false;
+
+      // If we don't have a natural inline object, the user may have clicked
+      // an action (like "Delete") inside a preview element at the bottom of
+      // the page.
+
+      // If they did, try to find an associated normal inline to act on, and
+      // pretend they clicked that instead. This makes the overall state of
+      // the page more consistent.
+
+      // However, there may be no normal inline (for example, because it is
+      // on a version of the diff which is not visible). In this case, we
+      // act by reference.
+
+      if (inline === null) {
+        var data = e.getNodeData('differential-inline-comment');
+        inline = this.getInlineByID(data.id);
+        if (inline) {
+          is_ref = true;
+        } else {
+          switch (action) {
+            case 'delete':
+              this._deleteInlineByID(data.id);
+              return;
+          }
+        }
+      }
+
+      // TODO: For normal operations, highlight the inline range here.
+
+      switch (action) {
+        case 'save':
+          inline.save();
+          break;
+        case 'cancel':
+          inline.cancel();
+          break;
+        case 'undo':
+          inline.undo();
+          break;
+        case 'done':
+          inline.toggleDone();
+          break;
+        case 'delete':
+          inline.delete(is_ref);
+          break;
+        case 'draft':
+          inline.triggerDraft();
+          break;
+        case 'menu':
+          var node = e.getNode('inline-action-dropdown');
+          inline.activateMenu(node, e);
+          break;
+      }
+    },
+
+    _onSelectRange: function(e) {
+      this._updateSourceSelection();
+    },
+
+    _updateSourceSelection: function() {
+      var ranges = this._getSelectedRanges();
+
+      // In Firefox, selecting multiple rows gives us multiple ranges. In
+      // Safari and Chrome, we get a single range.
+      if (!ranges.length) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      var min = 0;
+      var max = ranges.length - 1;
+
+      var head = ranges[min].startContainer;
+      var last = ranges[max].endContainer;
+
+      var head_loc = this._getFragmentLocation(head);
+      var last_loc = this._getFragmentLocation(last);
+
+      if (head_loc === null || last_loc === null) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      if (head_loc.changesetID !== last_loc.changesetID) {
+        this._setSourceSelection(null, null);
+        return;
+      }
+
+      head_loc.offset += ranges[min].startOffset;
+      last_loc.offset += ranges[max].endOffset;
+
+      this._setSourceSelection(head_loc, last_loc);
+    },
+
+    _setSourceSelection: function(start, end) {
+      var start_updated =
+        !this._isSameSourceSelection(this._sourceSelectionStart, start);
+
+      var end_updated =
+        !this._isSameSourceSelection(this._sourceSelectionEnd, end);
+
+      if (!start_updated && !end_updated) {
+        return;
+      }
+
+      this._sourceSelectionStart = start;
+      this._sourceSelectionEnd = end;
+
+      if (!start) {
+        this._closeSourceSelectionMenu();
+        return;
+      }
+
+      var menu;
+      if (this._sourceSelectionMenu) {
+        menu = this._sourceSelectionMenu;
+      } else {
+        menu = this._newSourceSelectionMenu();
+        this._sourceSelectionMenu = menu;
+      }
+
+      var pos = JX.$V(start.node)
+        .add(0, -menu.getMenuNodeDimensions().y)
+        .add(0, -24);
+
+      menu.setPosition(pos);
+      menu.open();
+    },
+
+    _newSourceSelectionMenu: function() {
+      var pht = this.getTranslations();
+
+      var menu = new JX.PHUIXDropdownMenu(null)
+        .setWidth(240);
+
+      // We need to disable autofocus for this menu, since it operates on the
+      // text selection in the document. If we leave this enabled, opening the
+      // menu immediately discards the selection.
+      menu.setDisableAutofocus(true);
+
+      var list = new JX.PHUIXActionListView();
+      menu.setContent(list.getNode());
+
+      var oncreate = JX.bind(this, this._onSourceSelectionMenuAction, 'create');
+
+      var comment_item = new JX.PHUIXActionView()
+        .setIcon('fa-comment-o')
+        .setName(pht('New Inline Comment'))
+        .setKeyCommand('c')
+        .setHandler(oncreate);
+
+      list.addItem(comment_item);
+
+      return menu;
+    },
+
+    _onSourceSelectionMenuAction: function(action, e) {
+      e.kill();
+      this._closeSourceSelectionMenu();
+
+      switch (action) {
+        case 'create':
+          this._onKeyCreate();
+          break;
+      }
+    },
+
+    _closeSourceSelectionMenu: function() {
+      if (this._sourceSelectionMenu) {
+        this._sourceSelectionMenu.close();
+      }
+    },
+
+    _isSameSourceSelection: function(u, v) {
+      if (u === null && v === null) {
+        return true;
+      }
+
+      if (u === null && v !== null) {
+        return false;
+      }
+
+      if (u !== null && v === null) {
+        return false;
+      }
+
+      return (
+        (u.changesetID === v.changesetID) &&
+        (u.line === v.line) &&
+        (u.displayColumn === v.displayColumn) &&
+        (u.offset === v.offset)
+      );
+    },
+
+    _getFragmentLocation: function(fragment) {
+      // Find the changeset containing the fragment.
+      var changeset = null;
+      try {
+        var node = JX.DOM.findAbove(
+          fragment,
+          'div',
+          'differential-changeset');
+
+        changeset = this.getChangesetForNode(node);
+        if (!changeset) {
+          return null;
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      // Find the line number and display column for the fragment.
+      var line = null;
+      var column_count = -1;
+      var has_new = false;
+      var has_old = false;
+      var offset = null;
+      var target_node = null;
+      var td;
+      try {
+
+        // NOTE: In Safari, you can carefully select an entire line and then
+        // move your mouse down slightly, causing selection of an empty
+        // document fragment which is an immediate child of the next "<tr />".
+
+        // If the fragment is a direct child of a "<tr />" parent, assume the
+        // user has done this and select the last child of the previous row
+        // instead. It's possible there are other ways to do this, so this may
+        // not always be the right rule.
+
+        // Otherwise, select the containing "<td />".
+
+        var is_end;
+        if (JX.DOM.isType(fragment.parentNode, 'tr')) {
+          // Assume this is Safari, and that the user has carefully selected a
+          // row and then moved their mouse down a few pixels to select the
+          // invisible fragment at the beginning of the next row.
+          var cells = fragment.parentNode.previousSibling.childNodes;
+          td = cells[cells.length - 1];
+          is_end = true;
+        } else {
+          td = this._findContentCell(fragment);
+          is_end = false;
+        }
+
+        var cursor = td;
+        while (cursor) {
+          if (cursor.getAttribute('data-copy-mode')) {
+            column_count++;
+          } else {
+            // In unified mode, the content column isn't currently marked
+            // with an attribute, and we can't count content columns anyway.
+            // Keep track of whether or not we see a "NL" (New Line) column
+            // and/or an "OL" (Old Line) column to try to puzzle out which
+            // side of the display change we're on.
+
+            if (cursor.id.match(/NL/)) {
+              has_new = true;
+            } else if (cursor.id.match(/OL/)) {
+              has_old = true;
+            }
+          }
+
+          var n = parseInt(cursor.getAttribute('data-n'));
+
+          if (n) {
+            if (line === null) {
+              target_node = cursor;
+              line = n;
+            }
+          }
+
+          cursor = cursor.previousSibling;
+        }
+
+        if (!line) {
+          return null;
+        }
+
+        if (column_count < 0) {
+          if (has_new || has_old) {
+            if (has_new) {
+              column_count = 1;
+            } else {
+              column_count = 0;
+            }
+          } else {
+            return null;
+          }
+        }
+
+        var info = this._getSelectionOffset(td, fragment);
+
+        if (info.found) {
+          offset = info.offset;
+        } else {
+          if (is_end) {
+            offset = info.offset;
+          } else {
+            offset = 0;
+          }
+        }
+      } catch (ex) {
+        return null;
+      }
+
+      var changeset_id;
+      if (column_count > 0) {
+        changeset_id = changeset.getRightChangesetID();
+      } else {
+        changeset_id = changeset.getLeftChangesetID();
+      }
+
+      return {
+        node: td,
+        changeset: changeset,
+        changesetID: changeset_id,
+        line: line,
+        displayColumn: column_count,
+        offset: offset,
+        targetNode: target_node
+      };
+    },
+
+    _getSelectionOffset: function(node, target) {
+      // If this is an aural hint node in a unified diff, ignore it when
+      // calculating the selection offset.
+      if (node.getAttribute && node.getAttribute('data-aural')) {
+        return {
+          offset: 0,
+          content: '',
+          found: false
+        };
+      }
+
+      if (!node.childNodes || !node.childNodes.length) {
+        return {
+          offset: node.textContent.length,
+          content: node.textContent,
+          found: false
+        };
+      }
+
+      var found = false;
+      var offset = 0;
+      var content = '';
+      for (var ii = 0; ii < node.childNodes.length; ii++) {
+        var child = node.childNodes[ii];
+
+        if (child === target) {
+          found = true;
+        }
+
+        var spec = this._getSelectionOffset(child, target);
+
+        content += spec.content;
+        if (!found) {
+          offset += spec.offset;
+        }
+
+        found = found || spec.found;
+      }
+
+      return {
+        offset: offset,
+        content: content,
+        found: found
+      };
+    },
+
+    _getSelectedRanges: function() {
+      var ranges = [];
+
+      if (!window.getSelection) {
+        return ranges;
+      }
+
+      var selection = window.getSelection();
+      for (var ii = 0; ii < selection.rangeCount; ii++) {
+        var range = selection.getRangeAt(ii);
+        if (range.collapsed) {
+          continue;
+        }
+
+        ranges.push(range);
+      }
+
+      return ranges;
+    },
+
+    _isContentCell: function(node) {
+      return !!node.getAttribute('data-copy-mode');
+    },
+
+    _findContentCell: function(node) {
+      var cursor = node;
+      while (true) {
+        cursor = JX.DOM.findAbove(cursor, 'td');
+        if (this._isContentCell(cursor)) {
+          return cursor;
+        }
+      }
     }
+
   }
 
 });

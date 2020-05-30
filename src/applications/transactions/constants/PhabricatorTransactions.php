@@ -32,10 +32,10 @@ final class PhabricatorTransactions extends Phobject {
 
   public static function getInlineStateMap() {
     return array(
-      PhabricatorInlineCommentInterface::STATE_DRAFT =>
-        PhabricatorInlineCommentInterface::STATE_DONE,
-      PhabricatorInlineCommentInterface::STATE_UNDRAFT =>
-        PhabricatorInlineCommentInterface::STATE_UNDONE,
+      PhabricatorInlineComment::STATE_DRAFT =>
+        PhabricatorInlineComment::STATE_DONE,
+      PhabricatorInlineComment::STATE_UNDRAFT =>
+        PhabricatorInlineComment::STATE_UNDONE,
     );
   }
 

@@ -11,8 +11,10 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $renderURI;
   private $renderingRef;
   private $autoload;
-  private $loaded;
-  private $renderer;
+  private $repository;
+  private $diff;
+  private $changesetResponse;
+  private $branch;
 
   public function setAutoload($autoload) {
     $this->autoload = $autoload;
@@ -23,15 +25,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this->autoload;
   }
 
-  public function setLoaded($loaded) {
-    $this->loaded = $loaded;
-    return $this;
-  }
-
-  public function getLoaded() {
-    return $this->loaded;
-  }
-
   public function setRenderingRef($rendering_ref) {
     $this->renderingRef = $rendering_ref;
     return $this;
@@ -39,6 +32,15 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
   public function getRenderingRef() {
     return $this->renderingRef;
+  }
+
+  public function setChangesetResponse(PhabricatorChangesetResponse $response) {
+    $this->changesetResponse = $response;
+    return $this;
+  }
+
+  public function getChangesetResponse() {
+    return $this->changesetResponse;
   }
 
   public function setRenderURI($render_uri) {
@@ -70,13 +72,13 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this;
   }
 
-  public function setRenderer($renderer) {
-    $this->renderer = $renderer;
+  public function setBranch($branch) {
+    $this->branch = $branch;
     return $this;
   }
 
-  public function getRenderer() {
-    return $this->renderer;
+  public function getBranch() {
+    return $this->branch;
   }
 
   public function getID() {
@@ -101,6 +103,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
+
     $this->requireResource('differential-changeset-view-css');
     $this->requireResource('syntax-highlighting-css');
 
@@ -136,9 +140,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $display_icon = FileTypeIcon::getFileIcon($display_filename);
     $icon = id(new PHUIIconView())
       ->setIcon($display_icon);
-
-    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
-      $this->getRenderer());
 
     $changeset_id = $this->changeset->getID();
 
@@ -178,6 +179,60 @@ final class DifferentialChangesetDetailView extends AphrontView {
       ),
       $file_part);
 
+    $response = $this->getChangesetResponse();
+    if ($response) {
+      $is_loaded = true;
+      $changeset_markup = $response->getRenderedChangeset();
+      $changeset_state = $response->getChangesetState();
+    } else {
+      $is_loaded = false;
+      $changeset_markup = null;
+      $changeset_state = null;
+    }
+
+    $path_parts = trim($display_filename, '/');
+    $path_parts = explode('/', $path_parts);
+
+    $show_path_uri = null;
+    $show_directory_uri = null;
+
+    $repository = $this->getRepository();
+    if ($repository) {
+      $diff = $this->getDiff();
+      if ($diff) {
+        $repo_path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+
+        $repo_dir = dirname($repo_path);
+        if ($repo_dir === $repo_path) {
+          $repo_dir = null;
+        }
+
+        $show_path_uri = $repository->getDiffusionBrowseURIForPath(
+          $viewer,
+          $repo_path,
+          idx($changeset->getMetadata(), 'line:first'),
+          $this->getBranch());
+
+        if ($repo_dir !== null) {
+          $repo_dir = rtrim($repo_dir, '/').'/';
+
+          $show_directory_uri = $repository->getDiffusionBrowseURIForPath(
+            $viewer,
+            $repo_dir,
+            null,
+            $this->getBranch());
+        }
+      }
+    }
+
+    if ($show_path_uri) {
+      $show_path_uri = phutil_string_cast($show_path_uri);
+    }
+
+    if ($show_directory_uri) {
+      $show_directory_uri = phutil_string_cast($show_directory_uri);
+    }
+
     return javelin_tag(
       'div',
       array(
@@ -186,16 +241,25 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'left'  => $left_id,
           'right' => $right_id,
           'renderURI' => $this->getRenderURI(),
-          'highlight' => null,
-          'renderer' => $this->getRenderer(),
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
-          'loaded' => $this->getLoaded(),
-          'undoTemplates' => hsprintf('%s', $renderer->renderUndoTemplates()),
           'displayPath' => hsprintf('%s', $display_parts),
-          'path' => $display_filename,
           'icon' => $display_icon,
-          'treeNodeID' => 'tree-node-'.$changeset->getAnchorName(),
+          'pathParts' => $path_parts,
+
+          'pathIconIcon' => $changeset->getPathIconIcon(),
+          'pathIconColor' => $changeset->getPathIconColor(),
+          'isLowImportance' => $changeset->getIsLowImportanceChangeset(),
+          'isOwned' => $changeset->getIsOwnedChangeset(),
+
+          'editorURITemplate' => $this->getEditorURITemplate(),
+          'editorConfigureURI' => $this->getEditorConfigureURI(),
+
+          'loaded' => $is_loaded,
+          'changesetState' => $changeset_state,
+
+          'showPathURI' => $show_path_uri,
+          'showDirectoryURI' => $show_directory_uri,
         ),
         'class' => $class,
         'id'    => $id,
@@ -206,13 +270,21 @@ final class DifferentialChangesetDetailView extends AphrontView {
           ->setNavigationMarker(true)
           ->render(),
         $buttons,
-        phutil_tag('h1',
+        javelin_tag(
+          'h1',
           array(
             'class' => 'differential-file-icon-header',
+            'sigil' => 'changeset-header',
           ),
           array(
             $icon,
-            $display_filename,
+            javelin_tag(
+              'span',
+              array(
+                'class' => 'differential-changeset-path-name',
+                'sigil' => 'changeset-header-path-name',
+              ),
+              $display_filename),
           )),
         javelin_tag(
           'div',
@@ -220,9 +292,67 @@ final class DifferentialChangesetDetailView extends AphrontView {
             'class' => 'changeset-view-content',
             'sigil' => 'changeset-view-content',
           ),
-          $this->renderChildren()),
+          array(
+            $changeset_markup,
+            $this->renderChildren(),
+          )),
       ));
   }
 
+  public function setRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->repository;
+  }
+
+  public function getChangeset() {
+    return $this->changeset;
+  }
+
+  public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  public function getDiff() {
+    return $this->diff;
+  }
+
+  private function getEditorURITemplate() {
+    $repository = $this->getRepository();
+    if (!$repository) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $link_engine = PhabricatorEditorURIEngine::newForViewer($viewer);
+    if (!$link_engine) {
+      return null;
+    }
+
+    $link_engine->setRepository($repository);
+
+    $changeset = $this->getChangeset();
+    $diff = $this->getDiff();
+
+    $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+    $path = ltrim($path, '/');
+
+    return $link_engine->getURITokensForPath($path);
+  }
+
+  private function getEditorConfigureURI() {
+    $viewer = $this->getViewer();
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    return '/settings/panel/editor/';
+  }
 
 }

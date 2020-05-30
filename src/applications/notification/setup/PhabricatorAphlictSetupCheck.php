@@ -24,6 +24,10 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
       $this->newIssue('aphlict.connect')
         ->setShortName(pht('Notification Server Down'))
         ->setName(pht('Unable to Connect to Notification Server'))
+        ->setSummary(
+          pht(
+            'Phabricator is configured to use a notification server, '.
+            'but is not able to connect to it.'))
         ->setMessage($message)
         ->addRelatedPhabricatorConfig('notification.servers')
         ->addCommand(

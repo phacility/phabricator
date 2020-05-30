@@ -25,9 +25,13 @@ final class HarbormasterExecFuture
   }
 
   public function isReady() {
+    if ($this->hasResult()) {
+      return true;
+    }
+
     $future = $this->getFuture();
 
-    $result = $future->isReady();
+    $is_ready = $future->isReady();
 
     list($stdout, $stderr) = $future->read();
     $future->discardBuffers();
@@ -40,11 +44,14 @@ final class HarbormasterExecFuture
       $this->stderr->append($stderr);
     }
 
-    return $result;
-  }
+    if ($future->hasResult()) {
+      $this->setResult($future->getResult());
+    }
 
-  protected function getResult() {
-    return $this->getFuture()->getResult();
+    // TODO: This should probably be implemented as a FutureProxy; it will
+    // not currently propagate exceptions or sockets properly.
+
+    return $is_ready;
   }
 
 }

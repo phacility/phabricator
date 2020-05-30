@@ -4,7 +4,6 @@ var JX = require('./javelin').JX;
 
 require('./AphlictListenerList');
 
-var http = require('http');
 var url = require('url');
 
 JX.install('AphlictAdminServer', {
@@ -54,6 +53,17 @@ JX.install('AphlictAdminServer', {
       return this;
     },
 
+    trace: function() {
+      var logger = this.getLogger();
+      if (!logger) {
+        return;
+      }
+
+      logger.trace.apply(logger, arguments);
+
+      return this;
+    },
+
     listen: function() {
       return this._server.listen.apply(this._server, arguments);
     },
@@ -76,7 +86,7 @@ JX.install('AphlictAdminServer', {
             try {
               var msg = JSON.parse(body);
 
-              self.log(
+              self.trace(
                 'Received notification (' + instance + '): ' +
                 JSON.stringify(msg));
               ++self._messagesIn;
@@ -201,13 +211,13 @@ JX.install('AphlictAdminServer', {
           listener.writeMessage(message);
 
           ++this._messagesOut;
-          this.log(
+          this.trace(
             '<%s> Wrote Message',
             listener.getDescription());
         } catch (error) {
           list.removeListener(listener);
 
-          this.log(
+          this.trace(
             '<%s> Write Error: %s',
             listener.getDescription(),
             error);

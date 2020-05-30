@@ -10,7 +10,6 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
 
   private $jiraBaseURI;
   private $adapterDomain;
-  private $currentSession;
   private $userInfo;
 
   public function setJIRABaseURI($jira_base_uri) {
@@ -22,12 +21,33 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
     return $this->jiraBaseURI;
   }
 
-  public function getAccountID() {
+  protected function newAccountIdentifiers() {
     // Make sure the handshake is finished; this method is used for its
     // side effect by Auth providers.
     $this->getHandshakeData();
 
-    return idx($this->getUserInfo(), 'key');
+    $info = $this->getUserInfo();
+
+    // See T13493. Older versions of JIRA provide a "key" with a username or
+    // email address. Newer versions of JIRA provide a GUID "accountId".
+    // Intermediate versions of JIRA provide both.
+
+    $identifiers = array();
+
+    $account_key = idx($info, 'key');
+    if ($account_key !== null) {
+      $identifiers[] = $this->newAccountIdentifier($account_key);
+    }
+
+    $account_id = idx($info, 'accountId');
+    if ($account_id !== null) {
+      $identifiers[] = $this->newAccountIdentifier(
+        sprintf(
+          'accountId(%s)',
+          $account_id));
+    }
+
+    return $identifiers;
   }
 
   public function getAccountName() {
@@ -85,21 +105,34 @@ final class PhutilJIRAAuthAdapter extends PhutilOAuth1AuthAdapter {
 
   private function getUserInfo() {
     if ($this->userInfo === null) {
-      $this->currentSession = $this->newJIRAFuture('rest/auth/1/session', 'GET')
-        ->resolveJSON();
-
-      // The session call gives us the username, but not the user key or other
-      // information. Make a second call to get additional information.
-
-      $params = array(
-        'username' => $this->currentSession['name'],
-      );
-
-      $this->userInfo = $this->newJIRAFuture('rest/api/2/user', 'GET', $params)
-        ->resolveJSON();
+      $this->userInfo = $this->newUserInfo();
     }
 
     return $this->userInfo;
+  }
+
+  private function newUserInfo() {
+    // See T13493. Try a relatively modern (circa early 2020) API call first.
+    try {
+      return $this->newJIRAFuture('rest/api/3/myself', 'GET')
+        ->resolveJSON();
+    } catch (Exception $ex) {
+      // If we failed the v3 call, assume the server version is too old
+      // to support this API and fall back to trying the older method.
+    }
+
+    $session = $this->newJIRAFuture('rest/auth/1/session', 'GET')
+      ->resolveJSON();
+
+    // The session call gives us the username, but not the user key or other
+    // information. Make a second call to get additional information.
+
+    $params = array(
+      'username' => $session['name'],
+    );
+
+    return $this->newJIRAFuture('rest/api/2/user', 'GET', $params)
+      ->resolveJSON();
   }
 
   public static function newJIRAKeypair() {

@@ -109,28 +109,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     if ($left) {
-      $left_data = $left->makeNewFile();
-      $left_properties = $left->getNewProperties();
-      if ($right) {
-        $right_data = $right->makeNewFile();
-        $right_properties = $right->getNewProperties();
-      } else {
-        $right_data = $left->makeOldFile();
-        $right_properties = $left->getOldProperties();
-      }
-
-      $engine = new PhabricatorDifferenceEngine();
-      $synthetic = $engine->generateChangesetFromFileContent(
-        $left_data,
-        $right_data);
-
-      $choice = clone nonempty($left, $right);
-      $choice->attachHunks($synthetic->getHunks());
-
-      $choice->setOldProperties($left_properties);
-      $choice->setNewProperties($right_properties);
-
-      $changeset = $choice;
+      $changeset = $left->newComparisonChangeset($right);
     }
 
     if ($left_new || $right_new) {
@@ -165,21 +144,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
-    $parser = id(new DifferentialChangesetParser())
-      ->setViewer($viewer)
-      ->setCoverage($coverage)
-      ->setChangeset($changeset)
-      ->setRenderingReference($rendering_reference)
-      ->setRenderCacheKey($render_cache_key)
-      ->setRightSideCommentMapping($right_source, $right_new)
-      ->setLeftSideCommentMapping($left_source, $left_new);
-
-    $parser->readParametersFromRequest($request);
-
-    if ($left && $right) {
-      $parser->setOriginals($left, $right);
-    }
-
     $diff = $changeset->getDiff();
     $revision_id = $diff->getRevisionID();
 
@@ -197,18 +161,57 @@ final class DifferentialChangesetViewController extends DifferentialController {
       }
     }
 
+    if ($revision) {
+      $container_phid = $revision->getPHID();
+    } else {
+      $container_phid = $diff->getPHID();
+    }
+
+    $viewstate_engine = id(new PhabricatorChangesetViewStateEngine())
+      ->setViewer($viewer)
+      ->setObjectPHID($container_phid)
+      ->setChangeset($changeset);
+
+    $viewstate = $viewstate_engine->newViewStateFromRequest($request);
+
+    if ($viewstate->getDiscardResponse()) {
+      return new AphrontAjaxResponse();
+    }
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setViewState($viewstate)
+      ->setCoverage($coverage)
+      ->setChangeset($changeset)
+      ->setRenderingReference($rendering_reference)
+      ->setRenderCacheKey($render_cache_key)
+      ->setRightSideCommentMapping($right_source, $right_new)
+      ->setLeftSideCommentMapping($left_source, $left_new);
+
+    if ($left && $right) {
+      $parser->setOriginals($left, $right);
+    }
+
     // Load both left-side and right-side inline comments.
     if ($revision) {
-      $query = id(new DifferentialInlineCommentQuery())
+      $inlines = id(new DifferentialDiffInlineCommentQuery())
         ->setViewer($viewer)
+        ->withRevisionPHIDs(array($revision->getPHID()))
+        ->withPublishableComments(true)
+        ->withPublishedComments(true)
         ->needHidden(true)
-        ->withRevisionPHIDs(array($revision->getPHID()));
-      $inlines = $query->execute();
-      $inlines = $query->adjustInlinesForChangesets(
-        $inlines,
-        $old,
-        $new,
-        $revision);
+        ->needInlineContext(true)
+        ->execute();
+
+      $inlines = mpull($inlines, 'newInlineCommentObject');
+
+      $inlines = id(new PhabricatorInlineCommentAdjustmentEngine())
+        ->setViewer($viewer)
+        ->setRevision($revision)
+        ->setOldChangesets($old)
+        ->setNewChangesets($new)
+        ->setInlines($inlines)
+        ->execute();
     } else {
       $inlines = array();
     }
@@ -243,13 +246,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
 
     $engine->process();
 
     $parser
-      ->setUser($viewer)
+      ->setViewer($viewer)
       ->setMarkupEngine($engine)
       ->setShowEditAndReplyLinks(true)
       ->setCanMarkDone($can_mark)
@@ -260,7 +263,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if ($request->isAjax()) {
       // NOTE: We must render the changeset before we render coverage
       // information, since it builds some caches.
-      $rendered_changeset = $parser->renderChangeset();
+      $response = $parser->newChangesetResponse();
 
       $mcov = $parser->renderModifiedCoverage();
 
@@ -268,10 +271,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
-      return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($rendered_changeset)
-        ->setCoverage($coverage_data)
-        ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
+      $response->setCoverage($coverage_data);
+
+      return $response;
     }
 
     $detail = id(new DifferentialChangesetListView())

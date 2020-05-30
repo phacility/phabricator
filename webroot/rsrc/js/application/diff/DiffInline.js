@@ -18,10 +18,11 @@ JX.install('DiffInline', {
     _length: null,
     _displaySide: null,
     _isNewFile: null,
-    _undoRow: null,
     _replyToCommentPHID: null,
-    _originalText: null,
+    _originalState: null,
     _snippet: null,
+    _menuItems: null,
+    _documentEngineKey: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -38,6 +39,20 @@ JX.install('DiffInline', {
     _isSynthetic: false,
     _isHidden: false,
 
+    _editRow: null,
+    _undoRow: null,
+    _undoType: null,
+    _undoState: null,
+
+    _draftRequest: null,
+    _skipFocus: false,
+    _menu: null,
+
+    _startOffset: null,
+    _endOffset: null,
+    _isSelected: false,
+    _canSuggestEdit: false,
+
     bindToRow: function(row) {
       this._row = row;
 
@@ -50,13 +65,10 @@ JX.install('DiffInline', {
       var comment = JX.DOM.find(row, 'div', 'differential-inline-comment');
       var data = JX.Stratcom.getData(comment);
 
-      this._id = data.id;
+      this._readInlineState(data);
       this._phid = data.phid;
 
-      // TODO: This is very, very, very, very, very, very, very hacky.
-      var td = comment.parentNode;
-      var th = td.previousSibling;
-      if (th.parentNode.firstChild != th) {
+      if (data.on_right) {
         this._displaySide = 'right';
       } else {
         this._displaySide = 'left';
@@ -64,10 +76,8 @@ JX.install('DiffInline', {
 
       this._number = parseInt(data.number, 10);
       this._length = parseInt(data.length, 10);
-      this._originalText = data.original;
-      this._isNewFile =
-        (this.getDisplaySide() == 'right') ||
-        (data.left != data.right);
+
+      this._isNewFile = data.isNewFile;
 
       this._replyToCommentPHID = data.replyToCommentPHID;
 
@@ -80,8 +90,25 @@ JX.install('DiffInline', {
       this._changesetID = data.changesetID;
       this._isNew = false;
       this._snippet = data.snippet;
+      this._menuItems = data.menuItems;
+      this._documentEngineKey = data.documentEngineKey;
 
-      this.setInvisible(false);
+      this._startOffset = data.startOffset;
+      this._endOffset = data.endOffset;
+
+      this._isEditing = data.isEditing;
+
+      if (this._isEditing) {
+        // NOTE: The "original" shipped down in the DOM may reflect a draft
+        // which we're currently editing. This flow is a little clumsy, but
+        // reasonable until some future change moves away from "send down
+        // the inline, then immediately click edit".
+        this.edit(null, true);
+      } else {
+        this.setInvisible(false);
+      }
+
+      this._startDrafts();
 
       return this;
     },
@@ -96,6 +123,10 @@ JX.install('DiffInline', {
 
     isEditing: function() {
       return this._isEditing;
+    },
+
+    isUndo: function() {
+      return !!this._undoRow;
     },
 
     isDeleted: function() {
@@ -118,6 +149,27 @@ JX.install('DiffInline', {
       return this._isGhost;
     },
 
+    getStartOffset: function() {
+      return this._startOffset;
+    },
+
+    getEndOffset: function() {
+      return this._endOffset;
+    },
+
+    setIsSelected: function(is_selected) {
+      this._isSelected = is_selected;
+
+      if (this._row) {
+        JX.DOM.alterClass(
+          this._row,
+          'inline-comment-selected',
+          this._isSelected);
+      }
+
+      return this;
+    },
+
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
       this._number = parseInt(data.number, 10);
@@ -125,6 +177,18 @@ JX.install('DiffInline', {
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
       this._isNew = true;
+
+      if (data.hasOwnProperty('startOffset')) {
+        this._startOffset = data.startOffset;
+      } else {
+        this._startOffset = null;
+      }
+
+      if (data.hasOwnProperty('endOffset')) {
+        this._endOffset = data.endOffset;
+      } else {
+        this._endOffset = null;
+      }
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -138,6 +202,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -149,6 +214,7 @@ JX.install('DiffInline', {
       this._isNewFile = inline._isNewFile;
       this._changesetID = inline._changesetID;
       this._isNew = true;
+      this._documentEngineKey = inline._documentEngineKey;
 
       this._replyToCommentPHID = inline._phid;
 
@@ -198,6 +264,7 @@ JX.install('DiffInline', {
       parent_row.parentNode.insertBefore(row, target_row);
 
       this.setInvisible(true);
+      this._startDrafts();
 
       return this;
     },
@@ -223,19 +290,11 @@ JX.install('DiffInline', {
     },
 
     canReply: function() {
-      if (!this._hasAction('reply')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('reply');
     },
 
     canEdit: function() {
-      if (!this._hasAction('edit')) {
-        return false;
-      }
-
-      return true;
+      return this._hasMenuAction('edit');
     },
 
     canDone: function() {
@@ -247,20 +306,7 @@ JX.install('DiffInline', {
     },
 
     canCollapse: function() {
-      if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
-        return false;
-      }
-
-      return true;
-    },
-
-    getRawText: function() {
-      return this._originalText;
-    },
-
-    _hasAction: function(action) {
-      var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
-      return (nodes.length > 0);
+      return this._hasMenuAction('collapse');
     },
 
     _newRow: function() {
@@ -277,12 +323,14 @@ JX.install('DiffInline', {
       this._phid = null;
       this._isCollapsed = false;
 
-      this._originalText = null;
+      this._originalState = null;
 
       return row;
     },
 
     setCollapsed: function(collapsed) {
+      this._closeMenu();
+
       this._isCollapsed = collapsed;
 
       var op;
@@ -347,10 +395,15 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    create: function(text) {
+    create: function(content_state) {
+      var changeset = this.getChangeset();
+      if (!this._documentEngineKey) {
+        this._documentEngineKey = changeset.getResponseDocumentEngineKey();
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oncreateresponse);
-      var data = this._newRequestData('new', text);
+      var data = this._newRequestData('new', content_state);
 
       this.setLoading(true);
 
@@ -359,15 +412,53 @@ JX.install('DiffInline', {
         .send();
     },
 
-    reply: function(text) {
-      var changeset = this.getChangeset();
-      return changeset.newInlineReply(this, text);
+    _getContentState: function() {
+      var state;
+
+      if (this._editRow) {
+        state = this._readFormState(this._editRow);
+      } else {
+        state = this._originalState;
+      }
+
+      return state;
     },
 
-    edit: function(text) {
+    reply: function(with_quote) {
+      this._closeMenu();
+
+      var content_state = this._newContentState();
+      if (with_quote) {
+        var text = this._getContentState().text;
+        text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
+        content_state.text = text;
+      }
+
+      var changeset = this.getChangeset();
+      return changeset.newInlineReply(this, content_state);
+    },
+
+    edit: function(content_state, skip_focus) {
+      this._closeMenu();
+
+      this._skipFocus = !!skip_focus;
+
+      // If you edit an inline ("A"), modify the text ("AB"), cancel, and then
+      // edit it again: discard the undo state ("AB"). Otherwise we end up
+      // with an open editor and an active "Undo" link, which is weird.
+
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+
+        this._undoType = null;
+        this._undoText = null;
+      }
+
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
-      var data = this._newRequestData('edit', text || null);
+
+      var data = this._newRequestData('edit', content_state);
 
       this.setLoading(true);
 
@@ -456,24 +547,46 @@ JX.install('DiffInline', {
       return this;
     },
 
-    _newRequestData: function(operation, text) {
-      return {
+    _newRequestData: function(operation, content_state) {
+      var data = {
         op: operation,
-        id: this._id,
-        on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
-        renderer: this.getChangeset().getRenderer(),
-        number: this.getLineNumber(),
-        length: this.getLineLength(),
         is_new: this.isNewFile(),
-        changesetID: this.getChangesetID(),
-        replyToCommentPHID: this.getReplyToCommentPHID() || '',
-        text: text || ''
+        on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
+        renderer: this.getChangeset().getRendererKey()
       };
+
+      if (operation === 'new') {
+        var create_data = {
+          changesetID: this.getChangesetID(),
+          documentEngineKey: this._documentEngineKey,
+          replyToCommentPHID: this.getReplyToCommentPHID(),
+          startOffset: this._startOffset,
+          endOffset: this._endOffset,
+          number: this.getLineNumber(),
+          length: this.getLineLength()
+        };
+
+        JX.copy(data, create_data);
+      } else {
+        var edit_data = {
+          id: this._id
+        };
+
+        JX.copy(data, edit_data);
+      }
+
+      if (content_state) {
+        data.hasContentState = 1;
+        JX.copy(data, content_state);
+      }
+
+      return data;
     },
 
     _oneditresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
 
       this.setLoading(false);
@@ -481,13 +594,36 @@ JX.install('DiffInline', {
     },
 
     _oncreateresponse: function(response) {
-      var rows = JX.$H(response).getNode();
+      var rows = JX.$H(response.view).getNode();
 
+      this._readInlineState(response.inline);
       this._drawEditRows(rows);
     },
 
+    _readInlineState: function(state) {
+      this._id = state.id;
+      this._originalState = state.contentState;
+      this._canSuggestEdit = state.canSuggestEdit;
+    },
+
     _ondeleteresponse: function() {
-      this._drawUndeleteRows();
+      // If there's an existing "unedit" undo element, remove it.
+      if (this._undoRow) {
+        JX.DOM.remove(this._undoRow);
+        this._undoRow = null;
+      }
+
+      // If there's an existing editor, remove it. This happens when you
+      // delete a comment from the comment preview area. In this case, we
+      // read and preserve the text so "Undo" restores it.
+      var state = null;
+      if (this._editRow) {
+        state = this._readFormState(this._editRow);
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
+
+      this._drawUndeleteRows(state);
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -495,15 +631,21 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _drawUndeleteRows: function() {
+    _drawUndeleteRows: function(content_state) {
+      this._undoType = 'undelete';
+      this._undoState = content_state || null;
+
       return this._drawUndoRows('undelete', this._row);
     },
 
-    _drawUneditRows: function(text) {
-      return this._drawUndoRows('unedit', null, text);
+    _drawUneditRows: function(content_state) {
+      this._undoType = 'unedit';
+      this._undoState = content_state;
+
+      return this._drawUndoRows('unedit', null);
     },
 
-    _drawUndoRows: function(mode, cursor, text) {
+    _drawUndoRows: function(mode, cursor) {
       var templates = this.getChangeset().getUndoTemplates();
 
       var template;
@@ -514,7 +656,7 @@ JX.install('DiffInline', {
       }
       template = JX.$H(template).getNode();
 
-      this._undoRow = this._drawRows(template, cursor, mode, text);
+      this._undoRow = this._drawRows(template, cursor, mode);
     },
 
     _drawContentRows: function(rows) {
@@ -523,16 +665,20 @@ JX.install('DiffInline', {
 
     _drawEditRows: function(rows) {
       this.setEditing(true);
-      return this._drawRows(rows, null, 'edit');
+      this._editRow = this._drawRows(rows, null, 'edit');
+
+      this._drawSuggestionState(this._editRow);
+      this.setHasSuggestion(this._originalState.hasSuggestion);
     },
 
-    _drawRows: function(rows, cursor, type, text) {
+    _drawRows: function(rows, cursor, type) {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
-      var first_meta;
       var row = first_row;
       var anchor = cursor || this._row;
       cursor = cursor || this._row.nextSibling;
 
+
+      var result_row;
       var next_row;
       while (row) {
         // Grab this first, since it's going to change once we insert the row
@@ -546,55 +692,28 @@ JX.install('DiffInline', {
         anchor.parentNode.insertBefore(row, cursor);
         cursor = row;
 
-        var row_meta = {
-          node: row,
-          type: type,
-          text: text || null,
-          listeners: []
-        };
-
-        if (!first_meta) {
-          first_meta = row_meta;
+        if (!result_row) {
+          result_row = row;
         }
 
-        if (type == 'edit') {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              ['submit', 'didSyntheticSubmit'],
-              'inline-edit-form',
-              JX.bind(this, this._onsubmit, row_meta)));
+        if (!this._skipFocus) {
+          // If the row has a textarea, focus it. This allows the user to start
+          // typing a comment immediately after a "new", "edit", or "reply"
+          // action.
 
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'inline-edit-cancel',
-              JX.bind(this, this._oncancel, row_meta)));
-        } else if (type == 'content') {
-          // No special listeners for these rows.
-        } else {
-          row_meta.listeners.push(
-            JX.DOM.listen(
-              row,
-              'click',
-              'differential-inline-comment-undo',
-              JX.bind(this, this._onundo, row_meta)));
-        }
+          // (When simulating an "edit" on page load, we don't do this.)
 
-        // If the row has a textarea, focus it. This allows the user to start
-        // typing a comment immediately after a "new", "edit", or "reply"
-        // action.
-        var textareas = JX.DOM.scry(
-          row,
-          'textarea',
-          'differential-inline-comment-edit-textarea');
-        if (textareas.length) {
-          var area = textareas[0];
-          area.focus();
+          var textareas = JX.DOM.scry(
+            row,
+            'textarea',
+            'inline-content-text');
+          if (textareas.length) {
+            var area = textareas[0];
+            area.focus();
 
-          var length = area.value.length;
-          JX.TextAreaUtils.setSelectionRange(area, length, length);
+            var length = area.value.length;
+            JX.TextAreaUtils.setSelectionRange(area, length, length);
+          }
         }
 
         row = next_row;
@@ -602,27 +721,112 @@ JX.install('DiffInline', {
 
       JX.Stratcom.invoke('resize');
 
-      return first_meta;
+      return result_row;
     },
 
-    _onsubmit: function(row, e) {
+    _drawSuggestionState: function(row) {
+      if (this._canSuggestEdit) {
+        var button = this._getSuggestionButton();
+        var node = button.getNode();
+
+        // As a side effect of form submission, the button may become
+        // visually disabled. Re-enable it. This is a bit hacky.
+        JX.DOM.alterClass(node, 'disabled', false);
+        node.disabled = false;
+
+        var container = JX.DOM.find(row, 'div', 'inline-edit-buttons');
+        container.appendChild(node);
+      }
+    },
+
+    _getSuggestionButton: function() {
+      if (!this._suggestionButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-pencil-square-o')
+          .setColor('grey');
+
+        var node = button.getNode();
+        JX.DOM.alterClass(node, 'inline-button-left', true);
+
+        var onclick = JX.bind(this, this._onSuggestEdit);
+        JX.DOM.listen(node, 'click', null, onclick);
+
+        this._suggestionButton = button;
+      }
+
+      return this._suggestionButton;
+    },
+
+    _onSuggestEdit: function(e) {
       e.kill();
 
-      var handler = JX.bind(this, this._onsubmitresponse, row);
+      this.setHasSuggestion(!this.getHasSuggestion());
+
+      // The first time the user actually clicks the button and enables
+      // suggestions for a given editor state, fill the input with the
+      // underlying text if there isn't any text yet.
+      if (this.getHasSuggestion()) {
+        if (this._editRow) {
+          var node = this._getSuggestionNode(this._editRow);
+          if (node) {
+            if (!node.value.length) {
+              var data = JX.Stratcom.getData(node);
+              if (!data.hasSetDefault) {
+                data.hasSetDefault = true;
+                node.value = data.defaultText;
+                node.rows = Math.max(3, node.value.split('\n').length);
+              }
+            }
+          }
+        }
+      }
+
+      // Save the "hasSuggestion" part of the content state.
+      this.triggerDraft();
+    },
+
+    setHasSuggestion: function(has_suggestion) {
+      this._hasSuggestion = has_suggestion;
+
+      var button = this._getSuggestionButton();
+      var pht = this.getChangeset().getChangesetList().getTranslations();
+      if (has_suggestion) {
+        button
+          .setIcon('fa-times')
+          .setText(pht('Discard Edit'));
+      } else {
+        button
+          .setIcon('fa-plus')
+          .setText(pht('Suggest Edit'));
+      }
+
+      if (this._editRow) {
+        JX.DOM.alterClass(this._editRow, 'has-suggestion', has_suggestion);
+      }
+    },
+
+    getHasSuggestion: function() {
+      return this._hasSuggestion;
+    },
+
+    save: function() {
+      var handler = JX.bind(this, this._onsubmitresponse);
 
       this.setLoading(true);
 
-      JX.Workflow.newFromForm(e.getTarget())
-        .setHandler(handler)
-        .start();
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('save', this._getContentState());
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
     },
 
-    _onundo: function(row, e) {
-      e.kill();
+    undo: function() {
+      JX.DOM.remove(this._undoRow);
+      this._undoRow = null;
 
-      this._removeRow(row);
-
-      if (row.type == 'undelete') {
+      if (this._undoType === 'undelete') {
         var uri = this._getInlineURI();
         var data = this._newRequestData('undelete');
         var handler = JX.bind(this, this._onundelete);
@@ -635,12 +839,8 @@ JX.install('DiffInline', {
           .send();
       }
 
-      if (row.type == 'unedit') {
-        if (this.getID()) {
-          this.edit(row.text);
-        } else {
-          this.create(row.text);
-        }
+      if (this._undoState !== null) {
+        this.edit(this._undoState);
       }
     },
 
@@ -649,38 +849,95 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _oncancel: function(row, e) {
-      e.kill();
+    cancel: function() {
+      var state = this._readFormState(this._editRow);
 
-      var text = this._readText(row.node);
-      if (text && text.length && (text != this._originalText)) {
-        this._drawUneditRows(text);
+      JX.DOM.remove(this._editRow);
+      this._editRow = null;
+
+      var is_empty = this._isVoidContentState(state);
+      var is_same = this._isSameContentState(state, this._originalState);
+      if (!is_empty && !is_same) {
+        this._drawUneditRows(state);
       }
 
-      this._removeRow(row);
-      this.setEditing(false);
+      // If this was an empty box and we typed some text and then hit cancel,
+      // don't show the empty concrete inline.
+      if (this._isVoidContentState(this._originalState)) {
+        this.setInvisible(true);
+      } else {
+        this.setInvisible(false);
+      }
 
-      this.setInvisible(false);
+      // If you "undo" to restore text ("AB") and then "Cancel", we put you
+      // back in the original text state ("A"). We also send the original
+      // text ("A") to the server as the current persistent state.
+
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('cancel', this._originalState);
+      var handler = JX.bind(this, this._onCancelResponse);
+
+      this.setLoading(true);
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
 
       this._didUpdate(true);
     },
 
-    _readText: function(row) {
-      var textarea;
+    _onCancelResponse: function(response) {
+      this.setEditing(false);
+      this.setLoading(false);
+
+      // If the comment was empty when we started editing it (there's no
+      // original text) and empty when we finished editing it (there's no
+      // undo row), just delete the comment.
+      if (this._isVoidContentState(this._originalState) && !this.isUndo()) {
+        this.setDeleted(true);
+
+        JX.DOM.remove(this._row);
+        this._row = null;
+
+        this._didUpdate();
+      }
+    },
+
+    _readFormState: function(row) {
+      var state = this._newContentState();
+
+      var node;
+
       try {
-        textarea = JX.DOM.find(
-          row,
-          'textarea',
-          'differential-inline-comment-edit-textarea');
+        node = JX.DOM.find(row, 'textarea', 'inline-content-text');
+        state.text = node.value;
+      } catch (ex) {
+        // Ignore.
+      }
+
+      node = this._getSuggestionNode(row);
+      if (node) {
+        state.suggestionText = node.value;
+      }
+
+      state.hasSuggestion = this.getHasSuggestion();
+
+      return state;
+    },
+
+    _getSuggestionNode: function(row) {
+      try {
+        return JX.DOM.find(row, 'textarea', 'inline-content-suggestion');
       } catch (ex) {
         return null;
       }
-
-      return textarea.value;
     },
 
-    _onsubmitresponse: function(row, response) {
-      this._removeRow(row);
+    _onsubmitresponse: function(response) {
+      if (this._editRow) {
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+      }
 
       this.setLoading(false);
       this.setInvisible(false);
@@ -691,8 +948,8 @@ JX.install('DiffInline', {
 
     _onupdate: function(response) {
       var new_row;
-      if (response.markup) {
-        new_row = this._drawContentRows(JX.$H(response.markup).getNode()).node;
+      if (response.view) {
+        new_row = this._drawContentRows(JX.$H(response.view).getNode());
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a
@@ -741,17 +998,183 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
     },
 
-    _removeRow: function(row) {
-      JX.DOM.remove(row.node);
-      for (var ii = 0; ii < row.listeners.length; ii++) {
-        row.listeners[ii].remove();
-      }
-    },
-
     _getInlineURI: function() {
       var changeset = this.getChangeset();
       var list = changeset.getChangesetList();
       return list.getInlineURI();
+    },
+
+    _startDrafts: function() {
+      if (this._draftRequest) {
+        return;
+      }
+
+      var onresponse = JX.bind(this, this._onDraftResponse);
+      var draft = JX.bind(this, this._getDraftState);
+
+      var uri = this._getInlineURI();
+      var request = new JX.PhabricatorShapedRequest(uri, onresponse, draft);
+
+      // The main transaction code uses a 500ms delay on desktop and a
+      // 10s delay on mobile. Perhaps this should be standardized.
+      request.setRateLimit(2000);
+
+      this._draftRequest = request;
+
+      request.start();
+    },
+
+    _onDraftResponse: function() {
+      // For now, do nothing.
+    },
+
+    _getDraftState: function() {
+      if (this.isDeleted()) {
+        return null;
+      }
+
+      if (!this.isEditing()) {
+        return null;
+      }
+
+      var state = this._readFormState(this._editRow);
+      if (this._isVoidContentState(state)) {
+        return null;
+      }
+
+      var draft_data = {
+        op: 'draft',
+        id: this.getID(),
+      };
+
+      JX.copy(draft_data, state);
+
+      return draft_data;
+    },
+
+    triggerDraft: function() {
+      if (this._draftRequest) {
+        this._draftRequest.trigger();
+      }
+    },
+
+    activateMenu: function(button, e) {
+      // If we already have a menu for this button, let the menu handle the
+      // event.
+      var data = JX.Stratcom.getData(button);
+      if (data.menu) {
+        return;
+      }
+
+      e.prevent();
+
+      var menu = new JX.PHUIXDropdownMenu(button)
+        .setWidth(240);
+
+      var list = new JX.PHUIXActionListView();
+      var items = this._newMenuItems(menu);
+      for (var ii = 0; ii < items.length; ii++) {
+        list.addItem(items[ii]);
+      }
+
+      menu.setContent(list.getNode());
+
+      data.menu = menu;
+      this._menu = menu;
+
+      menu.listen('open', JX.bind(this, function() {
+        var changeset_list = this.getChangeset().getChangesetList();
+        changeset_list.selectInline(this, true);
+      }));
+
+      menu.open();
+    },
+
+    _newMenuItems: function(menu) {
+      var items = [];
+
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+
+        var onmenu = JX.bind(this, this._onMenuItem, menu, spec.action, spec);
+
+        var item = new JX.PHUIXActionView()
+          .setIcon(spec.icon)
+          .setName(spec.label)
+          .setHandler(onmenu);
+
+        if (spec.key) {
+          item.setKeyCommand(spec.key);
+        }
+
+        items.push(item);
+      }
+
+      return items;
+    },
+
+    _onMenuItem: function(menu, action, spec, e) {
+      e.prevent();
+      menu.close();
+
+      switch (action) {
+        case 'reply':
+          this.reply();
+          break;
+        case 'quote':
+          this.reply(true);
+          break;
+        case 'collapse':
+          this.setCollapsed(true);
+          break;
+        case 'delete':
+          this.delete();
+          break;
+        case 'edit':
+          this.edit();
+          break;
+        case 'raw':
+          new JX.Workflow(spec.uri)
+            .start();
+          break;
+      }
+
+    },
+
+    _hasMenuAction: function(action) {
+      for (var ii = 0; ii < this._menuItems.length; ii++) {
+        var spec = this._menuItems[ii];
+        if (spec.action === action) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    _closeMenu: function() {
+      if (this._menu) {
+        this._menu.close();
+      }
+    },
+
+    _newContentState: function() {
+      return {
+        text: '',
+        suggestionText: '',
+        hasSuggestion: false
+      };
+    },
+
+    _isVoidContentState: function(state) {
+      return (!state.text.length && !state.suggestionText.length);
+    },
+
+    _isSameContentState: function(u, v) {
+      return (
+        ((u === null) === (v === null)) &&
+        (u.text === v.text) &&
+        (u.suggestionText === v.suggestionText) &&
+        (u.hasSuggestion === v.hasSuggestion));
     }
   }
 

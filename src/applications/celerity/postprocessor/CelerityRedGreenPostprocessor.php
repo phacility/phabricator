@@ -17,6 +17,9 @@ final class CelerityRedGreenPostprocessor
       'new-bright' => 'rgba(152, 207, 235, .35)',
       'old-background' => 'rgba(250, 212, 175, .3)',
       'old-bright' => 'rgba(250, 212, 175, .55)',
+
+      'delete-color' => '#e67e22',
+      'create-color' => '#2980b9',
     );
   }
 

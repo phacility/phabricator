@@ -110,60 +110,64 @@ final class PhabricatorPasteQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'paste.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'paste.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'authorPHID IN (%Ls)',
+        'paste.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->parentPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'parentPHID IN (%Ls)',
+        'paste.parentPHID IN (%Ls)',
         $this->parentPHIDs);
     }
 
     if ($this->languages !== null) {
       $where[] = qsprintf(
         $conn,
-        'language IN (%Ls)',
+        'paste.language IN (%Ls)',
         $this->languages);
     }
 
     if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated >= %d',
+        'paste.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated <= %d',
+        'paste.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'paste.status IN (%Ls)',
         $this->statuses);
     }
 
     return $where;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'paste';
   }
 
   private function getContentCacheKey(PhabricatorPaste $paste) {

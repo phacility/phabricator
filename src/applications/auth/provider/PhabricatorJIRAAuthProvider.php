@@ -335,7 +335,7 @@ final class PhabricatorJIRAAuthProvider
   public function getDoorkeeperURIRef(PhutilURI $uri) {
     $uri_string = phutil_string_cast($uri);
 
-    $pattern = '((https?://\S+?)/browse/([A-Z]+-[1-9]\d*))';
+    $pattern = '((https?://\S+?)/browse/([A-Z][A-Z0-9]*-[1-9]\d*))';
     $matches = null;
     if (!preg_match($pattern, $uri_string, $matches)) {
       return null;

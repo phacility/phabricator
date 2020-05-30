@@ -3,6 +3,14 @@
 final class DiffusionInlineCommentController
   extends PhabricatorInlineCommentController {
 
+  protected function newInlineCommentQuery() {
+    return new DiffusionDiffInlineCommentQuery();
+  }
+
+  protected function newContainerObject() {
+    return $this->loadCommit();
+  }
+
   private function getCommitPHID() {
     return $this->getRequest()->getURIData('phid');
   }
@@ -41,28 +49,10 @@ final class DiffusionInlineCommentController
       ->setPathID($path_id);
   }
 
-  protected function loadComment($id) {
-    return PhabricatorAuditInlineComment::loadID($id);
-  }
-
-  protected function loadCommentByPHID($phid) {
-    return PhabricatorAuditInlineComment::loadPHID($phid);
-  }
-
-  protected function loadCommentForEdit($id) {
-    $viewer = $this->getViewer();
-
-    $inline = $this->loadComment($id);
-    if (!$this->canEditInlineComment($viewer, $inline)) {
-      throw new Exception(pht('That comment is not editable!'));
-    }
-    return $inline;
-  }
-
   protected function loadCommentForDone($id) {
     $viewer = $this->getViewer();
 
-    $inline = $this->loadComment($id);
+    $inline = $this->loadCommentByID($id);
     if (!$inline) {
       throw new Exception(pht('Failed to load comment "%d".', $id));
     }
@@ -95,7 +85,7 @@ final class DiffusionInlineCommentController
     return $inline;
   }
 
-  private function canEditInlineComment(
+  protected function canEditInlineComment(
     PhabricatorUser $viewer,
     PhabricatorAuditInlineComment $inline) {
 
@@ -105,7 +95,7 @@ final class DiffusionInlineCommentController
     }
 
     // Saved comments may not be edited.
-    if ($inline->getAuditCommentID()) {
+    if ($inline->getTransactionPHID()) {
       return false;
     }
 
@@ -117,21 +107,8 @@ final class DiffusionInlineCommentController
     return true;
   }
 
-  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
-    $inline->setIsDeleted(1)->save();
-  }
-
-  protected function undeleteComment(
-    PhabricatorInlineCommentInterface $inline) {
-    $inline->setIsDeleted(0)->save();
-  }
-
-  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
-    return $inline->save();
-  }
-
   protected function loadObjectOwnerPHID(
-    PhabricatorInlineCommentInterface $inline) {
+    PhabricatorInlineComment $inline) {
     return $this->loadCommit()->getAuthorPHID();
   }
 

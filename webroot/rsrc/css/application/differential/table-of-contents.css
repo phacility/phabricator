@@ -88,3 +88,44 @@ table.aphront-table-view td.differential-toc-ftype {
   margin: 4px 0;
   border: 1px solid {$thinblueborder};
 }
+
+.diff-toc-path .phui-icon-view {
+  margin-right: 2px;
+  text-align: center;
+  width: 20px;
+  display: inline-block;
+}
+
+table.aphront-table-view-compact td {
+  padding: 3px 8px;
+}
+
+td.diff-toc-path td {
+  padding: 0;
+  color: {$greytext};
+}
+
+.diff-toc-path div.diff-path-component-new {
+  padding: 0 2px;
+  box-shadow: inset 0 -2px {$new-bright};
+  margin: 0 2px;
+}
+
+.diff-toc-path div.diff-path-component-old {
+  padding: 0 2px;
+  box-shadow: inset 0 -2px {$old-bright};
+  margin: 0 2px;
+}
+
+.diff-toc-path a {
+  color: {$darkbluetext};
+}
+
+td.diff-toc-path .diff-path-old td {
+  color: {$lightgreytext};
+}
+
+.diff-toc-low-importance-row,
+.alt-diff-toc-low-importance-row {
+  opacity: 0.5;
+}

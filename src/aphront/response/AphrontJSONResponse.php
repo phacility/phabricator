@@ -31,10 +31,10 @@ final class AphrontJSONResponse extends AphrontResponse {
   }
 
   public function getHeaders() {
-    $headers = array(
-      array('Content-Type', 'application/json'),
-    );
-    $headers = array_merge(parent::getHeaders(), $headers);
+    $headers = parent::getHeaders();
+
+    $headers[] = array('Content-Type', 'application/json');
+
     return $headers;
   }
 

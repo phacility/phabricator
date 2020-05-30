@@ -101,6 +101,23 @@ abstract class PhabricatorApplicationTransactionComment
     return ($this->oldComment !== self::ATTACHABLE);
   }
 
+  public function getRawRemarkupURI() {
+    return urisprintf(
+      '/transactions/raw/%s/',
+      $this->getTransactionPHID());
+  }
+
+  public function isEmptyComment() {
+    $content = $this->getContent();
+
+    // The comment is empty if there's no content, or if the content only has
+    // whitespace.
+    if (!strlen(trim($content))) {
+      return true;
+    }
+
+    return false;
+  }
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

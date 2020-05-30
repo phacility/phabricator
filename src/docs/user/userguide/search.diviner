@@ -140,6 +140,7 @@ some special syntax. These features are supported:
   - Quoted terms with `"platypus attorney"`.
   - Matching entire fields with `=platypus`.
   - Combining features with `title:~"platypus attorney"`.
+  - Testing a field for presence (`title:~`) or absence (`title:-`).
 
 See below for more detail.
 
@@ -169,7 +170,7 @@ or `title:"platypus attorney"`. These scopes are also supported:
   - `title:...` searches titles.
   - `body:...` searches bodies (descriptions or summaries).
   - `core:...` searches titles and bodies, but not comments.
-  - `comments:...` searches only comments.
+  - `comment:...` searches only comments.
 
 **Filtering Matches**: You can remove documents which match certain terms from
 the result set with `-`. For example: `platypus -mammal`. Documents which match
@@ -182,3 +183,11 @@ find documents with longer titles, like "Not a Warp Drive". The `=` operator
 requires that the entire field match the query exactly, so //only// documents
 exactly titled "Warp Drive" will be matched by the query (but note that the
 query is still case insensitive).
+
+**Present and Absent Fields**: To find objects with //any// value in a
+particular field, use `field:~` as a search term (with no additional text). For
+example, searching Maniphest for `comment:~` will find tasks with any comments.
+
+If you want to find objects that are //missing// a particular field, use
+`field:-` with no additional argument. For example, searching Maniphest for
+`body:-` will find tasks with no description.

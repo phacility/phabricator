@@ -19,9 +19,9 @@ final class PHUICurtainView extends AphrontTagView {
     $panel = new PHUICurtainPanelView();
     $this->addPanel($panel);
 
-    // By default, application panels go at the bottom of the curtain, below
+    // By default, application panels go at the top of the curtain, above
     // extension panels.
-    $panel->setOrder(100000);
+    $panel->setOrder(1000);
 
     return $panel;
   }

@@ -16,6 +16,9 @@ foreach (new LiskMigrationIterator($table) as $doc) {
     continue;
   }
 
+  $new_view_policy = $default_view_policy;
+  $new_edit_policy = $default_edit_policy;
+
   // If this was previously a magical project wiki page (under projects/, but
   // not projects/ itself) we need to apply the project policies. Otherwise,
   // apply the default policies.
@@ -35,26 +38,24 @@ foreach (new LiskMigrationIterator($table) as $doc) {
       ->executeOne();
 
     if ($project) {
-
       $view_policy = nonempty($project->getViewPolicy(), $default_view_policy);
       $edit_policy = nonempty($project->getEditPolicy(), $default_edit_policy);
 
-      $project_name = $project->getName();
-      echo pht(
-        "Migrating document %d to project policy %s...\n",
-        $id,
-        $project_name);
-      $doc->setViewPolicy($view_policy);
-      $doc->setEditPolicy($edit_policy);
-      $doc->save();
-      continue;
+      $new_view_policy = $view_policy;
+      $new_edit_policy = $edit_policy;
     }
   }
 
-  echo pht('Migrating document %d to default install policy...', $id)."\n";
-  $doc->setViewPolicy($default_view_policy);
-  $doc->setEditPolicy($default_edit_policy);
-  $doc->save();
+  echo pht('Migrating document %d to new policy...', $id)."\n";
+
+  queryfx(
+    $conn_w,
+    'UPDATE %R SET viewPolicy = %s, editPolicy = %s
+      WHERE id = %d',
+    $table,
+    $new_view_policy,
+    $new_edit_policy,
+    $id);
 }
 
 echo pht('Done.')."\n";

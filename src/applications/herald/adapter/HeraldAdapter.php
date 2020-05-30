@@ -243,6 +243,12 @@ abstract class HeraldAdapter extends Phobject {
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
 
+  public function getAdapterContentIcon() {
+    $application_class = $this->getAdapterApplicationClass();
+    $application = newv($application_class, array());
+    return $application->getIcon();
+  }
+
   /**
    * Return a new characteristic object for this adapter.
    *

@@ -80,7 +80,7 @@ final class PhabricatorAuthSSHPrivateKey extends Phobject {
     if (!$err) {
       if ($passphrase) {
         execx(
-          'ssh-keygen -y -P %P -N %s -f %R',
+          'ssh-keygen -p -P %P -N %s -f %R',
           $passphrase,
           '',
           $tmp);

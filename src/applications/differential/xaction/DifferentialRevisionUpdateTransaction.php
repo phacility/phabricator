@@ -100,6 +100,14 @@ final class DifferentialRevisionUpdateTransaction
         HarbormasterMessageType::BUILDABLE_CONTAINER,
         true);
     }
+
+    // See T13455. If users have set view properites on a diff and the diff
+    // is then attached to a revision, attempt to copy their view preferences
+    // to the revision.
+
+    DifferentialViewState::copyViewStatesToObject(
+      $diff->getPHID(),
+      $object->getPHID());
   }
 
   public function getColor() {

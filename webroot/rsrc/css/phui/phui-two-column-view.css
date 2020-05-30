@@ -2,6 +2,11 @@
  * @provides phui-two-column-view-css
  */
 
+.phui-launcher-view {
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
 .phui-two-column-fixed {
   max-width: 1140px;
   margin: 0 auto;

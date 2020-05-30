@@ -66,6 +66,8 @@ abstract class PhutilRemarkupQuotedBlockRule
     foreach ($text as $key => $line) {
       if (!strlen(trim($line))) {
         unset($text[$key]);
+      } else {
+        break;
       }
     }
 

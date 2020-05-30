@@ -39,10 +39,16 @@ final class PhabricatorOwnersPackageDatasource
       $name = $package->getName();
       $monogram = $package->getMonogram();
 
-      $results[] = id(new PhabricatorTypeaheadResult())
+      $result = id(new PhabricatorTypeaheadResult())
         ->setName("{$monogram}: {$name}")
         ->setURI($package->getURI())
         ->setPHID($package->getPHID());
+
+      if ($package->isArchived()) {
+        $result->setClosed(pht('Archived'));
+      }
+
+      $results[] = $result;
     }
 
     return $this->filterResultsAgainstTokens($results);

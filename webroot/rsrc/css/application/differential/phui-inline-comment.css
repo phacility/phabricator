@@ -25,8 +25,6 @@
 
 .differential-inline-comment,
 .differential-inline-comment-edit {
-  background: {$page.content};
-  border: 1px solid {$gentle.highlight.border};
   font: {$basefont};
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -35,6 +33,8 @@
   white-space: normal;
   border-radius: 3px;
   margin: 8px 12px;
+  background: {$page.content};
+  border: 1px solid {$blueborder};
 }
 
 .device .differential-inline-comment {
@@ -48,9 +48,10 @@
 .differential-inline-comment-head {
   font-weight:  bold;
   color: {$darkbluetext};
-  border-bottom: 1px solid {$gentle.highlight.border};
   padding: 4px 5px 4px 8px;
-  background-color: {$gentle.highlight};
+
+  background: {$lightbluebackground};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .differential-inline-comment-content {
@@ -261,21 +262,14 @@
     color: {$sky};
 }
 
-
-/* - Inline Is Done -----------------------------------------------------------
-
-  Is Done for Diff Author = grey, for Diff Viewer = yellow.
-
-*/
-
 .differential-inline-comment.inline-is-done {
-  border-color: {$lightgreyborder};
+  border-color: {$thingreyborder};
 }
 
 .differential-inline-comment.inline-is-done
   .differential-inline-comment-head {
     background-color: {$lightgreybackground};
-    border-bottom-color: {$lightgreyborder};
+    border-bottom-color: {$thingreyborder};
 }
 
 .differential-inline-comment.inline-is-done .differential-inline-comment-head
@@ -426,4 +420,88 @@
 
 .differential-inline-comment-synthetic .inline-button-divider {
   border: none;
+}
+
+.inline-comment-element .differential-inline-comment-head {
+  cursor: pointer;
+}
+
+.inline-comment-selected .inline-comment-element {
+  border-color: {$yellow};
+  background: {$gentle.highlight.background};
+}
+
+.inline-comment-selected .inline-comment-element
+  .differential-inline-comment-head {
+  background: {$lightyellow};
+  border-color: {$yellow};
+}
+
+.inline-suggestion {
+  display: none;
+  margin: 0 -8px;
+}
+
+.has-suggestion .inline-suggestion {
+  display: block;
+}
+
+.differential-inline-comment-edit-buttons button.inline-button-left {
+  float: left;
+  margin: 0 6px 0 0;
+}
+
+.inline-suggestion-table {
+  table-layout: fixed;
+  width: 100%;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  background: {$greybackground};
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: {$lightgreyborder};
+}
+
+textarea.inline-suggestion-input {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.inline-suggestion-line-cell {
+  text-align: right;
+  background: {$darkgreybackground};
+  width: 36px;
+  color: {$greytext};
+  border-right: 1px solid {$lightgreyborder};
+}
+
+.inline-suggestion-table td.inline-suggestion-input-cell {
+  padding: 8px 4px;
+}
+
+.inline-suggestion-table td.inline-suggestion-text-cell {
+  /* This is attempting to align the text in the textarea with the text on
+     the surrounding context lines. */
+  padding: 0 8px 0 11px;
+}
+
+.inline-suggestion-view {
+  padding: 4px 0;
+  white-space: pre-wrap;
+  background: {$lightgreybackground};
+  margin: 0 -12px 8px;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: {$lightgreyborder};
+}
+
+.diff-1up-simple-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.diff-1up-simple-table > tbody > tr > td {
+  padding-left: 12px;
+  padding-right: 12px;
 }

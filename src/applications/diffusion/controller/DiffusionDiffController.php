@@ -60,22 +60,33 @@ final class DiffusionDiffController extends DiffusionController {
       return new Aphront404Response();
     }
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setUser($viewer);
-    $parser->setChangeset($changeset);
+    $commit = $drequest->loadCommit();
+
+    $viewstate_engine = id(new PhabricatorChangesetViewStateEngine())
+      ->setViewer($viewer)
+      ->setObjectPHID($commit->getPHID())
+      ->setChangeset($changeset);
+
+    $viewstate = $viewstate_engine->newViewStateFromRequest($request);
+
+    if ($viewstate->getDiscardResponse()) {
+      return new AphrontAjaxResponse();
+    }
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setChangeset($changeset)
+      ->setViewState($viewstate);
+
     $parser->setRenderingReference($drequest->generateURI(
       array(
         'action' => 'rendering-ref',
       )));
 
-    $parser->readParametersFromRequest($request);
-
     $coverage = $drequest->loadCoverage();
     if ($coverage) {
       $parser->setCoverage($coverage);
     }
-
-    $commit = $drequest->loadCommit();
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();
@@ -88,10 +99,14 @@ final class DiffusionDiffController extends DiffusionController {
       ($viewer->getPHID() == $commit->getAuthorPHID()));
     $parser->setObjectOwnerPHID($commit->getAuthorPHID());
 
-    $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
-      $viewer,
-      $commit->getPHID(),
-      $path_id);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit->getPHID()))
+      ->withPathIDs(array($path_id))
+      ->withPublishedComments(true)
+      ->withPublishableComments(true)
+      ->execute();
+    $inlines = mpull($inlines, 'newInlineCommentObject');
 
     if ($inlines) {
       foreach ($inlines as $inline) {
@@ -109,7 +124,7 @@ final class DiffusionDiffController extends DiffusionController {
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
 
     $engine->process();
@@ -123,8 +138,6 @@ final class DiffusionDiffController extends DiffusionController {
     $parser->setRange($range_s, $range_e);
     $parser->setMask($mask);
 
-    return id(new PhabricatorChangesetResponse())
-      ->setRenderedChangeset($parser->renderChangeset())
-      ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
+    return $parser->newChangesetResponse();
   }
 }

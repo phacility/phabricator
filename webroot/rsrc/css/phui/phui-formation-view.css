@@ -1,0 +1,216 @@
+/**
+ * @provides phui-formation-view-css
+ */
+
+.phui-formation-view {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.phui-formation-view-expander {
+  position: fixed;
+  width: 24px;
+  height: 36px;
+  top: 64px;
+  border-style: solid;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  border-color: {$lightgreyborder};
+  background: {$lightgreybackground};
+  z-index: 4;
+
+  display: none;
+}
+
+.device-desktop .phui-formation-view-expander {
+  display: block;
+}
+
+.phui-formation-desktop-only {
+  display: none;
+}
+
+.device-desktop .phui-formation-desktop-only {
+  display: table-cell;
+}
+
+.phui-formation-view-expander-left {
+  border-radius: 0 12px 12px 0;
+  border-width: 1px 1px 1px 0;
+  cursor: e-resize;
+}
+
+.phui-formation-view-expander-right {
+  border-radius: 12px 0 0 12px;
+  border-width: 1px 0 1px 1px;
+  cursor: w-resize;
+}
+
+.phui-formation-view-expander-icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 9px;
+  left: 3px;
+  text-align: center;
+}
+
+.device-desktop .phui-formation-view-expander:hover {
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+  background: {$darkgreybackground};
+  transition: 0.1s;
+}
+
+.device-desktop .phui-formation-view-expander:hover
+  .phui-icon-view {
+  color: {$bluetext};
+  transition: 0.1s;
+}
+
+.phui-flank-header {
+  padding: 8px;
+  background: {$bluebackground};
+  border-bottom: 1px solid {$lightgreyborder};
+}
+
+.phui-flank-header-text {
+  color: {$darkgreytext};
+  font-weight: bold;
+}
+
+.phui-flank-header-hide {
+  font-size: {$normalfontsize};
+  position: absolute;
+  display: inline-block;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  border: 1px solid {$lightgreyborder};
+  border-radius: 4px;
+  line-height: 20px;
+}
+
+.phui-flank-header-hide-left {
+  cursor: w-resize;
+}
+
+
+.device-desktop .phui-flank-header-hide:hover {
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05);
+  background: {$darkgreybackground};
+  transition: 0.1s;
+}
+
+.device-desktop .phui-flank-header-hide:hover
+  .phui-icon-view {
+  color: {$bluetext};
+  transition: 0.1s;
+}
+
+.phui-formation-resizer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+
+  cursor: col-resize;
+  background: #f5f5f5;
+  border-style: solid;
+  border-width: 0 1px 0 1px;
+  border-color: #fff #999c9e #fff #999c9e;
+  box-sizing: border-box;
+
+  box-shadow: inset -1px 0px 1px rgba({$alphablack}, 0.15);
+
+  background-image: url(/rsrc/image/divot.png);
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: none;
+  z-index: 4;
+}
+
+.device-desktop .phui-formation-resizer {
+  display: block;
+}
+
+.phui-flank-view-fixed {
+  position: fixed;
+  top: {$menu.main.height};
+  bottom: 0;
+  overflow: hidden;
+  background: {$lightgreybackground};
+  z-index: 4;
+}
+
+.phui-flank-view-fixed .phui-flank-view-body {
+  overflow: hidden auto;
+}
+
+.device-desktop .phui-flank-view-fixed
+  .phui-flank-view-body::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.device-desktop .phui-flank-view-fixed
+  .phui-flank-view-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
+
+.phui-flank-view-fixed .phui-flank-view-tail {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.phui-flank-view .phui-list-view {
+  margin: 4px;
+}
+
+.phui-flank-view .phui-list-item-view {
+  height: 20px;
+  padding: 4px 0;
+}
+
+.phui-flank-view .phui-list-item-view .phui-icon-view {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  margin-right: 4px;
+}
+
+.phui-flank-view .phui-list-item-view .phui-list-item-href {
+  display: block;
+  color: {$darkbluetext};
+  text-decoration: none;
+}
+
+.device-desktop .phui-flank-view .phui-list-item-view:hover {
+  background: {$lightblueborder};
+  transition: 0.1s;
+}
+
+.phui-flank-view .keyboard-shortcut-key {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  height: 18px;
+  width: 18px;
+  line-height: 18px;
+  padding: 0;
+  color: {$lightgreytext};
+}
+
+.phui-flank-view-head .phui-list-view {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  padding-bottom: 4px;
+}
+
+.phui-flank-view-tail .phui-list-view {
+  box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1);
+  padding-top: 4px;
+}

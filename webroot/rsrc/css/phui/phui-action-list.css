@@ -242,3 +242,25 @@
    .phui-icon-view {
   margin-left: 12px;
 }
+
+.phabricator-action-view .keyboard-shortcut-key {
+  display: none;
+}
+
+.phabricator-action-view.has-key-command .keyboard-shortcut-key {
+  display: block;
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  right: 0;
+  top: 2px;
+  line-height: 12px;
+  padding: 4px;
+  color: {$greytext};
+  background: {$bluebackground};
+  border: none;
+}
+
+.phabricator-action-view.has-key-command .phabricator-action-view-item {
+  padding-right: 24px;
+}

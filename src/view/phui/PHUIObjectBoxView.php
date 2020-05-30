@@ -7,7 +7,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $background;
   private $tabGroups = array();
   private $formErrors = null;
-  private $formSaved = false;
   private $infoView;
   private $form;
   private $validationException;
@@ -27,6 +26,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $showHideOpen;
 
   private $propertyLists = array();
+  private $tailButtons = array();
 
   const COLOR_RED = 'red';
   const COLOR_BLUE = 'blue';
@@ -70,19 +70,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $this->formErrors = id(new PHUIInfoView())
         ->setTitle($title)
         ->setErrors($errors);
-    }
-    return $this;
-  }
-
-  public function setFormSaved($saved, $text = null) {
-    if (!$text) {
-      $text = pht('Changes saved.');
-    }
-    if ($saved) {
-      $save = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild($text);
-      $this->formSaved = $save;
     }
     return $this;
   }
@@ -151,6 +138,16 @@ final class PHUIObjectBoxView extends AphrontTagView {
     PhabricatorApplicationTransactionValidationException $ex = null) {
     $this->validationException = $ex;
     return $this;
+  }
+
+  public function newTailButton() {
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setColor(PHUIButtonView::GREY);
+
+    $this->tailButtons[] = $button;
+
+    return $button;
   }
 
   protected function getTagAttributes() {
@@ -313,7 +310,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $header,
       $this->infoView,
       $this->formErrors,
-      $this->formSaved,
       $exception_errors,
       $this->form,
       $this->tabGroups,
@@ -327,6 +323,15 @@ final class PHUIObjectBoxView extends AphrontTagView {
 
     if ($this->objectList) {
       $content[] = $this->objectList;
+    }
+
+    if ($this->tailButtons) {
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-box-tail-buttons',
+        ),
+        $this->tailButtons);
     }
 
     return $content;

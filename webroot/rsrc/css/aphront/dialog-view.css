@@ -192,3 +192,8 @@
 .aphront-dialog-tab-group .aphront-dialog-body {
   padding: 0 12px;
 }
+
+.aphront-dialog-body > hr {
+  background: {$thinblueborder};
+  margin: 24px 12px;
+}

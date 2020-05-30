@@ -28,25 +28,9 @@ final class PHUIDiffInlineCommentPreviewListView
   public function render() {
     $viewer = $this->getViewer();
 
-    $config = array(
-      'pht' => array(
-        'view' => pht('View'),
-      ),
-    );
-
-    Javelin::initBehavior('diff-preview-link', $config);
-
     $inlines = $this->getInlineComments();
     foreach ($inlines as $key => $inline) {
-      // TODO: This is real, real gross.
-
-      if ($inline instanceof DifferentialTransactionComment) {
-        $inlines[$key] = DifferentialInlineComment::newFromModernComment(
-          $inline);
-      } else {
-        $inlines[$key] = PhabricatorAuditInlineComment::newFromModernComment(
-          $inline);
-      }
+      $inlines[$key] = $inline->newInlineCommentObject();
     }
 
     $engine = new PhabricatorMarkupEngine();
@@ -54,7 +38,7 @@ final class PHUIDiffInlineCommentPreviewListView
     foreach ($inlines as $inline) {
       $engine->addObject(
         $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+        PhabricatorInlineComment::MARKUP_FIELD_BODY);
     }
     $engine->process();
 

@@ -53,20 +53,23 @@ final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
         "\n\n".
         'Leaving your authentication provider configuration unlocked '.
         'increases the damage that a compromised administrator account can '.
-        'do to your install, by, for example, changing the authentication '.
-        'provider to a server they control and intercepting usernames and '.
+        'do to your install. For example, an attacker who compromises an '.
+        'administrator account can change authentication providers to point '.
+        'at a server they control and attempt to intercept usernames and '.
         'passwords.'.
         "\n\n".
-        'To prevent this attack, you should configure your authentication '.
-        'providers, and then lock the configuration by doing `%s` '.
-        'from the command line. This will prevent changing the '.
-        'authentication provider config without first doing `%s`.',
-        'bin/auth lock',
-        'bin/auth unlock');
+        'To prevent this attack, you should configure authentication, and '.
+        'then lock the configuration by running "bin/auth lock" from the '.
+        'command line. This will prevent changing the authentication config '.
+        'without first running "bin/auth unlock".');
       $this
         ->newIssue('auth.config-unlocked')
         ->setShortName(pht('Auth Config Unlocked'))
-        ->setName(pht('Authenticaton Provider Configuration Unlocked'))
+        ->setName(pht('Authenticaton Configuration Unlocked'))
+        ->setSummary(
+          pht(
+            'Authentication configuration is currently unlocked. Once you '.
+            'finish configuring authentication, you should lock it.'))
         ->setMessage($message)
         ->addRelatedPhabricatorConfig('auth.lock-config')
         ->addCommand(

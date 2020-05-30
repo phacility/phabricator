@@ -4,6 +4,7 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-history
+ *           javelin-external-editor-link-engine
  */
 
 JX.behavior('phabricator-line-linker', function() {
@@ -169,10 +170,20 @@ JX.behavior('phabricator-line-linker', function() {
       JX.History.replace(uri);
 
       if (editor_link) {
-        if (editor_link.href) {
-          var editdata = JX.Stratcom.getData(editor_link);
-          editor_link.href = editdata.link_template.replace('%25l', o);
-        }
+        var data = JX.Stratcom.getData(editor_link);
+
+        var variables = {
+          l: parseInt(Math.min(o, t), 10),
+        };
+
+        var template = data.template;
+
+        var editor_uri = new JX.ExternalEditorLinkEngine()
+          .setTemplate(template)
+          .setVariables(variables)
+          .newURI();
+
+        editor_link.href = editor_uri;
       }
     });
 
@@ -186,6 +197,18 @@ JX.behavior('phabricator-line-linker', function() {
     } catch (ex) {
       // If we didn't hit an element on the page, just move on.
     }
+  }
+
+  if (editor_link) {
+    // TODO: This should be pht()'d, but this behavior is weird enough to
+    // make that a bit tricky.
+
+    new JX.KeyboardShortcut('\\', 'Open File in External Editor')
+        .setGroup('diff-nav')
+        .setHandler(function() {
+          JX.$U(editor_link.href).go();
+        })
+        .register();
   }
 
 });
