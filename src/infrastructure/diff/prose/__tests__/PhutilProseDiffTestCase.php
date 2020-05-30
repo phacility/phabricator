@@ -30,6 +30,14 @@ final class PhutilProseDiffTestCase
       ),
       pht('Remove Paragraph'));
 
+    $this->assertProseParts(
+       'xxx',
+       "xxxyyy\n.zzz",
+       array(
+         '= xxx',
+         "+ yyy\n.zzz",
+       ),
+       pht('Amend paragraph, and add paragraph starting with punctuation'));
 
     // Without smoothing, the alogorithm identifies that "shark" and "cat"
     // both contain the letter "a" and tries to express this as a very
