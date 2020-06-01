@@ -26,10 +26,6 @@ final class PhutilPygmentsSyntaxHighlighter extends Phobject {
       // process so we hit "pygmentize" directly if we have to SIGKILL this
       // because it explodes.
 
-      $future = new ExecFuture(
-        'exec pygmentize -O encoding=utf-8 -O stripnl=False -f html -l %s',
-        $language);
-
       $scrub = false;
       if ($language == 'php' && strpos($source, '<?') === false) {
         $source = "<?php\n".$source;
