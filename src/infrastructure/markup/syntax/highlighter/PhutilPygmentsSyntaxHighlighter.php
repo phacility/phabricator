@@ -26,22 +26,21 @@ final class PhutilPygmentsSyntaxHighlighter extends Phobject {
       // process so we hit "pygmentize" directly if we have to SIGKILL this
       // because it explodes.
 
-      $future = new ExecFuture(
-        'exec pygmentize -O encoding=utf-8 -O stripnl=False -f html -l %s',
-        $language);
-
       $scrub = false;
       if ($language == 'php' && strpos($source, '<?') === false) {
         $source = "<?php\n".$source;
         $scrub = true;
       }
 
+      $future = new HTTPFuture(
+        'http://localhost:7878/pygmentize?lang='.urlencode($language),
+        $source);
+      $future->setMethod("POST");
+
       // See T13224. In some cases, "pygmentize" has explosive runtime on small
       // inputs. Put a hard cap on how long it is allowed to run for to limit
       // the amount of damage it can do.
       $future->setTimeout(15);
-
-      $future->write($source);
 
       return new PhutilDefaultSyntaxHighlighterEnginePygmentsFuture(
         $future,

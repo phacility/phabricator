@@ -5,4 +5,8 @@
  * - actually TYPE_EDGE transactions that add "mentioned" edges - to the
  * implementing object.
  */
-interface PhabricatorMentionableInterface {}
+interface PhabricatorMentionableInterface {
+
+  public function getPHID();
+
+}
