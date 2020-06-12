@@ -220,6 +220,8 @@ return array(
     'phuix-formation-view',
     'phuix-formation-column-view',
     'phuix-formation-flank-view',
+
+    'javelin-external-editor-link-engine',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',

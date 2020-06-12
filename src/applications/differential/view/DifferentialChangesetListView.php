@@ -373,6 +373,9 @@ final class DifferentialChangesetListView extends AphrontView {
 
         'Add new inline comment on selected source text.' =>
           pht('Add new inline comment on selected source text.'),
+
+        'Suggest Edit' => pht('Suggest Edit'),
+        'Discard Edit' => pht('Discard Edit'),
       ),
     ));
 

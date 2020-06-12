@@ -101,7 +101,6 @@ final class PHUIDiffInlineCommentDetailView
       $classes[] = 'inline-comment-element';
     }
 
-    $content = $inline->getContent();
     $handles = $this->handles;
 
     $links = array();
@@ -428,6 +427,15 @@ final class PHUIDiffInlineCommentDetailView
 
     $metadata['menuItems'] = $menu_items;
 
+    $suggestion_content = $this->newSuggestionView($inline);
+
+    $inline_content = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $content);
+
     $markup = javelin_tag(
       'div',
       array(
@@ -446,9 +454,15 @@ final class PHUIDiffInlineCommentDetailView
             $group_left,
             $group_right,
           )),
-        phutil_tag_div(
-          'differential-inline-comment-content',
-          phutil_tag_div('phabricator-remarkup', $content)),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-inline-comment-content',
+          ),
+          array(
+            $suggestion_content,
+            $inline_content,
+          )),
       ));
 
     $summary = phutil_tag(
@@ -492,4 +506,77 @@ final class PHUIDiffInlineCommentDetailView
     return true;
   }
 
+  private function newSuggestionView(PhabricatorInlineComment $inline) {
+    $content_state = $inline->getContentState();
+    if (!$content_state->getContentHasSuggestion()) {
+      return null;
+    }
+
+    $context = $inline->getInlineContext();
+    if (!$context) {
+      return null;
+    }
+
+    $head_lines = $context->getHeadLines();
+    $head_lines = implode('', $head_lines);
+
+    $tail_lines = $context->getTailLines();
+    $tail_lines = implode('', $tail_lines);
+
+    $old_lines = $context->getBodyLines();
+    $old_lines = implode('', $old_lines);
+    $old_lines = $head_lines.$old_lines.$tail_lines;
+    if (strlen($old_lines) && !preg_match('/\n\z/', $old_lines)) {
+      $old_lines .= "\n";
+    }
+
+    $new_lines = $content_state->getContentSuggestionText();
+    $new_lines = $head_lines.$new_lines.$tail_lines;
+    if (strlen($new_lines) && !preg_match('/\n\z/', $new_lines)) {
+      $new_lines .= "\n";
+    }
+
+    if ($old_lines === $new_lines) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $changeset = id(new PhabricatorDifferenceEngine())
+      ->generateChangesetFromFileContent($old_lines, $new_lines);
+
+    $changeset->setFilename($context->getFilename());
+
+    $viewstate = new PhabricatorChangesetViewState();
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
+      ->setViewstate($viewstate)
+      ->setChangeset($changeset);
+
+    $fragment = $inline->getInlineCommentCacheFragment();
+    if ($fragment !== null) {
+      $cache_key = sprintf(
+        '%s.suggestion-view(v1, %s)',
+        $fragment,
+        PhabricatorHash::digestForIndex($new_lines));
+      $parser->setRenderCacheKey($cache_key);
+    }
+
+    $renderer = new DifferentialChangesetOneUpRenderer();
+    $renderer->setSimpleMode(true);
+
+    $parser->setRenderer($renderer);
+
+    $diff_view = $parser->render(0, 0xFFFF, array());
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'inline-suggestion-view PhabricatorMonospaced',
+      ),
+      $diff_view);
+
+    return $view;
+  }
 }

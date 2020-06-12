@@ -200,6 +200,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
         ->withPublishableComments(true)
         ->withPublishedComments(true)
         ->needHidden(true)
+        ->needInlineContext(true)
         ->execute();
 
       $inlines = mpull($inlines, 'newInlineCommentObject');
