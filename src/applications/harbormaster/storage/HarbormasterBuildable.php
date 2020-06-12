@@ -366,6 +366,10 @@ final class HarbormasterBuildable
         ->setKey('isManual')
         ->setType('bool')
         ->setDescription(pht('True if this is a manual buildable.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('uri')
+        ->setType('uri')
+        ->setDescription(pht('View URI for the buildable.')),
     );
   }
 
@@ -377,6 +381,7 @@ final class HarbormasterBuildable
         'value' => $this->getBuildableStatus(),
       ),
       'isManual' => (bool)$this->getIsManualBuildable(),
+      'uri' => PhabricatorEnv::getURI($this->getURI()),
     );
   }
 

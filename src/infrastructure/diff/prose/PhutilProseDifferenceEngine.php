@@ -148,7 +148,7 @@ final class PhutilProseDifferenceEngine extends Phobject {
         // whitespace at the end.
 
         $matches = null;
-        preg_match('/^(\s*)(.*?)(\s*)\z/', $result, $matches);
+        preg_match('/^(\s*)(.*?)(\s*)\z/s', $result, $matches);
 
         if (strlen($matches[1])) {
           $results[] = $matches[1];

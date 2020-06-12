@@ -11,6 +11,7 @@ final class DiffusionCommitDraftEngine
       ->setViewer($viewer)
       ->withCommitPHIDs(array($commit->getPHID()))
       ->withPublishableComments(true)
+      ->setReturnPartialResultsOnOverheat(true)
       ->setLimit(1)
       ->execute();
 

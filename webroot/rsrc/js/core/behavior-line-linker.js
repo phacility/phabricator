@@ -4,6 +4,7 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-history
+ *           javelin-external-editor-link-engine
  */
 
 JX.behavior('phabricator-line-linker', function() {
@@ -170,32 +171,19 @@ JX.behavior('phabricator-line-linker', function() {
 
       if (editor_link) {
         var data = JX.Stratcom.getData(editor_link);
-        var template = data.template;
 
         var variables = {
           l: parseInt(Math.min(o, t), 10),
         };
 
-        var parts = [];
-        for (var ii = 0; ii < template.length; ii++) {
-          var part = template[ii];
-          var value = part.value;
+        var template = data.template;
 
-          if (part.type === 'literal') {
-            parts.push(value);
-            continue;
-          }
+        var editor_uri = new JX.ExternalEditorLinkEngine()
+          .setTemplate(template)
+          .setVariables(variables)
+          .newURI();
 
-          if (part.type === 'variable') {
-            if (variables.hasOwnProperty(value)) {
-              var replacement = variables[value];
-              replacement = encodeURIComponent(replacement);
-              parts.push(replacement);
-            }
-          }
-        }
-
-        editor_link.href = parts.join('');
+        editor_link.href = editor_uri;
       }
     });
 

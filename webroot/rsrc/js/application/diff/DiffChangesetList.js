@@ -355,48 +355,11 @@ JX.install('DiffChangesetList', {
         // lines) reply on the old file.
 
         if (cursor.type == 'change') {
-          var origin = cursor.nodes.begin;
-          var target = cursor.nodes.end;
+          var cells = this._getLineNumberCellsForChangeBlock(
+            cursor.nodes.begin,
+            cursor.nodes.end);
 
-          // The "origin" and "target" are entire rows, but we need to find
-          // a range of "<th />" nodes to actually create an inline, so go
-          // fishing.
-
-          var old_list = [];
-          var new_list = [];
-
-          var row = origin;
-          while (row) {
-            var header = row.firstChild;
-            while (header) {
-              if (this.getLineNumberFromHeader(header)) {
-                if (header.className.indexOf('old') !== -1) {
-                  old_list.push(header);
-                } else if (header.className.indexOf('new') !== -1) {
-                  new_list.push(header);
-                }
-              }
-              header = header.nextSibling;
-            }
-
-            if (row == target) {
-              break;
-            }
-
-            row = row.nextSibling;
-          }
-
-          var use_list;
-          if (new_list.length) {
-            use_list = new_list;
-          } else {
-            use_list = old_list;
-          }
-
-          var src = use_list[0];
-          var dst = use_list[use_list.length - 1];
-
-          cursor.changeset.newInlineForRange(src, dst);
+          cursor.changeset.newInlineForRange(cells.src, cells.dst);
 
           this.setFocus(null);
           return;
@@ -405,6 +368,51 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment or change to reply to.'));
+    },
+
+    _getLineNumberCellsForChangeBlock: function(origin, target) {
+      // The "origin" and "target" are entire rows, but we need to find
+      // a range of cell nodes to actually create an inline, so go
+      // fishing.
+
+      var old_list = [];
+      var new_list = [];
+
+      var row = origin;
+      while (row) {
+        var header = row.firstChild;
+        while (header) {
+          if (this.getLineNumberFromHeader(header)) {
+            if (header.className.indexOf('old') !== -1) {
+              old_list.push(header);
+            } else if (header.className.indexOf('new') !== -1) {
+              new_list.push(header);
+            }
+          }
+          header = header.nextSibling;
+        }
+
+        if (row == target) {
+          break;
+        }
+
+        row = row.nextSibling;
+      }
+
+      var use_list;
+      if (new_list.length) {
+        use_list = new_list;
+      } else {
+        use_list = old_list;
+      }
+
+      var src = use_list[0];
+      var dst = use_list[use_list.length - 1];
+
+      return {
+        src: src,
+        dst: dst
+      };
     },
 
     _onkeyedit: function() {
@@ -505,7 +513,7 @@ JX.install('DiffChangesetList', {
       return changeset;
     },
 
-    _onkeyopeneditor: function() {
+    _onkeyopeneditor: function(e) {
       var pht = this.getTranslations();
       var changeset = this._getChangesetForKeyCommand();
 
@@ -514,12 +522,60 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      var editor_uri = changeset.getEditorURI();
+      this._openEditor(changeset);
+    },
 
-      if (editor_uri === null) {
+    _openEditor: function(changeset) {
+      var pht = this.getTranslations();
+
+      var editor_template = changeset.getEditorURITemplate();
+      if (editor_template === null) {
         this._warnUser(pht('No external editor is configured.'));
         return;
       }
+
+      var line = null;
+
+      // See PHI1749. We aren't exactly sure what the user intends when they
+      // use the keyboard to select a change block and then activate the
+      // "Open in Editor" function: they might mean to open the old or new
+      // offset, and may have the old or new state (or some other state) in
+      // their working copy.
+
+      // For now, pick: the new state line number if one exists; or the old
+      // state line number if one does not. If nothing else, this behavior is
+      // simple.
+
+      // If there's a document engine, just open the file to the first line.
+      // We currently can not map display blocks to source lines.
+
+      // If there's an inline, open the file to that line.
+
+      if (changeset.getResponseDocumentEngineKey() === null) {
+        var cursor = this._cursorItem;
+        if (cursor && (cursor.changeset === changeset)) {
+          if (cursor.type == 'change') {
+            var cells = this._getLineNumberCellsForChangeBlock(
+              cursor.nodes.begin,
+              cursor.nodes.end);
+            line = this.getLineNumberFromHeader(cells.src);
+          }
+
+          if (cursor.type === 'comment') {
+            var inline = cursor.target;
+            line = inline.getLineNumber();
+          }
+        }
+      }
+
+      var variables = {
+        l: line || 1
+      };
+
+      var editor_uri = new JX.ExternalEditorLinkEngine()
+        .setTemplate(editor_template)
+        .setVariables(variables)
+        .newURI();
 
       JX.$U(editor_uri).go();
     },
@@ -1029,10 +1085,21 @@ JX.install('DiffChangesetList', {
         changeset.getShowPathURI())
         .setKeyCommand('d');
 
-      var editor_uri = changeset.getEditorURI();
-      if (editor_uri !== null) {
-        add_link('fa-i-cursor', pht('Open in Editor'), editor_uri, true)
-          .setKeyCommand('\\');
+      var editor_template = changeset.getEditorURITemplate();
+      if (editor_template !== null) {
+        var editor_item = new JX.PHUIXActionView()
+          .setIcon('fa-i-cursor')
+          .setName(pht('Open in Editor'))
+          .setKeyCommand('\\')
+          .setHandler(function(e) {
+
+            changeset_list._openEditor(changeset);
+
+            e.prevent();
+            menu.close();
+          });
+
+        list.addItem(editor_item);
       } else {
         var configure_uri = changeset.getEditorConfigureURI();
         if (configure_uri !== null) {
@@ -2410,7 +2477,7 @@ JX.install('DiffChangesetList', {
 
       switch (action) {
         case 'save':
-          inline.save(e.getTarget());
+          inline.save();
           break;
         case 'cancel':
           inline.cancel();

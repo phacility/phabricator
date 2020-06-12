@@ -107,6 +107,18 @@ abstract class PhabricatorApplicationTransactionComment
       $this->getTransactionPHID());
   }
 
+  public function isEmptyComment() {
+    $content = $this->getContent();
+
+    // The comment is empty if there's no content, or if the content only has
+    // whitespace.
+    if (!strlen(trim($content))) {
+      return true;
+    }
+
+    return false;
+  }
+
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 
 

@@ -328,6 +328,13 @@ final class DifferentialRevisionEditEngine
     $content = array();
 
     if ($inlines) {
+      // Reload inlines to get inline context.
+      $inlines = id(new DifferentialDiffInlineCommentQuery())
+        ->setViewer($viewer)
+        ->withIDs(mpull($inlines, 'getID'))
+        ->needInlineContext(true)
+        ->execute();
+
       $inline_preview = id(new PHUIDiffInlineCommentPreviewListView())
         ->setViewer($viewer)
         ->setInlineComments($inlines);
