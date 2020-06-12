@@ -11,6 +11,7 @@
  *           phabricator-diff-inline
  *           phabricator-diff-path-view
  *           phuix-button-view
+ *           javelin-external-editor-link-engine
  * @javelin
  */
 
@@ -33,7 +34,7 @@ JX.install('DiffChangeset', {
     this._pathParts = data.pathParts;
     this._icon = data.icon;
 
-    this._editorURI = data.editorURI;
+    this._editorURITemplate = data.editorURITemplate;
     this._editorConfigureURI = data.editorConfigureURI;
     this._showPathURI = data.showPathURI;
     this._showDirectoryURI = data.showDirectoryURI;
@@ -87,7 +88,7 @@ JX.install('DiffChangeset', {
     _changesetList: null,
     _icon: null,
 
-    _editorURI: null,
+    _editorURITemplate: null,
     _editorConfigureURI: null,
     _showPathURI: null,
     _showDirectoryURI: null,
@@ -102,8 +103,8 @@ JX.install('DiffChangeset', {
     _isSelected: false,
     _viewMenu: null,
 
-    getEditorURI: function() {
-      return this._editorURI;
+    getEditorURITemplate: function() {
+      return this._editorURITemplate;
     },
 
     getEditorConfigureURI: function() {
@@ -453,8 +454,23 @@ JX.install('DiffChangeset', {
       var blocks = [];
       var block;
       var ii;
+      var parent_node = null;
       for (ii = 0; ii < rows.length; ii++) {
         var type = this._getRowType(rows[ii]);
+
+        // This row might be part of a diff inside an inline comment, showing
+        // an inline edit suggestion. Before we accept it as a possible target
+        // for selection, make sure it's a child of the right parent.
+
+        if (parent_node === null) {
+          parent_node = rows[ii].parentNode;
+        }
+
+        if (type !== null) {
+          if (rows[ii].parentNode !== parent_node) {
+            type = null;
+          }
+        }
 
         if (!block || (block.type !== type)) {
           block = {
@@ -761,14 +777,14 @@ JX.install('DiffChangeset', {
       return inline;
     },
 
-    newInlineReply: function(original, text) {
+    newInlineReply: function(original, state) {
       var inline = new JX.DiffInline()
         .setChangeset(this)
         .bindToReply(original);
 
       this._inlines.push(inline);
 
-      inline.create(text);
+      inline.create(state);
 
       return inline;
     },

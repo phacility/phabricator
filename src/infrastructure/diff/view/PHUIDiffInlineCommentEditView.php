@@ -22,37 +22,10 @@ final class PHUIDiffInlineCommentEditView
         'sigil' => 'inline-edit-form',
       ),
       array(
-        $this->renderInputs(),
         $this->renderBody(),
       ));
 
     return $content;
-  }
-
-  private function renderInputs() {
-    $inputs = array();
-    $inline = $this->getInlineComment();
-
-    $inputs[] = array('op', 'edit');
-    $inputs[] = array('id', $inline->getID());
-
-    $inputs[] = array('on_right', $this->getIsOnRight());
-    $inputs[] = array('renderer', $this->getRenderer());
-
-    $out = array();
-
-    foreach ($inputs as $input) {
-      list($name, $value) = $input;
-      $out[] = phutil_tag(
-        'input',
-        array(
-          'type'  => 'hidden',
-          'name'  => $name,
-          'value' => $value,
-        ));
-    }
-
-    return $out;
   }
 
   private function renderBody() {
@@ -73,17 +46,23 @@ final class PHUIDiffInlineCommentEditView
       ),
       $this->title);
 
+    $corpus_view = $this->newCorpusView();
+
     $body = phutil_tag(
       'div',
       array(
         'class' => 'differential-inline-comment-edit-body',
       ),
-      $this->newTextarea());
+      array(
+        $corpus_view,
+        $this->newTextarea(),
+      ));
 
-    $edit = phutil_tag(
+    $edit = javelin_tag(
       'div',
       array(
         'class' => 'differential-inline-comment-edit-buttons grouped',
+        'sigil' => 'inline-edit-buttons',
       ),
       array(
         $buttons,
@@ -109,14 +88,130 @@ final class PHUIDiffInlineCommentEditView
     $viewer = $this->getViewer();
     $inline = $this->getInlineComment();
 
-    $text = $inline->getContentForEdit($viewer);
+    $state = $inline->getContentStateForEdit($viewer);
 
     return id(new PhabricatorRemarkupControl())
       ->setViewer($viewer)
-      ->setSigil('differential-inline-comment-edit-textarea')
-      ->setName('text')
-      ->setValue($text)
+      ->setSigil('inline-content-text')
+      ->setValue($state->getContentText())
       ->setDisableFullScreen(true);
+  }
+
+  private function newCorpusView() {
+    $viewer = $this->getViewer();
+    $inline = $this->getInlineComment();
+
+    $context = $inline->getInlineContext();
+    if ($context === null) {
+      return null;
+    }
+
+    $head = $context->getHeadLines();
+    $head = $this->newContextView($head);
+
+    $state = $inline->getContentStateForEdit($viewer);
+
+    $main = $state->getContentSuggestionText();
+    $main_count = count(phutil_split_lines($main));
+
+    $default = $context->getBodyLines();
+    $default = implode('', $default);
+
+    // Browsers ignore one leading newline in text areas. Add one so that
+    // any actual leading newlines in the content are preserved.
+    $main = "\n".$main;
+
+    $textarea = javelin_tag(
+      'textarea',
+      array(
+        'class' => 'inline-suggestion-input PhabricatorMonospaced',
+        'rows' => max(3, $main_count + 1),
+        'sigil' => 'inline-content-suggestion',
+        'meta' => array(
+          'defaultText' => $default,
+        ),
+      ),
+      $main);
+
+    $main = phutil_tag(
+      'tr',
+      array(
+        'class' => 'inline-suggestion-input-row',
+      ),
+      array(
+        phutil_tag(
+          'td',
+          array(
+            'class' => 'inline-suggestion-line-cell',
+          ),
+          null),
+        phutil_tag(
+          'td',
+          array(
+            'class' => 'inline-suggestion-input-cell',
+          ),
+          $textarea),
+      ));
+
+    $tail = $context->getTailLines();
+    $tail = $this->newContextView($tail);
+
+    $body = phutil_tag(
+      'tbody',
+      array(),
+      array(
+        $head,
+        $main,
+        $tail,
+      ));
+
+    $table = phutil_tag(
+      'table',
+      array(
+        'class' => 'inline-suggestion-table',
+      ),
+      $body);
+
+    $container = phutil_tag(
+      'div',
+      array(
+        'class' => 'inline-suggestion',
+      ),
+      $table);
+
+    return $container;
+  }
+
+  private function newContextView(array $lines) {
+    if (!$lines) {
+      return array();
+    }
+
+    $rows = array();
+    foreach ($lines as $index => $line) {
+      $line_cell = phutil_tag(
+        'td',
+        array(
+          'class' => 'inline-suggestion-line-cell PhabricatorMonospaced',
+        ),
+        $index + 1);
+
+      $text_cell = phutil_tag(
+        'td',
+        array(
+          'class' => 'inline-suggestion-text-cell PhabricatorMonospaced',
+        ),
+        $line);
+
+      $cells = array(
+        $line_cell,
+        $text_cell,
+      );
+
+      $rows[] = phutil_tag('tr', array(), $cells);
+    }
+
+    return $rows;
   }
 
 }

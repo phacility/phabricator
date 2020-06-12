@@ -3,6 +3,17 @@
 final class DifferentialChangesetOneUpRenderer
   extends DifferentialChangesetHTMLRenderer {
 
+  private $simpleMode;
+
+  public function setSimpleMode($simple_mode) {
+    $this->simpleMode = $simple_mode;
+    return $this;
+  }
+
+  public function getSimpleMode() {
+    return $this->simpleMode;
+  }
+
   public function isOneUpRenderer() {
     return true;
   }
@@ -35,6 +46,8 @@ final class DifferentialChangesetOneUpRenderer
 
   protected function renderPrimitives(array $primitives, $rows) {
     list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
+
+    $is_simple = $this->getSimpleMode();
 
     $no_copy = phutil_tag('td', array('class' => 'copy'));
     $no_coverage = null;
@@ -185,6 +198,12 @@ final class DifferentialChangesetOneUpRenderer
             $cells[] = $no_coverage;
           }
 
+          // In simple mode, only render the text. This is used to render
+          // "Edit Suggestions" in inline comments.
+          if ($is_simple) {
+            $cells = array($cells[3]);
+          }
+
           $out[] = phutil_tag('tr', array(), $cells);
 
           break;
@@ -231,11 +250,17 @@ final class DifferentialChangesetOneUpRenderer
       }
     }
 
+    $result = null;
+
     if ($out) {
-      return $this->wrapChangeInTable(phutil_implode_html('', $out));
+      if ($is_simple) {
+        $result = $this->newSimpleTable($out);
+      } else {
+        $result = $this->wrapChangeInTable(phutil_implode_html('', $out));
+      }
     }
 
-    return null;
+    return $result;
   }
 
   public function renderDocumentEngineBlocks(
@@ -486,6 +511,16 @@ final class DifferentialChangesetOneUpRenderer
   public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
     return id(new PHUIDiffOneUpInlineCommentRowScaffold())
       ->addInlineView($view);
+  }
+
+
+  private function newSimpleTable($content) {
+    return phutil_tag(
+      'table',
+      array(
+        'class' => 'diff-1up-simple-table',
+      ),
+      $content);
   }
 
 }
