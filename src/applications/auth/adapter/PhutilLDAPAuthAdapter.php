@@ -410,17 +410,13 @@ final class PhutilLDAPAuthAdapter extends PhutilAuthAdapter {
     $profiler->endServiceCall($call_id, array());
 
     if (!$result) {
-      $this->raiseConnectionException(
-        $conn,
-        pht('LDAP search failed.'));
+      return null;
     }
 
     $entries = @ldap_get_entries($conn, $result);
 
     if (!$entries) {
-      $this->raiseConnectionException(
-        $conn,
-        pht('Failed to get LDAP entries from search result.'));
+      return null
     }
 
     $results = array();
