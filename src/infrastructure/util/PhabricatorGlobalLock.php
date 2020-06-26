@@ -144,6 +144,18 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
     $ok = head($result);
     if (!$ok) {
+
+      // See PHI1794. We failed to acquire the lock, but the connection itself
+      // is still good. We're done with it, so add it to the pool, just as we
+      // would if we were releasing the lock.
+
+      // If we don't  do this, we may establish a huge number of connections
+      // very rapidly if many workers try to acquire a lock at once. For
+      // example, this can happen if there are a large number of webhook tasks
+      // in the queue.
+
+      self::$pool[] = $conn;
+
       throw id(new PhutilLockException($lock_name))
         ->setHint($this->newHint($lock_name, $wait));
     }
