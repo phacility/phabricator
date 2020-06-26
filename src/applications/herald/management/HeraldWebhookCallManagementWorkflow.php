@@ -28,6 +28,17 @@ final class HeraldWebhookCallManagementWorkflow
             'name' => 'secure',
             'help' => pht('Set the "secure" flag on the request.'),
           ),
+          array(
+            'name' => 'count',
+            'param' => 'N',
+            'help' => pht('Make a total of __N__ copies of the call.'),
+          ),
+          array(
+            'name' => 'background',
+            'help' => pht(
+              'Instead of making calls in the foreground, add the tasks '.
+              'to the daemon queue.'),
+          ),
         ));
   }
 
@@ -39,6 +50,17 @@ final class HeraldWebhookCallManagementWorkflow
       throw new PhutilArgumentUsageException(
         pht(
           'Specify a webhook to call with "--id".'));
+    }
+
+    $count = $args->getArg('count');
+    if ($count === null) {
+      $count = 1;
+    }
+
+    if ($count <= 0) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specified "--count" must be larger than 0.'));
     }
 
     $hook = id(new HeraldWebhookQuery())
@@ -69,6 +91,8 @@ final class HeraldWebhookCallManagementWorkflow
       $object = head($objects);
     }
 
+    $is_background = $args->getArg('background');
+
     $xaction_query =
       PhabricatorApplicationTransactionQuery::newQueryForObject($object);
 
@@ -80,25 +104,49 @@ final class HeraldWebhookCallManagementWorkflow
 
     $application_phid = id(new PhabricatorHeraldApplication())->getPHID();
 
-    $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
-      ->setObjectPHID($object->getPHID())
-      ->setIsTestAction(true)
-      ->setIsSilentAction((bool)$args->getArg('silent'))
-      ->setIsSecureAction((bool)$args->getArg('secure'))
-      ->setTriggerPHIDs(array($application_phid))
-      ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
-      ->save();
+    if ($is_background) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Queueing webhook calls...'));
+      $progress_bar = id(new PhutilConsoleProgressBar())
+        ->setTotal($count);
+    } else {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Calling webhook...'));
+      PhabricatorWorker::setRunAllTasksInProcess(true);
+    }
 
-    PhabricatorWorker::setRunAllTasksInProcess(true);
-    $request->queueCall();
+    for ($ii = 0; $ii < $count; $ii++) {
+      $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
+        ->setObjectPHID($object->getPHID())
+        ->setIsTestAction(true)
+        ->setIsSilentAction((bool)$args->getArg('silent'))
+        ->setIsSecureAction((bool)$args->getArg('secure'))
+        ->setTriggerPHIDs(array($application_phid))
+        ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
+        ->save();
 
-    $request->reload();
+      $request->queueCall();
 
-    echo tsprintf(
-      "%s\n",
-      pht(
-        'Success, got HTTP %s from webhook.',
-        $request->getErrorCode()));
+      if ($is_background) {
+        $progress_bar->update(1);
+      } else {
+        $request->reload();
+
+        echo tsprintf(
+          "%s\n",
+          pht(
+            'Success, got HTTP %s from webhook.',
+            $request->getErrorCode()));
+      }
+    }
+
+    if ($is_background) {
+      $progress_bar->done();
+    }
 
     return 0;
   }
