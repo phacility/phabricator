@@ -290,13 +290,13 @@ final class PhabricatorRepositoryDiscoveryEngine
     $remote_root = (string)($xml->entry[0]->repository[0]->root[0]);
     $expect_root = $repository->getSubversionPathURI();
 
-    $normal_type_svn = PhabricatorRepositoryURINormalizer::TYPE_SVN;
+    $normal_type_svn = ArcanistRepositoryURINormalizer::TYPE_SVN;
 
-    $remote_normal = id(new PhabricatorRepositoryURINormalizer(
+    $remote_normal = id(new ArcanistRepositoryURINormalizer(
       $normal_type_svn,
       $remote_root))->getNormalizedPath();
 
-    $expect_normal = id(new PhabricatorRepositoryURINormalizer(
+    $expect_normal = id(new ArcanistRepositoryURINormalizer(
       $normal_type_svn,
       $expect_root))->getNormalizedPath();
 

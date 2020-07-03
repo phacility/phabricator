@@ -132,10 +132,13 @@ able to use:
 
 == Installing Tab Completion ==
 
-If you use `bash`, you can set up tab completion by adding something like this
-to your `.bashrc`, `.profile` or similar:
+If you use `bash`, you can set up tab completion by running this command:
 
-  source /path/to/arcanist/resources/shell/bash-completion
+  $ arc shell-complete
+
+This will install shell completion into your current shell. After installing,
+you may need to start a new shell (or open a new terminal window) to pick up
+the updated configuration.
 
 == Configuration ==
 

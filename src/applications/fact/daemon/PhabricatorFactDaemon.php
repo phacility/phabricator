@@ -6,7 +6,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
 
   protected function run() {
     $this->setEngines(PhabricatorFactEngine::loadAllEngines());
-    while (!$this->shouldExit()) {
+    do {
       PhabricatorCaches::destroyRequestCache();
 
       $iterators = $this->getAllApplicationIterators();
@@ -14,9 +14,14 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
         $this->processIteratorWithCursor($iterator_name, $iterator);
       }
 
-      $this->log(pht('Zzz...'));
-      $this->sleep(15);
-    }
+      $sleep_duration = 60;
+
+      if ($this->shouldHibernate($sleep_duration)) {
+        break;
+      }
+
+      $this->sleep($sleep_duration);
+    } while (!$this->shouldExit());
   }
 
   public static function getAllApplicationIterators() {

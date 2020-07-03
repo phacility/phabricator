@@ -689,10 +689,13 @@ final class PhabricatorRepositoryQuery
     // or an `svn+ssh` URI, we could deduce how to normalize it. However, this
     // would be more complicated and it's not clear if it matters in practice.
 
-    $types = PhabricatorRepositoryURINormalizer::getAllURITypes();
+    $domain_map = PhabricatorRepositoryURI::getURINormalizerDomainMap();
+
+    $types = ArcanistRepositoryURINormalizer::getAllURITypes();
     foreach ($this->uris as $uri) {
       foreach ($types as $type) {
-        $normalized_uri = new PhabricatorRepositoryURINormalizer($type, $uri);
+        $normalized_uri = new ArcanistRepositoryURINormalizer($type, $uri);
+        $normalized_uri->setDomainMap($domain_map);
         $normalized_uris[] = $normalized_uri->getNormalizedURI();
       }
     }

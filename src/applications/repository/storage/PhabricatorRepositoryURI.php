@@ -196,19 +196,22 @@ final class PhabricatorRepositoryURI
 
     $map = array(
       PhabricatorRepositoryType::REPOSITORY_TYPE_GIT =>
-        PhabricatorRepositoryURINormalizer::TYPE_GIT,
+        ArcanistRepositoryURINormalizer::TYPE_GIT,
       PhabricatorRepositoryType::REPOSITORY_TYPE_SVN =>
-        PhabricatorRepositoryURINormalizer::TYPE_SVN,
+        ArcanistRepositoryURINormalizer::TYPE_SVN,
       PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL =>
-        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+        ArcanistRepositoryURINormalizer::TYPE_MERCURIAL,
     );
 
     $type = $map[$vcs];
     $display = (string)$this->getDisplayURI();
 
-    $normal_uri = new PhabricatorRepositoryURINormalizer($type, $display);
+    $normalizer = new ArcanistRepositoryURINormalizer($type, $display);
 
-    return $normal_uri->getNormalizedURI();
+    $domain_map = self::getURINormalizerDomainMap();
+    $normalizer->setDomainMap($domain_map);
+
+    return $normalizer->getNormalizedURI();
   }
 
   public function getDisplayURI() {
@@ -733,6 +736,29 @@ final class PhabricatorRepositoryURI
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+  public static function getURINormalizerDomainMap() {
+    $domain_map = array();
+
+    // See T13435. If the domain for a repository URI is same as the install
+    // base URI, store it as a "<base-uri>" token instead of the actual domain
+    // so that the index does not fall out of date if the install moves.
+
+    $base_uri = PhabricatorEnv::getURI('/');
+    $base_uri = new PhutilURI($base_uri);
+    $base_domain = $base_uri->getDomain();
+    $domain_map['<base-uri>'] = $base_domain;
+
+    // Likewise, store a token for the "SSH Host" domain so it can be changed
+    // without requiring an index rebuild.
+
+    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
+    if (strlen($ssh_host)) {
+      $domain_map['<ssh-host>'] = $ssh_host;
+    }
+
+    return $domain_map;
   }
 
 }

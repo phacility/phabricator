@@ -86,6 +86,7 @@
   padding: 1px 4px;
   border-radius: 3px;
   white-space: pre-wrap;
+  line-break: anywhere;
 }
 
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
