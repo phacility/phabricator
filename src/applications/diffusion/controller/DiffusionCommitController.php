@@ -183,7 +183,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
 
       $curtain = $this->buildCurtain($commit, $repository);
-      $subheader = $this->buildSubheaderView($commit, $commit_data);
       $details = $this->buildPropertyListView(
         $commit,
         $commit_data,
@@ -483,7 +482,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setSubheader($subheader)
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
@@ -758,52 +756,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     return $view;
-  }
-
-  private function buildSubheaderView(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    $viewer = $this->getViewer();
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-
-    if ($repository->isSVN()) {
-      return null;
-    }
-
-    $author_phid = $commit->getAuthorDisplayPHID();
-    $author_name = $data->getAuthorName();
-    $author_epoch = $data->getCommitDetail('authorEpoch');
-    $date = null;
-    if ($author_epoch !== null) {
-      $date = phabricator_datetime($author_epoch, $viewer);
-    }
-
-    if ($author_phid) {
-      $handles = $viewer->loadHandles(array($author_phid));
-      $image_uri = $handles[$author_phid]->getImageURI();
-      $image_href = $handles[$author_phid]->getURI();
-      $author = $handles[$author_phid]->renderLink();
-    } else if (strlen($author_name)) {
-      $author = $author_name;
-      $image_uri = null;
-      $image_href = null;
-    } else {
-      return null;
-    }
-
-    $author = phutil_tag('strong', array(), $author);
-    if ($date) {
-      $content = pht('Authored by %s on %s.', $author, $date);
-    } else {
-      $content = pht('Authored by %s.', $author);
-    }
-
-    return id(new PHUIHeadThingView())
-      ->setImage($image_uri)
-      ->setImageHref($image_href)
-      ->setContent($content);
   }
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
