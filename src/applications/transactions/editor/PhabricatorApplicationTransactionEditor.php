@@ -4968,8 +4968,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private function hasWarnings($object, $xaction) {
     // TODO: For the moment, this is a very un-modular hack to support
-    // exactly one type of warning (mentioning users on a draft revision)
-    // that we want to show. See PHI433.
+    // a small number of warnings related to draft revisions. See PHI433.
 
     if (!($object instanceof DifferentialRevision)) {
       return false;
@@ -4991,8 +4990,21 @@ abstract class PhabricatorApplicationTransactionEditor
       return false;
     }
 
-    // NOTE: This will currently warn even if you're only removing
-    // subscribers.
+    // We're only going to raise a warning if the transaction adds subscribers
+    // other than the acting user. (This implementation is clumsy because the
+    // code runs before a lot of normalization occurs.)
+
+    $old = $this->getTransactionOldValue($object, $xaction);
+    $new = $this->getPHIDTransactionNewValue($xaction, $old);
+    $old = array_fuse($old);
+    $new = array_fuse($new);
+    $add = array_diff_key($new, $old);
+
+    unset($add[$this->getActingAsPHID()]);
+
+    if (!$add) {
+      return false;
+    }
 
     return true;
   }
