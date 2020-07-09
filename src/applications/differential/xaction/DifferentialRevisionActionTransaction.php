@@ -66,6 +66,12 @@ abstract class DifferentialRevisionActionTransaction
     return null;
   }
 
+  protected function getRevisionActionMetadata(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
+    return array();
+  }
+
   public static function loadAllActions() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
@@ -149,6 +155,11 @@ abstract class DifferentialRevisionActionTransaction
         if ($can_multi || $can_force || $not_self) {
           $field->setOptions($options);
           $field->setValue($value);
+        }
+
+        $metadata = $this->getRevisionActionMetadata($revision, $viewer);
+        foreach ($metadata as $metadata_key => $metadata_value) {
+          $field->setMetadataValue($metadata_key, $metadata_value);
         }
       }
     }
