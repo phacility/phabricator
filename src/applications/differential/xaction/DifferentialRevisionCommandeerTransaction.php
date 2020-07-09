@@ -6,12 +6,15 @@ final class DifferentialRevisionCommandeerTransaction
   const TRANSACTIONTYPE = 'differential.revision.commandeer';
   const ACTIONKEY = 'commandeer';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Commandeer Revision');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('You will take control of this revision and become its author.');
   }
 

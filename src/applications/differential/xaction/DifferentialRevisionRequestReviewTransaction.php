@@ -6,12 +6,15 @@ final class DifferentialRevisionRequestReviewTransaction
   const TRANSACTIONTYPE = 'differential.revision.request';
   const ACTIONKEY = 'request-review';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Request Review');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     if ($revision->isDraft()) {
       return pht('This revision will be submitted to reviewers for feedback.');
     } else {
@@ -20,7 +23,8 @@ final class DifferentialRevisionRequestReviewTransaction
   }
 
   protected function getRevisionActionSubmitButtonText(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
 
     // See PHI975. When the action stack will promote the revision out of
     // draft, change the button text from "Submit Quietly".

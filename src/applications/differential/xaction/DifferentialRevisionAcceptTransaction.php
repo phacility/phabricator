@@ -6,12 +6,15 @@ final class DifferentialRevisionAcceptTransaction
   const TRANSACTIONTYPE = 'differential.revision.accept';
   const ACTIONKEY = 'accept';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Accept Revision');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('These changes will be approved.');
   }
 

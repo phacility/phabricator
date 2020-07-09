@@ -6,12 +6,15 @@ final class DifferentialRevisionCloseTransaction
   const TRANSACTIONTYPE = 'differential.revision.close';
   const ACTIONKEY = 'close';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Close Revision');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('This revision will be closed.');
   }
 
