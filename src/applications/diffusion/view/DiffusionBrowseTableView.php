@@ -76,7 +76,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
       $dict = array(
         'lint'      => celerity_generate_unique_node_id(),
         'date'      => celerity_generate_unique_node_id(),
-        'author'    => celerity_generate_unique_node_id(),
         'details'   => celerity_generate_unique_node_id(),
       );
 

@@ -53,14 +53,6 @@ final class DiffusionLastModifiedController extends DiffusionController {
       }
     }
 
-    $phids = array();
-    foreach ($commits as $commit) {
-      $phids[] = $commit->getCommitterDisplayPHID();
-      $phids[] = $commit->getAuthorDisplayPHID();
-    }
-    $phids = array_filter($phids);
-    $handles = $this->loadViewerHandles($phids);
-
     $branch = $drequest->loadBranch();
     if ($branch && $commits) {
       $lint_query = id(new DiffusionLintCountQuery())
@@ -83,7 +75,6 @@ final class DiffusionLastModifiedController extends DiffusionController {
 
       $output[$path] = $this->renderColumns(
         $prequest,
-        $handles,
         $commit,
         idx($lint, $path));
     }
@@ -93,11 +84,9 @@ final class DiffusionLastModifiedController extends DiffusionController {
 
   private function renderColumns(
     DiffusionRequest $drequest,
-    array $handles,
     PhabricatorRepositoryCommit $commit = null,
     $lint = null) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     if ($commit) {
       $epoch = $commit->getEpoch();
@@ -110,13 +99,6 @@ final class DiffusionLastModifiedController extends DiffusionController {
       $date = '';
     }
 
-    $author = $commit->renderAuthor($viewer, $handles);
-    $committer = $commit->renderCommitter($viewer, $handles);
-
-    if ($author != $committer) {
-      $author = hsprintf('%s/%s', $author, $committer);
-    }
-
     $data = $commit->getCommitData();
     $details = DiffusionView::linkDetail(
       $drequest->getRepository(),
@@ -124,11 +106,9 @@ final class DiffusionLastModifiedController extends DiffusionController {
       $data->getSummary());
     $details = AphrontTableView::renderSingleDisplayLine($details);
 
-
     $return = array(
       'commit'    => $modified,
       'date'      => $date,
-      'author'    => $author,
       'details'   => $details,
     );
 
