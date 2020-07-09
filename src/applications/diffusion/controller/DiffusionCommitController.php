@@ -625,32 +625,49 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
-    $author_epoch = $data->getCommitDetail('authorEpoch');
+    $provenance_list = new PHUIStatusListView();
 
-    $committed_info = id(new PHUIStatusItemView())
-      ->setNote(phabricator_datetime($commit->getEpoch(), $viewer))
-      ->setTarget($commit->renderAnyCommitter($viewer, $handles));
+    $author_view = $commit->newCommitAuthorView($viewer);
+    if ($author_view) {
+      $author_date = $data->getCommitDetail('authorEpoch');
+      $author_date = phabricator_datetime($author_date, $viewer);
 
-    $committed_list = new PHUIStatusListView();
-    $committed_list->addItem($committed_info);
-    $view->addProperty(
-      pht('Committed'),
-      $committed_list);
+      $provenance_list->addItem(
+        id(new PHUIStatusItemView())
+          ->setTarget($author_view)
+          ->setNote(pht('Authored on %s', $author_date)));
+    }
+
+    if (!$commit->isAuthorSameAsCommitter()) {
+      $committer_view = $commit->newCommitCommitterView($viewer);
+      if ($committer_view) {
+        $committer_date = $commit->getEpoch();
+        $committer_date = phabricator_datetime($committer_date, $viewer);
+
+        $provenance_list->addItem(
+          id(new PHUIStatusItemView())
+            ->setTarget($committer_view)
+            ->setNote(pht('Committed on %s', $committer_date)));
+      }
+    }
 
     if ($push_logs) {
       $pushed_list = new PHUIStatusListView();
 
       foreach ($push_logs as $push_log) {
-        $pushed_item = id(new PHUIStatusItemView())
-          ->setTarget($handles[$push_log->getPusherPHID()]->renderLink())
-          ->setNote(phabricator_datetime($push_log->getEpoch(), $viewer));
-        $pushed_list->addItem($pushed_item);
-      }
+        $pusher_date = $push_log->getEpoch();
+        $pusher_date = phabricator_datetime($pusher_date, $viewer);
 
-      $view->addProperty(
-        pht('Pushed'),
-        $pushed_list);
+        $pusher_view = $handles[$push_log->getPusherPHID()]->renderLink();
+
+        $provenance_list->addItem(
+          id(new PHUIStatusItemView())
+            ->setTarget($pusher_view)
+            ->setNote(pht('Pushed on %s', $pusher_date)));
+      }
     }
+
+    $view->addProperty(pht('Provenance'), $provenance_list);
 
     $reviewer_phid = $data->getCommitDetail('reviewerPHID');
     if ($reviewer_phid) {

@@ -90,11 +90,6 @@ final class PhabricatorAuditListView extends AphrontView {
       foreach ($commit->getAudits() as $audit) {
         $phids[] = $audit->getAuditorPHID();
       }
-
-      $author_phid = $commit->getAuthorPHID();
-      if ($author_phid) {
-        $phids[] = $author_phid;
-      }
     }
 
     $handles = $viewer->loadHandles($phids);
@@ -126,20 +121,17 @@ final class PhabricatorAuditListView extends AphrontView {
       $status_color = $status->getColor();
       $status_icon = $status->getIcon();
 
-      $author_phid = $commit->getAuthorPHID();
-      if ($author_phid) {
-        $author_name = $handles[$author_phid]->renderLink();
-      } else {
-        $author_name = $commit->getCommitData()->getAuthorName();
-      }
-
       $item = id(new PHUIObjectItemView())
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
         ->setHref($commit_link)
         ->setDisabled($commit->isUnreachable())
-        ->addByline(pht('Author: %s', $author_name))
         ->addIcon('none', $committed);
+
+      $author_name = $commit->newCommitAuthorView($viewer);
+      if ($author_name) {
+        $item->addByline(pht('Author: %s', $author_name));
+      }
 
       if ($show_drafts) {
         if ($commit->getHasDraft($viewer)) {
