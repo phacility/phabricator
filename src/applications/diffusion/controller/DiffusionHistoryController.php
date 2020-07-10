@@ -35,10 +35,31 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history = $pager->sliceResults($history);
 
-    $history_list = id(new DiffusionHistoryListView())
+    $identifiers = array();
+    foreach ($history as $item) {
+      $identifiers[] = $item->getCommitIdentifier();
+    }
+
+    if ($identifiers) {
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->withIdentifiers($identifiers)
+        ->needCommitData(true)
+        ->needIdentities(true)
+        ->execute();
+    } else {
+      $commits = array();
+    }
+
+    $history_list = id(new DiffusionCommitGraphView())
       ->setViewer($viewer)
+      ->setParents($history_results['parents'])
+      ->setIsHead(!$pager->getOffset())
+      ->setIsTail(!$pager->getHasMorePages())
       ->setDiffusionRequest($drequest)
-      ->setHistory($history);
+      ->setHistory($history)
+      ->setCommits($commits);
 
     $header = $this->buildHeader($drequest);
 
