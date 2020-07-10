@@ -15,7 +15,7 @@ return array(
     'differential.pkg.css' => '5c459f92',
     'differential.pkg.js' => '218fda21',
     'diffusion.pkg.css' => '42c75c37',
-    'diffusion.pkg.js' => 'a98c0bf7',
+    'diffusion.pkg.js' => '8ee48a4b',
     'maniphest.pkg.css' => '35995d6d',
     'maniphest.pkg.js' => 'c9308721',
     'rsrc/audio/basic/alert.mp3' => '17889334',
@@ -73,7 +73,7 @@ return array(
     'rsrc/css/application/diffusion/diffusion-icons.css' => '23b31a1b',
     'rsrc/css/application/diffusion/diffusion-readme.css' => 'b68a76e4',
     'rsrc/css/application/diffusion/diffusion-repository.css' => 'b89e8c6c',
-    'rsrc/css/application/diffusion/diffusion.css' => 'b54c77b0',
+    'rsrc/css/application/diffusion/diffusion.css' => 'a54bb336',
     'rsrc/css/application/feed/feed.css' => 'd8b6e3f8',
     'rsrc/css/application/files/global-drag-and-drop.css' => '1d2713a4',
     'rsrc/css/application/flag/flag.css' => '2b77be8d',
@@ -390,7 +390,7 @@ return array(
     'rsrc/js/application/diffusion/ExternalEditorLinkEngine.js' => '48a8641f',
     'rsrc/js/application/diffusion/behavior-audit-preview.js' => 'b7b73831',
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => '4b671572',
-    'rsrc/js/application/diffusion/behavior-commit-graph.js' => 'ef836bf2',
+    'rsrc/js/application/diffusion/behavior-commit-graph.js' => '3be6ef4f',
     'rsrc/js/application/diffusion/behavior-locate-file.js' => '87428eb2',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'c715c123',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '6a85bc5a',
@@ -567,7 +567,7 @@ return array(
     'differential-revision-history-css' => '8aa3eac5',
     'differential-revision-list-css' => '93d2df7d',
     'differential-table-of-contents-css' => 'bba788b9',
-    'diffusion-css' => 'b54c77b0',
+    'diffusion-css' => 'a54bb336',
     'diffusion-icons-css' => '23b31a1b',
     'diffusion-readme-css' => 'b68a76e4',
     'diffusion-repository-css' => 'b89e8c6c',
@@ -615,7 +615,7 @@ return array(
     'javelin-behavior-differential-diff-radios' => '925fe8cd',
     'javelin-behavior-differential-populate' => 'b86ef6c2',
     'javelin-behavior-diffusion-commit-branches' => '4b671572',
-    'javelin-behavior-diffusion-commit-graph' => 'ef836bf2',
+    'javelin-behavior-diffusion-commit-graph' => '3be6ef4f',
     'javelin-behavior-diffusion-locate-file' => '87428eb2',
     'javelin-behavior-diffusion-pull-lastmodified' => 'c715c123',
     'javelin-behavior-document-engine' => '243d6c22',
@@ -1248,6 +1248,11 @@ return array(
     '3b4899b0' => array(
       'javelin-behavior',
       'phabricator-prefab',
+    ),
+    '3be6ef4f' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
     ),
     '3dc5ad43' => array(
       'javelin-behavior',
@@ -2172,11 +2177,6 @@ return array(
     ),
     'ee77366f' => array(
       'aphront-dialog-view-css',
-    ),
-    'ef836bf2' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     'f340a484' => array(
       'javelin-install',

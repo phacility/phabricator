@@ -237,3 +237,17 @@
     border-right: none;
     border-color: {$thinblueborder};
 }
+
+.diffusion-commit-graph-table td.diffusion-commit-graph-path-cell {
+  padding: 0 4px 0 0;
+}
+
+.diffusion-commit-graph-table td.diffusion-commit-graph-path-cell > canvas {
+  display: block;
+}
+
+.diffusion-commit-graph-date-header {
+  color: {$darkgreytext};
+  font-weight: bold;
+  padding: 4px 0;
+}

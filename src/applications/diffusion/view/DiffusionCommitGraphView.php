@@ -82,13 +82,9 @@ final class DiffusionCommitGraphView
   }
 
   public function render() {
-    $viewer = $this->getUser();
-
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
+    $viewer = $this->getViewer();
 
     require_celerity_resource('diffusion-css');
-    Javelin::initBehavior('phabricator-tooltips');
 
     $show_builds = $this->shouldShowBuilds();
     $show_revisions = $this->shouldShowRevisions();
@@ -107,13 +103,18 @@ final class DiffusionCommitGraphView
       $item_date = phabricator_date($item_epoch, $viewer);
       if ($item_date !== $last_date) {
         $last_date = $item_date;
-        $content[] = $item_date;
+        $content[] = phutil_tag(
+          'div',
+          array(
+            'class' => 'diffusion-commit-graph-date-header',
+          ),
+          $item_date);
       }
 
       $commit_description = $this->getCommitDescription($commit);
-      $commit_link = $this->getCommitURI($commit, $item_hash);
+      $commit_link = $this->getCommitURI($item_hash);
 
-      $short_hash = $this->getCommitObjectName($commit, $item_hash);
+      $short_hash = $this->getCommitObjectName($item_hash);
       $is_disabled = $this->getCommitIsDisabled($commit);
 
       $author_view = $this->getCommitAuthorView($commit);
@@ -156,29 +157,38 @@ final class DiffusionCommitGraphView
 
       $content[] = $view;
 
-      $rows[] = array(
-        $content,
-      );
+      $rows[] = $content;
     }
 
     $graph = $this->newGraphView();
-    if ($graph) {
-      $idx = 0;
-      foreach ($rows as $key => $row) {
-        array_unshift($row, $graph[$idx++]);
-        $rows[$key] = $row;
-      }
-    }
-
-    foreach ($rows as $key => $row) {
+    foreach ($rows as $idx => $row) {
       $cells = array();
-      foreach ($row as $cell) {
-        $cells[] = phutil_tag('td', array(), $cell);
+
+      if ($graph) {
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'class' => 'diffusion-commit-graph-path-cell',
+          ),
+          $graph[$idx]);
       }
-      $rows[$key] = phutil_tag('tr', array(), $cells);
+
+      $cells[] = phutil_tag(
+        'td',
+        array(
+          'class' => 'diffusion-commit-graph-content-cell',
+        ),
+        $row);
+
+      $rows[$idx] = phutil_tag('tr', array(), $cells);
     }
 
-    $table = phutil_tag('table', array(), $rows);
+    $table = phutil_tag(
+      'table',
+      array(
+        'class' => 'diffusion-commit-graph-table',
+      ),
+      $rows);
 
     return $table;
   }
@@ -275,17 +285,18 @@ final class DiffusionCommitGraphView
     return $commit->getCommitData()->getSummary();
   }
 
-  private function getCommitURI($commit, $hash) {
+  private function getCommitURI($hash) {
     $repository = $this->getRepository();
 
     if ($repository) {
       return $repository->getCommitURI($hash);
     }
 
+    $commit = $this->getCommit($hash);
     return $commit->getURI();
   }
 
-  private function getCommitObjectName($commit, $hash) {
+  private function getCommitObjectName($hash) {
     $repository = $this->getRepository();
 
     if ($repository) {
@@ -294,6 +305,7 @@ final class DiffusionCommitGraphView
         $is_local = true);
     }
 
+    $commit = $this->getCommit($hash);
     return $commit->getDisplayName();
   }
 

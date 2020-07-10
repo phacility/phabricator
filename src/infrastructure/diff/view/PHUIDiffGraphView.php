@@ -205,6 +205,7 @@ final class PHUIDiffGraphView extends Phobject {
       'diffusion-commit-graph',
       array(
         'count' => $count,
+        'autoheight' => true,
       ));
 
     return $graph;
