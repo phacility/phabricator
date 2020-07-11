@@ -6,12 +6,15 @@ final class DifferentialRevisionRejectTransaction
   const TRANSACTIONTYPE = 'differential.revision.reject';
   const ACTIONKEY = 'reject';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Request Changes');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('This revision will be returned to the author for updates.');
   }
 

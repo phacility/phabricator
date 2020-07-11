@@ -6,12 +6,15 @@ final class DifferentialRevisionResignTransaction
   const TRANSACTIONTYPE = 'differential.revision.resign';
   const ACTIONKEY = 'resign';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Resign as Reviewer');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('You will resign as a reviewer for this change.');
   }
 

@@ -6,12 +6,15 @@ final class DifferentialRevisionReclaimTransaction
   const TRANSACTIONTYPE = 'differential.revision.reclaim';
   const ACTIONKEY = 'reclaim';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Reclaim Revision');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('This revision will be reclaimed and reopened.');
   }
 

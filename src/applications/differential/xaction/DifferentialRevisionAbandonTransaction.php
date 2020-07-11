@@ -6,12 +6,15 @@ final class DifferentialRevisionAbandonTransaction
   const TRANSACTIONTYPE = 'differential.revision.abandon';
   const ACTIONKEY = 'abandon';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Abandon Revision');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('This revision will be abandoned and closed.');
   }
 

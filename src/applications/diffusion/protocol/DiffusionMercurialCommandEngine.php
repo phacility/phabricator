@@ -68,10 +68,15 @@ final class DiffusionMercurialCommandEngine
     // http://selenic.com/pipermail/mercurial-devel/2011-February/028541.html
     //
     // After Jan 2015, it may also fail to write to a revision branch cache.
+    //
+    // Separately, it may fail to write to a different branch cache, and may
+    // encounter issues reading the branch cache.
 
     $ignore = array(
       'ignoring untrusted configuration option',
       "couldn't write revision branch cache:",
+      "couldn't write branch cache:",
+      'invalid branchheads cache',
     );
 
     foreach ($ignore as $key => $pattern) {

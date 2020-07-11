@@ -6,12 +6,15 @@ final class DifferentialRevisionPlanChangesTransaction
   const TRANSACTIONTYPE = 'differential.revision.plan';
   const ACTIONKEY = 'plan-changes';
 
-  protected function getRevisionActionLabel() {
+  protected function getRevisionActionLabel(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht('Plan Changes');
   }
 
   protected function getRevisionActionDescription(
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
     return pht(
       'This revision will be removed from review queues until it is revised.');
   }
