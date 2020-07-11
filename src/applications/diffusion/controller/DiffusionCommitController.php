@@ -90,10 +90,9 @@ final class DiffusionCommitController extends DiffusionController {
         ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->appendChild($warning_message);
 
-      $list = id(new DiffusionCommitListView())
+      $list = id(new DiffusionCommitGraphView())
         ->setViewer($viewer)
-        ->setCommits($commits)
-        ->setNoDataString(pht('No recent commits.'));
+        ->setCommits($commits);
 
       $crumbs->addTextCrumb(pht('Ambiguous Commit'));
 

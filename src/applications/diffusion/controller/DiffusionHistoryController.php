@@ -54,12 +54,27 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history_list = id(new DiffusionCommitGraphView())
       ->setViewer($viewer)
-      ->setParents($history_results['parents'])
-      ->setIsHead(!$pager->getOffset())
-      ->setIsTail(!$pager->getHasMorePages())
       ->setDiffusionRequest($drequest)
       ->setHistory($history)
       ->setCommits($commits);
+
+    // NOTE: If we have a path (like "src/"), many nodes in the graph are
+    // likely to be missing (since the path wasn't touched by those commits).
+
+    // If we draw the graph, commits will often appear to be unrelated because
+    // intermediate nodes are omitted. Just drop the graph.
+
+    // The ideal behavior would be to load the entire graph and then connect
+    // ancestors appropriately, but this would currrently be prohibitively
+    // expensive in the general case.
+
+    $show_graph = !strlen($drequest->getPath());
+    if ($show_graph) {
+      $history_list
+        ->setParents($history_results['parents'])
+        ->setIsHead(!$pager->getOffset())
+        ->setIsTail(!$pager->getHasMorePages());
+    }
 
     $header = $this->buildHeader($drequest);
 

@@ -58,13 +58,13 @@ final class PhabricatorPeopleProfileCommitsController
       ->setViewer($viewer)
       ->withAuthorPHIDs(array($user->getPHID()))
       ->needCommitData(true)
+      ->needIdentities(true)
       ->setLimit(100)
       ->execute();
 
-    $list = id(new DiffusionCommitListView())
+    $list = id(new DiffusionCommitGraphView())
       ->setViewer($viewer)
-      ->setCommits($commits)
-      ->setNoDataString(pht('No recent commits.'));
+      ->setCommits($commits);
 
     return $list;
   }

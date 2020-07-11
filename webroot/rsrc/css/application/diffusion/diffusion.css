@@ -93,14 +93,6 @@
   font-size: {$biggerfontsize};
 }
 
-.diffusion-history-message {
-  background-color: {$bluebackground};
-  padding: 16px;
-  margin: 4px 0;
-  border-radius: 5px;
-  color: {$darkbluetext};
-}
-
 .diffusion-history-list .phui-oi-attribute {
   font-size: {$smallerfontsize};
   letter-spacing: 0.01em;

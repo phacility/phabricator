@@ -332,14 +332,21 @@ final class DiffusionCommitGraphView
   }
 
   private function newBrowseButton($hash) {
-    $commit = $this->getCommit($hash);
+    $repository = $this->getRepository();
 
-    return $this->linkBrowse(
-      '/',
-      array(
-        'commit' => $hash,
-      ),
-      $as_button = true);
+    if ($repository) {
+      $drequest = $this->getDiffusionRequest();
+
+      return $this->linkBrowse(
+        $drequest->getPath(),
+        array(
+          'commit' => $hash,
+          'branch' => $drequest->getBranch(),
+        ),
+        $as_button = true);
+    }
+
+    return null;
   }
 
   private function getCommit($hash) {
