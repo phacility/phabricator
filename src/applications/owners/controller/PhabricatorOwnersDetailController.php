@@ -82,12 +82,15 @@ final class PhabricatorOwnersDetailController
         ))
       ->needCommitData(true)
       ->needAuditRequests(true)
+      ->needIdentities(true)
       ->setLimit(10)
       ->execute();
-    $view = id(new PhabricatorAuditListView())
-      ->setUser($viewer)
-      ->setNoDataString(pht('This package has no open problem commits.'))
-      ->setCommits($attention_commits);
+    $view = id(new DiffusionCommitGraphView())
+      ->setViewer($viewer)
+      ->setCommits($attention_commits)
+      ->newObjectItemListView();
+
+    $view->setNoDataString(pht('This package has no open problem commits.'));
 
     $commit_views[] = array(
       'view'    => $view,
@@ -105,13 +108,16 @@ final class PhabricatorOwnersDetailController
       ->withPackagePHIDs(array($package->getPHID()))
       ->needCommitData(true)
       ->needAuditRequests(true)
+      ->needIdentities(true)
       ->setLimit(25)
       ->execute();
 
-    $view = id(new PhabricatorAuditListView())
-      ->setUser($viewer)
+    $view = id(new DiffusionCommitGraphView())
+      ->setViewer($viewer)
       ->setCommits($all_commits)
-      ->setNoDataString(pht('No commits in this package.'));
+      ->newObjectItemListView();
+
+    $view->setNoDataString(pht('No commits in this package.'));
 
     $commit_views[] = array(
       'view'    => $view,
