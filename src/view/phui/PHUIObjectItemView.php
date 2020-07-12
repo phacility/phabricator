@@ -30,7 +30,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $coverImage;
   private $description;
   private $clickable;
-  private $propertyLists = array();
+  private $mapViews = array();
 
   private $selectableName;
   private $selectableValue;
@@ -220,9 +220,10 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $action;
   }
 
-  public function newPropertyList() {
-    $list = new PHUIPropertyListView();
-    $this->propertyLists[] = $list;
+  public function newMapView() {
+    $list = id(new FuelMapView())
+      ->addClass('fuel-map-property-list');
+    $this->mapViews[] = $list;
     return $list;
   }
 
@@ -612,12 +613,18 @@ final class PHUIObjectItemView extends AphrontTagView {
         '');
     }
 
-    $property_lists = null;
-    if ($this->propertyLists) {
-      $property_lists[] = phutil_tag(
-        'div',
-        array(),
-        $this->propertyLists);
+    $map_views = null;
+    if ($this->mapViews) {
+      $grid = id(new FuelGridView())
+        ->addClass('fuel-grid-property-list');
+
+      $row = $grid->newRow();
+      foreach ($this->mapViews as $map_view) {
+        $row->newCell()
+          ->setContent($map_view);
+      }
+
+      $map_views = $grid;
     }
 
     $content = phutil_tag(
@@ -628,7 +635,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         $subhead,
         $attrs,
-        $property_lists,
+        $map_views,
         $this->renderChildren(),
       ));
 

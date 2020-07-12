@@ -1,0 +1,29 @@
+/**
+ * @provides fuel-grid-css
+ */
+
+.device-desktop .fuel-grid {
+  display: table;
+  table-layout: fixed;
+}
+
+.device-desktop .fuel-grid-body {
+  display: table-row-group;
+}
+
+.device-desktop .fuel-grid-row {
+  display: table-row;
+}
+
+.device-desktop .fuel-grid-cell {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.device-desktop .fuel-grid-cell-count-2 > .fuel-grid-cell {
+  width: 50%;
+}
+
+.fuel-grid-property-list > .fuel-grid {
+  width: 100%;
+}

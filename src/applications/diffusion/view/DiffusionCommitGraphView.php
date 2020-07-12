@@ -164,21 +164,23 @@ final class DiffusionCommitGraphView
       $this->addAuditAction($item_view, $hash);
 
       if ($show_auditors) {
-        $auditor_list = $item_view->newPropertyList();
+        $auditor_list = $item_view->newMapView();
         if ($commit) {
           $auditors = $this->newAuditorList($commit, $handles);
-          $auditor_list->addProperty(pht('Auditors'), $auditors);
+          $auditor_list->newItem()
+            ->setName(pht('Auditors'))
+            ->setValue($auditors);
         }
       }
 
-      $property_list = $item_view->newPropertyList();
+      $property_list = $item_view->newMapView();
 
       if ($commit) {
         $author_view = $this->getCommitAuthorView($commit);
         if ($author_view) {
-          $property_list->addProperty(
-            pht('Author'),
-            $this->getCommitAuthorView($commit));
+          $property_list->newItem()
+            ->setName(pht('Author'))
+            ->setValue($author_view);
         }
       }
 
@@ -189,9 +191,9 @@ final class DiffusionCommitGraphView
             $revision = head($revisions);
             $handle = $handles[$revision->getPHID()];
 
-            $property_list->addProperty(
-              pht('Revision'),
-              $handle->renderLink());
+            $property_list->newItem()
+              ->setName(pht('Revision'))
+              ->setValue($handle->renderLink());
           }
         }
       }
