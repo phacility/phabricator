@@ -35,28 +35,10 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history = $pager->sliceResults($history);
 
-    $identifiers = array();
-    foreach ($history as $item) {
-      $identifiers[] = $item->getCommitIdentifier();
-    }
-
-    if ($identifiers) {
-      $commits = id(new DiffusionCommitQuery())
-        ->setViewer($viewer)
-        ->withRepositoryPHIDs(array($repository->getPHID()))
-        ->withIdentifiers($identifiers)
-        ->needCommitData(true)
-        ->needIdentities(true)
-        ->execute();
-    } else {
-      $commits = array();
-    }
-
     $history_list = id(new DiffusionCommitGraphView())
       ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHistory($history)
-      ->setCommits($commits);
+      ->setHistory($history);
 
     // NOTE: If we have a path (like "src/"), many nodes in the graph are
     // likely to be missing (since the path wasn't touched by those commits).

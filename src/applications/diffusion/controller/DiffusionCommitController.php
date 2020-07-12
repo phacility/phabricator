@@ -811,15 +811,15 @@ final class DiffusionCommitController extends DiffusionController {
           new PhutilNumber($limit)));
     }
 
-    $history_table = id(new DiffusionHistoryTableView())
-      ->setUser($viewer)
+    $commit_list = id(new DiffusionCommitGraphView())
+      ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
       ->setHistory($merges);
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Merged Changes'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($history_table);
+      ->setObjectList($commit_list->newObjectItemListView());
     if ($caption) {
       $panel->setInfoView($caption);
     }

@@ -4,13 +4,13 @@ final class DiffusionCommitGraphView
   extends DiffusionView {
 
   private $history;
-  private $commits = array();
+  private $commits;
   private $isHead;
   private $isTail;
   private $parents;
   private $filterParents;
 
-  private $commitMap = array();
+  private $commitMap;
   private $buildableMap;
   private $revisionMap;
 
@@ -27,7 +27,6 @@ final class DiffusionCommitGraphView
   public function setCommits(array $commits) {
     assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commits = $commits;
-    $this->commitMap = mpull($commits, null, 'getCommitIdentifier');
     return $this;
   }
 
@@ -81,40 +80,35 @@ final class DiffusionCommitGraphView
     return $drequest->getRepository();
   }
 
-  public function render() {
-    $viewer = $this->getViewer();
+  public function newObjectItemListView() {
+    $list_view = id(new PHUIObjectItemListView());
 
+    $item_views = $this->newObjectItemViews();
+    foreach ($item_views as $item_view) {
+      $list_view->addItem($item_view);
+    }
+
+    return $list_view;
+  }
+
+  private function newObjectItemViews() {
     require_celerity_resource('diffusion-css');
 
     $show_builds = $this->shouldShowBuilds();
     $show_revisions = $this->shouldShowRevisions();
 
-    $items = $this->newHistoryItems();
+    $views = array();
 
-    $rows = array();
-    $last_date = null;
-    foreach ($items as $item) {
+    $items = $this->newHistoryItems();
+    foreach ($items as $hash => $item) {
       $content = array();
 
-      $item_epoch = $item['epoch'];
-      $item_hash = $item['hash'];
       $commit = $item['commit'];
 
-      $item_date = phabricator_date($item_epoch, $viewer);
-      if ($item_date !== $last_date) {
-        $last_date = $item_date;
-        $content[] = phutil_tag(
-          'div',
-          array(
-            'class' => 'diffusion-commit-graph-date-header',
-          ),
-          $item_date);
-      }
-
       $commit_description = $this->getCommitDescription($commit);
-      $commit_link = $this->getCommitURI($item_hash);
+      $commit_link = $this->getCommitURI($hash);
 
-      $short_hash = $this->getCommitObjectName($item_hash);
+      $short_hash = $this->getCommitObjectName($hash);
       $is_disabled = $this->getCommitIsDisabled($commit);
 
       $author_view = $this->getCommitAuthorView($commit);
@@ -129,11 +123,11 @@ final class DiffusionCommitGraphView
         $item_view->addAttribute($author_view);
       }
 
-      $browse_button = $this->newBrowseButton($item_hash);
+      $browse_button = $this->newBrowseButton($hash);
 
       $build_view = null;
       if ($show_builds) {
-        $build_view = $this->newBuildView($item_hash);
+        $build_view = $this->newBuildView($hash);
       }
 
       $item_view->setSideColumn(
@@ -144,21 +138,62 @@ final class DiffusionCommitGraphView
 
       $revision_view = null;
       if ($show_revisions) {
-        $revision_view = $this->newRevisionView($item_hash);
+        $revision_view = $this->newRevisionView($hash);
       }
 
       if ($revision_view !== null) {
         $item_view->addAttribute($revision_view);
       }
 
-      $view = id(new PHUIObjectItemListView())
-        ->setFlush(true)
-        ->addItem($item_view);
-
-      $content[] = $view;
-
-      $rows[] = $content;
+      $views[$hash] = $item_view;
     }
+
+    return $views;
+  }
+
+  private function newObjectItemRows() {
+    $viewer = $this->getViewer();
+
+    $items = $this->newHistoryItems();
+    $views = $this->newObjectItemViews();
+
+    $last_date = null;
+    $rows = array();
+    foreach ($items as $hash => $item) {
+      $item_epoch = $item['epoch'];
+      $item_date = phabricator_date($item_epoch, $viewer);
+      if ($item_date !== $last_date) {
+        $last_date = $item_date;
+        $date_view = phutil_tag(
+          'div',
+          array(
+            'class' => 'diffusion-commit-graph-date-header',
+          ),
+          $item_date);
+      } else {
+        $date_view = null;
+      }
+
+      $item_view = idx($views, $hash);
+      if ($item_view) {
+        $list_view = id(new PHUIObjectItemListView())
+          ->setFlush(true)
+          ->addItem($item_view);
+      } else {
+        $list_view = null;
+      }
+
+      $rows[] = array(
+        $date_view,
+        $list_view,
+      );
+    }
+
+    return $rows;
+  }
+
+  public function render() {
+    $rows = $this->newObjectItemRows();
 
     $graph = $this->newGraphView();
     foreach ($rows as $idx => $row) {
@@ -243,25 +278,25 @@ final class DiffusionCommitGraphView
   private function newHistoryItems() {
     $items = array();
 
-    $commits = $this->getCommits();
-    $commit_map = mpull($commits, null, 'getCommitIdentifier');
-
     $history = $this->getHistory();
     if ($history !== null) {
       foreach ($history as $history_item) {
         $commit_hash = $history_item->getCommitIdentifier();
 
-        $items[] = array(
+        $items[$commit_hash] = array(
           'epoch' => $history_item->getEpoch(),
           'hash' => $commit_hash,
-          'commit' => idx($commit_map, $commit_hash),
+          'commit' => $this->getCommit($commit_hash),
         );
       }
     } else {
+      $commits = $this->getCommitMap();
       foreach ($commits as $commit) {
-        $items[] = array(
+        $commit_hash = $commit->getCommitIdentifier();
+
+        $items[$commit_hash] = array(
           'epoch' => $commit->getEpoch(),
-          'hash' => $commit->getCommitIdentifier(),
+          'hash' => $commit_hash,
           'commit' => $commit,
         );
       }
@@ -293,7 +328,11 @@ final class DiffusionCommitGraphView
     }
 
     $commit = $this->getCommit($hash);
-    return $commit->getURI();
+    if ($commit) {
+      return $commit->getURI();
+    }
+
+    return null;
   }
 
   private function getCommitObjectName($hash) {
@@ -306,7 +345,11 @@ final class DiffusionCommitGraphView
     }
 
     $commit = $this->getCommit($hash);
-    return $commit->getDisplayName();
+    if ($commit) {
+      return $commit->getDisplayName();
+    }
+
+    return null;
   }
 
   private function getCommitIsDisabled($commit) {
@@ -355,6 +398,11 @@ final class DiffusionCommitGraphView
   }
 
   private function getCommitMap() {
+    if ($this->commitMap === null) {
+      $commit_list = $this->newCommitList();
+      $this->commitMap = mpull($commit_list, null, 'getCommitIdentifier');
+    }
+
     return $this->commitMap;
   }
 
@@ -379,7 +427,7 @@ final class DiffusionCommitGraphView
 
   private function getBuildableMap() {
     if ($this->buildableMap === null) {
-      $commits = $this->getCommits();
+      $commits = $this->getCommitMap();
       $buildables = $this->loadBuildables($commits);
       $this->buildableMap = $buildables;
     }
@@ -424,11 +472,49 @@ final class DiffusionCommitGraphView
 
   private function newRevisionMap() {
     $viewer = $this->getViewer();
-    $commits = $this->getCommits();
+    $commits = $this->getCommitMap();
 
     return DiffusionCommitRevisionQuery::loadRevisionMapForCommits(
       $viewer,
       $commits);
+  }
+
+  private function newCommitList() {
+    $commits = $this->getCommits();
+    if ($commits !== null) {
+      return $commits;
+    }
+
+    $repository = $this->getRepository();
+    if (!$repository) {
+      return array();
+    }
+
+    $history = $this->getHistory();
+    if ($history === null) {
+      return array();
+    }
+
+    $identifiers = array();
+    foreach ($history as $item) {
+      $identifiers[] = $item->getCommitIdentifier();
+    }
+
+    if (!$identifiers) {
+      return array();
+    }
+
+    $viewer = $this->getViewer();
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withIdentifiers($identifiers)
+      ->needCommitData(true)
+      ->needIdentities(true)
+      ->execute();
+
+    return $commits;
   }
 
 }
