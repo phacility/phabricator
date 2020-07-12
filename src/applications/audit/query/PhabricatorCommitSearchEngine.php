@@ -222,7 +222,8 @@ final class PhabricatorCommitSearchEngine
     $bucket = $this->getResultBucket($query);
 
     $template = id(new DiffusionCommitGraphView())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setShowAuditors(true);
 
     $views = array();
     if ($bucket) {

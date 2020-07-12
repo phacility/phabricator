@@ -725,3 +725,9 @@ ul.phui-oi-list-view .phui-oi-selectable
   padding: 8px 0;
   background: linear-gradient({$lightbluebackground}, #fff 66%, #fff);
 }
+
+.phui-oi-action-list {
+  background: {$lightbluebackground};
+  border-left: 1px solid {$thinblueborder};
+  padding: 4px;
+}

@@ -16,6 +16,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $bylines = array();
   private $grippable;
   private $actions = array();
+  private $actionItems = array();
   private $headIcons = array();
   private $disabled;
   private $imageURI;
@@ -29,6 +30,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $coverImage;
   private $description;
   private $clickable;
+  private $propertyLists = array();
 
   private $selectableName;
   private $selectableValue;
@@ -210,6 +212,18 @@ final class PHUIObjectItemView extends AphrontTagView {
       'attributes' => $attributes,
     );
     return $this;
+  }
+
+  public function newAction() {
+    $action = new PhabricatorActionView();
+    $this->actionItems[] = $action;
+    return $action;
+  }
+
+  public function newPropertyList() {
+    $list = new PHUIPropertyListView();
+    $this->propertyLists[] = $list;
+    return $list;
   }
 
   /**
@@ -598,6 +612,14 @@ final class PHUIObjectItemView extends AphrontTagView {
         '');
     }
 
+    $property_lists = null;
+    if ($this->propertyLists) {
+      $property_lists[] = phutil_tag(
+        'div',
+        array(),
+        $this->propertyLists);
+    }
+
     $content = phutil_tag(
       'div',
       array(
@@ -606,6 +628,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         $subhead,
         $attrs,
+        $property_lists,
         $this->renderChildren(),
       ));
 
@@ -733,6 +756,23 @@ final class PHUIObjectItemView extends AphrontTagView {
         ));
     }
 
+    $column4 = null;
+    if ($this->actionItems) {
+      $action_list = id(new PhabricatorActionListView())
+        ->setViewer($viewer);
+
+      foreach ($this->actionItems as $action_item) {
+        $action_list->addAction($action_item);
+      }
+
+      $column4 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-oi-col2 phui-oi-action-list',
+        ),
+        $action_list);
+    }
+
     $table = phutil_tag(
       'div',
       array(
@@ -745,6 +785,7 @@ final class PHUIObjectItemView extends AphrontTagView {
           $column1,
           $column2,
           $column3,
+          $column4,
         )));
 
     $box = phutil_tag(

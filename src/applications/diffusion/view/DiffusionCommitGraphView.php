@@ -14,6 +14,8 @@ final class DiffusionCommitGraphView
   private $buildableMap;
   private $revisionMap;
 
+  private $showAuditors;
+
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
@@ -32,6 +34,15 @@ final class DiffusionCommitGraphView
 
   public function getCommits() {
     return $this->commits;
+  }
+
+  public function setShowAuditors($show_auditors) {
+    $this->showAuditors = $show_auditors;
+    return $this;
+  }
+
+  public function getShowAuditors() {
+    return $this->showAuditors;
   }
 
   public function setParents(array $parents) {
@@ -92,10 +103,36 @@ final class DiffusionCommitGraphView
   }
 
   private function newObjectItemViews() {
+    $viewer = $this->getViewer();
+
     require_celerity_resource('diffusion-css');
 
     $show_builds = $this->shouldShowBuilds();
     $show_revisions = $this->shouldShowRevisions();
+    $show_auditors = $this->shouldShowAuditors();
+
+    $phids = array();
+
+    if ($show_revisions) {
+      $revision_map = $this->getRevisionMap();
+      foreach ($revision_map as $revisions) {
+        foreach ($revisions as $revision) {
+          $phids[] = $revision->getPHID();
+        }
+      }
+    }
+
+    if ($show_auditors) {
+      $commits = $this->getCommitMap();
+      foreach ($commits as $commit) {
+        $audits = $commit->getAudits();
+        foreach ($audits as $auditor) {
+          $phids[] = $auditor->getAuditorPHID();
+        }
+      }
+    }
+
+    $handles = $viewer->loadHandles($phids);
 
     $views = array();
 
@@ -111,38 +148,52 @@ final class DiffusionCommitGraphView
       $short_hash = $this->getCommitObjectName($hash);
       $is_disabled = $this->getCommitIsDisabled($commit);
 
-      $author_view = $this->getCommitAuthorView($commit);
-
       $item_view = id(new PHUIObjectItemView())
+        ->setViewer($viewer)
         ->setHeader($commit_description)
         ->setObjectName($short_hash)
         ->setHref($commit_link)
         ->setDisabled($is_disabled);
 
-      if ($author_view !== null) {
-        $item_view->addAttribute($author_view);
-      }
+      $this->addBrowseAction($item_view, $hash);
 
-      $browse_button = $this->newBrowseButton($hash);
-
-      $build_view = null;
       if ($show_builds) {
-        $build_view = $this->newBuildView($hash);
+        $this->addBuildAction($item_view, $hash);
       }
 
-      $item_view->setSideColumn(
-        array(
-          $build_view,
-          $browse_button,
-        ));
+      $this->addAuditAction($item_view, $hash);
 
-      $revision_view = null;
+      if ($show_auditors) {
+        $auditor_list = $item_view->newPropertyList();
+        if ($commit) {
+          $auditors = $this->newAuditorList($commit, $handles);
+          $auditor_list->addProperty(pht('Auditors'), $auditors);
+        }
+      }
+
+      $property_list = $item_view->newPropertyList();
+
+      if ($commit) {
+        $author_view = $this->getCommitAuthorView($commit);
+        if ($author_view) {
+          $property_list->addProperty(
+            pht('Author'),
+            $this->getCommitAuthorView($commit));
+        }
+      }
+
       if ($show_revisions) {
-        $revision_view = $this->newRevisionView($hash);
-      }
+        if ($commit) {
+          $revisions = $this->getRevisions($commit);
+          if ($revisions) {
+            $revision = head($revisions);
+            $handle = $handles[$revision->getPHID()];
 
-      if ($revision_view !== null) {
-        $item_view->addAttribute($revision_view);
+            $property_list->addProperty(
+              pht('Revision'),
+              $handle->renderLink());
+          }
+        }
       }
 
       $views[$hash] = $item_view;
@@ -172,6 +223,7 @@ final class DiffusionCommitGraphView
       $item_view = $views[$hash];
 
       $list_view = id(new PHUIObjectItemListView())
+        ->setViewer($viewer)
         ->setFlush(true)
         ->addItem($item_view);
 
@@ -266,6 +318,10 @@ final class DiffusionCommitGraphView
       $viewer);
 
     return $show_revisions;
+  }
+
+  private function shouldShowAuditors() {
+    return $this->getShowAuditors();
   }
 
   private function newHistoryItems() {
@@ -367,24 +423,6 @@ final class DiffusionCommitGraphView
     return $commit->newCommitAuthorView($viewer);
   }
 
-  private function newBrowseButton($hash) {
-    $repository = $this->getRepository();
-
-    if ($repository) {
-      $drequest = $this->getDiffusionRequest();
-
-      return $this->linkBrowse(
-        $drequest->getPath(),
-        array(
-          'commit' => $hash,
-          'branch' => $drequest->getBranch(),
-        ),
-        $as_button = true);
-    }
-
-    return null;
-  }
-
   private function getCommit($hash) {
     $commit_map = $this->getCommitMap();
     return idx($commit_map, $hash);
@@ -399,18 +437,84 @@ final class DiffusionCommitGraphView
     return $this->commitMap;
   }
 
-  private function newBuildView($hash) {
+  private function addBrowseAction(PHUIObjectItemView $item, $hash) {
+    $repository = $this->getRepository();
+
+    if (!$repository) {
+      return;
+    }
+
+    $drequest = $this->getDiffusionRequest();
+    $path = $drequest->getPath();
+
+    $uri = $drequest->generateURI(
+      array(
+        'action' => 'browse',
+        'path'   => $path,
+      ));
+
+    $item->newAction()
+      ->setIcon('fa-folder-open-o bluegrey')
+      ->setName(pht('Browse Repository'))
+      ->setHref($uri);
+  }
+
+  private function addBuildAction(PHUIObjectItemView $item, $hash) {
+    $is_disabled = true;
+
+    $buildable = null;
+
     $commit = $this->getCommit($hash);
     if (!$commit) {
-      return null;
+      $buildable = $this->getBuildable($commit);
     }
 
-    $buildable = $this->getBuildable($commit);
-    if (!$buildable) {
-      return null;
+    if ($buildable) {
+      $icon = $buildable->getStatusIcon();
+      $color = $buildable->getStatusColor();
+      $name = $buildable->getStatusDisplayName();
+      $uri = $buildable->getURI();
+    } else {
+      $icon = 'fa-times';
+      $color = 'grey';
+      $name = pht('No Builds');
+      $uri = null;
     }
 
-    return $this->renderBuildable($buildable, 'button');
+    $item->newAction()
+      ->setIcon($icon.' '.$color)
+      ->setName($name)
+      ->setHref($uri)
+      ->setDisabled(($uri === null));
+  }
+
+  private function addAuditAction(PHUIObjectItemView $item_view, $hash) {
+    $commit = $this->getCommit($hash);
+
+    if ($commit) {
+      $status = $commit->getAuditStatusObject();
+
+      $text = $status->getName();
+      $color = $status->getColor();
+      $icon = $status->getIcon();
+
+      $uri = $commit->getURI();
+
+      $is_disabled = $status->isNoAudit();
+    } else {
+      $text = pht('No Audit');
+      $color = 'grey';
+      $icon = 'fa-times';
+      $uri = null;
+
+      $is_disabled = true;
+    }
+
+    $item_view->newAction()
+      ->setIcon($icon.' '.$color)
+      ->setName($text)
+      ->setHref($uri)
+      ->setDisabled($is_disabled);
   }
 
   private function getBuildable(PhabricatorRepositoryCommit $commit) {
@@ -426,28 +530,6 @@ final class DiffusionCommitGraphView
     }
 
     return $this->buildableMap;
-  }
-
-  private function newRevisionView($hash) {
-    $commit = $this->getCommit($hash);
-    if (!$commit) {
-      return null;
-    }
-
-    $revisions = $this->getRevisions($commit);
-    if (!$revisions) {
-      return null;
-    }
-
-    $revision = head($revisions);
-
-    return id(new PHUITagView())
-      ->setName($revision->getMonogram())
-      ->setType(PHUITagView::TYPE_SHADE)
-      ->setColor(PHUITagView::COLOR_BLUE)
-      ->setHref($revision->getURI())
-      ->setBorder(PHUITagView::BORDER_NONE)
-      ->setSlimShady(true);
   }
 
   private function getRevisions(PhabricatorRepositoryCommit $commit) {
@@ -508,6 +590,23 @@ final class DiffusionCommitGraphView
       ->execute();
 
     return $commits;
+  }
+
+  private function newAuditorList(
+    PhabricatorRepositoryCommit $commit,
+    $handles) {
+
+    $auditors = $commit->getAudits();
+    if (!$auditors) {
+      return phutil_tag('em', array(), pht('None'));
+    }
+
+    $auditor_phids = mpull($auditors, 'getAuditorPHID');
+    $auditor_list = $handles->newSublist($auditor_phids)
+      ->renderList()
+      ->setAsInline(true);
+
+    return $auditor_list;
   }
 
 }
