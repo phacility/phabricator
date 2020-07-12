@@ -164,29 +164,22 @@ final class DiffusionCommitGraphView
       $item_date = phabricator_date($item_epoch, $viewer);
       if ($item_date !== $last_date) {
         $last_date = $item_date;
-        $date_view = phutil_tag(
-          'div',
-          array(
-            'class' => 'diffusion-commit-graph-date-header',
-          ),
-          $item_date);
+        $header = $item_date;
       } else {
-        $date_view = null;
+        $header = null;
       }
 
-      $item_view = idx($views, $hash);
-      if ($item_view) {
-        $list_view = id(new PHUIObjectItemListView())
-          ->setFlush(true)
-          ->addItem($item_view);
-      } else {
-        $list_view = null;
+      $item_view = $views[$hash];
+
+      $list_view = id(new PHUIObjectItemListView())
+        ->setFlush(true)
+        ->addItem($item_view);
+
+      if ($header !== null) {
+        $list_view->setHeader($header);
       }
 
-      $rows[] = array(
-        $date_view,
-        $list_view,
-      );
+      $rows[] = $list_view;
     }
 
     return $rows;

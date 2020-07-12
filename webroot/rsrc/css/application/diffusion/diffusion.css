@@ -102,10 +102,6 @@
   color: {$darkbluetext};
 }
 
-.diffusion-history-list .diffusion-differential-tag {
-  margin-left: 4px;
-}
-
 /* - Branch Styles  ----------------------------------------------------------*/
 
 .diffusion-branch-list .phui-oi-attribute a {
@@ -238,8 +234,9 @@
   display: block;
 }
 
-.diffusion-commit-graph-date-header {
+.diffusion-commit-graph-table .phui-oi-list-header {
   color: {$darkgreytext};
   font-weight: bold;
-  padding: 4px 0;
+  padding: 4px 4px;
+  font-size: {$normalfontsize};
 }
