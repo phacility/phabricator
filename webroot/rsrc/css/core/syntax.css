@@ -39,3 +39,8 @@ span.crossreference-item {
   color: #ffffff;
   cursor: default;
 }
+
+.logical-tab {
+  user-select: all;
+  -webkit-user-select: all;
+}

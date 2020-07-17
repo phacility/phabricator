@@ -1600,6 +1600,13 @@ final class DifferentialChangesetParser extends Phobject {
           'span',
           array(
             'data-copy-text' => "\t",
+
+            // See PHI1814. Mark this as a single logical tab for the purposes
+            // of text selection behavior: when the user drags their mouse over
+            // the character sequence, we'd like the whole thing to select as
+            // a single unit.
+
+            'class' => 'logical-tab',
           ),
           str_repeat(' ', $ii));
         $tag = phutil_string_cast($tag);
