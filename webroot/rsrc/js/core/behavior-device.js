@@ -43,7 +43,7 @@ JX.install('Device', {
       if (v.x <= self._tabletBreakpoint) {
         device = 'tablet';
       }
-      if (v.x <= 480) {
+      if (v.x <= 512) {
         device = 'phone';
       }
 

@@ -16,7 +16,6 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $bylines = array();
   private $grippable;
   private $actions = array();
-  private $actionItems = array();
   private $headIcons = array();
   private $disabled;
   private $imageURI;
@@ -31,6 +30,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $description;
   private $clickable;
   private $mapViews = array();
+  private $menu;
 
   private $selectableName;
   private $selectableValue;
@@ -214,10 +214,12 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function newAction() {
-    $action = new PhabricatorActionView();
-    $this->actionItems[] = $action;
-    return $action;
+  public function newMenuItem() {
+    if (!$this->menu) {
+      $this->menu = new FuelMenuView();
+    }
+
+    return $this->menu->newItem();
   }
 
   public function newMapView() {
@@ -763,23 +765,6 @@ final class PHUIObjectItemView extends AphrontTagView {
         ));
     }
 
-    $column4 = null;
-    if ($this->actionItems) {
-      $action_list = id(new PhabricatorActionListView())
-        ->setViewer($viewer);
-
-      foreach ($this->actionItems as $action_item) {
-        $action_list->addAction($action_item);
-      }
-
-      $column4 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col2 phui-oi-action-list',
-        ),
-        $action_list);
-    }
-
     $table = phutil_tag(
       'div',
       array(
@@ -792,7 +777,6 @@ final class PHUIObjectItemView extends AphrontTagView {
           $column1,
           $column2,
           $column3,
-          $column4,
         )));
 
     $box = phutil_tag(
@@ -859,7 +843,22 @@ final class PHUIObjectItemView extends AphrontTagView {
         $frame_content,
       ));
 
-    return $frame;
+    $grid_view = id(new FuelGridView())
+      ->addClass('fuel-grid-tablet');
+    $grid_row = $grid_view->newRow();
+
+    $grid_row->newCell()
+      ->setContent($frame);
+
+    if ($this->menu) {
+      $menu = $this->menu;
+
+      $grid_row->newCell()
+        ->addClass('phui-oi-menu')
+        ->setContent($menu);
+    }
+
+    return $grid_view;
   }
 
   private function renderStatusIcon($icon, $label) {

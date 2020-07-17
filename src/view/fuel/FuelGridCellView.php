@@ -1,7 +1,7 @@
 <?php
 
 final class FuelGridCellView
-  extends FuelView {
+  extends FuelComponentView {
 
   private $content;
 
@@ -17,7 +17,7 @@ final class FuelGridCellView
   public function render() {
     $content = $this->getContent();
 
-    return phutil_tag(
+    return $this->newComponentTag(
       'div',
       array(
         'class' => 'fuel-grid-cell',

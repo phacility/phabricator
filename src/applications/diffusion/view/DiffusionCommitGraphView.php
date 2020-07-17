@@ -452,13 +452,17 @@ final class DiffusionCommitGraphView
     $uri = $drequest->generateURI(
       array(
         'action' => 'browse',
-        'path'   => $path,
+        'path' => $path,
+        'commit' => $hash,
       ));
 
-    $item->newAction()
-      ->setIcon('fa-folder-open-o bluegrey')
+    $menu_item = $item->newMenuItem()
       ->setName(pht('Browse Repository'))
-      ->setHref($uri);
+      ->setURI($uri);
+
+    $menu_item->newIcon()
+      ->setIcon('fa-folder-open-o')
+      ->setColor('bluegrey');
   }
 
   private function addBuildAction(PHUIObjectItemView $item, $hash) {
@@ -483,11 +487,14 @@ final class DiffusionCommitGraphView
       $uri = null;
     }
 
-    $item->newAction()
-      ->setIcon($icon.' '.$color)
+    $menu_item = $item->newMenuItem()
       ->setName($name)
-      ->setHref($uri)
+      ->setURI($uri)
       ->setDisabled(($uri === null));
+
+    $menu_item->newIcon()
+      ->setIcon($icon)
+      ->setColor($color);
   }
 
   private function addAuditAction(PHUIObjectItemView $item_view, $hash) {
@@ -502,7 +509,7 @@ final class DiffusionCommitGraphView
 
       $uri = $commit->getURI();
 
-      $is_disabled = $status->isNoAudit();
+      $is_disabled = false;
     } else {
       $text = pht('No Audit');
       $color = 'grey';
@@ -512,11 +519,15 @@ final class DiffusionCommitGraphView
       $is_disabled = true;
     }
 
-    $item_view->newAction()
-      ->setIcon($icon.' '.$color)
+    $menu_item = $item_view->newMenuItem()
       ->setName($text)
-      ->setHref($uri)
+      ->setURI($uri)
+      ->setBackgroundColor($color)
       ->setDisabled($is_disabled);
+
+    $menu_item->newIcon()
+      ->setIcon($icon)
+      ->setColor($color);
   }
 
   private function getBuildable(PhabricatorRepositoryCommit $commit) {

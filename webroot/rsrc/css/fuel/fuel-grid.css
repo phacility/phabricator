@@ -2,26 +2,28 @@
  * @provides fuel-grid-css
  */
 
-.device-desktop .fuel-grid {
+.device-desktop .fuel-grid,
+.device-tablet .fuel-grid-tablet > .fuel-grid {
   display: table;
   table-layout: fixed;
 }
 
-.device-desktop .fuel-grid-body {
+.device-desktop .fuel-grid-body,
+.device-tablet .fuel-grid-tablet > .fuel-grid > .fuel-grid-body {
   display: table-row-group;
 }
 
-.device-desktop .fuel-grid-row {
+.device-desktop .fuel-grid-row,
+.device-tablet .fuel-grid-tablet > .fuel-grid > .fuel-grid-body >
+  .fuel-grid-row {
   display: table-row;
 }
 
-.device-desktop .fuel-grid-cell {
+.device-desktop .fuel-grid-cell,
+.device-tablet .fuel-grid-tablet > .fuel-grid > .fuel-grid-body >
+  .fuel-grid-row > .fuel-grid-cell {
   display: table-cell;
   vertical-align: top;
-}
-
-.device-desktop .fuel-grid-cell-count-2 > .fuel-grid-cell {
-  width: 50%;
 }
 
 .fuel-grid-property-list > .fuel-grid {
