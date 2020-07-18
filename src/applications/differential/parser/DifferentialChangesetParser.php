@@ -1327,6 +1327,10 @@ final class DifferentialChangesetParser extends Phobject {
     $not_covered = 0;
 
     foreach ($this->new as $k => $new) {
+      if ($new === null) {
+        continue;
+      }
+
       if (!$new['line']) {
         continue;
       }
