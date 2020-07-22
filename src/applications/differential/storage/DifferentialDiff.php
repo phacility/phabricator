@@ -737,9 +737,10 @@ final class DifferentialDiff
         $prop->delete();
       }
 
-      $viewstates = id(new DifferentialViewStateQuery())
+      $viewstate_query = id(new DifferentialViewStateQuery())
         ->setViewer($viewer)
         ->withObjectPHIDs(array($this->getPHID()));
+      $viewstates = new PhabricatorQueryIterator($viewstate_query);
       foreach ($viewstates as $viewstate) {
         $viewstate->delete();
       }
