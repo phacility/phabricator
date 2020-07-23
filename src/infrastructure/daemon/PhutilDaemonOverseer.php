@@ -181,10 +181,6 @@ EOHELP
           }
         }
 
-        foreach ($pool->getFutures() as $future) {
-          $future_pool->addFuture($future);
-        }
-
         if ($pool->getDaemons()) {
           $running_pools = true;
         }
@@ -208,6 +204,11 @@ EOHELP
     }
 
     exit($this->err);
+  }
+
+  public function addFutureToPool(Future $future) {
+    $this->getFuturePool()->addFuture($future);
+    return $this;
   }
 
   private function getFuturePool() {
