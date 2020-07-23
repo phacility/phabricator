@@ -327,13 +327,14 @@ final class PhutilDaemonHandle extends Phobject {
 
   private function annihilateProcessGroup() {
     $pid = $this->getPID();
-
-    $pgid = posix_getpgid($pid);
-    if ($pid && $pgid) {
-      posix_kill(-$pgid, SIGTERM);
-      sleep($this->getKillDelay());
-      posix_kill(-$pgid, SIGKILL);
-      $this->pid = null;
+    if ($pid) {
+      $pgid = posix_getpgid($pid);
+      if ($pgid) {
+        posix_kill(-$pgid, SIGTERM);
+        sleep($this->getKillDelay());
+        posix_kill(-$pgid, SIGKILL);
+        $this->pid = null;
+      }
     }
   }
 
@@ -440,7 +441,10 @@ final class PhutilDaemonHandle extends Phobject {
     // naturally be restarted after it exits, as though it had exited after an
     // unhandled exception.
 
-    posix_kill($this->getPID(), SIGINT);
+    $pid = $this->getPID();
+    if ($pid) {
+      posix_kill($pid, SIGINT);
+    }
   }
 
   public function didReceiveGracefulSignal($signo) {
@@ -461,7 +465,10 @@ final class PhutilDaemonHandle extends Phobject {
 
     $this->logMessage('DONE', $sigmsg, $signo);
 
-    posix_kill($this->getPID(), SIGINT);
+    $pid = $this->getPID();
+    if ($pid) {
+      posix_kill($pid, SIGINT);
+    }
   }
 
   public function didReceiveTerminateSignal($signo) {
