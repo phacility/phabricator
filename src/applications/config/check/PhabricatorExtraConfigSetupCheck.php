@@ -322,6 +322,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'directly supported. Prefixes and other strings may be customized with '.
       '"translation.override".');
 
+    $phd_reason = pht(
+      'Use "bin/phd debug ..." to get a detailed daemon execution log.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -539,6 +542,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'phd.pid-directory' => pht(
         'Phabricator daemons no longer use PID files.'),
+
+      'phd.trace' => $phd_reason,
+      'phd.verbose' => $phd_reason,
     );
 
     return $ancient_config;

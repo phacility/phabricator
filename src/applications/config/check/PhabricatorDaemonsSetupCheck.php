@@ -8,14 +8,21 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
 
-    $task_daemon = id(new PhabricatorDaemonLogQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
-      ->withDaemonClasses(array('PhabricatorTaskmasterDaemon'))
-      ->setLimit(1)
-      ->execute();
+    try {
+      $task_daemons = id(new PhabricatorDaemonLogQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+        ->withDaemonClasses(array('PhabricatorTaskmasterDaemon'))
+        ->setLimit(1)
+        ->execute();
 
-    if (!$task_daemon) {
+      $no_daemons = !$task_daemons;
+    } catch (Exception $ex) {
+      // Just skip this warning if the query fails for some reason.
+      $no_daemons = false;
+    }
+
+    if ($no_daemons) {
       $doc_href = PhabricatorEnv::getDoclink('Managing Daemons with phd');
 
       $summary = pht(
