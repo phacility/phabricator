@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '0e3cf785',
     'conpherence.pkg.js' => '020aebcf',
-    'core.pkg.css' => '2e175364',
+    'core.pkg.css' => 'da792a0f',
     'core.pkg.js' => '845355f4',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => '5c459f92',
@@ -115,7 +115,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => 'b4795059',
     'rsrc/css/core/core.css' => '1b29ed61',
     'rsrc/css/core/remarkup.css' => '7d3ebc86',
-    'rsrc/css/core/syntax.css' => '98fdb17e',
+    'rsrc/css/core/syntax.css' => '548567f6',
     'rsrc/css/core/z-index.css' => 'ac3bfcd4',
     'rsrc/css/diviner/diviner-shared.css' => '4bd263b0',
     'rsrc/css/font/font-awesome.css' => '3883938a',
@@ -909,7 +909,7 @@ return array(
     'sprite-login-css' => '18b368a6',
     'sprite-tokens-css' => 'f1896dc5',
     'syntax-default-css' => '055fc231',
-    'syntax-highlighting-css' => '98fdb17e',
+    'syntax-highlighting-css' => '548567f6',
     'tokens-css' => 'ce5a50bd',
     'trigger-rule' => '41b7b4f6',
     'trigger-rule-control' => '5faf27b9',
@@ -1422,6 +1422,9 @@ return array(
       'phuix-autocomplete',
       'javelin-mask',
     ),
+    '548567f6' => array(
+      'syntax-default-css',
+    ),
     '55a24e84' => array(
       'javelin-install',
       'javelin-dom',
@@ -1799,9 +1802,6 @@ return array(
       'javelin-dom',
       'javelin-request',
       'javelin-util',
-    ),
-    '98fdb17e' => array(
-      'syntax-default-css',
     ),
     '995f5102' => array(
       'javelin-install',

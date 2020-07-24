@@ -4,8 +4,8 @@ final class DifferentialTabReplacementTestCase
   extends PhabricatorTestCase {
 
   public function testTabReplacement() {
-    $tab1 = "<span data-copy-text=\"\t\" class=\"logical-tab\"> </span>";
-    $tab2 = "<span data-copy-text=\"\t\" class=\"logical-tab\">  </span>";
+    $tab1 = "<span data-copy-text=\"\t\"> </span>";
+    $tab2 = "<span data-copy-text=\"\t\">  </span>";
 
     $cat = "\xF0\x9F\x90\xB1";
 
