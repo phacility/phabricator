@@ -116,11 +116,11 @@ abstract class PhabricatorDaemonManagementWorkflow
     $trace = PhutilArgumentParser::isTraceModeEnabled();
 
     $flags = array();
-    if ($trace || PhabricatorEnv::getEnvConfig('phd.trace')) {
+    if ($trace) {
       $flags[] = '--trace';
     }
 
-    if ($debug || PhabricatorEnv::getEnvConfig('phd.verbose')) {
+    if ($debug) {
       $flags[] = '--verbose';
     }
 

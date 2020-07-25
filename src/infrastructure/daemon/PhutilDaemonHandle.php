@@ -16,7 +16,6 @@ final class PhutilDaemonHandle extends Phobject {
   private $restartAt;
   private $busyEpoch;
 
-  private $pid;
   private $daemonID;
   private $deadline;
   private $heartbeat;
@@ -104,7 +103,7 @@ final class PhutilDaemonHandle extends Phobject {
   }
 
   public function isRunning() {
-    return (bool)$this->future;
+    return (bool)$this->getFuture();
   }
 
   public function isHibernating() {
@@ -134,10 +133,6 @@ final class PhutilDaemonHandle extends Phobject {
     return (!$this->shouldRestart && !$this->isRunning());
   }
 
-  public function getFuture() {
-    return $this->future;
-  }
-
   public function update() {
     if (!$this->isRunning()) {
       if (!$this->shouldRestart) {
@@ -152,11 +147,19 @@ final class PhutilDaemonHandle extends Phobject {
       $this->startDaemonProcess();
     }
 
-    $future = $this->future;
+    $future = $this->getFuture();
 
     $result = null;
-    if ($future->isReady()) {
-      $result = $future->resolve();
+    $caught = null;
+    if ($future->canResolve()) {
+      $this->future = null;
+      try {
+        $result = $future->resolve();
+      } catch (Exception $ex) {
+        $caught = $ex;
+      } catch (Throwable $ex) {
+        $caught = $ex;
+      }
     }
 
     list($stdout, $stderr) = $future->read();
@@ -173,16 +176,22 @@ final class PhutilDaemonHandle extends Phobject {
       }
     }
 
-    if ($result !== null) {
-      list($err) = $result;
+    if ($result !== null || $caught !== null) {
 
-      if ($err) {
-        $this->logMessage('FAIL', pht('Process exited with error %s.', $err));
+      if ($caught) {
+        $message = pht(
+          'Process failed with exception: %s',
+          $caught->getMessage());
+        $this->logMessage('FAIL', $message);
       } else {
-        $this->logMessage('DONE', pht('Process exited normally.'));
-      }
+        list($err) = $result;
 
-      $this->future = null;
+        if ($err) {
+          $this->logMessage('FAIL', pht('Process exited with error %s.', $err));
+        } else {
+          $this->logMessage('DONE', pht('Process exited normally.'));
+        }
+      }
 
       if ($this->shouldShutdown) {
         $this->restartAt = null;
@@ -244,8 +253,22 @@ final class PhutilDaemonHandle extends Phobject {
     return $this->daemonID;
   }
 
-  public function getPID() {
-    return $this->pid;
+  private function getFuture() {
+    return $this->future;
+  }
+
+  private function getPID() {
+    $future = $this->getFuture();
+
+    if (!$future) {
+      return null;
+    }
+
+    if (!$future->hasPID()) {
+      return null;
+    }
+
+    return $future->getPID();
   }
 
   private function getCaptureBufferSize() {
@@ -327,13 +350,14 @@ final class PhutilDaemonHandle extends Phobject {
 
   private function annihilateProcessGroup() {
     $pid = $this->getPID();
-
-    $pgid = posix_getpgid($pid);
-    if ($pid && $pgid) {
-      posix_kill(-$pgid, SIGTERM);
-      sleep($this->getKillDelay());
-      posix_kill(-$pgid, SIGKILL);
-      $this->pid = null;
+    if ($pid) {
+      $pgid = posix_getpgid($pid);
+      if ($pgid) {
+        posix_kill(-$pgid, SIGTERM);
+        sleep($this->getKillDelay());
+        posix_kill(-$pgid, SIGKILL);
+        $this->pid = null;
+      }
     }
   }
 
@@ -345,10 +369,12 @@ final class PhutilDaemonHandle extends Phobject {
     $this->stdoutBuffer = '';
     $this->hibernating = false;
 
-    $this->future = $this->newExecFuture();
-    $this->future->start();
+    $future = $this->newExecFuture();
+    $this->future = $future;
 
-    $this->pid = $this->future->getPID();
+    $pool = $this->getDaemonPool();
+    $overseer = $pool->getOverseer();
+    $overseer->addFutureToPool($future);
   }
 
   private function didReadStdout($data) {
@@ -440,7 +466,10 @@ final class PhutilDaemonHandle extends Phobject {
     // naturally be restarted after it exits, as though it had exited after an
     // unhandled exception.
 
-    posix_kill($this->getPID(), SIGINT);
+    $pid = $this->getPID();
+    if ($pid) {
+      posix_kill($pid, SIGINT);
+    }
   }
 
   public function didReceiveGracefulSignal($signo) {
@@ -461,7 +490,10 @@ final class PhutilDaemonHandle extends Phobject {
 
     $this->logMessage('DONE', $sigmsg, $signo);
 
-    posix_kill($this->getPID(), SIGINT);
+    $pid = $this->getPID();
+    if ($pid) {
+      posix_kill($pid, SIGINT);
+    }
   }
 
   public function didReceiveTerminateSignal($signo) {

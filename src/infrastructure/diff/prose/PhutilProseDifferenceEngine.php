@@ -142,22 +142,9 @@ final class PhutilProseDifferenceEngine extends Phobject {
       }
 
       if ($level < 2) {
-        // Split pieces into separate text and whitespace sections: make one
-        // piece out of all the whitespace at the beginning, one piece out of
-        // all the actual text in the middle, and one piece out of all the
-        // whitespace at the end.
-
-        $matches = null;
-        preg_match('/^(\s*)(.*?)(\s*)\z/s', $result, $matches);
-
-        if (strlen($matches[1])) {
-          $results[] = $matches[1];
-        }
-        if (strlen($matches[2])) {
-          $results[] = $matches[2];
-        }
-        if (strlen($matches[3])) {
-          $results[] = $matches[3];
+        $trimmed_pieces = $this->trimApart($result);
+        foreach ($trimmed_pieces as $trimmed_piece) {
+          $results[] = $trimmed_piece;
         }
       } else {
         $results[] = $result;
@@ -270,6 +257,38 @@ final class PhutilProseDifferenceEngine extends Phobject {
     }
 
     return $blocks;
+  }
+
+  public static function trimApart($input) {
+    // Split pieces into separate text and whitespace sections: make one
+    // piece out of all the whitespace at the beginning, one piece out of
+    // all the actual text in the middle, and one piece out of all the
+    // whitespace at the end.
+
+    $parts = array();
+
+    $length = strlen($input);
+
+    $corpus = ltrim($input);
+    $l_length = strlen($corpus);
+    if ($l_length !== $length) {
+      $parts[] = substr($input, 0, $length - $l_length);
+    }
+
+    $corpus = rtrim($corpus);
+    $lr_length = strlen($corpus);
+
+    if ($lr_length) {
+      $parts[] = $corpus;
+    }
+
+    if ($lr_length !== $l_length) {
+      // NOTE: This will be a negative value; we're slicing from the end of
+      // the input string.
+      $parts[] = substr($input, $lr_length - $l_length);
+    }
+
+    return $parts;
   }
 
 }

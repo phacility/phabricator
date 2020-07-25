@@ -43,22 +43,6 @@ final class PhabricatorPHDConfigOptions
             "configuration changes are picked up by the daemons ".
             "automatically, but pool sizes can not be changed without a ".
             "restart.")),
-      $this->newOption('phd.verbose', 'bool', false)
-        ->setLocked(true)
-        ->setBoolOptions(
-          array(
-            pht('Verbose mode'),
-            pht('Normal mode'),
-          ))
-        ->setSummary(pht("Launch daemons in 'verbose' mode by default."))
-        ->setDescription(
-          pht(
-            "Launch daemons in 'verbose' mode by default. This creates a lot ".
-            "of output, but can help debug issues. Daemons launched in debug ".
-            "mode with '%s' are always launched in verbose mode. ".
-            "See also '%s'.",
-            'phd debug',
-            'phd.trace')),
       $this->newOption('phd.user', 'string', null)
         ->setLocked(true)
         ->setSummary(pht('System user to run daemons as.'))
@@ -68,22 +52,6 @@ final class PhabricatorPHDConfigOptions
             'user will own the working copies of any repositories that '.
             'Phabricator imports or manages. This option is new and '.
             'experimental.')),
-      $this->newOption('phd.trace', 'bool', false)
-        ->setLocked(true)
-        ->setBoolOptions(
-          array(
-            pht('Trace mode'),
-            pht('Normal mode'),
-          ))
-        ->setSummary(pht("Launch daemons in 'trace' mode by default."))
-        ->setDescription(
-          pht(
-            "Launch daemons in 'trace' mode by default. This creates an ".
-            "ENORMOUS amount of output, but can help debug issues. Daemons ".
-            "launched in debug mode with '%s' are always launched in ".
-            "trace mode. See also '%s'.",
-            'phd debug',
-            'phd.verbose')),
       $this->newOption('phd.garbage-collection', 'wild', array())
         ->setLocked(true)
         ->setLockedMessage(

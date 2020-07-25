@@ -111,18 +111,6 @@ final class PhutilDaemonPool extends Phobject {
     return $this->daemons;
   }
 
-  public function getFutures() {
-    $futures = array();
-    foreach ($this->getDaemons() as $daemon) {
-      $future = $daemon->getFuture();
-      if ($future) {
-        $futures[] = $future;
-      }
-    }
-
-    return $futures;
-  }
-
   public function didReceiveSignal($signal, $signo) {
     switch ($signal) {
       case PhutilDaemonOverseer::SIGNAL_GRACEFUL:

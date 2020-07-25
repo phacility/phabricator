@@ -24,7 +24,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           if ($ex) {
             if ($ex instanceof PhabricatorWorkerPermanentFailureException) {
               // NOTE: Make sure these reach the daemon log, even when not
-              // running in "phd.verbose" mode. See T12803 for discussion.
+              // running in verbose mode. See T12803 for discussion.
               $log_exception = new PhutilProxyException(
                 pht(
                   'Task "%s" encountered a permanent failure and was '.

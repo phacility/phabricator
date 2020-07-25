@@ -3,6 +3,39 @@
 final class PhutilProseDiffTestCase
   extends PhabricatorTestCase {
 
+  public function testTrimApart() {
+    $map = array(
+      '' => array(),
+      'a' => array('a'),
+      ' a ' => array(
+        ' ',
+        'a',
+        ' ',
+      ),
+      ' a' => array(
+        ' ',
+        'a',
+      ),
+      'a ' => array(
+        'a',
+        ' ',
+      ),
+      ' a b ' => array(
+        ' ',
+        'a b',
+        ' ',
+      ),
+    );
+
+    foreach ($map as $input => $expect) {
+      $actual = PhutilProseDifferenceEngine::trimApart($input);
+      $this->assertEqual(
+        $expect,
+        $actual,
+        pht('Trim Apart: %s', $input));
+    }
+  }
+
   public function testProseDiffsDistance() {
     $this->assertProseParts(
       '',
