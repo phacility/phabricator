@@ -122,8 +122,16 @@ final class DiffusionCommitGraphView
       }
     }
 
+    $commits = $this->getCommitMap();
+
+    foreach ($commits as $commit) {
+      $author_phid = $commit->getAuthorDisplayPHID();
+      if ($author_phid !== null) {
+        $phids[] = $author_phid;
+      }
+    }
+
     if ($show_auditors) {
-      $commits = $this->getCommitMap();
       foreach ($commits as $commit) {
         $audits = $commit->getAudits();
         foreach ($audits as $auditor) {
@@ -188,12 +196,12 @@ final class DiffusionCommitGraphView
         if ($commit) {
           $revisions = $this->getRevisions($commit);
           if ($revisions) {
-            $revision = head($revisions);
-            $handle = $handles[$revision->getPHID()];
+            $list_view = $handles->newSublist(mpull($revisions, 'getPHID'))
+              ->newListView();
 
             $property_list->newItem()
-              ->setName(pht('Revision'))
-              ->setValue($handle->renderLink());
+              ->setName(pht('Revisions'))
+              ->setValue($list_view);
           }
         }
       }
@@ -422,6 +430,12 @@ final class DiffusionCommitGraphView
 
     $viewer = $this->getViewer();
 
+    $author_phid = $commit->getAuthorDisplayPHID();
+    if ($author_phid) {
+      return $viewer->loadHandles(array($author_phid))
+        ->newListView();
+    }
+
     return $commit->newCommitAuthorView($viewer);
   }
 
@@ -504,12 +518,16 @@ final class DiffusionCommitGraphView
       $status = $commit->getAuditStatusObject();
 
       $text = $status->getName();
-      $color = $status->getColor();
       $icon = $status->getIcon();
 
-      $uri = $commit->getURI();
-
-      $is_disabled = false;
+      $is_disabled = $status->isNoAudit();
+      if ($is_disabled) {
+        $uri = null;
+        $color = 'grey';
+      } else {
+        $color = $status->getColor();
+        $uri = $commit->getURI();
+      }
     } else {
       $text = pht('No Audit');
       $color = 'grey';
@@ -616,8 +634,7 @@ final class DiffusionCommitGraphView
 
     $auditor_phids = mpull($auditors, 'getAuditorPHID');
     $auditor_list = $handles->newSublist($auditor_phids)
-      ->renderList()
-      ->setAsInline(true);
+      ->newListView();
 
     return $auditor_list;
   }

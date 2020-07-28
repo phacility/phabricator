@@ -104,6 +104,10 @@ final class PhabricatorHandleList
       ->setHandleList($this);
   }
 
+  public function newListView() {
+    return id(new FuelHandleListView())
+      ->addHandleList($this);
+  }
 
   /**
    * Return a @{class:PHUIHandleView} which can render a specific handle.

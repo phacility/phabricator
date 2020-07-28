@@ -1,0 +1,33 @@
+/**
+ * @provides fuel-handle-list-css
+ */
+
+.fuel-handle-list {
+  display: table;
+  max-width: 100%;
+}
+
+.fuel-handle-list-body {
+  display: table-row-group;
+}
+
+.fuel-handle-list-item {
+  display: table-row;
+}
+
+.fuel-handle-list-item-cell {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.fuel-handle-list-item-icon {
+  padding-right: 4px;
+}
+
+.fuel-handle-list-item-icon > .phui-icon-view {
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  display: inline-block;
+  background-size: 100%;
+}

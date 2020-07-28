@@ -23,13 +23,13 @@
   border-radius: 3px;
 }
 
-.fuel-menu-item.disabled > .fuel-menu-item-link {
-  color: {$lightgreytext};
-}
-
 .fuel-menu-item.has-link > .fuel-menu-item-link {
   color: {$darkbluetext};
   cursor: pointer;
+}
+
+.fuel-menu-item.disabled > .fuel-menu-item-link {
+  color: {$lightgreytext};
 }
 
 .device-desktop .fuel-menu-item > .fuel-menu-item-link:hover {
