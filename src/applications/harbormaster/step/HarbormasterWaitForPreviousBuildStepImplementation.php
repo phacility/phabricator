@@ -14,7 +14,7 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
   }
 
   public function getBuildStepGroupKey() {
-    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+    return HarbormasterControlBuildStepGroup::GROUPKEY;
   }
 
   public function execute(
