@@ -505,6 +505,8 @@ abstract class DifferentialChangesetRenderer extends Phobject {
         $ospec['htype'] = $old[$ii]['type'];
         if (isset($old_render[$ii])) {
           $ospec['render'] = $old_render[$ii];
+        } else if ($ospec['htype'] === '\\') {
+          $ospec['render'] = $old[$ii]['text'];
         }
       }
 
@@ -514,6 +516,8 @@ abstract class DifferentialChangesetRenderer extends Phobject {
         $nspec['htype'] = $new[$ii]['type'];
         if (isset($new_render[$ii])) {
           $nspec['render'] = $new_render[$ii];
+        } else if ($nspec['htype'] === '\\') {
+          $nspec['render'] = $new[$ii]['text'];
         }
       }
 
