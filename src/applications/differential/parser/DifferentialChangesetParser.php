@@ -1053,14 +1053,30 @@ final class DifferentialChangesetParser extends Phobject {
       $this->comments = id(new PHUIDiffInlineThreader())
         ->reorderAndThreadCommments($this->comments);
 
+      $old_max_display = 1;
+      foreach ($this->old as $old) {
+        if (isset($old['line'])) {
+          $old_max_display = $old['line'];
+        }
+      }
+
+      $new_max_display = 1;
+      foreach ($this->new as $new) {
+        if (isset($new['line'])) {
+          $new_max_display = $new['line'];
+        }
+      }
+
       foreach ($this->comments as $comment) {
-        $final = $comment->getLineNumber() +
-          $comment->getLineLength();
-        $final = max(1, $final);
+        $display_line = $comment->getLineNumber() + $comment->getLineLength();
+        $display_line = max(1, $display_line);
+
         if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
-          $new_comments[$final][] = $comment;
+          $display_line = min($new_max_display, $display_line);
+          $new_comments[$display_line][] = $comment;
         } else {
-          $old_comments[$final][] = $comment;
+          $display_line = min($old_max_display, $display_line);
+          $old_comments[$display_line][] = $comment;
         }
       }
     }
