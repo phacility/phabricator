@@ -83,7 +83,9 @@ final class DifferentialChangesetOneUpRenderer
           $cells = array();
           if ($is_old) {
             if ($p['htype']) {
-              if (empty($p['oline'])) {
+              if ($p['htype'] === '\\') {
+                $class = 'comment';
+              } else if (empty($p['oline'])) {
                 $class = 'left old old-full';
               } else {
                 $class = 'left old';
@@ -129,7 +131,9 @@ final class DifferentialChangesetOneUpRenderer
             $cells[] = $no_coverage;
           } else {
             if ($p['htype']) {
-              if (empty($p['oline'])) {
+              if ($p['htype'] === '\\') {
+                $class = 'comment';
+              } else if (empty($p['oline'])) {
                 $class = 'right new new-full';
               } else {
                 $class = 'right new';

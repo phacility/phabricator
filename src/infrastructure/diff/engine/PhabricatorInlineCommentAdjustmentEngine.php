@@ -358,7 +358,7 @@ final class PhabricatorInlineCommentAdjustmentEngine
         list($tail_deleted, $tail_offset, $tail_line) = $tail_info;
 
         if ($head_offset !== false) {
-          $inline->setLineNumber($head_line + 1 + $head_offset);
+          $inline->setLineNumber($head_line + $head_offset);
         } else {
           $inline->setLineNumber($head_line);
           $inline->setLineLength($tail_line - $head_line);
