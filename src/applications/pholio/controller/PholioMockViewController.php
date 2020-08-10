@@ -61,6 +61,8 @@ final class PholioMockViewController extends PholioController {
       new PholioTransactionQuery());
     $timeline->setMock($mock);
 
+    $timeline->setQuoteRef($mock->getMonogram());
+
     $curtain = $this->buildCurtainView($mock);
     $details = $this->buildDescriptionView($mock);
 
@@ -80,6 +82,7 @@ final class PholioMockViewController extends PholioController {
       ->appendChild($mock_view);
 
     $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
+    $add_comment->setTransactionTimeline($timeline);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($mock->getMonogram(), $mock->getURI());
