@@ -86,7 +86,11 @@
   padding: 1px 4px;
   border-radius: 3px;
   white-space: pre-wrap;
+
+  /* See T13564. This is a narrow control for PDF printing behavior in
+     Chrome. */
   line-break: anywhere;
+  overflow-wrap: anywhere;
 }
 
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
