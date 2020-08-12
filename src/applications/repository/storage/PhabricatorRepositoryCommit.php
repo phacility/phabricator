@@ -523,6 +523,50 @@ final class PhabricatorRepositoryCommit
     return $data->getCommitDetail('committer');
   }
 
+  public function newCommitRef(PhabricatorUser $viewer) {
+    $repository = $this->getRepository();
+
+    $future = $repository->newConduitFuture(
+      $viewer,
+      'internal.commit.search',
+      array(
+        'constraints' => array(
+          'repositoryPHIDs' => array($repository->getPHID()),
+          'phids' => array($this->getPHID()),
+        ),
+      ));
+    $result = $future->resolve();
+
+    $commit_display = $this->getMonogram();
+
+    if (empty($result['data'])) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve details for commit "%s"!',
+          $commit_display));
+    }
+
+    if (count($result['data']) !== 1) {
+      throw new Exception(
+        pht(
+          'Got too many results (%s) for commit "%s", expected %s.',
+          phutil_count($result['data']),
+          $commit_display,
+          1));
+    }
+
+    $record = head($result['data']);
+    $ref_record = idxv($record, array('fields', 'ref'));
+
+    if (!$ref_record) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve CommitRef record for commit "%s".',
+          $commit_display));
+    }
+
+    return DiffusionCommitRef::newFromDictionary($ref_record);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

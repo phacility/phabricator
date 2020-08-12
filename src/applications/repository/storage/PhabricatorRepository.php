@@ -2258,6 +2258,28 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $client;
   }
 
+  public function newConduitFuture(
+    PhabricatorUser $viewer,
+    $method,
+    array $params,
+    $never_proxy = false) {
+
+    $client = $this->newConduitClient(
+      $viewer,
+      $never_proxy);
+
+    if (!$client) {
+      $result = id(new ConduitCall($method, $params))
+        ->setUser($viewer)
+        ->execute();
+      $future = new ImmediateFuture($result);
+    } else {
+      $future = $client->callMethod($method, $params);
+    }
+
+    return $future;
+  }
+
   public function getPassthroughEnvironmentalVariables() {
     $env = $_ENV;
 

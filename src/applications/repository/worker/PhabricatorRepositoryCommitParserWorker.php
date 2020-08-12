@@ -124,4 +124,9 @@ abstract class PhabricatorRepositoryCommitParserWorker
 
     return array($link, $suffix);
   }
+
+  final public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
 }

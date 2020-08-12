@@ -14,31 +14,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     PhabricatorRepositoryCommit $commit) {
 
     if (!$this->shouldSkipImportStep()) {
-      $viewer = PhabricatorUser::getOmnipotentUser();
+      $viewer = $this->getViewer();
 
-      $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
-        $viewer,
-        DiffusionRequest::newFromDictionary(
-          array(
-            'repository' => $repository,
-            'user' => $viewer,
-          )),
-        'diffusion.querycommits',
-        array(
-          'repositoryPHID' => $repository->getPHID(),
-          'phids' => array($commit->getPHID()),
-          'bypassCache' => true,
-          'needMessages' => true,
-        ));
+      $ref = $commit->newCommitRef($viewer);
 
-      if (empty($refs_raw['data'])) {
-        throw new Exception(
-          pht(
-            'Unable to retrieve details for commit "%s"!',
-            $commit->getPHID()));
-      }
-
-      $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
       $this->updateCommitData($ref);
     }
 
