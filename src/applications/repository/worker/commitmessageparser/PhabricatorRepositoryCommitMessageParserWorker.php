@@ -63,7 +63,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $commit = $this->commit;
     $author = $ref->getAuthor();
     $committer = $ref->getCommitter();
-    $hashes = $ref->getHashes();
     $has_committer = (bool)strlen($committer);
 
     $viewer = PhabricatorUser::getOmnipotentUser();
@@ -136,13 +135,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $author_phid = $data->getCommitDetail('authorPHID');
     $committer_phid = $data->getCommitDetail('committerPHID');
-
-    $user = new PhabricatorUser();
-    if ($author_phid) {
-      $user = $user->loadOneWhere(
-        'phid = %s',
-        $author_phid);
-    }
 
     if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
