@@ -34,4 +34,21 @@ final class DiffusionCommitHash extends Phobject {
     }
     return $hash_objects;
   }
+
+  public static function newFromDictionary(array $map) {
+    $hash_type = idx($map, 'type');
+    $hash_value = idx($map, 'value');
+
+    return id(new self())
+      ->setHashType($hash_type)
+      ->setHashValue($hash_value);
+  }
+
+  public function newDictionary() {
+    return array(
+      'type' => $this->hashType,
+      'value' => $this->hashValue,
+    );
+  }
+
 }

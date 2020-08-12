@@ -92,4 +92,13 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     return array_values($holds);
   }
 
+  public function setCommitRef(DiffusionCommitRef $ref) {
+    $this->setCommitDetail('commitRef', $ref->newDictionary());
+  }
+
+  public function newCommitRef() {
+    $map = $this->getCommitDetail('commitRef', array());
+    return DiffusionCommitRef::neWFromDictionary($map);
+  }
+
 }
