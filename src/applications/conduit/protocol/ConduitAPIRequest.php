@@ -51,6 +51,10 @@ final class ConduitAPIRequest extends Phobject {
     return $this->user;
   }
 
+  public function getViewer() {
+    return $this->getUser();
+  }
+
   public function setOAuthToken(
     PhabricatorOAuthServerAccessToken $oauth_token) {
     $this->oauthToken = $oauth_token;
