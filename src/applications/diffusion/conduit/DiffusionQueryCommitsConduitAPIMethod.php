@@ -38,7 +38,6 @@ final class DiffusionQueryCommitsConduitAPIMethod
 
   protected function execute(ConduitAPIRequest $request) {
     $need_messages = $request->getValue('needMessages');
-    $bypass_cache = $request->getValue('bypassCache');
     $viewer = $request->getUser();
 
     $query = id(new DiffusionCommitQuery())
@@ -53,12 +52,6 @@ final class DiffusionQueryCommitsConduitAPIMethod
         ->executeOne();
       if ($repository) {
         $query->withRepository($repository);
-        if ($bypass_cache) {
-          id(new DiffusionRepositoryClusterEngine())
-            ->setViewer($viewer)
-            ->setRepository($repository)
-            ->synchronizeWorkingCopyBeforeRead();
-        }
       }
     }
 
@@ -111,33 +104,7 @@ final class DiffusionQueryCommitsConduitAPIMethod
         'hashes' => array(),
       );
 
-      if ($bypass_cache) {
-        $lowlevel_commitref = id(new DiffusionLowLevelCommitQuery())
-          ->setRepository($commit->getRepository())
-          ->withIdentifier($commit->getCommitIdentifier())
-          ->execute();
-
-        $dict['authorEpoch'] = $lowlevel_commitref->getAuthorEpoch();
-        $dict['author'] = $lowlevel_commitref->getAuthor();
-        $dict['authorName'] = $lowlevel_commitref->getAuthorName();
-        $dict['authorEmail'] = $lowlevel_commitref->getAuthorEmail();
-        $dict['committer'] = $lowlevel_commitref->getCommitter();
-        $dict['committerName'] = $lowlevel_commitref->getCommitterName();
-        $dict['committerEmail'] = $lowlevel_commitref->getCommitterEmail();
-
-        if ($need_messages) {
-          $dict['message'] = $lowlevel_commitref->getMessage();
-        }
-
-        foreach ($lowlevel_commitref->getHashes() as $hash) {
-          $dict['hashes'][] = array(
-            'type' => $hash->getHashType(),
-            'value' => $hash->getHashValue(),
-          );
-        }
-      }
-
-      if ($need_messages && !$bypass_cache) {
+      if ($need_messages) {
         $dict['message'] = $commit_data->getCommitMessage();
       }
 
