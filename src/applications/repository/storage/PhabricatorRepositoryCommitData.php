@@ -6,6 +6,7 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   protected $authorName    = '';
   protected $commitMessage = '';
   protected $commitDetails = array();
+  private $commitRef;
 
   protected function getConfiguration() {
     return array(
@@ -93,8 +94,14 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   }
 
   public function getAuthorString() {
-    $author = phutil_string_cast($this->authorName);
+    $ref = $this->getCommitRef();
 
+    $author = $ref->getAuthor();
+    if (strlen($author)) {
+      return $author;
+    }
+
+    $author = phutil_string_cast($this->authorName);
     if (strlen($author)) {
       return $author;
     }
@@ -103,15 +110,15 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   }
 
   public function getAuthorDisplayName() {
-    return $this->getCommitDetailString('authorName');
+    return $this->getCommitRef()->getAuthorName();
   }
 
   public function getAuthorEmail() {
-    return $this->getCommitDetailString('authorEmail');
+    return $this->getCommitRef()->getAuthorEmail();
   }
 
   public function getAuthorEpoch() {
-    $epoch = $this->getCommitDetail('authorEpoch');
+    $epoch = $this->getCommitRef()->getAuthorEpoch();
 
     if ($epoch) {
       return (int)$epoch;
@@ -121,15 +128,22 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   }
 
   public function getCommitterString() {
+    $ref = $this->getCommitRef();
+
+    $committer = $ref->getCommitter();
+    if (strlen($committer)) {
+      return $committer;
+    }
+
     return $this->getCommitDetailString('committer');
   }
 
   public function getCommitterDisplayName() {
-    return $this->getCommitDetailString('committerName');
+    return $this->getCommitRef()->getCommitterName();
   }
 
   public function getCommitterEmail() {
-    return $this->getCommitDetailString('committerEmail');
+    return $this->getCommitRef()->getCommitterEmail();
   }
 
   private function getCommitDetailString($key) {
@@ -141,6 +155,37 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     }
 
     return null;
+  }
+
+  public function setCommitRef(DiffusionCommitRef $ref) {
+    $this->setCommitDetail('ref', $ref->newDictionary());
+    $this->commitRef = null;
+
+    return $this;
+  }
+
+  public function getCommitRef() {
+    if ($this->commitRef === null) {
+      $map = $this->getCommitDetail('ref', array());
+
+      if (!is_array($map)) {
+        $map = array();
+      }
+
+      $map = $map + array(
+        'authorName' => $this->getCommitDetailString('authorName'),
+        'authorEmail' => $this->getCommitDetailString('authorEmail'),
+        'authorEpoch' => $this->getCommitDetailString('authorEpoch'),
+        'committerName' => $this->getCommitDetailString('committerName'),
+        'committerEmail' => $this->getCommitDetailString('committerEmail'),
+        'message' => $this->getCommitMessage(),
+      );
+
+      $ref = DiffusionCommitRef::newFromDictionary($map);
+      $this->commitRef = $ref;
+    }
+
+    return $this->commitRef;
   }
 
 }

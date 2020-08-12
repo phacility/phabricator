@@ -174,6 +174,11 @@ final class PhabricatorRepositoryCommit
     return $this;
   }
 
+  public function hasCommitData() {
+    return ($this->commitData !== self::ATTACHABLE) &&
+           ($this->commitData !== null);
+  }
+
   public function getCommitData() {
     return $this->assertAttached($this->commitData);
   }

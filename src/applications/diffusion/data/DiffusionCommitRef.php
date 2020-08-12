@@ -50,10 +50,6 @@ final class DiffusionCommitRef extends Phobject {
       ->setHashes($hashes);
   }
 
-  public static function newFromConduitResult(array $result) {
-    return self::newFromDictionary($result);
-  }
-
   public function setHashes(array $hashes) {
     assert_instances_of($hashes, 'DiffusionCommitHash');
     $this->hashes = $hashes;

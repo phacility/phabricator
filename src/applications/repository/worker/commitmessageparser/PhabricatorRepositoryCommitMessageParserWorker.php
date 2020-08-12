@@ -18,7 +18,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       $ref = $commit->newCommitRef($viewer);
 
-      $this->updateCommitData($ref);
+      $data = $this->loadCommitData($commit);
+      $data->setCommitRef($ref);
+
+      $this->updateCommitData($commit, $data);
     }
 
     if ($this->shouldQueueFollowupTasks()) {
@@ -38,13 +41,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
   }
 
-  final protected function updateCommitData(DiffusionCommitRef $ref) {
-    $commit = $this->commit;
+  final protected function updateCommitData(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    $ref = $data->getCommitRef();
+    $viewer = $this->getViewer();
+
     $author = $ref->getAuthor();
     $committer = $ref->getCommitter();
     $has_committer = (bool)strlen($committer);
-
-    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $identity_engine = id(new DiffusionRepositoryIdentityEngine())
       ->setViewer($viewer)
@@ -66,13 +72,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $committer_identity = null;
     }
 
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
-    if (!$data) {
-      $data = new PhabricatorRepositoryCommitData();
-    }
-    $data->setCommitID($commit->getID());
     $data->setAuthorName(id(new PhutilUTF8StringTruncator())
       ->setMaximumBytes(255)
       ->truncateString((string)$author));
@@ -122,7 +121,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $commit->setAuthorIdentityPHID($author_identity->getPHID());
 
     $commit->setSummary($data->getSummary());
+
     $commit->save();
+    $data->save();
 
     // If we're publishing this commit, we're going to queue tasks to update
     // referenced objects (like tasks and revisions). Otherwise, record some
@@ -130,15 +131,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $publisher = $repository->newPublisher();
     if ($publisher->shouldPublishCommit($commit)) {
-      $actor = PhabricatorUser::getOmnipotentUser();
-      $this->closeRevisions($actor, $ref, $commit, $data);
-      $this->closeTasks($actor, $ref, $commit, $data);
+      $this->closeRevisions($viewer, $commit);
+      $this->closeTasks($viewer, $commit);
     } else {
       $hold_reasons = $publisher->getCommitHoldReasons($commit);
-      $data->setCommitDetail('holdReasons', $hold_reasons);
-    }
 
-    $data->save();
+      $data->setCommitDetail('holdReasons', $hold_reasons);
+      $data->save();
+    }
 
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
@@ -146,9 +146,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
   private function closeRevisions(
     PhabricatorUser $actor,
-    DiffusionCommitRef $ref,
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
+    PhabricatorRepositoryCommit $commit) {
 
     $differential = 'PhabricatorDifferentialApplication';
     if (!PhabricatorApplication::isClassInstalled($differential)) {
@@ -156,6 +154,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $repository = $commit->getRepository();
+    $data = $commit->getCommitData();
+    $ref = $data->getCommitRef();
 
     $field_query = id(new DiffusionLowLevelCommitFieldsQuery())
       ->setRepository($repository)
@@ -198,14 +198,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
   private function closeTasks(
     PhabricatorUser $actor,
-    DiffusionCommitRef $ref,
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
+    PhabricatorRepositoryCommit $commit) {
 
     $maniphest = 'PhabricatorManiphestApplication';
     if (!PhabricatorApplication::isClassInstalled($maniphest)) {
       return;
     }
+
+    $data = $commit->getCommitData();
 
     $prefixes = ManiphestTaskStatus::getStatusPrefixMap();
     $suffixes = ManiphestTaskStatus::getStatusSuffixMap();
