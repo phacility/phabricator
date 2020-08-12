@@ -626,7 +626,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $author_view = $commit->newCommitAuthorView($viewer);
     if ($author_view) {
-      $author_date = $data->getCommitDetail('authorEpoch');
+      $author_date = $data->getAuthorEpoch();
       $author_date = phabricator_datetime($author_date, $viewer);
 
       $provenance_list->addItem(

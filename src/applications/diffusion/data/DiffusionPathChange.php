@@ -104,7 +104,7 @@ final class DiffusionPathChange extends Phobject {
 
   public function getAuthorName() {
     if ($this->getCommitData()) {
-      return $this->getCommitData()->getAuthorName();
+      return $this->getCommitData()->getAuthorString();
     }
     return null;
   }

@@ -515,12 +515,12 @@ final class PhabricatorRepositoryCommit
 
   private function getRawAuthorStringForDisplay() {
     $data = $this->getCommitData();
-    return $data->getAuthorName();
+    return $data->getAuthorString();
   }
 
   private function getRawCommitterStringForDisplay() {
     $data = $this->getCommitData();
-    return $data->getCommitDetail('committer');
+    return $data->getCommitterString();
   }
 
   public function newCommitRef(PhabricatorUser $viewer) {
@@ -898,12 +898,7 @@ final class PhabricatorRepositoryCommit
       $committer_user_phid = null;
     }
 
-    $author_epoch = $data->getCommitDetail('authorEpoch');
-    if ($author_epoch) {
-      $author_epoch = (int)$author_epoch;
-    } else {
-      $author_epoch = null;
-    }
+    $author_epoch = $data->getAuthorEpoch();
 
     $audit_status = $this->getAuditStatusObject();
 

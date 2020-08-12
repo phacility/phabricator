@@ -202,11 +202,11 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
       $needs_update = false;
 
       $data = $commit->getCommitData();
-      $author_name = $data->getAuthorName();
+      $author = $data->getAuthorString();
 
       $author_identity = $this->getIdentityForCommit(
         $commit,
-        $author_name);
+        $author);
 
       $author_phid = $commit->getAuthorIdentityPHID();
       $identity_phid = $author_identity->getPHID();
@@ -218,7 +218,7 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
         $needs_update = true;
       }
 
-      $committer_name = $data->getCommitDetail('committer', null);
+      $committer_name = $data->getCommitterString();
       $committer_phid = $commit->getCommitterIdentityPHID();
       if (strlen($committer_name)) {
         $committer_identity = $this->getIdentityForCommit(

@@ -150,7 +150,7 @@ final class DiffusionTagListView extends DiffusionView {
     if ($commit->getAuthorPHID()) {
       $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
     } else if ($commit->getCommitData()) {
-      $author = self::renderName($commit->getCommitData()->getAuthorName());
+      $author = self::renderName($commit->getCommitData()->getAuthorString());
     } else {
       $author = self::renderName($tag->getAuthor());
     }

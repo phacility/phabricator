@@ -116,9 +116,9 @@ final class PhabricatorRepositoryCommitPublishWorker
         array(
           'description'   => $data->getCommitMessage(),
           'summary'       => $data->getSummary(),
-          'authorName'    => $data->getAuthorName(),
+          'authorName'    => $data->getAuthorString(),
           'authorPHID'    => $commit->getAuthorPHID(),
-          'committerName' => $data->getCommitDetail('committer'),
+          'committerName' => $data->getCommitterString(),
           'committerPHID' => $data->getCommitDetail('committerPHID'),
         ));
 

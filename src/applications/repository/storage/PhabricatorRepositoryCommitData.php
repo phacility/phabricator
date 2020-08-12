@@ -92,13 +92,55 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     return array_values($holds);
   }
 
-  public function setCommitRef(DiffusionCommitRef $ref) {
-    $this->setCommitDetail('commitRef', $ref->newDictionary());
+  public function getAuthorString() {
+    $author = phutil_string_cast($this->authorName);
+
+    if (strlen($author)) {
+      return $author;
+    }
+
+    return null;
   }
 
-  public function newCommitRef() {
-    $map = $this->getCommitDetail('commitRef', array());
-    return DiffusionCommitRef::neWFromDictionary($map);
+  public function getAuthorDisplayName() {
+    return $this->getCommitDetailString('authorName');
+  }
+
+  public function getAuthorEmail() {
+    return $this->getCommitDetailString('authorEmail');
+  }
+
+  public function getAuthorEpoch() {
+    $epoch = $this->getCommitDetail('authorEpoch');
+
+    if ($epoch) {
+      return (int)$epoch;
+    }
+
+    return null;
+  }
+
+  public function getCommitterString() {
+    return $this->getCommitDetailString('committer');
+  }
+
+  public function getCommitterDisplayName() {
+    return $this->getCommitDetailString('committerName');
+  }
+
+  public function getCommitterEmail() {
+    return $this->getCommitDetailString('committerEmail');
+  }
+
+  private function getCommitDetailString($key) {
+    $string = $this->getCommitDetail($key);
+    $string = phutil_string_cast($string);
+
+    if (strlen($string)) {
+      return $string;
+    }
+
+    return null;
   }
 
 }
