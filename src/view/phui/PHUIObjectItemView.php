@@ -816,6 +816,23 @@ final class PHUIObjectItemView extends AphrontTagView {
         $box,
       ));
 
+    if ($this->menu) {
+      $grid_view = id(new FuelGridView())
+        ->addClass('fuel-grid-tablet');
+      $grid_row = $grid_view->newRow();
+
+      $grid_row->newCell()
+        ->setContent($frame_content);
+
+      $menu = $this->menu;
+
+      $grid_row->newCell()
+        ->addClass('phui-oi-menu')
+        ->setContent($menu);
+
+      $frame_content = $grid_view;
+    }
+
     $frame_cover = null;
     if ($this->coverImage) {
       $cover_image = phutil_tag(
@@ -843,22 +860,7 @@ final class PHUIObjectItemView extends AphrontTagView {
         $frame_content,
       ));
 
-    $grid_view = id(new FuelGridView())
-      ->addClass('fuel-grid-tablet');
-    $grid_row = $grid_view->newRow();
-
-    $grid_row->newCell()
-      ->setContent($frame);
-
-    if ($this->menu) {
-      $menu = $this->menu;
-
-      $grid_row->newCell()
-        ->addClass('phui-oi-menu')
-        ->setContent($menu);
-    }
-
-    return $grid_view;
+    return $frame;
   }
 
   private function renderStatusIcon($icon, $label) {

@@ -736,10 +736,9 @@ ul.phui-oi-list-view .phui-oi-selectable
 .device-desktop .phui-oi-menu,
 .device-tablet .phui-oi-menu {
   width: 200px;
-  border-width: 0 0 1px 1px;
+  border-width: 0 0 0 1px;
 }
 
 .device-phone .phui-oi-menu {
-  border-width: 0 0 1px;
-  margin-bottom: 12px;
+  border-width: 1px 0 0;
 }
