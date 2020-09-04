@@ -401,7 +401,7 @@ final class PhrictionDocumentController
 
     $view->addProperty(
       pht('Last Edited'),
-      phabricator_datetime($content->getDateCreated(), $viewer));
+      phabricator_dual_datetime($content->getDateCreated(), $viewer));
 
     return $view;
   }

@@ -50,6 +50,23 @@ function javelin_tag(
     unset($attributes['aural']);
   }
 
+  if (isset($attributes['print'])) {
+    if ($attributes['print']) {
+      $class = idx($attributes, 'class', '');
+      $class = rtrim('print-only '.$class);
+      $attributes['class'] = $class;
+
+      // NOTE: Alternative print content is hidden from screen readers.
+      $attributes['aria-hidden'] = 'true';
+    } else {
+      $class = idx($attributes, 'class', '');
+      $class = rtrim('screen-only '.$class);
+      $attributes['class'] = $class;
+    }
+    unset($attributes['print']);
+  }
+
+
   return phutil_tag($tag, $attributes, $content);
 }
 

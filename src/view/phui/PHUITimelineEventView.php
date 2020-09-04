@@ -591,7 +591,7 @@ final class PHUITimelineEventView extends AphrontView {
       }
 
       if ($date_created) {
-        $date = phabricator_datetime(
+        $date = phabricator_dual_datetime(
           $date_created,
           $this->getUser());
         if ($this->anchor) {
@@ -611,6 +611,7 @@ final class PHUITimelineEventView extends AphrontView {
               $date),
           );
         }
+
         $extra[] = $date;
       }
 
