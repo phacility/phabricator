@@ -162,6 +162,33 @@ hr {
   opacity: 0.25;
 }
 
+.print-only {
+  display: none;
+}
+
+/* NOTE: These rules currently only work when applied to elements which
+   actually want "display: inline". There is no "display: auto". If there
+   is a future need to mix inline and block print elements, using
+   "display: initial" may be a reasonable approach. */
+
+.printable .print-only {
+  display: inline;
+}
+
+.printable .screen-only {
+  display: none;
+}
+
+@media print {
+  .screen-only {
+    display: none;
+  }
+
+  .print-only {
+    display: inline;
+  }
+}
+
 .routing-bar {
   position: fixed;
   top: 0;

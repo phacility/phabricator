@@ -38,6 +38,39 @@ function phabricator_time($epoch, $user) {
     $user->getUserSetting($time_key));
 }
 
+function phabricator_dual_datetime($epoch, $user) {
+  $screen_view = phabricator_datetime($epoch, $user);
+  $print_view = phabricator_absolute_datetime($epoch, $user);
+
+  $screen_tag = javelin_tag(
+    'span',
+    array(
+      'print' => false,
+    ),
+    $screen_view);
+
+  $print_tag = javelin_tag(
+    'span',
+    array(
+      'print' => true,
+    ),
+    $print_view);
+
+  return array(
+    $screen_tag,
+    $print_tag,
+  );
+}
+
+function phabricator_absolute_datetime($epoch, $user) {
+  $format = 'Y-m-d H:i:s (\\U\\T\\CP)';
+
+  $datetime = phabricator_format_local_time($epoch, $user, $format);
+  $datetime = preg_replace('/(UTC[+-])0?([^:]+)(:00)?/', '\\1\\2', $datetime);
+
+  return $datetime;
+}
+
 function phabricator_datetime($epoch, $user) {
   $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
   return phabricator_format_local_time(
