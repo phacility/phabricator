@@ -356,7 +356,6 @@ final class PhutilDaemonHandle extends Phobject {
         posix_kill(-$pgid, SIGTERM);
         sleep($this->getKillDelay());
         posix_kill(-$pgid, SIGKILL);
-        $this->pid = null;
       }
     }
   }
