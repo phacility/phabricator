@@ -205,6 +205,8 @@ final class PhabricatorDatabaseRefParser
             'Database "%s" is configured as a replica and specifies a '.
             'master ("%s"), but that master is not a valid master. Valid '.
             'masters are: %s.',
+            $ref->getRefKey(),
+            $master_key,
             implode(', ', $master_keys)));
       }
 

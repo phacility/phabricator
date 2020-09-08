@@ -98,7 +98,9 @@ final class PhabricatorNotificationServersConfigType
             'Notification server configuration describes an invalid host '.
             '("%s", at index "%s"). This is an "admin" service but it has a '.
             '"path" property. This property is only valid for "client" '.
-            'services.'));
+            'services.',
+            $host,
+            $index));
       }
 
       // We can't guarantee that you didn't just give the same host two

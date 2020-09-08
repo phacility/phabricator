@@ -266,8 +266,7 @@ final class PhabricatorPolicy
           return pht(
             'Members of a particular project can take this action. (You '.
             'can not see this object, so the name of this project is '.
-            'restricted.)',
-            $handle->getFullName());
+            'restricted.)');
         } else if ($type == PhabricatorPeopleUserPHIDType::TYPECONST) {
           return pht(
             '%s can take this action.',

@@ -199,8 +199,7 @@ final class ManiphestTaskPriority extends ManiphestConstants {
       throw new Exception(
         pht(
           'Configuration is not valid. Maniphest priority configurations '.
-          'must be dictionaries.',
-          $config));
+          'must be dictionaries.'));
     }
 
     $all_keywords = array();

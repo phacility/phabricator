@@ -54,6 +54,7 @@ final class HarbormasterManagementPublishWorkflow
           pht(
             'Object "%s" is not a HarbormasterBuildable (it is a "%s"). '.
             'Name one or more buildables to publish, like "B123".',
+            $name,
             get_class($result)));
       }
     }

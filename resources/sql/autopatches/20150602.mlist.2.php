@@ -40,7 +40,8 @@ foreach ($lists as $list) {
   if (!$username_okay) {
     echo pht(
       'Failed to migrate mailing list "%s": unable to generate a unique '.
-      'username for it.')."\n";
+      'username for it.',
+      $name)."\n";
     continue;
   }
 

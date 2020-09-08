@@ -65,6 +65,7 @@ abstract class PhabricatorMailAdapter
           pht(
             'Adapter ("%s") is configured for medium "%s", but this is not '.
             'a supported delivery medium. Supported media are: %s.',
+            get_class($this),
             $medium,
             implode(', ', $native_map)));
       }

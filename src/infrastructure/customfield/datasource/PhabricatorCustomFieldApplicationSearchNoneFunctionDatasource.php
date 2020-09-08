@@ -22,7 +22,7 @@ final class PhabricatorCustomFieldApplicationSearchNoneFunctionDatasource
         'summary' => pht('Find results with no value.'),
         'description' => pht(
           "This function includes results which have no value. Use a query ".
-          "like this to find results with no value:\n\n%s\n\n",
+          "like this to find results with no value:\n\n%s\n\n".
           'If you combine this function with other constraints, results '.
           'which have no value or the specified values will be returned.',
           '> any()'),

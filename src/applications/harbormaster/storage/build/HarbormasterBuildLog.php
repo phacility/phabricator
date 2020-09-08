@@ -177,6 +177,8 @@ final class HarbormasterBuildLog
         pht(
           'Attempt to load log bytes (%d - %d) failed: failed to '.
           'load a single contiguous range. Actual ranges: %s.',
+          $offset,
+          $end,
           implode('; ', $display_ranges)));
     }
 

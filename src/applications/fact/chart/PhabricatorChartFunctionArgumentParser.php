@@ -43,6 +43,7 @@ final class PhabricatorChartFunctionArgumentParser
         pht(
           'Chart function "%s" emitted an argument specification ("%s") with '.
           'no type. Each argument specification must have a valid type.',
+          $this->getFunctionArgumentSignature(),
           $name));
     }
 

@@ -84,7 +84,8 @@ final class DifferentialRevisionRepositoryTransaction
         $errors[] = $this->newInvalidError(
           pht(
             'Repository "%s" is not a valid repository, or you do not have '.
-            'permission to view it.'),
+            'permission to view it.',
+            $new_value),
           $xaction);
       }
     }
