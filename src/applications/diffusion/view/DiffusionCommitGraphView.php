@@ -485,7 +485,7 @@ final class DiffusionCommitGraphView
     $buildable = null;
 
     $commit = $this->getCommit($hash);
-    if (!$commit) {
+    if ($commit) {
       $buildable = $this->getBuildable($commit);
     }
 
