@@ -12,6 +12,7 @@ final class PhabricatorMailAdapterTestCase
         array(
           'access-key' => 'test',
           'secret-key' => 'test',
+          'region' => 'test',
           'endpoint' => 'test',
         ),
       ),
