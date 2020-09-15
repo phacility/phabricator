@@ -247,7 +247,9 @@ To use this mailer, set `type` to `ses`, then configure these `options`:
 
   - `access-key`: Required string. Your Amazon SES access key.
   - `secret-key`: Required string. Your Amazon SES secret key.
-  - `endpoint`: Required string. Your Amazon SES endpoint.
+  - `region`: Required string. Your Amazon SES region, like `us-west-2`.
+  - `endpoint`: Required string. Your Amazon SES endpoint, like
+    `email.us-west-2.amazonaws.com`.
 
 NOTE: Amazon SES **requires you to verify your "From" address**. Configure
 which "From" address to use by setting `metamta.default-address` in your
