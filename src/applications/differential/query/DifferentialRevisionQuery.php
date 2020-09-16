@@ -778,12 +778,19 @@ final class DifferentialRevisionQuery
    */
   protected function shouldGroupQueryResultRows() {
 
-    $join_triggers = array_merge(
-      $this->pathIDs,
-      $this->ccs,
-      $this->reviewers);
+    if (count($this->pathIDs) > 1) {
+      return true;
+    }
 
-    if (count($join_triggers) > 1) {
+    if (count($this->ccs) > 1) {
+      return true;
+    }
+
+    if (count($this->reviewers) > 1) {
+      return true;
+    }
+
+    if (count($this->commitHashes) > 1) {
       return true;
     }
 
