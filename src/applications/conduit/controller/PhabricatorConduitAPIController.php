@@ -100,9 +100,17 @@ final class PhabricatorConduitAPIController
       }
     } catch (Exception $ex) {
       $result = null;
-      $error_code = ($ex instanceof ConduitException
-        ? 'ERR-CONDUIT-CALL'
-        : 'ERR-CONDUIT-CORE');
+
+      if ($ex instanceof ConduitException) {
+        $error_code = 'ERR-CONDUIT-CALL';
+      } else {
+        $error_code = 'ERR-CONDUIT-CORE';
+
+        // See T13581. When a Conduit method raises an uncaught exception
+        // other than a "ConduitException", log it.
+        phlog($ex);
+      }
+
       $error_info = $ex->getMessage();
     }
 
