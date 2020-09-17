@@ -614,7 +614,7 @@ final class DiffusionCommitGraphView
 
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
-      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withRepository($repository)
       ->withIdentifiers($identifiers)
       ->needCommitData(true)
       ->needIdentities(true)
