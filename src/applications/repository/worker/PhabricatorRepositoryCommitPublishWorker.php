@@ -67,10 +67,17 @@ final class PhabricatorRepositoryCommitPublishWorker
       return;
     }
 
-    $this->applyTransactions($viewer, $repository, $commit);
+    // NOTE: Close revisions and tasks before applying transactions, because
+    // we want a side effect of closure (the commit being associated with
+    // a revision) to occur before a side effect of transactions (Herald
+    // executing). The close methods queue tasks for the actual updates to
+    // commits/revisions, so those won't occur until after the commit gets
+    // transactions.
 
     $this->closeRevisions($viewer, $commit);
     $this->closeTasks($viewer, $commit);
+
+    $this->applyTransactions($viewer, $repository, $commit);
   }
 
   private function applyTransactions(
