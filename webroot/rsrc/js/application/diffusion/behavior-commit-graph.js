@@ -61,7 +61,13 @@ JX.behavior('diffusion-commit-graph', function(config) {
       return (col * cell) + (cell / 2);
     };
 
-    var h = 34;
+    var h;
+    if (config.autoheight) {
+      h = JX.Vector.getDim(nodes[ii].parentNode).y;
+    } else {
+      h = 34;
+    }
+
     var w = cell * config.count;
 
     var canvas = JX.$N('canvas', {width: w, height: h});
@@ -147,7 +153,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
       }
     }
 
-    JX.DOM.setContent(nodes[ii], canvas);
+    JX.DOM.replace(nodes[ii], canvas);
   }
 
 

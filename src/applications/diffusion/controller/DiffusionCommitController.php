@@ -90,10 +90,9 @@ final class DiffusionCommitController extends DiffusionController {
         ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->appendChild($warning_message);
 
-      $list = id(new DiffusionCommitListView())
+      $list = id(new DiffusionCommitGraphView())
         ->setViewer($viewer)
-        ->setCommits($commits)
-        ->setNoDataString(pht('No recent commits.'));
+        ->setCommits($commits);
 
       $crumbs->addTextCrumb(pht('Ambiguous Commit'));
 
@@ -183,7 +182,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
 
       $curtain = $this->buildCurtain($commit, $repository);
-      $subheader = $this->buildSubheaderView($commit, $commit_data);
       $details = $this->buildPropertyListView(
         $commit,
         $commit_data,
@@ -483,7 +481,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setSubheader($subheader)
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
@@ -625,32 +622,49 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
-    $author_epoch = $data->getCommitDetail('authorEpoch');
+    $provenance_list = new PHUIStatusListView();
 
-    $committed_info = id(new PHUIStatusItemView())
-      ->setNote(phabricator_datetime($commit->getEpoch(), $viewer))
-      ->setTarget($commit->renderAnyCommitter($viewer, $handles));
+    $author_view = $commit->newCommitAuthorView($viewer);
+    if ($author_view) {
+      $author_date = $data->getAuthorEpoch();
+      $author_date = phabricator_datetime($author_date, $viewer);
 
-    $committed_list = new PHUIStatusListView();
-    $committed_list->addItem($committed_info);
-    $view->addProperty(
-      pht('Committed'),
-      $committed_list);
+      $provenance_list->addItem(
+        id(new PHUIStatusItemView())
+          ->setTarget($author_view)
+          ->setNote(pht('Authored on %s', $author_date)));
+    }
+
+    if (!$commit->isAuthorSameAsCommitter()) {
+      $committer_view = $commit->newCommitCommitterView($viewer);
+      if ($committer_view) {
+        $committer_date = $commit->getEpoch();
+        $committer_date = phabricator_datetime($committer_date, $viewer);
+
+        $provenance_list->addItem(
+          id(new PHUIStatusItemView())
+            ->setTarget($committer_view)
+            ->setNote(pht('Committed on %s', $committer_date)));
+      }
+    }
 
     if ($push_logs) {
       $pushed_list = new PHUIStatusListView();
 
       foreach ($push_logs as $push_log) {
-        $pushed_item = id(new PHUIStatusItemView())
-          ->setTarget($handles[$push_log->getPusherPHID()]->renderLink())
-          ->setNote(phabricator_datetime($push_log->getEpoch(), $viewer));
-        $pushed_list->addItem($pushed_item);
-      }
+        $pusher_date = $push_log->getEpoch();
+        $pusher_date = phabricator_datetime($pusher_date, $viewer);
 
-      $view->addProperty(
-        pht('Pushed'),
-        $pushed_list);
+        $pusher_view = $handles[$push_log->getPusherPHID()]->renderLink();
+
+        $provenance_list->addItem(
+          id(new PHUIStatusItemView())
+            ->setTarget($pusher_view)
+            ->setNote(pht('Pushed on %s', $pusher_date)));
+      }
     }
+
+    $view->addProperty(pht('Provenance'), $provenance_list);
 
     $reviewer_phid = $data->getCommitDetail('reviewerPHID');
     if ($reviewer_phid) {
@@ -743,52 +757,6 @@ final class DiffusionCommitController extends DiffusionController {
     return $view;
   }
 
-  private function buildSubheaderView(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    $viewer = $this->getViewer();
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-
-    if ($repository->isSVN()) {
-      return null;
-    }
-
-    $author_phid = $commit->getAuthorDisplayPHID();
-    $author_name = $data->getAuthorName();
-    $author_epoch = $data->getCommitDetail('authorEpoch');
-    $date = null;
-    if ($author_epoch !== null) {
-      $date = phabricator_datetime($author_epoch, $viewer);
-    }
-
-    if ($author_phid) {
-      $handles = $viewer->loadHandles(array($author_phid));
-      $image_uri = $handles[$author_phid]->getImageURI();
-      $image_href = $handles[$author_phid]->getURI();
-      $author = $handles[$author_phid]->renderLink();
-    } else if (strlen($author_name)) {
-      $author = $author_name;
-      $image_uri = null;
-      $image_href = null;
-    } else {
-      return null;
-    }
-
-    $author = phutil_tag('strong', array(), $author);
-    if ($date) {
-      $content = pht('Authored by %s on %s.', $author, $date);
-    } else {
-      $content = pht('Authored by %s.', $author);
-    }
-
-    return id(new PHUIHeadThingView())
-      ->setImage($image_uri)
-      ->setImageHref($image_href)
-      ->setContent($content);
-  }
-
   private function buildComments(PhabricatorRepositoryCommit $commit) {
     $timeline = $this->buildTransactionTimeline(
       $commit,
@@ -843,15 +811,15 @@ final class DiffusionCommitController extends DiffusionController {
           new PhutilNumber($limit)));
     }
 
-    $history_table = id(new DiffusionHistoryTableView())
-      ->setUser($viewer)
+    $commit_list = id(new DiffusionCommitGraphView())
+      ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
       ->setHistory($merges);
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Merged Changes'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($history_table);
+      ->setObjectList($commit_list->newObjectItemListView());
     if ($caption) {
       $panel->setInfoView($caption);
     }

@@ -29,6 +29,8 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $coverImage;
   private $description;
   private $clickable;
+  private $mapViews = array();
+  private $menu;
 
   private $selectableName;
   private $selectableValue;
@@ -210,6 +212,21 @@ final class PHUIObjectItemView extends AphrontTagView {
       'attributes' => $attributes,
     );
     return $this;
+  }
+
+  public function newMenuItem() {
+    if (!$this->menu) {
+      $this->menu = new FuelMenuView();
+    }
+
+    return $this->menu->newItem();
+  }
+
+  public function newMapView() {
+    $list = id(new FuelMapView())
+      ->addClass('fuel-map-property-list');
+    $this->mapViews[] = $list;
+    return $list;
   }
 
   /**
@@ -598,6 +615,20 @@ final class PHUIObjectItemView extends AphrontTagView {
         '');
     }
 
+    $map_views = null;
+    if ($this->mapViews) {
+      $grid = id(new FuelGridView())
+        ->addClass('fuel-grid-property-list');
+
+      $row = $grid->newRow();
+      foreach ($this->mapViews as $map_view) {
+        $row->newCell()
+          ->setContent($map_view);
+      }
+
+      $map_views = $grid;
+    }
+
     $content = phutil_tag(
       'div',
       array(
@@ -606,6 +637,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         $subhead,
         $attrs,
+        $map_views,
         $this->renderChildren(),
       ));
 
@@ -783,6 +815,23 @@ final class PHUIObjectItemView extends AphrontTagView {
         $image,
         $box,
       ));
+
+    if ($this->menu) {
+      $grid_view = id(new FuelGridView())
+        ->addClass('fuel-grid-tablet');
+      $grid_row = $grid_view->newRow();
+
+      $grid_row->newCell()
+        ->setContent($frame_content);
+
+      $menu = $this->menu;
+
+      $grid_row->newCell()
+        ->addClass('phui-oi-menu')
+        ->setContent($menu);
+
+      $frame_content = $grid_view;
+    }
 
     $frame_cover = null;
     if ($this->coverImage) {

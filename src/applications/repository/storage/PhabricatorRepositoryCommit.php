@@ -174,6 +174,11 @@ final class PhabricatorRepositoryCommit
     return $this;
   }
 
+  public function hasCommitData() {
+    return ($this->commitData !== self::ATTACHABLE) &&
+           ($this->commitData !== null);
+  }
+
   public function getCommitData() {
     return $this->assertAttached($this->commitData);
   }
@@ -377,52 +382,6 @@ final class PhabricatorRepositoryCommit
     return $repository->formatCommitName($identifier, $local = true);
   }
 
-  /**
-   * Make a strong effort to find a way to render this commit's committer.
-   * This currently attempts to use @{PhabricatorRepositoryIdentity}, and
-   * falls back to examining the commit detail information. After we force
-   * the migration to using identities, update this method to remove the
-   * fallback. See T12164 for details.
-   */
-  public function renderAnyCommitter(PhabricatorUser $viewer, $handles) {
-    $committer = $this->renderCommitter($viewer, $handles);
-    if ($committer) {
-      return $committer;
-    }
-
-    return $this->renderAuthor($viewer, $handles);
-  }
-
-  public function renderCommitter(PhabricatorUser $viewer, $handles) {
-    $committer_phid = $this->getCommitterDisplayPHID();
-    if ($committer_phid) {
-      return $handles[$committer_phid]->renderLink();
-    }
-
-    $data = $this->getCommitData();
-    $committer_name = $data->getCommitDetail('committer');
-    if (strlen($committer_name)) {
-      return DiffusionView::renderName($committer_name);
-    }
-
-    return null;
-  }
-
-  public function renderAuthor(PhabricatorUser $viewer, $handles) {
-    $author_phid = $this->getAuthorDisplayPHID();
-    if ($author_phid) {
-      return $handles[$author_phid]->renderLink();
-    }
-
-    $data = $this->getCommitData();
-    $author_name = $data->getAuthorName();
-    if (strlen($author_name)) {
-      return DiffusionView::renderName($author_name);
-    }
-
-    return null;
-  }
-
   public function loadIdentities(PhabricatorUser $viewer) {
     if ($this->authorIdentity !== self::ATTACHABLE) {
       return $this;
@@ -509,6 +468,109 @@ final class PhabricatorRepositoryCommit
 
   public function isPermanentCommit() {
     return (bool)$this->isPartiallyImported(self::IMPORTED_CLOSEABLE);
+  }
+
+  public function newCommitAuthorView(PhabricatorUser $viewer) {
+    $author_phid = $this->getAuthorDisplayPHID();
+    if ($author_phid) {
+      $handles = $viewer->loadHandles(array($author_phid));
+      return $handles[$author_phid]->renderLink();
+    }
+
+    $author = $this->getRawAuthorStringForDisplay();
+    if (strlen($author)) {
+      return DiffusionView::renderName($author);
+    }
+
+    return null;
+  }
+
+  public function newCommitCommitterView(PhabricatorUser $viewer) {
+    $committer_phid = $this->getCommitterDisplayPHID();
+    if ($committer_phid) {
+      $handles = $viewer->loadHandles(array($committer_phid));
+      return $handles[$committer_phid]->renderLink();
+    }
+
+    $committer = $this->getRawCommitterStringForDisplay();
+    if (strlen($committer)) {
+      return DiffusionView::renderName($committer);
+    }
+
+    return null;
+  }
+
+  public function isAuthorSameAsCommitter() {
+    $author_phid = $this->getAuthorDisplayPHID();
+    $committer_phid = $this->getCommitterDisplayPHID();
+
+    if ($author_phid && $committer_phid) {
+      return ($author_phid === $committer_phid);
+    }
+
+    if ($author_phid || $committer_phid) {
+      return false;
+    }
+
+    $author = $this->getRawAuthorStringForDisplay();
+    $committer = $this->getRawCommitterStringForDisplay();
+
+    return ($author === $committer);
+  }
+
+  private function getRawAuthorStringForDisplay() {
+    $data = $this->getCommitData();
+    return $data->getAuthorString();
+  }
+
+  private function getRawCommitterStringForDisplay() {
+    $data = $this->getCommitData();
+    return $data->getCommitterString();
+  }
+
+  public function newCommitRef(PhabricatorUser $viewer) {
+    $repository = $this->getRepository();
+
+    $future = $repository->newConduitFuture(
+      $viewer,
+      'internal.commit.search',
+      array(
+        'constraints' => array(
+          'repositoryPHIDs' => array($repository->getPHID()),
+          'phids' => array($this->getPHID()),
+        ),
+      ));
+    $result = $future->resolve();
+
+    $commit_display = $this->getMonogram();
+
+    if (empty($result['data'])) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve details for commit "%s"!',
+          $commit_display));
+    }
+
+    if (count($result['data']) !== 1) {
+      throw new Exception(
+        pht(
+          'Got too many results (%s) for commit "%s", expected %s.',
+          phutil_count($result['data']),
+          $commit_display,
+          1));
+    }
+
+    $record = head($result['data']);
+    $ref_record = idxv($record, array('fields', 'ref'));
+
+    if (!$ref_record) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve CommitRef record for commit "%s".',
+          $commit_display));
+    }
+
+    return DiffusionCommitRef::newFromDictionary($ref_record);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -841,12 +903,7 @@ final class PhabricatorRepositoryCommit
       $committer_user_phid = null;
     }
 
-    $author_epoch = $data->getCommitDetail('authorEpoch');
-    if ($author_epoch) {
-      $author_epoch = (int)$author_epoch;
-    } else {
-      $author_epoch = null;
-    }
+    $author_epoch = $data->getAuthorEpoch();
 
     $audit_status = $this->getAuditStatusObject();
 

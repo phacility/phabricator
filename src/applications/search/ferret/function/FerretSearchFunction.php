@@ -17,7 +17,8 @@ abstract class FerretSearchFunction
         pht(
           'Ferret search engine function name ("%s") is invalid. Function '.
           'names must be nonempty and may only contain latin letters and '.
-          'hyphens.'));
+          'hyphens.',
+          $function_name));
     }
   }
 
@@ -77,6 +78,7 @@ abstract class FerretSearchFunction
               'Ferret function "%s" is specified with a denormalized name. '.
               'Instead, specify the function using the normalized '.
               'function name ("%s").',
+              $function_name,
               $normal_name));
         }
 

@@ -124,4 +124,29 @@ abstract class PhabricatorRepositoryCommitParserWorker
 
     return array($link, $suffix);
   }
+
+  final protected function loadCommitData(PhabricatorRepositoryCommit $commit) {
+    if ($commit->hasCommitData()) {
+      return $commit->getCommitData();
+    }
+
+    $commit_id = $commit->getID();
+
+    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+      'commitID = %d',
+      $commit_id);
+    if (!$data) {
+      $data = id(new PhabricatorRepositoryCommitData())
+        ->setCommitID($commit_id);
+    }
+
+    $commit->attachCommitData($data);
+
+    return $data;
+  }
+
+  final public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
 }

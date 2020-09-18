@@ -30,11 +30,6 @@ final class PhabricatorRepositoryCommitPublishWorker
     PhabricatorRepositoryCommit $commit) {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
-    $publisher = $repository->newPublisher();
-    if (!$publisher->shouldPublishCommit($commit)) {
-      return;
-    }
-
     $commit_phid = $commit->getPHID();
 
     // Reload the commit to get the commit data, identities, and any
@@ -53,6 +48,43 @@ final class PhabricatorRepositoryCommitPublishWorker
           $commit_phid));
     }
 
+    $publisher = $repository->newPublisher();
+    $should_publish = $publisher->shouldPublishCommit($commit);
+
+    if (!$should_publish) {
+      $hold_reasons = $publisher->getCommitHoldReasons($commit);
+    } else {
+      $hold_reasons = array();
+    }
+
+    $data = $commit->getCommitData();
+    if ($data->getCommitDetail('holdReasons') !== $hold_reasons) {
+      $data->setCommitDetail('holdReasons', $hold_reasons);
+      $data->save();
+    }
+
+    if (!$should_publish) {
+      return;
+    }
+
+    // NOTE: Close revisions and tasks before applying transactions, because
+    // we want a side effect of closure (the commit being associated with
+    // a revision) to occur before a side effect of transactions (Herald
+    // executing). The close methods queue tasks for the actual updates to
+    // commits/revisions, so those won't occur until after the commit gets
+    // transactions.
+
+    $this->closeRevisions($viewer, $commit);
+    $this->closeTasks($viewer, $commit);
+
+    $this->applyTransactions($viewer, $repository, $commit);
+  }
+
+  private function applyTransactions(
+    PhabricatorUser $actor,
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
     $xactions = array(
       $this->newAuditTransactions($commit),
       $this->newPublishTransactions($commit),
@@ -63,7 +95,7 @@ final class PhabricatorRepositoryCommitPublishWorker
     $content_source = $this->newContentSource();
 
     $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
-      $viewer,
+      $actor,
       $commit);
 
     // Prevent the commit from generating a mention of the associated
@@ -75,7 +107,7 @@ final class PhabricatorRepositoryCommitPublishWorker
     }
 
     $editor = $commit->getApplicationTransactionEditor()
-      ->setActor($viewer)
+      ->setActor($actor)
       ->setActingAsPHID($acting_phid)
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
@@ -116,9 +148,9 @@ final class PhabricatorRepositoryCommitPublishWorker
         array(
           'description'   => $data->getCommitMessage(),
           'summary'       => $data->getSummary(),
-          'authorName'    => $data->getAuthorName(),
+          'authorName'    => $data->getAuthorString(),
           'authorPHID'    => $commit->getAuthorPHID(),
-          'committerName' => $data->getCommitDetail('committer'),
+          'committerName' => $data->getCommitterString(),
           'committerPHID' => $data->getCommitDetail('committerPHID'),
         ));
 
@@ -391,4 +423,129 @@ final class PhabricatorRepositoryCommitPublishWorker
 
     return $file->loadFileData();
   }
+
+  private function closeRevisions(
+    PhabricatorUser $actor,
+    PhabricatorRepositoryCommit $commit) {
+
+    $differential = 'PhabricatorDifferentialApplication';
+    if (!PhabricatorApplication::isClassInstalled($differential)) {
+      return;
+    }
+
+    $repository = $commit->getRepository();
+    $data = $commit->getCommitData();
+    $ref = $data->getCommitRef();
+
+    $field_query = id(new DiffusionLowLevelCommitFieldsQuery())
+      ->setRepository($repository)
+      ->withCommitRef($ref);
+
+    $field_values = $field_query->execute();
+
+    $revision_id = idx($field_values, 'revisionID');
+    if (!$revision_id) {
+      return;
+    }
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($actor)
+      ->withIDs(array($revision_id))
+      ->executeOne();
+    if (!$revision) {
+      return;
+    }
+
+    // NOTE: This is very old code from when revisions had a single reviewer.
+    // It still powers the "Reviewer (Deprecated)" field in Herald, but should
+    // be removed.
+    if (!empty($field_values['reviewedByPHIDs'])) {
+      $data->setCommitDetail(
+        'reviewerPHID',
+        head($field_values['reviewedByPHIDs']));
+    }
+
+    $match_data = $field_query->getRevisionMatchData();
+
+    $data->setCommitDetail('differential.revisionID', $revision_id);
+    $data->setCommitDetail('revisionMatchData', $match_data);
+
+    $data->save();
+
+    $properties = array(
+      'revisionMatchData' => $match_data,
+    );
+    $this->queueObjectUpdate($commit, $revision, $properties);
+  }
+
+  private function closeTasks(
+    PhabricatorUser $actor,
+    PhabricatorRepositoryCommit $commit) {
+
+    $maniphest = 'PhabricatorManiphestApplication';
+    if (!PhabricatorApplication::isClassInstalled($maniphest)) {
+      return;
+    }
+
+    $data = $commit->getCommitData();
+
+    $prefixes = ManiphestTaskStatus::getStatusPrefixMap();
+    $suffixes = ManiphestTaskStatus::getStatusSuffixMap();
+    $message = $data->getCommitMessage();
+
+    $matches = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($message);
+
+    $task_map = array();
+    foreach ($matches as $match) {
+      $prefix = phutil_utf8_strtolower($match['prefix']);
+      $suffix = phutil_utf8_strtolower($match['suffix']);
+
+      $status = idx($suffixes, $suffix);
+      if (!$status) {
+        $status = idx($prefixes, $prefix);
+      }
+
+      foreach ($match['monograms'] as $task_monogram) {
+        $task_id = (int)trim($task_monogram, 'tT');
+        $task_map[$task_id] = $status;
+      }
+    }
+
+    if (!$task_map) {
+      return;
+    }
+
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($actor)
+      ->withIDs(array_keys($task_map))
+      ->execute();
+    foreach ($tasks as $task_id => $task) {
+      $status = $task_map[$task_id];
+
+      $properties = array(
+        'status' => $status,
+      );
+
+      $this->queueObjectUpdate($commit, $task, $properties);
+    }
+  }
+
+  private function queueObjectUpdate(
+    PhabricatorRepositoryCommit $commit,
+    $object,
+    array $properties) {
+
+    $this->queueTask(
+      'DiffusionUpdateObjectAfterCommitWorker',
+      array(
+        'commitPHID' => $commit->getPHID(),
+        'objectPHID' => $object->getPHID(),
+        'properties' => $properties,
+      ),
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_DEFAULT,
+      ));
+  }
+
 }

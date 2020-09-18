@@ -224,6 +224,7 @@ final class PhabricatorProjectIconSet
             'Icon key "%s" is not a valid icon key. Icon keys must be 1-32 '.
             'characters long and contain only lowercase letters. For example, '.
             '"%s" and "%s" are reasonable keys.',
+            $value['key'],
             'tag',
             'group'));
       }

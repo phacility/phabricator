@@ -221,9 +221,9 @@ final class PhabricatorCommitSearchEngine
 
     $bucket = $this->getResultBucket($query);
 
-    $template = id(new PhabricatorAuditListView())
+    $template = id(new DiffusionCommitGraphView())
       ->setViewer($viewer)
-      ->setShowDrafts(true);
+      ->setShowAuditors(true);
 
     $views = array();
     if ($bucket) {
@@ -235,37 +235,31 @@ final class PhabricatorCommitSearchEngine
         foreach ($groups as $group) {
           // Don't show groups in Dashboard Panels
           if ($group->getObjects() || !$this->isPanelContext()) {
-            $views[] = id(clone $template)
+            $item_list = id(clone $template)
+              ->setCommits($group->getObjects())
+              ->newObjectItemListView();
+
+            $views[] = $item_list
               ->setHeader($group->getName())
-              ->setNoDataString($group->getNoDataString())
-              ->setCommits($group->getObjects());
+              ->setNoDataString($group->getNoDataString());
           }
         }
       } catch (Exception $ex) {
         $this->addError($ex->getMessage());
       }
-    } else {
-      $views[] = id(clone $template)
-        ->setCommits($commits)
-        ->setNoDataString(pht('No commits found.'));
     }
 
     if (!$views) {
-      $views[] = id(new PhabricatorAuditListView())
-        ->setViewer($viewer)
+      $item_list = id(clone $template)
+        ->setCommits($commits)
+        ->newObjectItemListView();
+
+      $views[] = $item_list
         ->setNoDataString(pht('No commits found.'));
     }
 
-    if (count($views) == 1) {
-      $list = head($views)->buildList();
-    } else {
-      $list = $views;
-    }
-
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($list);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($views);
   }
 
   protected function getNewUserBody() {

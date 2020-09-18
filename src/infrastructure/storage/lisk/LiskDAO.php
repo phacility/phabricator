@@ -653,7 +653,18 @@ abstract class LiskDAO extends Phobject
     foreach ($rows as $row) {
       $obj = clone $this;
       if ($id_key && isset($row[$id_key])) {
-        $result[$row[$id_key]] = $obj->loadFromArray($row);
+        $row_id = $row[$id_key];
+
+        if (isset($result[$row_id])) {
+          throw new Exception(
+            pht(
+              'Rows passed to "loadAllFromArray(...)" include two or more '.
+              'rows with the same ID ("%s"). Rows must have unique IDs. '.
+              'An underlying query may be missing a GROUP BY.',
+              $row_id));
+        }
+
+        $result[$row_id] = $obj->loadFromArray($row);
       } else {
         $result[] = $obj->loadFromArray($row);
       }

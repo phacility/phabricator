@@ -1,0 +1,71 @@
+/**
+ * @provides fuel-map-css
+ */
+
+.device-desktop .fuel-map {
+  display: table;
+  table-layout: fixed;
+}
+
+.device-desktop .fuel-map-items {
+  display: table-row-group;
+}
+
+.device-desktop .fuel-map-pair {
+  display: table-row;
+}
+
+.device-desktop .fuel-map-name,
+.device-desktop .fuel-map-value {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.fuel-map-property-list {
+  margin: 4px;
+}
+
+.fuel-map-property-list > .fuel-map {
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-name,
+.fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-value {
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+.fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-name {
+  color: {$bluetext};
+}
+
+.fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-value {
+  color: {$lightgreytext};
+}
+
+.device-desktop
+  .fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-name {
+  text-align: right;
+  min-width: 80px;
+  width: 80px;
+}
+
+.device-desktop
+  .fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-value {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.device
+  .fuel-map-property-list > .fuel-map > .fuel-map-items > .fuel-map-pair >
+  .fuel-map-value {
+  padding-left: 12px;
+}

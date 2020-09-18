@@ -1,0 +1,52 @@
+/**
+ * @provides fuel-menu-css
+ */
+
+.fuel-menu-item-icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  text-align: center;
+}
+
+.fuel-menu-item-link {
+  padding: 4px 4px 4px 28px;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: {$greytext};
+  cursor: default;
+  border-radius: 3px;
+}
+
+.fuel-menu-item.has-link > .fuel-menu-item-link {
+  color: {$darkbluetext};
+  cursor: pointer;
+}
+
+.fuel-menu-item.disabled > .fuel-menu-item-link {
+  color: {$lightgreytext};
+}
+
+.device-desktop .fuel-menu-item > .fuel-menu-item-link:hover {
+  text-decoration: none;
+}
+
+.device-desktop .fuel-menu-item.has-link > .fuel-menu-item-link:hover {
+  color: {$sky};
+  background: rgba({$alphablue}, .08);
+}
+
+.fuel-menu-item-background-color-orange > .fuel-menu-item-link {
+  background: {$sh-orangebackground};
+}
+
+.device-desktop .fuel-menu-item.has-link.fuel-menu-item-background-color-orange
+  > .fuel-menu-item-link:hover {
+  background: {$lightorange};
+  color: {$orange};
+}

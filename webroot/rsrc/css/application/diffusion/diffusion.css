@@ -93,14 +93,6 @@
   font-size: {$biggerfontsize};
 }
 
-.diffusion-history-message {
-  background-color: {$bluebackground};
-  padding: 16px;
-  margin: 4px 0;
-  border-radius: 5px;
-  color: {$darkbluetext};
-}
-
 .diffusion-history-list .phui-oi-attribute {
   font-size: {$smallerfontsize};
   letter-spacing: 0.01em;
@@ -108,10 +100,6 @@
 
 .diffusion-history-author-name a {
   color: {$darkbluetext};
-}
-
-.diffusion-history-list .diffusion-differential-tag {
-  margin-left: 4px;
 }
 
 /* - Branch Styles  ----------------------------------------------------------*/
@@ -236,4 +224,19 @@
     border-left: none;
     border-right: none;
     border-color: {$thinblueborder};
+}
+
+.diffusion-commit-graph-table td.diffusion-commit-graph-path-cell {
+  padding: 0 4px 0 0;
+}
+
+.diffusion-commit-graph-table td.diffusion-commit-graph-path-cell > canvas {
+  display: block;
+}
+
+.diffusion-commit-graph-table .phui-oi-list-header {
+  color: {$darkgreytext};
+  font-weight: bold;
+  padding: 4px 4px;
+  font-size: {$normalfontsize};
 }

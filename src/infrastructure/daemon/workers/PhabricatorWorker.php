@@ -162,6 +162,19 @@ abstract class PhabricatorWorker extends Phobject {
         try {
           $worker->executeTask();
           $worker->flushTaskQueue();
+
+          $task_result = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
+          break;
+        } catch (PhabricatorWorkerPermanentFailureException $ex) {
+          $proxy = new PhutilProxyException(
+            pht(
+              'In-process task ("%s") failed permanently.',
+              $task_class),
+            $ex);
+
+          phlog($proxy);
+
+          $task_result = PhabricatorWorkerArchiveTask::RESULT_FAILURE;
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
           phlog(
@@ -177,9 +190,7 @@ abstract class PhabricatorWorker extends Phobject {
       // object with a valid ID.
       $task->openTransaction();
         $task->save();
-        $archived = $task->archiveTask(
-          PhabricatorWorkerArchiveTask::RESULT_SUCCESS,
-          0);
+        $archived = $task->archiveTask($task_result, 0);
       $task->saveTransaction();
 
       return $archived;

@@ -553,6 +553,7 @@ final class PhabricatorRepositoryRefEngine
     }
 
     $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    $published_flag = PhabricatorRepositoryCommit::IMPORTED_PUBLISH;
 
     $all_commits = ipull($all_commits, null, 'commitIdentifier');
     foreach ($identifiers as $identifier) {
@@ -566,12 +567,21 @@ final class PhabricatorRepositoryRefEngine
             $identifier));
       }
 
-      if (!($row['importStatus'] & $closeable_flag)) {
+      $import_status = $row['importStatus'];
+      if (!($import_status & $closeable_flag)) {
+        // Set the "closeable" flag.
+        $import_status = ($import_status | $closeable_flag);
+
+        // See T13580. Clear the "published" flag, so publishing executes
+        // again. We may have previously performed a no-op "publish" on the
+        // commit to make sure it has all bits in the "IMPORTED_ALL" bitmask.
+        $import_status = ($import_status & ~$published_flag);
+
         queryfx(
           $conn,
-          'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
+          'UPDATE %T SET importStatus = %d WHERE id = %d',
           $commit_table->getTableName(),
-          $closeable_flag,
+          $import_status,
           $row['id']);
 
         $data = array(

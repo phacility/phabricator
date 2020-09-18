@@ -725,3 +725,20 @@ ul.phui-oi-list-view .phui-oi-selectable
   padding: 8px 0;
   background: linear-gradient({$lightbluebackground}, #fff 66%, #fff);
 }
+
+.phui-oi-menu {
+  background: {$lightbluebackground};
+  border-style: solid;
+  border-color: {$thinblueborder};
+  padding: 4px;
+}
+
+.device-desktop .phui-oi-menu,
+.device-tablet .phui-oi-menu {
+  width: 200px;
+  border-width: 0 0 0 1px;
+}
+
+.device-phone .phui-oi-menu {
+  border-width: 1px 0 0;
+}

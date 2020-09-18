@@ -2548,7 +2548,9 @@ abstract class PhabricatorEditEngine
             pht(
               'Extension "%s" defines a bulk edit group with the same key '.
               '("%s") as the main editor or another extension. Each bulk '.
-              'edit group must have a unique key.'));
+              'edit group must have a unique key.',
+              get_class($extension),
+              $key));
         }
 
         $map[$key] = $group;

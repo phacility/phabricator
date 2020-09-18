@@ -55,6 +55,12 @@ final class DrydockRepositoryOperation extends DrydockDAO
         'key_repository' => array(
           'columns' => array('repositoryPHID', 'operationState'),
         ),
+        'key_state' => array(
+          'columns' => array('operationState'),
+        ),
+        'key_author' => array(
+          'columns' => array('authorPHID', 'operationState'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

@@ -120,7 +120,19 @@ abstract class ConduitAPIMethod
   public function executeMethod(ConduitAPIRequest $request) {
     $this->setViewer($request->getUser());
 
+    $client = $this->newConduitCallProxyClient($request);
+    if ($client) {
+      // We're proxying, so just make an intracluster call.
+      return $client->callMethodSynchronous(
+        $this->getAPIMethodName(),
+        $request->getAllParameters());
+    }
+
     return $this->execute($request);
+  }
+
+  protected function newConduitCallProxyClient(ConduitAPIRequest $request) {
+    return null;
   }
 
   abstract public function getAPIMethodName();

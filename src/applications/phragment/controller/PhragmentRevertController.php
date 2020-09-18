@@ -71,7 +71,6 @@ final class PhragmentRevertController extends PhragmentController {
       ->appendParagraph(pht(
         'Reverting this fragment to version %d will create a new version of '.
         'the fragment. It will not delete any version history.',
-        $version->getSequence(),
         $version->getSequence()));
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

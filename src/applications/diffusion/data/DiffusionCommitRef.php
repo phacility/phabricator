@@ -10,28 +10,48 @@ final class DiffusionCommitRef extends Phobject {
   private $committerEmail;
   private $hashes = array();
 
-  public static function newFromConduitResult(array $result) {
-    $ref = id(new DiffusionCommitRef())
-      ->setAuthorEpoch(idx($result, 'authorEpoch'))
-      ->setCommitterEmail(idx($result, 'committerEmail'))
-      ->setCommitterName(idx($result, 'committerName'))
-      ->setAuthorEmail(idx($result, 'authorEmail'))
-      ->setAuthorName(idx($result, 'authorName'))
-      ->setMessage(idx($result, 'message'));
+  public function newDictionary() {
+    $hashes = $this->getHashes();
+    $hashes = mpull($hashes, 'newDictionary');
+    $hashes = array_values($hashes);
 
-    $hashes = array();
-    foreach (idx($result, 'hashes', array()) as $hash_result) {
-      $hashes[] = id(new DiffusionCommitHash())
-        ->setHashType(idx($hash_result, 'type'))
-        ->setHashValue(idx($hash_result, 'value'));
+    return array(
+      'authorEpoch' => $this->authorEpoch,
+      'authorName' => $this->authorName,
+      'authorEmail' => $this->authorEmail,
+      'committerName' => $this->committerName,
+      'committerEmail' => $this->committerEmail,
+      'message' => $this->message,
+      'hashes' => $hashes,
+    );
+  }
+
+  public static function newFromDictionary(array $map) {
+    $hashes = idx($map, 'hashes', array());
+    foreach ($hashes as $key => $hash_map) {
+      $hashes[$key] = DiffusionCommitHash::newFromDictionary($hash_map);
     }
+    $hashes = array_values($hashes);
 
-    $ref->setHashes($hashes);
+    $author_epoch = idx($map, 'authorEpoch');
+    $author_name = idx($map, 'authorName');
+    $author_email = idx($map, 'authorEmail');
+    $committer_name = idx($map, 'committerName');
+    $committer_email = idx($map, 'committerEmail');
+    $message = idx($map, 'message');
 
-    return $ref;
+    return id(new self())
+      ->setAuthorEpoch($author_epoch)
+      ->setAuthorName($author_name)
+      ->setAuthorEmail($author_email)
+      ->setCommitterName($committer_name)
+      ->setCommitterEmail($committer_email)
+      ->setMessage($message)
+      ->setHashes($hashes);
   }
 
   public function setHashes(array $hashes) {
+    assert_instances_of($hashes, 'DiffusionCommitHash');
     $this->hashes = $hashes;
     return $this;
   }

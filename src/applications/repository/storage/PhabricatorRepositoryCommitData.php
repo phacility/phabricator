@@ -6,6 +6,7 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   protected $authorName    = '';
   protected $commitMessage = '';
   protected $commitDetails = array();
+  private $commitRef;
 
   protected function getConfiguration() {
     return array(
@@ -90,6 +91,101 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     }
 
     return array_values($holds);
+  }
+
+  public function getAuthorString() {
+    $ref = $this->getCommitRef();
+
+    $author = $ref->getAuthor();
+    if (strlen($author)) {
+      return $author;
+    }
+
+    $author = phutil_string_cast($this->authorName);
+    if (strlen($author)) {
+      return $author;
+    }
+
+    return null;
+  }
+
+  public function getAuthorDisplayName() {
+    return $this->getCommitRef()->getAuthorName();
+  }
+
+  public function getAuthorEmail() {
+    return $this->getCommitRef()->getAuthorEmail();
+  }
+
+  public function getAuthorEpoch() {
+    $epoch = $this->getCommitRef()->getAuthorEpoch();
+
+    if ($epoch) {
+      return (int)$epoch;
+    }
+
+    return null;
+  }
+
+  public function getCommitterString() {
+    $ref = $this->getCommitRef();
+
+    $committer = $ref->getCommitter();
+    if (strlen($committer)) {
+      return $committer;
+    }
+
+    return $this->getCommitDetailString('committer');
+  }
+
+  public function getCommitterDisplayName() {
+    return $this->getCommitRef()->getCommitterName();
+  }
+
+  public function getCommitterEmail() {
+    return $this->getCommitRef()->getCommitterEmail();
+  }
+
+  private function getCommitDetailString($key) {
+    $string = $this->getCommitDetail($key);
+    $string = phutil_string_cast($string);
+
+    if (strlen($string)) {
+      return $string;
+    }
+
+    return null;
+  }
+
+  public function setCommitRef(DiffusionCommitRef $ref) {
+    $this->setCommitDetail('ref', $ref->newDictionary());
+    $this->commitRef = null;
+
+    return $this;
+  }
+
+  public function getCommitRef() {
+    if ($this->commitRef === null) {
+      $map = $this->getCommitDetail('ref', array());
+
+      if (!is_array($map)) {
+        $map = array();
+      }
+
+      $map = $map + array(
+        'authorName' => $this->getCommitDetailString('authorName'),
+        'authorEmail' => $this->getCommitDetailString('authorEmail'),
+        'authorEpoch' => $this->getCommitDetailString('authorEpoch'),
+        'committerName' => $this->getCommitDetailString('committerName'),
+        'committerEmail' => $this->getCommitDetailString('committerEmail'),
+        'message' => $this->getCommitMessage(),
+      );
+
+      $ref = DiffusionCommitRef::newFromDictionary($map);
+      $this->commitRef = $ref;
+    }
+
+    return $this->commitRef;
   }
 
 }

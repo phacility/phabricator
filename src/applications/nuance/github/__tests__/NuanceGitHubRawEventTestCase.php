@@ -85,7 +85,8 @@ final class NuanceGitHubRawEventTestCase
         throw new Exception(
           pht(
             'Expected test file "%s" to contain exactly two sections, '.
-            'but it has more than two sections.'));
+            'but it has more than two sections.',
+            $file));
       }
 
       list($input, $expect) = $parts;

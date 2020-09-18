@@ -17,6 +17,7 @@ final class PhabricatorMailAmazonSESAdapter
       array(
         'access-key' => 'string',
         'secret-key' => 'string',
+        'region' => 'string',
         'endpoint' => 'string',
       ));
   }
@@ -25,6 +26,7 @@ final class PhabricatorMailAmazonSESAdapter
     return array(
       'access-key' => null,
       'secret-key' => null,
+      'region' => null,
       'endpoint' => null,
     );
   }
@@ -45,23 +47,33 @@ final class PhabricatorMailAmazonSESAdapter
     $mailer->Send();
   }
 
-
-
-  /**
-   * @phutil-external-symbol class SimpleEmailService
-   */
   public function executeSend($body) {
     $key = $this->getOption('access-key');
+
     $secret = $this->getOption('secret-key');
+    $secret = new PhutilOpaqueEnvelope($secret);
+
+    $region = $this->getOption('region');
     $endpoint = $this->getOption('endpoint');
 
-    $root = phutil_get_library_root('phabricator');
-    $root = dirname($root);
-    require_once $root.'/externals/amazon-ses/ses.php';
+    $data = array(
+      'Action' => 'SendRawEmail',
+      'RawMessage.Data' => base64_encode($body),
+    );
 
-    $service = new SimpleEmailService($key, $secret, $endpoint);
-    $service->enableUseExceptions(true);
-    return $service->sendRawEmail($body);
+    $data = phutil_build_http_querystring($data);
+
+    $future = id(new PhabricatorAWSSESFuture())
+      ->setAccessKey($key)
+      ->setSecretKey($secret)
+      ->setRegion($region)
+      ->setEndpoint($endpoint)
+      ->setHTTPMethod('POST')
+      ->setData($data);
+
+    $future->resolve();
+
+    return true;
   }
 
 }

@@ -299,15 +299,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       $handles,
       $browse_pager);
 
-    $content[] = $this->buildHistoryTable(
-      $history_results,
-      $history,
-      $history_exception);
-
     if ($readme) {
       $content[] = $readme;
     }
-
 
     try {
       $branch_button = $this->buildBranchList($drequest);
@@ -426,51 +420,6 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->addClass('diffusion-profile-description');
     }
     return null;
-  }
-
-  private function buildHistoryTable(
-    $history_results,
-    $history,
-    $history_exception) {
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-
-    if ($history_exception) {
-      if ($repository->isImporting()) {
-        return $this->renderStatusMessage(
-          pht('Still Importing...'),
-          pht(
-            'This repository is still importing. History is not yet '.
-            'available.'));
-      } else {
-        return $this->renderStatusMessage(
-          pht('Unable to Retrieve History'),
-          $history_exception->getMessage());
-      }
-    }
-
-    $history_table = id(new DiffusionHistoryTableView())
-      ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setHistory($history)
-      ->setIsHead(true);
-
-    if ($history_results) {
-      $history_table->setParents($history_results['parents']);
-    }
-
-    $panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addClass('diffusion-mobile-view');
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Commits'));
-    $panel->setHeader($header);
-    $panel->setTable($history_table);
-
-    return $panel;
   }
 
   private function buildBranchList(DiffusionRequest $drequest) {
