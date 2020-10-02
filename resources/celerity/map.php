@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => 'adc34883',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => '5c459f92',
-    'differential.pkg.js' => '218fda21',
+    'differential.pkg.js' => '5080baf4',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => '8ee48a4b',
     'maniphest.pkg.css' => '35995d6d',
@@ -383,7 +383,7 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'a2ab19be',
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
-    'rsrc/js/application/diff/DiffChangeset.js' => '39dcf2c3',
+    'rsrc/js/application/diff/DiffChangeset.js' => '3b6e1fde',
     'rsrc/js/application/diff/DiffChangesetList.js' => 'cc2c5de5',
     'rsrc/js/application/diff/DiffInline.js' => '511a1315',
     'rsrc/js/application/diff/DiffPathView.js' => '8207abf9',
@@ -784,7 +784,7 @@ return array(
     'phabricator-darklog' => '3b869402',
     'phabricator-darkmessage' => '26cd4b73',
     'phabricator-dashboard-css' => '5a205b9d',
-    'phabricator-diff-changeset' => '39dcf2c3',
+    'phabricator-diff-changeset' => '3b6e1fde',
     'phabricator-diff-changeset-list' => 'cc2c5de5',
     'phabricator-diff-inline' => '511a1315',
     'phabricator-diff-path-view' => '8207abf9',
@@ -1229,7 +1229,14 @@ return array(
       'trigger-rule',
       'trigger-rule-type',
     ),
-    '39dcf2c3' => array(
+    '3ae89b20' => array(
+      'phui-workcard-view-css',
+    ),
+    '3b4899b0' => array(
+      'javelin-behavior',
+      'phabricator-prefab',
+    ),
+    '3b6e1fde' => array(
       'javelin-dom',
       'javelin-util',
       'javelin-stratcom',
@@ -1242,13 +1249,6 @@ return array(
       'phabricator-diff-path-view',
       'phuix-button-view',
       'javelin-external-editor-link-engine',
-    ),
-    '3ae89b20' => array(
-      'phui-workcard-view-css',
-    ),
-    '3b4899b0' => array(
-      'javelin-behavior',
-      'phabricator-prefab',
     ),
     '3be6ef4f' => array(
       'javelin-behavior',
