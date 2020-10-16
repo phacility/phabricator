@@ -12,6 +12,18 @@ final class PhabricatorObjectHasFileEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'object.attached-files';
+  }
+
+  public function getConduitName() {
+    return pht('Object Has Files');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source object is associated with the destination file.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,
