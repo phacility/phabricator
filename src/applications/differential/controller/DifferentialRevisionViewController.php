@@ -510,6 +510,11 @@ final class DifferentialRevisionViewController
       ->setLoadEntireGraph(true)
       ->loadGraph();
     if (!$stack_graph->isEmpty()) {
+      // See PHI1900. The graph UI element now tries to figure out the correct
+      // height automatically, but currently can't in this case because the
+      // element is not visible when the page loads. Set an explicit height.
+      $stack_graph->setHeight(34);
+
       $stack_table = $stack_graph->newGraphTable();
 
       $parent_type = DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST;

@@ -62,10 +62,10 @@ JX.behavior('diffusion-commit-graph', function(config) {
     };
 
     var h;
-    if (config.autoheight) {
-      h = JX.Vector.getDim(nodes[ii].parentNode).y;
+    if (config.height) {
+      h = config.height;
     } else {
-      h = 34;
+      h = JX.Vector.getDim(nodes[ii].parentNode).y;
     }
 
     var w = cell * config.count;
