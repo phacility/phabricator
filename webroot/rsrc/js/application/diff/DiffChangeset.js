@@ -723,14 +723,17 @@ JX.install('DiffChangeset', {
       var data = JX.Stratcom.getData(node);
 
       if (!data.inline) {
-        var inline = new JX.DiffInline()
-          .setChangeset(this)
-          .bindToRow(node);
-
-        this._inlines.push(inline);
+        var inline = this._newInlineForRow(node);
+        this.getInlines().push(inline);
       }
 
       return data.inline;
+    },
+
+    _newInlineForRow: function(node) {
+      return new JX.DiffInline()
+        .setChangeset(this)
+        .bindToRow(node);
     },
 
     newInlineForRange: function(origin, target, options) {
@@ -770,7 +773,7 @@ JX.install('DiffChangeset', {
         .setChangeset(this)
         .bindToRange(data);
 
-      this._inlines.push(inline);
+      this.getInlines().push(inline);
 
       inline.create();
 
@@ -855,9 +858,7 @@ JX.install('DiffChangeset', {
           continue;
         }
 
-        // As a side effect, this builds any missing inline objects and adds
-        // them to this Changeset's list of inlines.
-        this.getInlineForRow(row);
+        this._inlines.push(this._newInlineForRow(row));
       }
     },
 

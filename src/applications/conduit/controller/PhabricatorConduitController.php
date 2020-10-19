@@ -142,6 +142,8 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $parts[] = '--conduit-token ';
     $parts[] = phutil_tag('strong', array(), '<conduit-token>');
     $parts[] = ' ';
+    $parts[] = '--';
+    $parts[] = ' ';
 
     $parts[] = $method->getAPIMethodName();
 

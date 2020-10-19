@@ -1557,6 +1557,7 @@ phutil_register_library_map(array(
     'HeraldBuildableState' => 'applications/herald/state/HeraldBuildableState.php',
     'HeraldCallWebhookAction' => 'applications/herald/action/HeraldCallWebhookAction.php',
     'HeraldCommentAction' => 'applications/herald/action/HeraldCommentAction.php',
+    'HeraldCommentContentField' => 'applications/herald/field/HeraldCommentContentField.php',
     'HeraldCommitAdapter' => 'applications/diffusion/herald/HeraldCommitAdapter.php',
     'HeraldCondition' => 'applications/herald/storage/HeraldCondition.php',
     'HeraldConditionTranscript' => 'applications/herald/storage/transcript/HeraldConditionTranscript.php',
@@ -7770,6 +7771,7 @@ phutil_register_library_map(array(
     'HeraldBuildableState' => 'HeraldState',
     'HeraldCallWebhookAction' => 'HeraldAction',
     'HeraldCommentAction' => 'HeraldAction',
+    'HeraldCommentContentField' => 'HeraldField',
     'HeraldCommitAdapter' => array(
       'HeraldAdapter',
       'HarbormasterBuildableAdapterInterface',

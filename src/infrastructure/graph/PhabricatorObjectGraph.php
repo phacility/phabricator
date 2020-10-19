@@ -11,6 +11,7 @@ abstract class PhabricatorObjectGraph
   private $loadEntireGraph = false;
   private $limit;
   private $adjacent;
+  private $height;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -32,6 +33,15 @@ abstract class PhabricatorObjectGraph
 
   public function getLimit() {
     return $this->limit;
+  }
+
+  public function setHeight($height) {
+    $this->height = $height;
+    return $this;
+  }
+
+  public function getHeight() {
+    return $this->height;
   }
 
   final public function setRenderOnlyAdjacentNodes($adjacent) {
@@ -193,8 +203,14 @@ abstract class PhabricatorObjectGraph
 
     $ancestry = array_select_keys($ancestry, $order);
 
-    $traces = id(new PHUIDiffGraphView())
-      ->renderGraph($ancestry);
+    $graph_view = id(new PHUIDiffGraphView());
+
+    $height = $this->getHeight();
+    if ($height !== null) {
+      $graph_view->setHeight($height);
+    }
+
+    $traces = $graph_view->renderGraph($ancestry);
 
     $ii = 0;
     $rows = array();

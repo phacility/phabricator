@@ -86,11 +86,6 @@
   padding: 1px 4px;
   border-radius: 3px;
   white-space: pre-wrap;
-
-  /* See T13564. This is a narrow control for PDF printing behavior in
-     Chrome. */
-  line-break: anywhere;
-  overflow-wrap: anywhere;
 }
 
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
@@ -499,6 +494,10 @@ video.phabricator-media {
   overflow-x: auto;
 }
 
+!print .phabricator-remarkup .remarkup-table-wrap {
+  overflow-x: hidden;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
@@ -516,6 +515,14 @@ video.phabricator-media {
 .phabricator-remarkup table.remarkup-table td {
   background: {$page.content};
   padding: 3px 6px;
+}
+
+!print .phabricator-remarkup table.remarkup-table td {
+  /* See T13564. This is a narrow control for PDF printing behavior in
+     Chrome. */
+
+  line-break: anywhere;
+  overflow-wrap: anywhere;
 }
 
 body div.phabricator-remarkup.remarkup-has-toc

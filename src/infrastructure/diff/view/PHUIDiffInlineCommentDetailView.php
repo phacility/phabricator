@@ -568,7 +568,24 @@ final class PHUIDiffInlineCommentDetailView
 
     $parser->setRenderer($renderer);
 
-    $diff_view = $parser->render(0, 0xFFFF, array());
+    // See PHI1896. If a user leaves an inline on a very long range with
+    // suggestions at the beginning and end, we'll hide context in the middle
+    // by default. We don't want to do this in the context of an inline
+    // suggestion, so build a mask to force display of all lines.
+
+    // (We don't know exactly how many lines the diff has, we just know that
+    // it can't have more lines than the old file plus the new file, so we're
+    // using that as an upper bound.)
+
+    $min = 0;
+
+    $old_len = count(phutil_split_lines($old_lines));
+    $new_len = count(phutil_split_lines($new_lines));
+    $max = ($old_len + $new_len);
+
+    $mask = array_fill($min, ($max - $min), true);
+
+    $diff_view = $parser->render($min, ($max - $min), $mask);
 
     $view = phutil_tag(
       'div',

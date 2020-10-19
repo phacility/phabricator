@@ -4,6 +4,7 @@ final class PHUIDiffGraphView extends Phobject {
 
   private $isHead = true;
   private $isTail = true;
+  private $height;
 
   public function setIsHead($is_head) {
     $this->isHead = $is_head;
@@ -21,6 +22,15 @@ final class PHUIDiffGraphView extends Phobject {
 
   public function getIsTail() {
     return $this->isTail;
+  }
+
+  public function setHeight($height) {
+    $this->height = $height;
+    return $this;
+  }
+
+  public function getHeight() {
+    return $this->height;
   }
 
   public function renderRawGraph(array $parents) {
@@ -205,7 +215,7 @@ final class PHUIDiffGraphView extends Phobject {
       'diffusion-commit-graph',
       array(
         'count' => $count,
-        'autoheight' => true,
+        'height' => $this->getHeight(),
       ));
 
     return $graph;
