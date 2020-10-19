@@ -189,6 +189,8 @@ abstract class PhabricatorInlineCommentController
           $inline->setIsEditing(false);
 
           if (!$inline->isVoidComment($viewer)) {
+            $inline->setIsDeleted(0);
+
             $this->saveComment($inline);
 
             return $this->buildRenderedCommentResponse(
@@ -217,7 +219,10 @@ abstract class PhabricatorInlineCommentController
 
           $is_dirty = false;
           if (!$inline->getIsEditing()) {
-            $inline->setIsEditing(true);
+            $inline
+              ->setIsDeleted(0)
+              ->setIsEditing(true);
+
             $is_dirty = true;
           }
 
