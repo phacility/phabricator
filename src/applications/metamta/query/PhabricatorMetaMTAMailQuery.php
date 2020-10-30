@@ -64,24 +64,6 @@ final class PhabricatorMetaMTAMailQuery
         $this->actorPHIDs);
     }
 
-    if ($this->recipientPHIDs !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'recipient.dst IN (%Ls)',
-        $this->recipientPHIDs);
-    }
-
-    if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
-      $viewer = $this->getViewer();
-      if (!$viewer->isOmnipotent()) {
-        $where[] = qsprintf(
-          $conn,
-          'edge.dst = %s OR actorPHID = %s',
-          $viewer->getPHID(),
-          $viewer->getPHID());
-      }
-    }
-
     if ($this->createdMin !== null) {
       $where[] = qsprintf(
         $conn,
@@ -102,24 +84,27 @@ final class PhabricatorMetaMTAMailQuery
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
 
-    if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
+    if ($this->shouldJoinRecipients()) {
       $joins[] = qsprintf(
         $conn,
-        'LEFT JOIN %T edge ON mail.phid = edge.src AND edge.type = %d',
+        'JOIN %T recipient
+          ON mail.phid = recipient.src
+            AND recipient.type = %d
+            AND recipient.dst IN (%Ls)',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
-    }
-
-    if ($this->recipientPHIDs !== null) {
-      $joins[] = qsprintf(
-        $conn,
-        'LEFT JOIN %T recipient '.
-        'ON mail.phid = recipient.src AND recipient.type = %d',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
+        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST,
+        $this->recipientPHIDs);
     }
 
     return $joins;
+  }
+
+  private function shouldJoinRecipients() {
+    if ($this->recipientPHIDs === null) {
+      return false;
+    }
+
+    return true;
   }
 
   protected function getPrimaryTableAlias() {
@@ -132,6 +117,16 @@ final class PhabricatorMetaMTAMailQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorMetaMTAApplication';
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinRecipients()) {
+      if (count($this->recipientPHIDs) > 1) {
+        return true;
+      }
+    }
+
+    return parent::shouldGroupQueryResultRows();
   }
 
 }
