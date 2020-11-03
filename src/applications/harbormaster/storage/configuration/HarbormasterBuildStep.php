@@ -4,7 +4,8 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $description;
@@ -167,6 +168,46 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the build step.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('remarkup')
+        ->setDescription(pht('The build step description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildPlanPHID')
+        ->setType('phid')
+        ->setDescription(
+          pht(
+            'The PHID of the build plan this build step belongs to.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    // T6203: This can be removed once the field becomes non-nullable.
+    $name = $this->getName();
+    $name = phutil_string_cast($name);
+
+    return array(
+      'name' => $name,
+      'description' => array(
+        'raw' => $this->getDescription(),
+      ),
+      'buildPlanPHID' => $this->getBuildPlanPHID(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 

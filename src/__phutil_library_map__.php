@@ -1436,6 +1436,8 @@ phutil_register_library_map(array(
     'HarbormasterBuildStepImplementationTestCase' => 'applications/harbormaster/step/__tests__/HarbormasterBuildStepImplementationTestCase.php',
     'HarbormasterBuildStepPHIDType' => 'applications/harbormaster/phid/HarbormasterBuildStepPHIDType.php',
     'HarbormasterBuildStepQuery' => 'applications/harbormaster/query/HarbormasterBuildStepQuery.php',
+    'HarbormasterBuildStepSearchAPIMethod' => 'applications/harbormaster/conduit/HarbormasterBuildStepSearchAPIMethod.php',
+    'HarbormasterBuildStepSearchEngine' => 'applications/harbormaster/query/HarbormasterBuildStepSearchEngine.php',
     'HarbormasterBuildStepTransaction' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStepTransaction.php',
     'HarbormasterBuildStepTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildStepTransactionQuery.php',
     'HarbormasterBuildTarget' => 'applications/harbormaster/storage/build/HarbormasterBuildTarget.php',
@@ -7627,6 +7629,7 @@ phutil_register_library_map(array(
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
+      'PhabricatorConduitResultInterface',
     ),
     'HarbormasterBuildStepCoreCustomField' => array(
       'HarbormasterBuildStepCustomField',
@@ -7639,6 +7642,8 @@ phutil_register_library_map(array(
     'HarbormasterBuildStepImplementationTestCase' => 'PhabricatorTestCase',
     'HarbormasterBuildStepPHIDType' => 'PhabricatorPHIDType',
     'HarbormasterBuildStepQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildStepSearchAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
+    'HarbormasterBuildStepSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HarbormasterBuildStepTransaction' => 'PhabricatorApplicationTransaction',
     'HarbormasterBuildStepTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HarbormasterBuildTarget' => array(
