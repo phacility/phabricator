@@ -3,8 +3,6 @@
 final class HeraldEngine extends Phobject {
 
   protected $rules = array();
-  protected $results = array();
-  protected $stack = array();
   protected $activeRule;
   protected $transcript;
 
@@ -19,6 +17,9 @@ final class HeraldEngine extends Phobject {
 
   private $profilerStack = array();
   private $profilerFrames = array();
+
+  private $ruleResults;
+  private $ruleStack;
 
   public function setDryRun($dry_run) {
     $this->dryRun = $dry_run;
@@ -54,6 +55,74 @@ final class HeraldEngine extends Phobject {
     return $engine->getTranscript();
   }
 
+/* -(  Rule Stack  )--------------------------------------------------------- */
+
+  private function resetRuleStack() {
+    $this->ruleStack = array();
+    return $this;
+  }
+
+  private function hasRuleOnStack(HeraldRule $rule) {
+    $phid = $rule->getPHID();
+    return isset($this->ruleStack[$phid]);
+  }
+
+  private function pushRuleStack(HeraldRule $rule) {
+    $phid = $rule->getPHID();
+    $this->ruleStack[$phid] = $rule;
+    return $this;
+  }
+
+  private function getRuleStack() {
+    return array_values($this->ruleStack);
+  }
+
+/* -(  Rule Results  )------------------------------------------------------- */
+
+  private function resetRuleResults() {
+    $this->ruleResults = array();
+    return $this;
+  }
+
+  private function setRuleResult(
+    HeraldRule $rule,
+    HeraldRuleResult $result) {
+
+    $phid = $rule->getPHID();
+
+    if ($this->hasRuleResult($rule)) {
+      throw new Exception(
+        pht(
+          'Herald rule "%s" already has an evaluation result.',
+          $phid));
+    }
+
+    $this->ruleResults[$phid] = $result;
+
+    $this->newRuleTranscript($rule)
+      ->setRuleResult($result);
+
+    return $this;
+  }
+
+  private function hasRuleResult(HeraldRule $rule) {
+    $phid = $rule->getPHID();
+    return isset($this->ruleResults[$phid]);
+  }
+
+  private function getRuleResult(HeraldRule $rule) {
+    $phid = $rule->getPHID();
+
+    if (!$this->hasRuleResult($rule)) {
+      throw new Exception(
+        pht(
+          'Herald rule "%s" does not have an evaluation result.',
+          $phid));
+    }
+
+    return $this->ruleResults[$phid];
+  }
+
   public function applyRules(array $rules, HeraldAdapter $object) {
     assert_instances_of($rules, 'HeraldRule');
     $t_start = microtime(true);
@@ -66,62 +135,70 @@ final class HeraldEngine extends Phobject {
     $this->transcript->setObjectPHID((string)$object->getPHID());
     $this->fieldCache = array();
     $this->fieldExceptions = array();
-    $this->results = array();
     $this->rules   = $rules;
     $this->object  = $object;
 
+    $this->resetRuleResults();
+
     $effects = array();
     foreach ($rules as $phid => $rule) {
-      $this->stack = array();
-
-      $is_first_only = $rule->isRepeatFirst();
+      $this->resetRuleStack();
 
       $caught = null;
+      $result = null;
       try {
+        $is_first_only = $rule->isRepeatFirst();
+
         if (!$this->getDryRun() &&
             $is_first_only &&
             $rule->getRuleApplied($object->getPHID())) {
+
           // This is not a dry run, and this rule is only supposed to be
-          // applied a single time, and it's already been applied...
+          // applied a single time, and it has already been applied.
           // That means automatic failure.
-          $this->newRuleTranscript($rule)
-            ->setResult(false)
-            ->setReason(
-              pht(
-                'This rule is only supposed to be repeated a single time, '.
-                'and it has already been applied.'));
 
-          $rule_matches = false;
+          $result_code = HeraldRuleResult::RESULT_ALREADY_APPLIED;
+          $result = HeraldRuleResult::newFromResultCode($result_code);
+        } else if ($this->isForbidden($rule, $object)) {
+          $result_code = HeraldRuleResult::RESULT_OBJECT_STATE;
+          $result = HeraldRuleResult::newFromResultCode($result_code);
         } else {
-          if ($this->isForbidden($rule, $object)) {
-            $this->newRuleTranscript($rule)
-              ->setResult(HeraldRuleTranscript::RESULT_FORBIDDEN)
-              ->setReason(
-                pht(
-                  'Object state is not compatible with rule.'));
-
-            $rule_matches = false;
-          } else {
-            $rule_matches = $this->doesRuleMatch($rule, $object);
-          }
+          $result = $this->getRuleMatchResult($rule, $object);
         }
       } catch (HeraldRecursiveConditionsException $ex) {
-        $names = array();
-        foreach ($this->stack as $rule_phid => $ignored) {
-          $names[] = '"'.$rules[$rule_phid]->getName().'"';
+        $cycle_phids = array();
+
+        $stack = $this->getRuleStack();
+        foreach ($stack as $stack_rule) {
+          $cycle_phids[] = $stack_rule->getPHID();
         }
-        $names = implode(', ', $names);
-        foreach ($this->stack as $rule_phid => $ignored) {
-          $this->newRuleTranscript($rules[$rule_phid])
-            ->setResult(false)
-            ->setReason(
-              pht(
-                "Rules %s are recursively dependent upon one another! ".
-                "Don't do this! You have formed an unresolvable cycle in the ".
-                "dependency graph!",
-                $names));
+        // Add the rule which actually cycled to the list to make the
+        // result more clear when we show it to the user.
+        $cycle_phids[] = $phid;
+
+        foreach ($stack as $stack_rule) {
+          if ($this->hasRuleResult($stack_rule)) {
+            continue;
+          }
+
+          $result_code = HeraldRuleResult::RESULT_RECURSION;
+          $result_data = array(
+            'cyclePHIDs' => $cycle_phids,
+          );
+
+          $result = HeraldRuleResult::newFromResultCode($result_code)
+            ->setResultData($result_data);
+          $this->setRuleResult($stack_rule, $result);
         }
-        $rule_matches = false;
+
+        $result = $this->getRuleResult($rule);
+      } catch (HeraldRuleEvaluationException $ex) {
+        // When we encounter an evaluation exception, the condition which
+        // failed to evaluate is responsible for logging the details of the
+        // error.
+
+        $result_code = HeraldRuleResult::RESULT_EVALUATION_EXCEPTION;
+        $result = HeraldRuleResult::newFromResultCode($result_code);
       } catch (Exception $ex) {
         $caught = $ex;
       } catch (Throwable $ex) {
@@ -129,17 +206,26 @@ final class HeraldEngine extends Phobject {
       }
 
       if ($caught) {
-        $this->newRuleTranscript($rules[$phid])
-          ->setResult(false)
-          ->setReason(
-            pht(
-              'Rule encountered an exception while evaluting.'));
-        $rule_matches = false;
+        // These exceptions are unexpected, and did not arise during rule
+        // evaluation, so we're responsible for handling the details.
+
+        $result_code = HeraldRuleResult::RESULT_EXCEPTION;
+
+        $result_data = array(
+          'exception.class' => get_class($caught),
+          'exception.message' => $ex->getMessage(),
+        );
+
+        $result = HeraldRuleResult::newFromResultCode($result_code)
+          ->setResultData($result_data);
       }
 
-      $this->results[$phid] = $rule_matches;
+      if (!$this->hasRuleResult($rule)) {
+        $this->setRuleResult($rule, $result);
+      }
+      $result = $this->getRuleResult($rule);
 
-      if ($rule_matches) {
+      if ($result->getShouldApplyActions()) {
         foreach ($this->getRuleEffects($rule, $object) as $effect) {
           $effects[] = $effect;
         }
@@ -286,58 +372,46 @@ final class HeraldEngine extends Phobject {
   public function doesRuleMatch(
     HeraldRule $rule,
     HeraldAdapter $object) {
+    $result = $this->getRuleMatchResult($rule, $object);
+    return $result->getShouldApplyActions();
+  }
 
-    $phid = $rule->getPHID();
+  private function getRuleMatchResult(
+    HeraldRule $rule,
+    HeraldAdapter $object) {
 
-    if (isset($this->results[$phid])) {
+    if ($this->hasRuleResult($rule)) {
       // If we've already evaluated this rule because another rule depends
       // on it, we don't need to reevaluate it.
-      return $this->results[$phid];
+      return $this->getRuleResult($rule);
     }
 
-    if (isset($this->stack[$phid])) {
+    if ($this->hasRuleOnStack($rule)) {
       // We've recursed, fail all of the rules on the stack. This happens when
       // there's a dependency cycle with "Rule conditions match for rule ..."
       // conditions.
-      foreach ($this->stack as $rule_phid => $ignored) {
-        $this->results[$rule_phid] = false;
-      }
       throw new HeraldRecursiveConditionsException();
     }
-
-    $this->stack[$phid] = true;
+    $this->pushRuleStack($rule);
 
     $all = $rule->getMustMatchAll();
 
     $conditions = $rule->getConditions();
 
-    $result = null;
+    $result_code = null;
+    $result_data = array();
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
-      $reason = pht(
-        'Rule could not be processed, it was created with a newer version '.
-        'of Herald.');
-      $result = false;
+      $result_code = HeraldRuleResult::RESULT_VERSION;
     } else if (!$conditions) {
-      $reason = pht(
-        'Rule failed automatically because it has no conditions.');
-      $result = false;
+      $result_code = HeraldRuleResult::RESULT_EMPTY;
     } else if (!$rule->hasValidAuthor()) {
-      $reason = pht(
-        'Rule failed automatically because its owner is invalid '.
-        'or disabled.');
-      $result = false;
+      $result_code = HeraldRuleResult::RESULT_OWNER;
     } else if (!$this->canAuthorViewObject($rule, $object)) {
-      $reason = pht(
-        'Rule failed automatically because it is a personal rule and its '.
-        'owner can not see the object.');
-      $result = false;
+      $result_code = HeraldRuleResult::RESULT_VIEW_POLICY;
     } else if (!$this->canRuleApplyToObject($rule, $object)) {
-      $reason = pht(
-        'Rule failed automatically because it is an object rule which is '.
-        'not relevant for this object.');
-      $result = false;
+      $result_code = HeraldRuleResult::RESULT_OBJECT_RULE;
     } else {
       foreach ($conditions as $condition) {
         $caught = null;
@@ -347,6 +421,10 @@ final class HeraldEngine extends Phobject {
             $rule,
             $condition,
             $object);
+        } catch (HeraldRuleEvaluationException $ex) {
+          throw $ex;
+        } catch (HeraldRecursiveConditionsException $ex) {
+          throw $ex;
         } catch (Exception $ex) {
           $caught = $ex;
         } catch (Throwable $ex) {
@@ -354,60 +432,59 @@ final class HeraldEngine extends Phobject {
         }
 
         if ($caught) {
-          throw $ex;
+          throw new HeraldRuleEvaluationException();
         }
 
         if (!$all && $match) {
-          $reason = pht('Any condition matched.');
-          $result = true;
+          $result_code = HeraldRuleResult::RESULT_ANY_MATCHED;
           break;
         }
 
         if ($all && !$match) {
-          $reason = pht('Not all conditions matched.');
-          $result = false;
+          $result_code = HeraldRuleResult::RESULT_ANY_FAILED;
           break;
         }
       }
 
-      if ($result === null) {
+      if ($result_code === null) {
         if ($all) {
-          $reason = pht('All conditions matched.');
-          $result = true;
+          $result_code = HeraldRuleResult::RESULT_ALL_MATCHED;
         } else {
-          $reason = pht('No conditions matched.');
-          $result = false;
+          $result_code = HeraldRuleResult::RESULT_ALL_FAILED;
         }
       }
     }
 
     // If this rule matched, and is set to run "if it did not match the last
-    // time", and we matched the last time, we're going to return a match in
-    // the transcript but set a flag so we don't actually apply any effects.
+    // time", and we matched the last time, we're going to return a special
+    // result code which records a match but doesn't actually apply effects.
 
     // We need the rule to match so that storage gets updated properly. If we
     // just pretend the rule didn't match it won't cause any effects (which
     // is correct), but it also won't set the "it matched" flag in storage,
     // so the next run after this one would incorrectly trigger again.
 
+    $result = HeraldRuleResult::newFromResultCode($result_code)
+      ->setResultData($result_data);
+
+    $should_apply = $result->getShouldApplyActions();
+
     $is_dry_run = $this->getDryRun();
-    if ($result && !$is_dry_run) {
+    if ($should_apply && !$is_dry_run) {
       $is_on_change = $rule->isRepeatOnChange();
       if ($is_on_change) {
         $did_apply = $rule->getRuleApplied($object->getPHID());
         if ($did_apply) {
-          $reason = pht(
-            'This rule matched, but did not take any actions because it '.
-            'is configured to act only if it did not match the last time.');
+          // Replace the result with our modified result.
+          $result_code = HeraldRuleResult::RESULT_LAST_MATCHED;
+          $result = HeraldRuleResult::newFromResultCode($result_code);
 
           $this->skipEffects[$rule->getID()] = true;
         }
       }
     }
 
-    $this->newRuleTranscript($rule)
-      ->setResult($result)
-      ->setReason($reason);
+    $this->setRuleResult($rule, $result);
 
     return $result;
   }
@@ -439,6 +516,9 @@ final class HeraldEngine extends Phobject {
       } else {
         $result_code = HeraldConditionResult::RESULT_FAILED;
       }
+    } catch (HeraldRecursiveConditionsException $ex) {
+      $result_code = HeraldConditionResult::RESULT_RECURSION;
+      $caught = $ex;
     } catch (HeraldInvalidConditionException $ex) {
       $result_code = HeraldConditionResult::RESULT_INVALID;
       $caught = $ex;

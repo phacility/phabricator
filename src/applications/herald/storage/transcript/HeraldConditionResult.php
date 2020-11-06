@@ -7,6 +7,7 @@ final class HeraldConditionResult
   const RESULT_FAILED = 'failed';
   const RESULT_OBJECT_STATE = 'object-state';
   const RESULT_INVALID = 'invalid';
+  const RESULT_RECURSION = 'recursion';
   const RESULT_EXCEPTION = 'exception';
   const RESULT_UNKNOWN = 'unknown';
 
@@ -22,7 +23,7 @@ final class HeraldConditionResult
     return ($this->getSpecificationProperty('match') === true);
   }
 
-  public function newDetailsView() {
+  public function newDetailsView(PhabricatorUser $viewer) {
     switch ($this->getResultCode()) {
       case self::RESULT_OBJECT_STATE:
         $reason = $this->getDataProperty('reason');
@@ -53,8 +54,6 @@ final class HeraldConditionResult
           '%s: %s',
           phutil_tag('strong', array(), $error_class),
           phutil_escape_html_newlines($error_message));
-        break;
-        $details = 'exception';
         break;
       default:
         $details = null;
@@ -89,6 +88,12 @@ final class HeraldConditionResult
         'icon' => 'fa-exclamation-triangle',
         'color.icon' => 'yellow',
         'name' => pht('Invalid'),
+      ),
+      self::RESULT_RECURSION => array(
+        'match' => null,
+        'icon' => 'fa-exclamation-triangle',
+        'color.icon' => 'red',
+        'name' => pht('Recursion'),
       ),
       self::RESULT_EXCEPTION => array(
         'match' => null,

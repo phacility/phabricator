@@ -224,6 +224,7 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   private function buildActionTranscriptPanel(HeraldTranscript $xscript) {
+    $viewer = $this->getViewer();
     $action_xscript = mgroup($xscript->getApplyTranscripts(), 'getRuleID');
 
     $adapter = $this->getAdapter();
@@ -253,7 +254,9 @@ final class HeraldTranscriptController extends HeraldController {
         ->setHeader($rule_xscript->getRuleName())
         ->setHref($rule_uri);
 
-      if (!$rule_xscript->getResult()) {
+      $rule_result = $rule_xscript->getRuleResult();
+
+      if (!$rule_result->getShouldApplyActions()) {
         $rule_item->setDisabled(true);
       }
 
@@ -275,7 +278,7 @@ final class HeraldTranscriptController extends HeraldController {
         $color = $result->getIconColor();
         $name = $result->getName();
 
-        $result_details = $result->newDetailsView();
+        $result_details = $result->newDetailsView($viewer);
         if ($result_details !== null) {
           $result_details = phutil_tag(
             'div',
@@ -301,27 +304,27 @@ final class HeraldTranscriptController extends HeraldController {
         $cond_list->addItem($cond_item);
       }
 
-      if ($rule_xscript->isForbidden()) {
-        $last_icon = 'fa-ban';
-        $last_color = 'indigo';
-        $last_result = pht('Forbidden');
-        $last_note = pht('Object state prevented rule evaluation.');
-      } else if ($rule_xscript->getResult()) {
-        $last_icon = 'fa-check-circle';
-        $last_color = 'green';
-        $last_result = pht('Passed');
-        $last_note = pht('Rule passed.');
-      } else {
-        $last_icon = 'fa-times-circle';
-        $last_color = 'red';
-        $last_result = pht('Failed');
-        $last_note = pht('Rule failed.');
+      $rule_result = $rule_xscript->getRuleResult();
+
+      $last_icon = $rule_result->getIconIcon();
+      $last_color = $rule_result->getIconColor();
+      $last_result = $rule_result->getName();
+      $last_note = $rule_result->getDescription();
+
+      $last_details = $rule_result->newDetailsView($viewer);
+      if ($last_details !== null) {
+        $last_details = phutil_tag(
+          'div',
+          array(
+            'class' => 'herald-condition-note',
+          ),
+          $last_details);
       }
 
       $cond_last = id(new PHUIStatusItemView())
         ->setIcon($last_icon, $last_color)
         ->setTarget(phutil_tag('strong', array(), $last_result))
-        ->setNote($last_note);
+        ->setNote(array($last_note, $last_details));
       $cond_list->addItem($cond_last);
 
       $cond_box = id(new PHUIBoxView())
@@ -330,11 +333,10 @@ final class HeraldTranscriptController extends HeraldController {
 
       $rule_item->appendChild($cond_box);
 
-      if (!$rule_xscript->getResult()) {
-        // If the rule didn't pass, don't generate an action transcript since
-        // actions didn't apply.
-        continue;
-      }
+      // Not all rules will have any action transcripts, but we show them
+      // in general because they may have relevant information even when
+      // rules did not take actions. In particular, state-based actions may
+      // forbid rules from matching.
 
       $cond_box->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM);
 

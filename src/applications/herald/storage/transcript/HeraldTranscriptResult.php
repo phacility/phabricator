@@ -47,9 +47,11 @@ abstract class HeraldTranscriptResult
     return $this->getSpecificationProperty('name');
   }
 
-  final protected function getDataProperty($key) {
+  abstract public function newDetailsView(PhabricatorUser $viewer);
+
+  final protected function getDataProperty($key, $default = null) {
     $data = $this->getResultData();
-    return idx($data, $key);
+    return idx($data, $key, $default);
   }
 
   final public function newResultMap() {
@@ -78,5 +80,12 @@ abstract class HeraldTranscriptResult
   }
 
   abstract protected function newResultSpecificationMap();
+
+  final protected function newErrorView($error_class, $error_message) {
+    return pht(
+      '%s: %s',
+      phutil_tag('strong', array(), $error_class),
+      phutil_escape_html_newlines($error_message));
+  }
 
 }
