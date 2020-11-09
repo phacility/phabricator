@@ -269,34 +269,20 @@ final class HeraldTranscriptController extends HeraldController {
           ->setTarget(phutil_tag('strong', array(), pht('Conditions'))));
 
       foreach ($cond_xscripts as $cond_xscript) {
-        if ($cond_xscript->isForbidden()) {
-          $icon = 'fa-ban';
-          $color = 'indigo';
-          $result = pht('Forbidden');
-        } else if ($cond_xscript->getResult()) {
-          $icon = 'fa-check';
-          $color = 'green';
-          $result = pht('Passed');
-        } else {
-          $icon = 'fa-times';
-          $color = 'red';
-          $result = pht('Failed');
-        }
+        $result = $cond_xscript->getResult();
 
-        if ($cond_xscript->getNote()) {
-          $note_text = $cond_xscript->getNote();
-          if ($cond_xscript->isForbidden()) {
-            $note_text = HeraldStateReasons::getExplanation($note_text);
-          }
+        $icon = $result->getIconIcon();
+        $color = $result->getIconColor();
+        $name = $result->getName();
 
-          $note = phutil_tag(
+        $result_details = $result->newDetailsView();
+        if ($result_details !== null) {
+          $result_details = phutil_tag(
             'div',
             array(
               'class' => 'herald-condition-note',
             ),
-            $note_text);
-        } else {
-          $note = null;
+            $result_details);
         }
 
         // TODO: This is not really translatable and should be driven through
@@ -309,8 +295,8 @@ final class HeraldTranscriptController extends HeraldController {
 
         $cond_item = id(new PHUIStatusItemView())
           ->setIcon($icon, $color)
-          ->setTarget($result)
-          ->setNote(array($explanation, $note));
+          ->setTarget($name)
+          ->setNote(array($explanation, $result_details));
 
         $cond_list->addItem($cond_item);
       }

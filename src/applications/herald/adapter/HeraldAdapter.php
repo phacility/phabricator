@@ -520,21 +520,29 @@ abstract class HeraldAdapter extends Phobject {
       case self::CONDITION_NOT_REGEXP:
         $result_if_match = ($condition_type == self::CONDITION_REGEXP);
 
+        // We add the 'S' flag because we use the regexp multiple times.
+        // It shouldn't cause any troubles if the flag is already there
+        // - /.*/S is evaluated same as /.*/SS.
+        $condition_pattern = $condition_value.'S';
+
         foreach ((array)$field_value as $value) {
-          // We add the 'S' flag because we use the regexp multiple times.
-          // It shouldn't cause any troubles if the flag is already there
-          // - /.*/S is evaluated same as /.*/SS.
-          $result = @preg_match($condition_value.'S', $value);
-          if ($result === false) {
-            throw new HeraldInvalidConditionException(
-              pht(
-                'Regular expression "%s" in Herald rule "%s" is not valid, '.
-                'or exceeded backtracking or recursion limits while '.
-                'executing. Verify the expression and correct it or rewrite '.
-                'it with less backtracking.',
-                $condition_value,
-                $rule->getMonogram()));
+          try {
+            $result = phutil_preg_match($condition_pattern, $value);
+          } catch (PhutilRegexException $ex) {
+            $message = array();
+            $message[] = pht(
+              'Regular expression "%s" in Herald rule "%s" is not valid, '.
+              'or exceeded backtracking or recursion limits while '.
+              'executing. Verify the expression and correct it or rewrite '.
+              'it with less backtracking.',
+              $condition_value,
+              $rule->getMonogram());
+            $message[] = $ex->getMessage();
+            $message = implode("\n\n", $message);
+
+            throw new HeraldInvalidConditionException($message);
           }
+
           if ($result) {
             return $result_if_match;
           }

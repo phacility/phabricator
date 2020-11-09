@@ -8,7 +8,8 @@ final class HeraldEngine extends Phobject {
   protected $activeRule;
   protected $transcript;
 
-  protected $fieldCache = array();
+  private $fieldCache = array();
+  private $fieldExceptions = array();
   protected $object;
   private $dryRun;
 
@@ -64,6 +65,7 @@ final class HeraldEngine extends Phobject {
     $this->transcript = new HeraldTranscript();
     $this->transcript->setObjectPHID((string)$object->getPHID());
     $this->fieldCache = array();
+    $this->fieldExceptions = array();
     $this->results = array();
     $this->rules   = $rules;
     $this->object  = $object;
@@ -74,6 +76,7 @@ final class HeraldEngine extends Phobject {
 
       $is_first_only = $rule->isRepeatFirst();
 
+      $caught = null;
       try {
         if (!$this->getDryRun() &&
             $is_first_only &&
@@ -119,7 +122,21 @@ final class HeraldEngine extends Phobject {
                 $names));
         }
         $rule_matches = false;
+      } catch (Exception $ex) {
+        $caught = $ex;
+      } catch (Throwable $ex) {
+        $caught = $ex;
       }
+
+      if ($caught) {
+        $this->newRuleTranscript($rules[$phid])
+          ->setResult(false)
+          ->setReason(
+            pht(
+              'Rule encountered an exception while evaluting.'));
+        $rule_matches = false;
+      }
+
       $this->results[$phid] = $rule_matches;
 
       if ($rule_matches) {
@@ -323,42 +340,18 @@ final class HeraldEngine extends Phobject {
       $result = false;
     } else {
       foreach ($conditions as $condition) {
-        try {
-          $this->getConditionObjectValue($condition, $object);
-        } catch (Exception $ex) {
-          $reason = pht(
-            'Field "%s" does not exist!',
-            $condition->getFieldName());
-          $result = false;
-          break;
-        }
-
-        // Here, we're profiling the cost to match the condition value against
-        // whatever test is configured. Normally, this cost should be very
-        // small (<<1ms) since it amounts to a single comparison:
-        //
-        //   [ Task author ][ is any of ][ alice ]
-        //
-        // However, it may be expensive in some cases, particularly if you
-        // write a rule with a very creative regular expression that backtracks
-        // explosively.
-        //
-        // At time of writing, the "Another Herald Rule" field is also
-        // evaluated inside the matching function. This may be arbitrarily
-        // expensive (it can prompt us to execute any finite number of other
-        // Herald rules), although we'll push the profiler stack appropriately
-        // so we don't count the evaluation time against this rule in the final
-        // profile.
-
         $caught = null;
 
-        $this->pushProfilerRule($rule);
         try {
-          $match = $this->doesConditionMatch($rule, $condition, $object);
+          $match = $this->doesConditionMatch(
+            $rule,
+            $condition,
+            $object);
         } catch (Exception $ex) {
           $caught = $ex;
+        } catch (Throwable $ex) {
+          $caught = $ex;
         }
-        $this->popProfilerRule($rule);
 
         if ($caught) {
           throw $ex;
@@ -419,63 +412,176 @@ final class HeraldEngine extends Phobject {
     return $result;
   }
 
-  protected function doesConditionMatch(
+  private function doesConditionMatch(
     HeraldRule $rule,
     HeraldCondition $condition,
-    HeraldAdapter $object) {
+    HeraldAdapter $adapter) {
 
-    $object_value = $this->getConditionObjectValue($condition, $object);
     $transcript = $this->newConditionTranscript($rule, $condition);
 
+    $caught = null;
+    $result_data = array();
+
     try {
-      $result = $object->doesConditionMatch(
-        $this,
+      $field_key = $condition->getFieldName();
+
+      $field_value = $this->getProfiledObjectFieldValue(
+        $adapter,
+        $field_key);
+
+      $is_match = $this->getProfiledConditionMatch(
+        $adapter,
         $rule,
         $condition,
-        $object_value);
+        $field_value);
+      if ($is_match) {
+        $result_code = HeraldConditionResult::RESULT_MATCHED;
+      } else {
+        $result_code = HeraldConditionResult::RESULT_FAILED;
+      }
     } catch (HeraldInvalidConditionException $ex) {
-      $result = false;
-      $transcript->setNote($ex->getMessage());
+      $result_code = HeraldConditionResult::RESULT_INVALID;
+      $caught = $ex;
+    } catch (Exception $ex) {
+      $result_code = HeraldConditionResult::RESULT_EXCEPTION;
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $result_code = HeraldConditionResult::RESULT_EXCEPTION;
+      $caught = $ex;
     }
+
+    if ($caught) {
+      $result_data = array(
+        'exception.class' => get_class($caught),
+        'exception.message' => $ex->getMessage(),
+      );
+    }
+
+    $result = HeraldConditionResult::newFromResultCode($result_code)
+      ->setResultData($result_data);
 
     $transcript->setResult($result);
 
-    return $result;
-  }
-
-  protected function getConditionObjectValue(
-    HeraldCondition $condition,
-    HeraldAdapter $object) {
-
-    $field = $condition->getFieldName();
-
-    return $this->getObjectFieldValue($field);
-  }
-
-  public function getObjectFieldValue($field) {
-    if (!array_key_exists($field, $this->fieldCache)) {
-      $adapter = $this->object;
-
-      $adapter->willGetHeraldField($field);
-
-      $caught = null;
-
-      $this->pushProfilerField($field);
-      try {
-        $value = $adapter->getHeraldField($field);
-      } catch (Exception $ex) {
-        $caught = $ex;
-      }
-      $this->popProfilerField($field);
-
-      if ($caught) {
-        throw $caught;
-      }
-
-      $this->fieldCache[$field] = $value;
+    if ($caught) {
+      throw $caught;
     }
 
-    return $this->fieldCache[$field];
+    return $result->getIsMatch();
+  }
+
+  private function getProfiledConditionMatch(
+    HeraldAdapter $adapter,
+    HeraldRule $rule,
+    HeraldCondition $condition,
+    $field_value) {
+
+    // Here, we're profiling the cost to match the condition value against
+    // whatever test is configured. Normally, this cost should be very
+    // small (<<1ms) since it amounts to a single comparison:
+    //
+    //   [ Task author ][ is any of ][ alice ]
+    //
+    // However, it may be expensive in some cases, particularly if you
+    // write a rule with a very creative regular expression that backtracks
+    // explosively.
+    //
+    // At time of writing, the "Another Herald Rule" field is also
+    // evaluated inside the matching function. This may be arbitrarily
+    // expensive (it can prompt us to execute any finite number of other
+    // Herald rules), although we'll push the profiler stack appropriately
+    // so we don't count the evaluation time against this rule in the final
+    // profile.
+
+    $this->pushProfilerRule($rule);
+
+    $caught = null;
+    try {
+      $is_match = $adapter->doesConditionMatch(
+        $this,
+        $rule,
+        $condition,
+        $field_value);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+
+    $this->popProfilerRule($rule);
+
+    if ($caught) {
+      throw $caught;
+    }
+
+    return $is_match;
+  }
+
+  private function getProfiledObjectFieldValue(
+    HeraldAdapter $adapter,
+    $field_key) {
+
+    // Before engaging the profiler, make sure the field class is loaded.
+
+    $adapter->willGetHeraldField($field_key);
+
+    // The first time we read a field value, we'll actually generate it, which
+    // may be slow.
+
+    // After it is generated for the first time, this will just read it from a
+    // cache, which should be very fast.
+
+    // We still want to profile the request even if it goes to cache so we can
+    // get an accurate count of how many times we access the field value: when
+    // trying to improve the performance of Herald rules, it's helpful to know
+    // how many rules rely on the value of a field which is slow to generate.
+
+    $caught = null;
+
+    $this->pushProfilerField($field_key);
+    try {
+      $value = $this->getObjectFieldValue($field_key);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+    $this->popProfilerField($field_key);
+
+    if ($caught) {
+      throw $caught;
+    }
+
+    return $value;
+  }
+
+  private function getObjectFieldValue($field_key) {
+    if (array_key_exists($field_key, $this->fieldExceptions)) {
+      throw $this->fieldExceptions[$field_key];
+    }
+
+    if (array_key_exists($field_key, $this->fieldCache)) {
+      return $this->fieldCache[$field_key];
+    }
+
+    $adapter = $this->object;
+
+    $caught = null;
+    try {
+      $value = $adapter->getHeraldField($field_key);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+
+    if ($caught) {
+      $this->fieldExceptions[$field_key] = $caught;
+      throw $caught;
+    }
+
+    $this->fieldCache[$field_key] = $value;
+
+    return $value;
   }
 
   protected function getRuleEffects(
@@ -639,9 +745,16 @@ final class HeraldEngine extends Phobject {
 
       $forbidden_reason = $this->forbiddenFields[$field_key];
       if ($forbidden_reason !== null) {
+        $result_code = HeraldConditionResult::RESULT_OBJECT_STATE;
+        $result_data = array(
+          'reason' => $forbidden_reason,
+        );
+
+        $result = HeraldConditionResult::newFromResultCode($result_code)
+          ->setResultData($result_data);
+
         $this->newConditionTranscript($rule, $condition)
-          ->setResult(HeraldConditionTranscript::RESULT_FORBIDDEN)
-          ->setNote($forbidden_reason);
+          ->setResult($result);
 
         $is_forbidden = true;
       }
