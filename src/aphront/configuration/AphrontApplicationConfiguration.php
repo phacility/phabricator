@@ -176,7 +176,7 @@ final class AphrontApplicationConfiguration
     }
 
     $host = AphrontRequest::getHTTPHeader('Host');
-    $path = $_REQUEST['__path__'];
+    $path = PhabricatorStartup::getRequestPath();
 
     $application = new self();
 
@@ -759,7 +759,7 @@ final class AphrontApplicationConfiguration
   }
 
   private static function newSelfCheckResponse() {
-    $path = idx($_REQUEST, '__path__', '');
+    $path = PhabricatorStartup::getRequestPath();
     $query = idx($_SERVER, 'QUERY_STRING', '');
 
     $pairs = id(new PhutilQueryStringParser())
