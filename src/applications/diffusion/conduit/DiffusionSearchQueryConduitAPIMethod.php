@@ -64,7 +64,7 @@ final class DiffusionSearchQueryConduitAPIMethod
     $future = $repository->getLocalCommandFuture(
       // NOTE: --perl-regexp is available only with libpcre compiled in.
       'grep --extended-regexp --null -n --no-color -f - %s -- %s',
-      $drequest->getStableCommit(),
+      gitsprintf('%s', $drequest->getStableCommit()),
       $path);
 
     // NOTE: We're writing the pattern on stdin to avoid issues with UTF8

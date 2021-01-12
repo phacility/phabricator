@@ -64,7 +64,7 @@ final class DiffusionHistoryQueryConduitAPIMethod
       $offset,
       $limit,
       '%H:%P',
-      $commit_range,
+      gitsprintf('%s', $commit_range),
       // Git omits merge commits if the path is provided, even if it is empty.
       (strlen($path) ? csprintf('%s', $path) : ''));
 

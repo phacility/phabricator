@@ -48,7 +48,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     } else {
       try {
         list($stdout) = $repository->execxLocalCommand(
-          'cat-file -t %s:%s',
+          'cat-file -t -- %s:%s',
           $commit,
           $path);
       } catch (CommandException $e) {
@@ -62,7 +62,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
         list($sub_err, $sub_stdout) = $repository->execLocalCommand(
           'ls-tree %s -- %s',
-          $commit,
+          gitsprintf('%s', $commit),
           $path);
         if (!$sub_err) {
           // If the path failed "cat-file" but "ls-tree" worked, we assume it
@@ -86,8 +86,9 @@ final class DiffusionBrowseQueryConduitAPIMethod
         if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
           // Grab two logs, since the first one is when the object was deleted.
           list($stdout) = $repository->execxLocalCommand(
-            'log -n2 --format="%%H" %s -- %s',
-            $commit,
+            'log -n2 %s %s -- %s',
+            '--format=%H',
+            gitsprintf('%s', $commit),
             $path);
           $stdout = trim($stdout);
           if ($stdout) {
@@ -121,8 +122,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
     }
 
     list($stdout) = $repository->execxLocalCommand(
-      'ls-tree -z -l %s:%s',
-      $commit,
+      'ls-tree -z -l %s -- %s',
+      gitsprintf('%s', $commit),
       $path);
 
     $submodules = array();
@@ -207,7 +208,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       // the wild.
 
       list($err, $contents) = $repository->execLocalCommand(
-        'cat-file blob %s:.gitmodules',
+        'cat-file blob -- %s:.gitmodules',
         $commit);
 
       if (!$err) {

@@ -10,7 +10,7 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $commit = $drequest->getCommit();
 
     return $repository->getLocalCommandFuture(
-      'cat-file blob %s:%s',
+      'cat-file blob -- %s:%s',
       $commit,
       $path);
   }

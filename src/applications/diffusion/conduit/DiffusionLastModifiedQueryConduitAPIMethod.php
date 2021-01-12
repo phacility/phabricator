@@ -34,7 +34,7 @@ final class DiffusionLastModifiedQueryConduitAPIMethod
       }
       list($hash) = $repository->execxLocalCommand(
         'log -n1 --format=%%H %s -- %s',
-        $commit,
+        gitsprintf('%s', $commit),
         $path);
       $results[$path] = trim($hash);
     }

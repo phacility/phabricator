@@ -35,9 +35,9 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
     $limit = $this->getLimit($request);
 
     list($parents) = $repository->execxLocalCommand(
-      'log -n 1 --format=%s %s',
+      'log -n 1 --format=%s %s --',
       '%P',
-      $commit);
+      gitsprintf('%s', $commit));
 
     $parents = preg_split('/\s+/', trim($parents));
     if (count($parents) < 2) {
@@ -54,8 +54,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
       // NOTE: "+ 1" accounts for the merge commit itself.
       $limit + 1,
       '%H',
-      $commit,
-      '^'.$first_parent);
+      gitsprintf('%s', $commit),
+      gitsprintf('%s', '^'.$first_parent));
 
     $hashes = explode("\n", trim($logs));
 

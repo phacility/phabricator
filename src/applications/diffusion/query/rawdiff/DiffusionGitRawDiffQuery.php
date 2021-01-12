@@ -25,7 +25,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
       list($parents) = $repository->execxLocalCommand(
         'log -n 1 --format=%s %s --',
         '%P',
-        $commit);
+        gitsprintf('%s', $commit));
 
       if (strlen(trim($parents))) {
         $against = $commit.'^';
@@ -42,8 +42,8 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
     return $repository->getLocalCommandFuture(
       'diff %Ls %s %s -- %s',
       $options,
-      $against,
-      $commit,
+      gitsprintf('%s', $against),
+      gitsprintf('%s', $commit),
       $path);
   }
 
