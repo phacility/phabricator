@@ -35,8 +35,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
     $limit = $this->getLimit($request);
 
     list($parents) = $repository->execxLocalCommand(
-      'log -n 1 --format=%s %s --',
-      '%P',
+      'log -n 1 %s %s --',
+      '--format=%P',
       gitsprintf('%s', $commit));
 
     $parents = preg_split('/\s+/', trim($parents));
@@ -50,10 +50,10 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
 
     $first_parent = head($parents);
     list($logs) = $repository->execxLocalCommand(
-      'log -n %d --format=%s %s %s --',
+      'log -n %d %s %s %s --',
       // NOTE: "+ 1" accounts for the merge commit itself.
       $limit + 1,
-      '%H',
+      '--format=%H',
       gitsprintf('%s', $commit),
       gitsprintf('%s', '^'.$first_parent));
 

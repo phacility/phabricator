@@ -43,9 +43,9 @@ final class DiffusionInternalGitRawDiffQueryConduitAPIMethod
     // it requires the commit to have a parent that we can diff against. The
     // first commit doesn't, so "commit^" is not a valid ref.
     list($parents) = $repository->execxLocalCommand(
-      'log -n1 --format=%s %s',
-      '%P',
-      $commit);
+      'log -n1 %s %s --',
+      '--format=%P',
+      gitsprintf('%s', $commit));
     $use_log = !strlen(trim($parents));
 
     // First, get a fast raw diff without "--find-copies-harder". This flag
@@ -96,18 +96,18 @@ final class DiffusionInternalGitRawDiffQueryConduitAPIMethod
       // NOTE: "--pretty=format: " is to disable diff output, we only want the
       // part we get from "--raw".
       $future = $repository->getLocalCommandFuture(
-        'log %Ls --pretty=format: %s',
+        'log %Ls --pretty=format: %s --',
         $flags,
-        $commit);
+        gitsprintf('%s', $commit));
     } else {
       // Otherwise, we can use "diff", which will give us output for merges.
       // We diff against the first parent, as this is generally the expectation
       // and results in sensible behavior.
       $future = $repository->getLocalCommandFuture(
-        'diff %Ls %s^1 %s',
+        'diff %Ls %s %s --',
         $flags,
-        $commit,
-        $commit);
+        gitsprintf('%s^1', $commit),
+        gitsprintf('%s', $commit));
     }
 
     // Don't spend more than 30 seconds generating the slower output.

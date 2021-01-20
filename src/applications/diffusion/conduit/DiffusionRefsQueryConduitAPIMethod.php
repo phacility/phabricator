@@ -28,9 +28,9 @@ final class DiffusionRefsQueryConduitAPIMethod
     $commit = $request->getValue('commit');
 
     list($stdout) = $repository->execxLocalCommand(
-      'log --format=%s -n 1 %s --',
-      '%d',
-      $commit);
+      'log -n 1 %s %s --',
+      '--format=%d',
+      gitsprintf('%s', $commit));
 
     // %d, gives a weird output format
     // similar to (remote/one, remote/two, remote/three)

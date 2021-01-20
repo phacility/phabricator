@@ -19,13 +19,13 @@ final class PhabricatorGitGraphStream
 
     if ($start_commit !== null) {
       $future = $repository->getLocalCommandFuture(
-        'log --format=%s %s --',
-        '%H%x01%P%x01%ct',
-        $start_commit);
+        'log %s %s --',
+        '--format=%H%x01%P%x01%ct',
+        gitsprintf('%s', $start_commit));
     } else {
       $future = $repository->getLocalCommandFuture(
-        'log --format=%s --all --',
-        '%H%x01%P%x01%ct');
+        'log %s --all --',
+        '--format=%H%x01%P%x01%ct');
     }
 
     $this->iterator = new LinesOfALargeExecFuture($future);

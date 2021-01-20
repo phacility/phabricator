@@ -35,22 +35,26 @@ final class DiffusionBrowseQueryConduitAPIMethod
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
+
     $path = $request->getValue('path');
+    if (!strlen($path)) {
+      $path = null;
+    }
+
     $commit = $request->getValue('commit');
     $offset = (int)$request->getValue('offset');
     $limit = (int)$request->getValue('limit');
     $result = $this->getEmptyResultSet();
 
-    if ($path == '') {
+    if ($path === null) {
       // Fast path to improve the performance of the repository view; we know
       // the root is always a tree at any commit and always exists.
       $stdout = 'tree';
     } else {
       try {
         list($stdout) = $repository->execxLocalCommand(
-          'cat-file -t -- %s:%s',
-          $commit,
-          $path);
+          'cat-file -t -- %s',
+          sprintf('%s:%s', $commit, $path));
       } catch (CommandException $e) {
         // The "cat-file" command may fail if the path legitimately does not
         // exist, but it may also fail if the path is a submodule. This can
@@ -121,14 +125,20 @@ final class DiffusionBrowseQueryConduitAPIMethod
       return $result;
     }
 
-    list($stdout) = $repository->execxLocalCommand(
-      'ls-tree -z -l %s -- %s',
-      gitsprintf('%s', $commit),
-      $path);
+    if ($path === null) {
+      list($stdout) = $repository->execxLocalCommand(
+        'ls-tree -z -l %s --',
+        gitsprintf('%s', $commit));
+    } else {
+      list($stdout) = $repository->execxLocalCommand(
+        'ls-tree -z -l %s -- %s',
+        gitsprintf('%s', $commit),
+        $path);
+    }
 
     $submodules = array();
 
-    if (strlen($path)) {
+    if ($path !== null) {
       $prefix = rtrim($path, '/').'/';
     } else {
       $prefix = '';
@@ -226,8 +236,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
           $dict[$key] = $value;
         }
 
-        foreach ($submodules as $path) {
-          $full_path = $path->getFullPath();
+        foreach ($submodules as $submodule_path) {
+          $full_path = $submodule_path->getFullPath();
           $key = 'submodule.'.$full_path.'.url';
           if (isset($dict[$key])) {
             $path->setExternalURI($dict[$key]);

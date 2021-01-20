@@ -23,8 +23,8 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
       // Check if this is the root commit by seeing if it has parents, since
       // `git diff X^ X` does not work if "X" is the initial commit.
       list($parents) = $repository->execxLocalCommand(
-        'log -n 1 --format=%s %s --',
-        '%P',
+        'log -n 1 %s --',
+        '--format=%P',
         gitsprintf('%s', $commit));
 
       if (strlen(trim($parents))) {

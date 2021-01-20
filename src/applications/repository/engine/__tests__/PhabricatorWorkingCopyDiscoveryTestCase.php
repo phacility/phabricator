@@ -4,6 +4,8 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
   extends PhabricatorWorkingCopyTestCase {
 
   public function testSubversionCommitDiscovery() {
+    $this->requireBinaryForTest('svn');
+
     $refs = $this->discoverRefs('ST');
     $this->assertEqual(
       array(

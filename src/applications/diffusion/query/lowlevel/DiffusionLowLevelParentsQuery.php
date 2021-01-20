@@ -37,8 +37,8 @@ final class DiffusionLowLevelParentsQuery
     $repository = $this->getRepository();
 
     list($stdout) = $repository->execxLocalCommand(
-      'log -n 1 --format=%s %s --',
-      '%P',
+      'log -n 1 %s %s --',
+      '--format=%P',
       gitsprintf('%s', $this->identifier));
 
     return preg_split('/\s+/', trim($stdout));

@@ -483,17 +483,17 @@ final class PhabricatorRepositoryRefEngine
           $ref_list = implode("\n", $ref_list)."\n";
 
           $future = $this->getRepository()->getLocalCommandFuture(
-            'log --format=%s --stdin',
-            '%H');
+            'log %s --stdin --',
+            '--format=%H');
 
           list($stdout) = $future
             ->write($ref_list)
             ->resolvex();
         } else {
           list($stdout) = $this->getRepository()->execxLocalCommand(
-            'log --format=%s %s',
-            '%H',
-            $new_head);
+            'log %s %s --',
+            '--format=%H',
+            gitsprintf('%s', $new_head));
         }
 
         $stdout = trim($stdout);
