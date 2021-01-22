@@ -100,7 +100,7 @@ final class PhabricatorRepositoryRefEngine
       $this->setPermanentFlagOnCommits($this->permanentCommits);
     }
 
-    $save_cursors = $this->getCursorsForUpdate($all_cursors);
+    $save_cursors = $this->getCursorsForUpdate($repository, $all_cursors);
 
     if ($this->newPositions || $this->deadPositions || $save_cursors) {
       $repository->openTransaction();
@@ -121,17 +121,19 @@ final class PhabricatorRepositoryRefEngine
     }
   }
 
-  private function getCursorsForUpdate(array $cursors) {
+  private function getCursorsForUpdate(
+    PhabricatorRepository $repository,
+    array $cursors) {
     assert_instances_of($cursors, 'PhabricatorRepositoryRefCursor');
+
+    $publisher = $repository->newPublisher();
 
     $results = array();
 
     foreach ($cursors as $cursor) {
-      $ref_type = $cursor->getRefType();
-      $ref_name = $cursor->getRefName();
+      $diffusion_ref = $cursor->newDiffusionRepositoryRef();
 
-      $is_permanent = $this->isPermanentRef($ref_type, $ref_name);
-
+      $is_permanent = $publisher->isPermanentRef($diffusion_ref);
       if ($is_permanent == $cursor->getIsPermanent()) {
         continue;
       }
@@ -259,6 +261,7 @@ final class PhabricatorRepositoryRefEngine
     $ref_type,
     array $all_closing_heads) {
     $repository = $this->getRepository();
+    $publisher = $repository->newPublisher();
 
     // NOTE: Mercurial branches may have multiple branch heads; this logic
     // is complex primarily to account for that.
@@ -341,7 +344,8 @@ final class PhabricatorRepositoryRefEngine
         $this->markPositionNew($new_position);
       }
 
-      if ($this->isPermanentRef($ref_type, $name)) {
+      $diffusion_ref = head($refs)->newDiffusionRepositoryRef();
+      if ($publisher->isPermanentRef($diffusion_ref)) {
 
         // See T13284. If this cursor was already marked as permanent, we
         // only need to publish the newly created ref positions. However, if
@@ -402,14 +406,6 @@ final class PhabricatorRepositoryRefEngine
         $this->markPositionDead($position);
       }
     }
-  }
-
-  private function isPermanentRef($ref_type, $ref_name) {
-    if ($ref_type !== PhabricatorRepositoryRefCursor::TYPE_BRANCH) {
-      return false;
-    }
-
-    return $this->getRepository()->isBranchPermanentRef($ref_name);
   }
 
   /**

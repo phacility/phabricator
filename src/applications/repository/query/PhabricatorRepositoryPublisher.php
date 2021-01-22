@@ -38,6 +38,10 @@ final class PhabricatorRepositoryPublisher
     return !$this->getCommitHoldReasons($commit);
   }
 
+  public function isPermanentRef(DiffusionRepositoryRef $ref) {
+    return !$this->getRefImpermanentReasons($ref);
+  }
+
 /* -(  Hold Reasons  )------------------------------------------------------- */
 
   public function getRepositoryHoldReasons() {
@@ -59,18 +63,8 @@ final class PhabricatorRepositoryPublisher
     $repository = $this->getRepository();
     $reasons = $this->getRepositoryHoldReasons();
 
-    if (!$ref->isBranch()) {
-      $reasons[] = self::HOLD_REF_NOT_BRANCH;
-    } else {
-      $branch_name = $ref->getShortName();
-
-      if (!$repository->shouldTrackBranch($branch_name)) {
-        $reasons[] = self::HOLD_UNTRACKED;
-      }
-
-      if (!$repository->isBranchPermanentRef($branch_name)) {
-        $reasons[] = self::HOLD_NOT_PERMANENT_REF;
-      }
+    foreach ($this->getRefImpermanentReasons($ref) as $reason) {
+      $reasons[] = $reason;
     }
 
     return $reasons;
@@ -83,6 +77,27 @@ final class PhabricatorRepositoryPublisher
     if ($repository->isGit()) {
       if (!$commit->isPermanentCommit()) {
         $reasons[] = self::HOLD_NOT_REACHABLE_FROM_PERMANENT_REF;
+      }
+    }
+
+    return $reasons;
+  }
+
+  public function getRefImpermanentReasons(DiffusionRepositoryRef $ref) {
+    $repository = $this->getRepository();
+    $reasons = array();
+
+    if (!$ref->isBranch()) {
+      $reasons[] = self::HOLD_REF_NOT_BRANCH;
+    } else {
+      $branch_name = $ref->getShortName();
+
+      if (!$repository->shouldTrackBranch($branch_name)) {
+        $reasons[] = self::HOLD_UNTRACKED;
+      }
+
+      if (!$repository->isBranchPermanentRef($branch_name)) {
+        $reasons[] = self::HOLD_NOT_PERMANENT_REF;
       }
     }
 

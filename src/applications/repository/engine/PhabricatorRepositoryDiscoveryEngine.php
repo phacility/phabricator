@@ -189,7 +189,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $head_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
-        $publisher->shouldPublishRef($ref));
+        $publisher->isPermanentRef($ref));
 
       $this->didDiscoverRefs($head_refs);
 
@@ -507,9 +507,9 @@ final class PhabricatorRepositoryDiscoveryEngine
   }
 
   /**
-   * Sort branches so we process permanent branches first. This makes the
-   * whole import process a little cheaper, since we can publish these commits
-   * the first time through rather than catching them in the refs step.
+   * Sort refs so we process permanent refs first. This makes the whole import
+   * process a little cheaper, since we can publish these commits the first
+   * time through rather than catching them in the refs step.
    *
    * @task internal
    *
@@ -523,7 +523,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     $head_refs = array();
     $tail_refs = array();
     foreach ($refs as $ref) {
-      if ($publisher->shouldPublishRef($ref)) {
+      if ($publisher->isPermanentRef($ref)) {
         $head_refs[] = $ref;
       } else {
         $tail_refs[] = $ref;
