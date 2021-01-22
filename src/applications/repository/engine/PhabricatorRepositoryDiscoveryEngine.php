@@ -101,7 +101,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $repository,
         $ref->getIdentifier(),
         $ref->getEpoch(),
-        $ref->getCanCloseImmediately(),
+        $ref->getIsPermanent(),
         $ref->getParents(),
         $task_priority);
 
@@ -250,7 +250,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $refs[$identifier] = id(new PhabricatorRepositoryCommitRef())
           ->setIdentifier($identifier)
           ->setEpoch($epoch)
-          ->setCanCloseImmediately(true);
+          ->setIsPermanent(true);
 
         if ($upper_bound === null) {
           $upper_bound = $identifier;
@@ -354,7 +354,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorMercurialGraphStream($repository, $commit),
         $commit,
-        $close_immediately = true);
+        $is_permanent = true);
 
       $this->didDiscoverRefs($branch_refs);
 
@@ -371,7 +371,7 @@ final class PhabricatorRepositoryDiscoveryEngine
   private function discoverStreamAncestry(
     PhabricatorRepositoryGraphStream $stream,
     $commit,
-    $close_immediately) {
+    $is_permanent) {
 
     $discover = array($commit);
     $graph = array();
@@ -424,7 +424,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
         ->setEpoch($epoch)
-        ->setCanCloseImmediately($close_immediately)
+        ->setIsPermanent($is_permanent)
         ->setParents($stream->getParents($commit));
     }
 
@@ -507,8 +507,8 @@ final class PhabricatorRepositoryDiscoveryEngine
   }
 
   /**
-   * Sort branches so we process closeable branches first. This makes the
-   * whole import process a little cheaper, since we can close these commits
+   * Sort branches so we process permanent branches first. This makes the
+   * whole import process a little cheaper, since we can publish these commits
    * the first time through rather than catching them in the refs step.
    *
    * @task internal
@@ -538,7 +538,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     PhabricatorRepository $repository,
     $commit_identifier,
     $epoch,
-    $close_immediately,
+    $is_permanent,
     array $parents,
     $task_priority) {
 
@@ -570,8 +570,8 @@ final class PhabricatorRepositoryDiscoveryEngine
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
-    if ($close_immediately) {
-      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
+    if ($is_permanent) {
+      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_PERMANENT);
     }
 
     $data = new PhabricatorRepositoryCommitData();

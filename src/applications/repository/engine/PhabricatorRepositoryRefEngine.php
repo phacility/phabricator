@@ -9,7 +9,7 @@ final class PhabricatorRepositoryRefEngine
 
   private $newPositions = array();
   private $deadPositions = array();
-  private $closeCommits = array();
+  private $permanentCommits = array();
   private $rebuild;
 
   public function setRebuild($rebuild) {
@@ -24,7 +24,7 @@ final class PhabricatorRepositoryRefEngine
   public function updateRefs() {
     $this->newPositions = array();
     $this->deadPositions = array();
-    $this->closeCommits = array();
+    $this->permanentCommits = array();
 
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -96,8 +96,8 @@ final class PhabricatorRepositoryRefEngine
       $this->updateCursors($cursor_group, $refs, $type, $all_closing_heads);
     }
 
-    if ($this->closeCommits) {
-      $this->setCloseFlagOnCommits($this->closeCommits);
+    if ($this->permanentCommits) {
+      $this->setPermanentFlagOnCommits($this->permanentCommits);
     }
 
     $save_cursors = $this->getCursorsForUpdate($all_cursors);
@@ -217,9 +217,9 @@ final class PhabricatorRepositoryRefEngine
     return $this;
   }
 
-  private function markCloseCommits(array $identifiers) {
+  private function markPermanentCommits(array $identifiers) {
     foreach ($identifiers as $identifier) {
-      $this->closeCommits[$identifier] = $identifier;
+      $this->permanentCommits[$identifier] = $identifier;
     }
     return $this;
   }
@@ -377,7 +377,7 @@ final class PhabricatorRepositoryRefEngine
             $identifier,
             $exclude);
 
-          $this->markCloseCommits($new_identifiers);
+          $this->markPermanentCommits($new_identifiers);
         }
       }
     }
@@ -507,10 +507,10 @@ final class PhabricatorRepositoryRefEngine
   }
 
   /**
-   * Mark a list of commits as closeable, and queue workers for those commits
+   * Mark a list of commits as permanent, and queue workers for those commits
    * which don't already have the flag.
    */
-  private function setCloseFlagOnCommits(array $identifiers) {
+  private function setPermanentFlagOnCommits(array $identifiers) {
     $repository = $this->getRepository();
     $commit_table = new PhabricatorRepositoryCommit();
     $conn = $commit_table->establishConnection('w');
@@ -552,7 +552,7 @@ final class PhabricatorRepositoryRefEngine
       }
     }
 
-    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    $permanent_flag = PhabricatorRepositoryCommit::IMPORTED_PERMANENT;
     $published_flag = PhabricatorRepositoryCommit::IMPORTED_PUBLISH;
 
     $all_commits = ipull($all_commits, null, 'commitIdentifier');
@@ -568,9 +568,9 @@ final class PhabricatorRepositoryRefEngine
       }
 
       $import_status = $row['importStatus'];
-      if (!($import_status & $closeable_flag)) {
-        // Set the "closeable" flag.
-        $import_status = ($import_status | $closeable_flag);
+      if (!($import_status & $permanent_flag)) {
+        // Set the "permanent" flag.
+        $import_status = ($import_status | $permanent_flag);
 
         // See T13580. Clear the "published" flag, so publishing executes
         // again. We may have previously performed a no-op "publish" on the
