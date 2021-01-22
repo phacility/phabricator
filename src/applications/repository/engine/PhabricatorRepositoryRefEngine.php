@@ -548,6 +548,22 @@ final class PhabricatorRepositoryRefEngine
       }
     }
 
+    $commit_refs = array();
+    foreach ($identifiers as $identifier) {
+
+      // See T13591. This construction is a bit ad-hoc, but the priority
+      // function currently only cares about the number of refs we have
+      // discovered, so we'll get the right result even without filling
+      // these records out in detail.
+
+      $commit_refs[] = id(new PhabricatorRepositoryCommitRef())
+        ->setIdentifier($identifier);
+    }
+
+    $task_priority = $this->getImportTaskPriority(
+      $repository,
+      $commit_refs);
+
     $permanent_flag = PhabricatorRepositoryCommit::IMPORTED_PERMANENT;
     $published_flag = PhabricatorRepositoryCommit::IMPORTED_PUBLISH;
 
@@ -580,17 +596,12 @@ final class PhabricatorRepositoryRefEngine
           $import_status,
           $row['id']);
 
-        $data = array(
-          'commitID' => $row['id'],
-        );
-
-        PhabricatorWorker::scheduleTask(
-          $class,
-          $data,
-          array(
-            'priority' => PhabricatorWorker::PRIORITY_COMMIT,
-            'objectPHID' => $row['phid'],
-          ));
+        $this->queueCommitImportTask(
+          $repository,
+          $row['id'],
+          $row['phid'],
+          $task_priority,
+          $via = 'ref');
       }
     }
 
