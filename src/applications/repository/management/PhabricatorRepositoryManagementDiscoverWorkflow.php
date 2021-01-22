@@ -7,21 +7,22 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
     $this
       ->setName('discover')
       ->setExamples('**discover** [__options__] __repository__ ...')
-      ->setSynopsis(pht('Discover __repository__.'))
+      ->setSynopsis(pht('Discover commits in __repository__.'))
       ->setArguments(
         array(
           array(
-            'name'        => 'verbose',
-            'help'        => pht('Show additional debugging information.'),
+            'name' => 'verbose',
+            'help' => pht('Show additional debugging information.'),
           ),
           array(
-            'name'        => 'repair',
-            'help'        => pht(
-              'Repair a repository with gaps in commit history.'),
+            'name' => 'repair',
+            'help' => pht(
+              'Discover all commits, even if they are ancestors of known '.
+              'commits. This can repair gaps in repository history.'),
           ),
           array(
-            'name'        => 'repos',
-            'wildcard'    => true,
+            'name' => 'repos',
+            'wildcard' => true,
           ),
         ));
   }

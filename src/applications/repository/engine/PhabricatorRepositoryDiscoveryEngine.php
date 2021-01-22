@@ -459,13 +459,6 @@ final class PhabricatorRepositoryDiscoveryEngine
       return true;
     }
 
-    if ($this->repairMode) {
-      // In repair mode, rediscover the entire repository, ignoring the
-      // database state. We can hit the local cache above, but if we miss it
-      // stop the script from going to the database cache.
-      return false;
-    }
-
     $this->fillCommitCache(array($identifier));
 
     return isset($this->commitCache[$identifier]);
@@ -473,6 +466,13 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function fillCommitCache(array $identifiers) {
     if (!$identifiers) {
+      return;
+    }
+
+    if ($this->repairMode) {
+      // In repair mode, rediscover the entire repository, ignoring the
+      // database state. The engine still maintains a local cache (the
+      // "Working Set") but we just give up before looking in the database.
       return;
     }
 
