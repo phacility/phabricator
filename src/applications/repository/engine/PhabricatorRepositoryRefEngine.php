@@ -344,8 +344,7 @@ final class PhabricatorRepositoryRefEngine
         $this->markPositionNew($new_position);
       }
 
-      $diffusion_ref = head($refs)->newDiffusionRepositoryRef();
-      if ($publisher->isPermanentRef($diffusion_ref)) {
+      if ($publisher->isPermanentRef(head($refs))) {
 
         // See T13284. If this cursor was already marked as permanent, we
         // only need to publish the newly created ref positions. However, if
@@ -613,13 +612,17 @@ final class PhabricatorRepositoryRefEngine
     $ref_type,
     $ref_name) {
 
-    $is_permanent = $this->isPermanentRef($ref_type, $ref_name);
-
     $cursor = id(new PhabricatorRepositoryRefCursor())
       ->setRepositoryPHID($repository->getPHID())
       ->setRefType($ref_type)
-      ->setRefName($ref_name)
-      ->setIsPermanent((int)$is_permanent);
+      ->setRefName($ref_name);
+
+    $publisher = $repository->newPublisher();
+
+    $diffusion_ref = $cursor->newDiffusionRepositoryRef();
+    $is_permanent = $publisher->isPermanentRef($diffusion_ref);
+
+    $cursor->setIsPermanent((int)$is_permanent);
 
     try {
       return $cursor->save();
