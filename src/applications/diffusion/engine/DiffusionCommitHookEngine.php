@@ -608,9 +608,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       // repository. Particularly, this will cover the cases of a new branch, a
       // completely moved tag, etc.
       $futures[$key] = $this->getRepository()->getLocalCommandFuture(
-        'log --format=%s %s --not --all',
-        '%H',
-        $ref_update->getRefNew());
+        'log %s %s --not --all --',
+        '--format=%H',
+        gitsprintf('%s', $ref_update->getRefNew()));
     }
 
     $content_updates = array();

@@ -88,6 +88,12 @@ final class PhabricatorRepositoryRefCursor
     return mpull($this->getPositions(), 'getCommitIdentifier');
   }
 
+  public function newDiffusionRepositoryRef() {
+    return id(new DiffusionRepositoryRef())
+      ->setRefType($this->getRefType())
+      ->setShortName($this->getRefName());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

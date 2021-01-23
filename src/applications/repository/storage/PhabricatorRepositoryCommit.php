@@ -36,7 +36,7 @@ final class PhabricatorRepositoryCommit
   const IMPORTED_PUBLISH = 8;
   const IMPORTED_ALL = 11;
 
-  const IMPORTED_CLOSEABLE = 1024;
+  const IMPORTED_PERMANENT = 1024;
   const IMPORTED_UNREACHABLE = 2048;
 
   private $commitData = self::ATTACHABLE;
@@ -467,7 +467,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function isPermanentCommit() {
-    return (bool)$this->isPartiallyImported(self::IMPORTED_CLOSEABLE);
+    return (bool)$this->isPartiallyImported(self::IMPORTED_PERMANENT);
   }
 
   public function newCommitAuthorView(PhabricatorUser $viewer) {

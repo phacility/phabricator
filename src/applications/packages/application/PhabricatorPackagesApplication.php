@@ -15,7 +15,7 @@ final class PhabricatorPackagesApplication extends PhabricatorApplication {
   }
 
   public function getBaseURI() {
-    return '/packages/';
+    return '/packages/package/';
   }
 
   public function getIcon() {

@@ -181,6 +181,12 @@ final class PhabricatorAuthPasswordEngine
     $normal_password = phutil_utf8_strtolower($raw_password);
     if (strlen($normal_password) >= $minimum_similarity) {
       foreach ($normal_map as $term => $source) {
+
+        // See T2312. This may be required if the term list includes numeric
+        // strings like "12345", which will be cast to integers when used as
+        // array keys.
+        $term = phutil_string_cast($term);
+
         if (strpos($term, $normal_password) === false &&
             strpos($normal_password, $term) === false) {
           continue;

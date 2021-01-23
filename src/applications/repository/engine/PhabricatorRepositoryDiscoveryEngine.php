@@ -101,7 +101,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $repository,
         $ref->getIdentifier(),
         $ref->getEpoch(),
-        $ref->getCanCloseImmediately(),
+        $ref->getIsPermanent(),
         $ref->getParents(),
         $task_priority);
 
@@ -189,7 +189,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $head_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
-        $publisher->shouldPublishRef($ref));
+        $publisher->isPermanentRef($ref));
 
       $this->didDiscoverRefs($head_refs);
 
@@ -250,7 +250,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $refs[$identifier] = id(new PhabricatorRepositoryCommitRef())
           ->setIdentifier($identifier)
           ->setEpoch($epoch)
-          ->setCanCloseImmediately(true);
+          ->setIsPermanent(true);
 
         if ($upper_bound === null) {
           $upper_bound = $identifier;
@@ -354,7 +354,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorMercurialGraphStream($repository, $commit),
         $commit,
-        $close_immediately = true);
+        $is_permanent = true);
 
       $this->didDiscoverRefs($branch_refs);
 
@@ -371,7 +371,7 @@ final class PhabricatorRepositoryDiscoveryEngine
   private function discoverStreamAncestry(
     PhabricatorRepositoryGraphStream $stream,
     $commit,
-    $close_immediately) {
+    $is_permanent) {
 
     $discover = array($commit);
     $graph = array();
@@ -424,7 +424,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
         ->setEpoch($epoch)
-        ->setCanCloseImmediately($close_immediately)
+        ->setIsPermanent($is_permanent)
         ->setParents($stream->getParents($commit));
     }
 
@@ -459,13 +459,6 @@ final class PhabricatorRepositoryDiscoveryEngine
       return true;
     }
 
-    if ($this->repairMode) {
-      // In repair mode, rediscover the entire repository, ignoring the
-      // database state. We can hit the local cache above, but if we miss it
-      // stop the script from going to the database cache.
-      return false;
-    }
-
     $this->fillCommitCache(array($identifier));
 
     return isset($this->commitCache[$identifier]);
@@ -473,6 +466,13 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function fillCommitCache(array $identifiers) {
     if (!$identifiers) {
+      return;
+    }
+
+    if ($this->repairMode) {
+      // In repair mode, rediscover the entire repository, ignoring the
+      // database state. The engine still maintains a local cache (the
+      // "Working Set") but we just give up before looking in the database.
       return;
     }
 
@@ -507,9 +507,9 @@ final class PhabricatorRepositoryDiscoveryEngine
   }
 
   /**
-   * Sort branches so we process closeable branches first. This makes the
-   * whole import process a little cheaper, since we can close these commits
-   * the first time through rather than catching them in the refs step.
+   * Sort refs so we process permanent refs first. This makes the whole import
+   * process a little cheaper, since we can publish these commits the first
+   * time through rather than catching them in the refs step.
    *
    * @task internal
    *
@@ -523,7 +523,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     $head_refs = array();
     $tail_refs = array();
     foreach ($refs as $ref) {
-      if ($publisher->shouldPublishRef($ref)) {
+      if ($publisher->isPermanentRef($ref)) {
         $head_refs[] = $ref;
       } else {
         $tail_refs[] = $ref;
@@ -538,7 +538,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     PhabricatorRepository $repository,
     $commit_identifier,
     $epoch,
-    $close_immediately,
+    $is_permanent,
     array $parents,
     $task_priority) {
 
@@ -570,8 +570,8 @@ final class PhabricatorRepositoryDiscoveryEngine
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
-    if ($close_immediately) {
-      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
+    if ($is_permanent) {
+      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_PERMANENT);
     }
 
     $data = new PhabricatorRepositoryCommitData();
@@ -655,7 +655,12 @@ final class PhabricatorRepositoryDiscoveryEngine
     $epoch,
     $task_priority) {
 
-    $this->insertTask($repository, $commit, $task_priority);
+    $this->queueCommitImportTask(
+      $repository,
+      $commit->getID(),
+      $commit->getPHID(),
+      $task_priority,
+      $via = 'discovery');
 
     // Update the repository summary table.
     queryfx(
@@ -677,36 +682,6 @@ final class PhabricatorRepositoryDiscoveryEngine
     foreach ($refs as $ref) {
       $this->workingSet[$ref->getIdentifier()] = true;
     }
-  }
-
-  private function insertTask(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    $task_priority,
-    $data = array()) {
-
-    $vcs = $repository->getVersionControlSystem();
-    switch ($vcs) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
-        break;
-      default:
-        throw new Exception(pht("Unknown repository type '%s'!", $vcs));
-    }
-
-    $data['commitID'] = $commit->getID();
-
-    $options = array(
-      'priority' => $task_priority,
-    );
-
-    PhabricatorWorker::scheduleTask($class, $data, $options);
   }
 
   private function isInitialImport(array $refs) {
@@ -924,73 +899,6 @@ final class PhabricatorRepositoryDiscoveryEngine
       $data['N'],
       $data['id'],
       $data['epoch']);
-  }
-
-  private function getImportTaskPriority(
-    PhabricatorRepository $repository,
-    array $refs) {
-
-    // If the repository is importing for the first time, we schedule tasks
-    // at IMPORT priority, which is very low. Making progress on importing a
-    // new repository for the first time is less important than any other
-    // daemon task.
-
-    // If the repository has finished importing and we're just catching up
-    // on recent commits, we usually schedule discovery at COMMIT priority,
-    // which is slightly below the default priority.
-
-    // Note that followup tasks and triggered tasks (like those generated by
-    // Herald or Harbormaster) will queue at DEFAULT priority, so that each
-    // commit tends to fully import before we start the next one. This tends
-    // to give imports fairly predictable progress. See T11677 for some
-    // discussion.
-
-    if ($repository->isImporting()) {
-      $this->log(
-        pht(
-          'Importing %s commit(s) at low priority ("PRIORITY_IMPORT") '.
-          'because this repository is still importing.',
-          phutil_count($refs)));
-
-      return PhabricatorWorker::PRIORITY_IMPORT;
-    }
-
-    // See T13369. If we've discovered a lot of commits at once, import them
-    // at lower priority.
-
-    // This is mostly aimed at reducing the impact that synchronizing thousands
-    // of commits from a remote upstream has on other repositories. The queue
-    // is "mostly FIFO", so queueing a thousand commit imports can stall other
-    // repositories.
-
-    // In a perfect world we'd probably give repositories round-robin queue
-    // priority, but we don't currently have the primitives for this and there
-    // isn't a strong case for building them.
-
-    // Use "a whole lot of commits showed up at once" as a heuristic for
-    // detecting "someone synchronized an upstream", and import them at a lower
-    // priority to more closely approximate fair scheduling.
-
-    if (count($refs) >= PhabricatorRepository::LOWPRI_THRESHOLD) {
-      $this->log(
-        pht(
-          'Importing %s commit(s) at low priority ("PRIORITY_IMPORT") '.
-          'because many commits were discovered at once.',
-          phutil_count($refs)));
-
-      return PhabricatorWorker::PRIORITY_IMPORT;
-    }
-
-    // Otherwise, import at normal priority.
-
-    if ($refs) {
-      $this->log(
-        pht(
-          'Importing %s commit(s) at normal priority ("PRIORITY_COMMIT").',
-          phutil_count($refs)));
-    }
-
-    return PhabricatorWorker::PRIORITY_COMMIT;
   }
 
 }

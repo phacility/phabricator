@@ -45,7 +45,7 @@ final class DiffusionQueryPathsConduitAPIMethod
 
     $future = $repository->getLocalCommandFuture(
       'ls-tree --name-only -r -z %s -- %s',
-      $commit,
+      gitsprintf('%s', $commit),
       $path);
 
     $lines = id(new LinesOfALargeExecFuture($future))->setDelimiter("\0");

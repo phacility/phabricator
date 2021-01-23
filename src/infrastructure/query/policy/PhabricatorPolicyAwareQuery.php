@@ -234,7 +234,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     // T11773 for some discussion.
     $this->isOverheated = false;
 
-    // See T13386. If we on an old offset-based paging workflow, we need
+    // See T13386. If we are on an old offset-based paging workflow, we need
     // to base the overheating limit on both the offset and limit.
     $overheat_limit = $need * 10;
     $total_seen = 0;

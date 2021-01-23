@@ -25,7 +25,7 @@ final class DiffusionExistsQueryConduitAPIMethod
     $repository = $this->getDiffusionRequest()->getRepository();
     $commit = $request->getValue('commit');
     list($err, $merge_base) = $repository->execLocalCommand(
-      'cat-file -t %s',
+      'cat-file -t -- %s',
       $commit);
     return !$err;
   }

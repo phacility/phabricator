@@ -15,7 +15,7 @@ final class DiffusionCommitQuery
   private $statuses;
   private $packagePHIDs;
   private $unreachable;
-  private $unpublished;
+  private $permanent;
 
   private $needAuditRequests;
   private $needAuditAuthority;
@@ -154,8 +154,8 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  public function withUnpublished($unpublished) {
-    $this->unpublished = $unpublished;
+  public function withPermanent($permanent) {
+    $this->permanent = $permanent;
     return $this;
   }
 
@@ -859,18 +859,18 @@ final class DiffusionCommitQuery
       }
     }
 
-    if ($this->unpublished !== null) {
-      if ($this->unpublished) {
-        $where[] = qsprintf(
-          $conn,
-          '(commit.importStatus & %d) = 0',
-          PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
-      } else {
+    if ($this->permanent !== null) {
+      if ($this->permanent) {
         $where[] = qsprintf(
           $conn,
           '(commit.importStatus & %d) = %d',
-          PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE,
-          PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
+          PhabricatorRepositoryCommit::IMPORTED_PERMANENT,
+          PhabricatorRepositoryCommit::IMPORTED_PERMANENT);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(commit.importStatus & %d) = 0',
+          PhabricatorRepositoryCommit::IMPORTED_PERMANENT);
       }
     }
 

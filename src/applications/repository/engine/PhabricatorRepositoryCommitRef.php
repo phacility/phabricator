@@ -5,7 +5,7 @@ final class PhabricatorRepositoryCommitRef extends Phobject {
   private $identifier;
   private $epoch;
   private $branch;
-  private $canCloseImmediately;
+  private $isPermanent;
   private $parents = array();
 
   public function setIdentifier($identifier) {
@@ -35,13 +35,13 @@ final class PhabricatorRepositoryCommitRef extends Phobject {
     return $this->branch;
   }
 
-  public function setCanCloseImmediately($can_close_immediately) {
-    $this->canCloseImmediately = $can_close_immediately;
+  public function setIsPermanent($is_permanent) {
+    $this->isPermanent = $is_permanent;
     return $this;
   }
 
-  public function getCanCloseImmediately() {
-    return $this->canCloseImmediately;
+  public function getIsPermanent() {
+    return $this->isPermanent;
   }
 
   public function setParents(array $parents) {

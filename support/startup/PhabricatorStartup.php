@@ -35,6 +35,7 @@
  * @task validation   Validation
  * @task ratelimit    Rate Limiting
  * @task phases       Startup Phase Timers
+ * @task request-path Request Path
  */
 final class PhabricatorStartup {
 
@@ -47,6 +48,7 @@ final class PhabricatorStartup {
   private static $phases;
 
   private static $limits = array();
+  private static $requestPath;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
@@ -119,6 +121,7 @@ final class PhabricatorStartup {
     self::$phases = array();
 
     self::$accessLog = null;
+    self::$requestPath = null;
 
     static $registered;
     if (!$registered) {
@@ -140,7 +143,7 @@ final class PhabricatorStartup {
 
     self::normalizeInput();
 
-    self::verifyRewriteRules();
+    self::readRequestPath();
 
     self::beginOutputCapture();
   }
@@ -552,17 +555,29 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task validation
+   * @task request-path
    */
-  private static function verifyRewriteRules() {
+  private static function readRequestPath() {
+
+    // See T13575. The request path may be provided in:
+    //
+    //  - the "$_GET" parameter "__path__" (normal for Apache and nginx); or
+    //  - the "$_SERVER" parameter "REQUEST_URI" (normal for the PHP builtin
+    //    webserver).
+    //
+    // Locate it wherever it is, and store it for later use. Note that writing
+    // to "$_REQUEST" here won't always work, because later code may rebuild
+    // "$_REQUEST" from other sources.
+
     if (isset($_REQUEST['__path__']) && strlen($_REQUEST['__path__'])) {
+      self::setRequestPath($_REQUEST['__path__']);
       return;
     }
 
+    // Compatibility with PHP 5.4+ built-in web server.
     if (php_sapi_name() == 'cli-server') {
-      // Compatibility with PHP 5.4+ built-in web server.
-      $url = parse_url($_SERVER['REQUEST_URI']);
-      $_REQUEST['__path__'] = $url['path'];
+      $path = parse_url($_SERVER['REQUEST_URI']);
+      self::setRequestPath($path['path']);
       return;
     }
 
@@ -578,6 +593,30 @@ final class PhabricatorStartup {
         "are not configured correctly. The '__path__' should always ".
         "begin with a '/'.");
     }
+  }
+
+  /**
+   * @task request-path
+   */
+  public static function getRequestPath() {
+    $path = self::$requestPath;
+
+    if ($path === null) {
+      self::didFatal(
+        'Request attempted to access request path, but no request path is '.
+        'available for this request. You may be calling web request code '.
+        'from a non-request context, or your webserver may not be passing '.
+        'a request path to Phabricator in a format that it understands.');
+    }
+
+    return $path;
+  }
+
+  /**
+   * @task request-path
+   */
+  public static function setRequestPath($path) {
+    self::$requestPath = $path;
   }
 
 

@@ -45,7 +45,12 @@ final class DiffusionHistoryQueryConduitAPIMethod
     $repository = $drequest->getRepository();
     $commit_hash = $request->getValue('commit');
     $against_hash = $request->getValue('against');
+
     $path = $request->getValue('path');
+    if (!strlen($path)) {
+      $path = null;
+    }
+
     $offset = $request->getValue('offset');
     $limit = $request->getValue('limit');
 
@@ -55,18 +60,27 @@ final class DiffusionHistoryQueryConduitAPIMethod
       $commit_range = $commit_hash;
     }
 
+    $argv = array();
+
+    $argv[] = '--skip';
+    $argv[] = $offset;
+
+    $argv[] = '--max-count';
+    $argv[] = $limit;
+
+    $argv[] = '--format=%H:%P';
+
+    $argv[] = gitsprintf('%s', $commit_range);
+
+    $argv[] = '--';
+
+    if ($path !== null) {
+      $argv[] = $path;
+    }
+
     list($stdout) = $repository->execxLocalCommand(
-      'log '.
-        '--skip=%d '.
-        '-n %d '.
-        '--pretty=format:%s '.
-        '%s -- %C',
-      $offset,
-      $limit,
-      '%H:%P',
-      $commit_range,
-      // Git omits merge commits if the path is provided, even if it is empty.
-      (strlen($path) ? csprintf('%s', $path) : ''));
+      'log %Ls',
+      $argv);
 
     $lines = explode("\n", trim($stdout));
     $lines = array_filter($lines);

@@ -169,7 +169,21 @@ EOREMARKUP
             'Maniphest. If you\'d prefer more traditional UI strings like '.
             '"Add Comment", you can set this flag to disable most of the '.
             'extra flavor.')),
-      $this->newOption('remarkup.ignored-object-names', 'string', '/^(Q|V)\d$/')
+      $this->newOption(
+        'remarkup.ignored-object-names',
+        'string',
+
+        // Q1, Q2, etc., are common abbreviations for "Quarter".
+        // V1, V2, etc., are common abbreviations for "Version".
+        // P1, P2, etc., are common abbreviations for "Priority".
+
+        // M1 is a computer chip manufactured by Apple.
+        // M2 (commonly spelled "M.2") is an expansion slot on motherboards.
+        // M4 is a carbine.
+        // M8 is a phonetic spelling of "mate", used in culturally significant
+        // copypasta about navy seals.
+
+        '/^(Q|V|M|P)\d$/')
         ->setSummary(
           pht('Text values that match this regex and are also object names '.
           'will not be linked.'))

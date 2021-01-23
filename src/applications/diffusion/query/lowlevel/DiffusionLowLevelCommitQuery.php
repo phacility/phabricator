@@ -55,12 +55,15 @@ final class DiffusionLowLevelCommitQuery
       $split_body = true;
     }
 
-    // Even though we pass --encoding here, git doesn't always succeed, so
-    // we try a little harder, since git *does* tell us what the actual encoding
-    // is correctly (unless it doesn't; encoding is sometimes empty).
-    list($info) = $repository->execxLocalCommand(
-      'log -n 1 --encoding=%s --format=%s %s --',
-      'UTF-8',
+    $argv = array();
+
+    $argv[] = '-n';
+    $argv[] = '1';
+
+    $argv[] = '--encoding=UTF-8';
+
+    $argv[] = sprintf(
+      '--format=%s',
       implode(
         '%x00',
         array(
@@ -78,8 +81,15 @@ final class DiffusionLowLevelCommitQuery
           // so include an explicit terminator: this makes sure the exact
           // body text is surrounded by "\0" characters.
           '~',
-        )),
-      $this->identifier);
+        )));
+
+    // Even though we pass --encoding here, git doesn't always succeed, so
+    // we try a little harder, since git *does* tell us what the actual encoding
+    // is correctly (unless it doesn't; encoding is sometimes empty).
+    list($info) = $repository->execxLocalCommand(
+      'log -n 1 %Ls %s --',
+      $argv,
+      gitsprintf('%s', $this->identifier));
 
     $parts = explode("\0", $info);
     $encoding = array_shift($parts);

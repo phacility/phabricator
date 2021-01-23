@@ -35,22 +35,26 @@ final class DiffusionBrowseQueryConduitAPIMethod
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
+
     $path = $request->getValue('path');
+    if (!strlen($path)) {
+      $path = null;
+    }
+
     $commit = $request->getValue('commit');
     $offset = (int)$request->getValue('offset');
     $limit = (int)$request->getValue('limit');
     $result = $this->getEmptyResultSet();
 
-    if ($path == '') {
+    if ($path === null) {
       // Fast path to improve the performance of the repository view; we know
       // the root is always a tree at any commit and always exists.
       $stdout = 'tree';
     } else {
       try {
         list($stdout) = $repository->execxLocalCommand(
-          'cat-file -t %s:%s',
-          $commit,
-          $path);
+          'cat-file -t -- %s',
+          sprintf('%s:%s', $commit, $path));
       } catch (CommandException $e) {
         // The "cat-file" command may fail if the path legitimately does not
         // exist, but it may also fail if the path is a submodule. This can
@@ -62,7 +66,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
         list($sub_err, $sub_stdout) = $repository->execLocalCommand(
           'ls-tree %s -- %s',
-          $commit,
+          gitsprintf('%s', $commit),
           $path);
         if (!$sub_err) {
           // If the path failed "cat-file" but "ls-tree" worked, we assume it
@@ -86,8 +90,9 @@ final class DiffusionBrowseQueryConduitAPIMethod
         if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
           // Grab two logs, since the first one is when the object was deleted.
           list($stdout) = $repository->execxLocalCommand(
-            'log -n2 --format="%%H" %s -- %s',
-            $commit,
+            'log -n2 %s %s -- %s',
+            '--format=%H',
+            gitsprintf('%s', $commit),
             $path);
           $stdout = trim($stdout);
           if ($stdout) {
@@ -120,14 +125,20 @@ final class DiffusionBrowseQueryConduitAPIMethod
       return $result;
     }
 
-    list($stdout) = $repository->execxLocalCommand(
-      'ls-tree -z -l %s:%s',
-      $commit,
-      $path);
+    if ($path === null) {
+      list($stdout) = $repository->execxLocalCommand(
+        'ls-tree -z -l %s --',
+        gitsprintf('%s', $commit));
+    } else {
+      list($stdout) = $repository->execxLocalCommand(
+        'ls-tree -z -l %s -- %s',
+        gitsprintf('%s', $commit),
+        $path);
+    }
 
     $submodules = array();
 
-    if (strlen($path)) {
+    if ($path !== null) {
       $prefix = rtrim($path, '/').'/';
     } else {
       $prefix = '';
@@ -207,7 +218,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       // the wild.
 
       list($err, $contents) = $repository->execLocalCommand(
-        'cat-file blob %s:.gitmodules',
+        'cat-file blob -- %s:.gitmodules',
         $commit);
 
       if (!$err) {
@@ -225,8 +236,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
           $dict[$key] = $value;
         }
 
-        foreach ($submodules as $path) {
-          $full_path = $path->getFullPath();
+        foreach ($submodules as $submodule_path) {
+          $full_path = $submodule_path->getFullPath();
           $key = 'submodule.'.$full_path.'.url';
           if (isset($dict[$key])) {
             $path->setExternalURI($dict[$key]);

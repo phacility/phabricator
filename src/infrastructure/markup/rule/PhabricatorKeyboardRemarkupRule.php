@@ -62,6 +62,22 @@ final class PhabricatorKeyboardRemarkupRule extends PhutilRemarkupRule {
         ),
       ),
       array(
+        'name' => pht('Enter'),
+        'symbol' => "\xE2\x8F\x8E",
+        'aliases' => array(
+          'enter',
+          'return',
+        ),
+      ),
+      array(
+        'name' => pht('Control'),
+        'symbol' => "\xE2\x8C\x83",
+        'aliases' => array(
+          'ctrl',
+          'control',
+        ),
+      ),
+      array(
         'name' => pht('Up'),
         'symbol' => "\xE2\x86\x91",
         'heavy' => "\xE2\xAC\x86",

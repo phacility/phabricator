@@ -33,7 +33,7 @@ final class DiffusionLowLevelFilesizeQuery
 
     $paths_future = $repository->getLocalCommandFuture(
       'diff-tree -z -r --no-commit-id %s --',
-      $identifier);
+      gitsprintf('%s', $identifier));
 
     // With "-z" we get "<fields>\0<filename>\0" for each line. Process the
     // delimited text as "<fields>, <filename>" pairs.
