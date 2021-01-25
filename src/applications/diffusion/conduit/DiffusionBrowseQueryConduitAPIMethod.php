@@ -138,12 +138,6 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
     $submodules = array();
 
-    if ($path !== null) {
-      $prefix = rtrim($path, '/').'/';
-    } else {
-      $prefix = '';
-    }
-
     $count = 0;
     $results = array();
     $lines = empty($stdout)
@@ -166,7 +160,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
             $line));
       }
 
-      list($mode, $type, $hash, $size, $name) = $parts;
+      list($mode, $type, $hash, $size, $full_path) = $parts;
 
       $path_result = new DiffusionRepositoryPath();
 
@@ -184,8 +178,14 @@ final class DiffusionBrowseQueryConduitAPIMethod
         }
       }
 
-      $path_result->setFullPath($prefix.$name);
-      $path_result->setPath($name);
+      if ($path === null) {
+        $local_path = $full_path;
+      } else {
+        $local_path = basename($full_path);
+      }
+
+      $path_result->setFullPath($full_path);
+      $path_result->setPath($local_path);
       $path_result->setHash($hash);
       $path_result->setFileType($file_type);
       $path_result->setFileSize($size);
