@@ -318,6 +318,11 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
         'Acquiring write lock for repository "%s"...',
         $repository->getDisplayName()));
 
+    // See T13590. On the HTTP pathway, it's possible for us to hit the script
+    // time limit while holding the durable write lock if a user makes a big
+    // push. Remove the time limit before we acquire the durable lock.
+    set_time_limit(0);
+
     $lock_wait = phutil_units('2 minutes in seconds');
     try {
       $write_wait_start = microtime(true);
