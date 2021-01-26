@@ -214,6 +214,11 @@ final class DiffusionServeController extends DiffusionController {
       $viewer = new PhabricatorUser();
     }
 
+    // See T13590. Some pathways, like error handling, may require unusual
+    // access to things like timezone information. These are fine to build
+    // inline; this pathway is not lightweight anyway.
+    $viewer->setAllowInlineCacheGeneration(true);
+
     $this->setServiceViewer($viewer);
 
     $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
