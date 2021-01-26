@@ -240,7 +240,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
           $full_path = $submodule_path->getFullPath();
           $key = 'submodule.'.$full_path.'.url';
           if (isset($dict[$key])) {
-            $path->setExternalURI($dict[$key]);
+            $submodule_path->setExternalURI($dict[$key]);
           }
         }
       }
