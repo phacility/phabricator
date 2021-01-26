@@ -2,7 +2,9 @@
 
 /**
  * In Git, there appears to be no way to send a message which will be output
- * by `git clone http://...`, although the response code is visible.
+ * by `git clone http://...`, although the response code is visible. We send
+ * the message in a header which is visible with "GIT_CURL_VERBOSE" if you
+ * know where to look.
  *
  * In Mercurial, the HTTP status response message is printed to the console, so
  * we send human-readable text there.
@@ -42,6 +44,16 @@ final class PhabricatorVCSResponse extends AphrontResponse {
         'WWW-Authenticate',
         'Basic realm="Phabricator Repositories"',
       );
+    }
+
+    $message = $this->getMessage();
+    if (strlen($message)) {
+      foreach (phutil_split_lines($message, false) as $line) {
+        $headers[] = array(
+          'X-Phabricator-Message',
+          $line,
+        );
+      }
     }
 
     return $headers;
