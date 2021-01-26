@@ -100,7 +100,7 @@ final class DifferentialCreateInlineConduitAPIMethod
       ->setChangesetID($cid)
       ->setAuthorPHID($request->getUser()->getPHID())
       ->setContent($request->getValue('content'))
-      ->setIsNewFile($request->getValue('isNewFile'))
+      ->setIsNewFile((int)$request->getValue('isNewFile'))
       ->setLineNumber($request->getValue('lineNumber'))
       ->setLineLength($request->getValue('lineLength', 0))
       ->save();
