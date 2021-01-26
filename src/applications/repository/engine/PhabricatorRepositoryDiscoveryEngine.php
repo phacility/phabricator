@@ -142,61 +142,86 @@ final class PhabricatorRepositoryDiscoveryEngine
       return array();
     }
 
-    $heads = $this->sortRefs($heads);
-    $head_commits = mpull($heads, 'getCommitIdentifier');
-
     $this->log(
       pht(
         'Discovering commits in repository "%s".',
         $repository->getDisplayName()));
 
-    $this->fillCommitCache($head_commits);
+    $ref_lists = array();
 
-    $refs = array();
-    foreach ($heads as $ref) {
-      $name = $ref->getShortName();
-      $commit = $ref->getCommitIdentifier();
+    $head_groups = $this->getRefGroupsForDiscovery($heads);
+    foreach ($head_groups as $head_group) {
 
-      $this->log(
-        pht(
-          'Examining "%s" (%s) at "%s".',
-          $name,
-          $ref->getRefType(),
-          $commit));
+      $group_identifiers = mpull($head_group, 'getCommitIdentifier');
+      $group_identifiers = array_fuse($group_identifiers);
+      $this->fillCommitCache($group_identifiers);
 
-      if (!$repository->shouldTrackRef($ref)) {
-        $this->log(pht('Skipping, ref is untracked.'));
-        continue;
+      foreach ($head_group as $ref) {
+        $name = $ref->getShortName();
+        $commit = $ref->getCommitIdentifier();
+
+        $this->log(
+          pht(
+            'Examining "%s" (%s) at "%s".',
+            $name,
+            $ref->getRefType(),
+            $commit));
+
+        if (!$repository->shouldTrackRef($ref)) {
+          $this->log(pht('Skipping, ref is untracked.'));
+          continue;
+        }
+
+        if ($this->isKnownCommit($commit)) {
+          $this->log(pht('Skipping, HEAD is known.'));
+          continue;
+        }
+
+        // In Git, it's possible to tag anything. We just skip tags that don't
+        // point to a commit. See T11301.
+        $fields = $ref->getRawFields();
+        $ref_type = idx($fields, 'objecttype');
+        $tag_type = idx($fields, '*objecttype');
+        if ($ref_type != 'commit' && $tag_type != 'commit') {
+          $this->log(pht('Skipping, this is not a commit.'));
+          continue;
+        }
+
+        $this->log(pht('Looking for new commits.'));
+
+        $head_refs = $this->discoverStreamAncestry(
+          new PhabricatorGitGraphStream($repository, $commit),
+          $commit,
+          $publisher->isPermanentRef($ref));
+
+        $this->didDiscoverRefs($head_refs);
+
+        $ref_lists[] = $head_refs;
       }
-
-      if ($this->isKnownCommit($commit)) {
-        $this->log(pht('Skipping, HEAD is known.'));
-        continue;
-      }
-
-      // In Git, it's possible to tag anything. We just skip tags that don't
-      // point to a commit. See T11301.
-      $fields = $ref->getRawFields();
-      $ref_type = idx($fields, 'objecttype');
-      $tag_type = idx($fields, '*objecttype');
-      if ($ref_type != 'commit' && $tag_type != 'commit') {
-        $this->log(pht('Skipping, this is not a commit.'));
-        continue;
-      }
-
-      $this->log(pht('Looking for new commits.'));
-
-      $head_refs = $this->discoverStreamAncestry(
-        new PhabricatorGitGraphStream($repository, $commit),
-        $commit,
-        $publisher->isPermanentRef($ref));
-
-      $this->didDiscoverRefs($head_refs);
-
-      $refs[] = $head_refs;
     }
 
-    return array_mergev($refs);
+    $refs = array_mergev($ref_lists);
+
+    return $refs;
+  }
+
+  /**
+   * @task git
+   */
+  private function getRefGroupsForDiscovery(array $heads) {
+    $heads = $this->sortRefs($heads);
+
+    // See T13593. We hold a commit cache with a fixed maximum size. Split the
+    // refs into chunks no larger than the cache size, so we don't overflow the
+    // cache when testing them.
+
+    $array_iterator = new ArrayIterator($heads);
+
+    $chunk_iterator = new PhutilChunkedIterator(
+      $array_iterator,
+      self::MAX_COMMIT_CACHE_SIZE);
+
+    return $chunk_iterator;
   }
 
 
