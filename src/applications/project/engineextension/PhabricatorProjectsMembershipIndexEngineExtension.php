@@ -73,26 +73,86 @@ final class PhabricatorProjectsMembershipIndexEngineExtension
 
     $project->openTransaction();
 
-      // Delete any existing materialized member edges.
-      queryfx(
+      // Copy current member edges to create new materialized edges.
+
+      // See T13596. Avoid executing this as an "INSERT ... SELECT" to reduce
+      // the required level of table locking. Since we're decomposing it into
+      // "SELECT" + "INSERT" anyway, we can also compute exactly which rows
+      // need to be modified.
+
+      $have_rows = queryfx_all(
         $conn_w,
-        'DELETE FROM %T WHERE src = %s AND type = %s',
+        'SELECT dst FROM %T
+          WHERE src = %s AND type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         $project_phid,
         $material_type);
 
-      // Copy current member edges to create new materialized edges.
-      queryfx(
+      $want_rows = queryfx_all(
         $conn_w,
-        'INSERT IGNORE INTO %T (src, type, dst, dateCreated, seq)
-          SELECT %s, %d, dst, dateCreated, seq FROM %T
+        'SELECT dst, dateCreated, seq FROM %T
           WHERE src IN (%Ls) AND type = %d',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        $project_phid,
-        $material_type,
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         $source_phids,
         $member_type);
+
+      $have_phids = ipull($have_rows, 'dst', 'dst');
+      $want_phids = ipull($want_rows, null, 'dst');
+
+      $rem_phids = array_diff_key($have_phids, $want_phids);
+      $rem_phids = array_keys($rem_phids);
+
+      $add_phids = array_diff_key($want_phids, $have_phids);
+      $add_phids = array_keys($add_phids);
+
+      $rem_sql = array();
+      foreach ($rem_phids as $rem_phid) {
+        $rem_sql[] = qsprintf(
+          $conn_w,
+          '%s',
+          $rem_phid);
+      }
+
+      $add_sql = array();
+      foreach ($add_phids as $add_phid) {
+        $add_row = $want_phids[$add_phid];
+        $add_sql[] = qsprintf(
+          $conn_w,
+          '(%s, %d, %s, %d, %d)',
+          $project_phid,
+          $material_type,
+          $add_row['dst'],
+          $add_row['dateCreated'],
+          $add_row['seq']);
+      }
+
+      // Remove materialized members who are no longer project members.
+
+      if ($rem_sql) {
+        foreach (PhabricatorLiskDAO::chunkSQL($rem_sql) as $sql_chunk) {
+          queryfx(
+            $conn_w,
+            'DELETE FROM %T
+              WHERE src = %s AND type = %s AND dst IN (%LQ)',
+            PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+            $project_phid,
+            $material_type,
+            $sql_chunk);
+        }
+      }
+
+      // Add project members who are not yet materialized members.
+
+      if ($add_sql) {
+        foreach (PhabricatorLiskDAO::chunkSQL($add_sql) as $sql_chunk) {
+          queryfx(
+            $conn_w,
+            'INSERT IGNORE INTO %T (src, type, dst, dateCreated, seq)
+              VALUES %LQ',
+            PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+            $sql_chunk);
+        }
+      }
 
       // Update the hasSubprojects flag.
       queryfx(
