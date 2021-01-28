@@ -37,7 +37,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $repository = $drequest->getRepository();
 
     $path = $request->getValue('path');
-    if (!strlen($path)) {
+    if (!strlen($path) || $path === '/') {
       $path = null;
     }
 
@@ -49,12 +49,13 @@ final class DiffusionBrowseQueryConduitAPIMethod
     if ($path === null) {
       // Fast path to improve the performance of the repository view; we know
       // the root is always a tree at any commit and always exists.
-      $stdout = 'tree';
+      $path_type = 'tree';
     } else {
       try {
         list($stdout) = $repository->execxLocalCommand(
           'cat-file -t -- %s',
           sprintf('%s:%s', $commit, $path));
+        $path_type = trim($stdout);
       } catch (CommandException $e) {
         // The "cat-file" command may fail if the path legitimately does not
         // exist, but it may also fail if the path is a submodule. This can
@@ -114,7 +115,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       }
     }
 
-    if (trim($stdout) == 'blob') {
+    if ($path_type === 'blob') {
       $result->setReasonForEmptyResultSet(
         DiffusionBrowseResultSet::REASON_IS_FILE);
       return $result;
@@ -130,6 +131,12 @@ final class DiffusionBrowseQueryConduitAPIMethod
         'ls-tree -z -l %s --',
         gitsprintf('%s', $commit));
     } else {
+      if ($path_type === 'tree') {
+        $path = rtrim($path, '/').'/';
+      } else {
+        $path = rtrim($path, '/');
+      }
+
       list($stdout) = $repository->execxLocalCommand(
         'ls-tree -z -l %s -- %s',
         gitsprintf('%s', $commit),
