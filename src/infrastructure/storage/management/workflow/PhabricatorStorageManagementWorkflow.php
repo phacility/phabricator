@@ -922,6 +922,10 @@ abstract class PhabricatorStorageManagementWorkflow
     $patches = $this->patches;
     $is_dryrun = $this->dryRun;
 
+    // We expect that patches should already be sorted properly. However,
+    // phase behavior will be wrong if they aren't, so make sure.
+    $patches = msortv($patches, 'newSortVector');
+
     $api_map = array();
     foreach ($apis as $api) {
       $api_map[$api->getRef()->getRefKey()] = $api;

@@ -1,5 +1,7 @@
 <?php
 
+// @phase worker
+
 PhabricatorRebuildIndexesWorker::rebuildObjectsWithQuery(
   'PhabricatorDashboardQuery');
 
