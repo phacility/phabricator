@@ -119,6 +119,7 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
     $options = array(
       'priority' => $task_priority,
       'objectPHID' => $commit_phid,
+      'containerPHID' => $repository->getPHID(),
     );
 
     PhabricatorWorker::scheduleTask($class, $data, $options);

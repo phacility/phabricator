@@ -51,8 +51,40 @@ abstract class PhabricatorRepositoryCommitParserWorker
     $this->parseCommit($repository, $this->commit);
   }
 
-  final protected function shouldQueueFollowupTasks() {
+  private function shouldQueueFollowupTasks() {
     return !idx($this->getTaskData(), 'only');
+  }
+
+  final protected function queueCommitTask($task_class) {
+    if (!$this->shouldQueueFollowupTasks()) {
+      return;
+    }
+
+    $commit = $this->loadCommit();
+    $repository = $commit->getRepository();
+
+    $data = array(
+      'commitID' => $commit->getID(),
+    );
+
+    $task_data = $this->getTaskData();
+    if (isset($task_data['via'])) {
+      $data['via'] = $task_data['via'];
+    }
+
+    $options = array(
+      // We queue followup tasks at default priority so that the queue finishes
+      // work it has started before starting more work. If followups are queued
+      // at the same priority level, we do all message parses first, then all
+      // change parses, etc. This makes progress uneven. See T11677 for
+      // discussion.
+      'priority' => parent::PRIORITY_DEFAULT,
+
+      'objectPHID' => $commit->getPHID(),
+      'containerPHID' => $repository->getPHID(),
+    );
+
+    $this->queueTask($task_class, $data, $options);
   }
 
   protected function getImportStepFlag() {

@@ -396,6 +396,8 @@ final class PhabricatorChangeParserTestCase
   }
 
   public function testSubversionParser() {
+    $this->requireBinaryForTest('svn');
+
     $repository = $this->buildDiscoveredRepository('CHC');
     $viewer = PhabricatorUser::getOmnipotentUser();
 
@@ -955,6 +957,8 @@ final class PhabricatorChangeParserTestCase
   }
 
   public function testSubversionPartialParser() {
+    $this->requireBinaryForTest('svn');
+
     $repository = $this->buildBareRepository('CHD');
     $repository->setDetail('svn-subpath', 'trunk/');
 
@@ -1059,6 +1063,8 @@ final class PhabricatorChangeParserTestCase
   }
 
   public function testSubversionValidRootParser() {
+    $this->requireBinaryForTest('svn');
+
     // First, automatically configure the root correctly.
     $repository = $this->buildBareRepository('CHD');
     id(new PhabricatorRepositoryPullEngine())
@@ -1104,6 +1110,8 @@ final class PhabricatorChangeParserTestCase
   }
 
   public function testSubversionForeignStubsParser() {
+    $this->requireBinaryForTest('svn');
+
     $repository = $this->buildBareRepository('CHE');
     $repository->setDetail('svn-subpath', 'branch/');
 
