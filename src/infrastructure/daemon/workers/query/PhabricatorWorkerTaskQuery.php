@@ -7,10 +7,13 @@ abstract class PhabricatorWorkerTaskQuery
   private $dateModifiedSince;
   private $dateCreatedBefore;
   private $objectPHIDs;
+  private $containerPHIDs;
   private $classNames;
   private $limit;
   private $minFailureCount;
   private $maxFailureCount;
+  private $minPriority;
+  private $maxPriority;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -32,6 +35,11 @@ abstract class PhabricatorWorkerTaskQuery
     return $this;
   }
 
+  public function withContainerPHIDs(array $phids) {
+    $this->containerPHIDs = $phids;
+    return $this;
+  }
+
   public function withClassNames(array $names) {
     $this->classNames = $names;
     return $this;
@@ -40,6 +48,12 @@ abstract class PhabricatorWorkerTaskQuery
   public function withFailureCountBetween($min, $max) {
     $this->minFailureCount = $min;
     $this->maxFailureCount = $max;
+    return $this;
+  }
+
+  public function withPriorityBetween($min, $max) {
+    $this->minPriority = $min;
+    $this->maxPriority = $max;
     return $this;
   }
 
@@ -63,6 +77,13 @@ abstract class PhabricatorWorkerTaskQuery
         $conn,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
+    }
+
+    if ($this->containerPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'containerPHID IN (%Ls)',
+        $this->containerPHIDs);
     }
 
     if ($this->dateModifiedSince !== null) {
@@ -98,6 +119,20 @@ abstract class PhabricatorWorkerTaskQuery
         $conn,
         'failureCount <= %d',
         $this->maxFailureCount);
+    }
+
+    if ($this->minPriority !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'priority >= %d',
+        $this->minPriority);
+    }
+
+    if ($this->maxPriority !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'priority <= %d',
+        $this->maxPriority);
     }
 
     return $this->formatWhereClause($conn, $where);
