@@ -682,7 +682,6 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $this->queueCommitImportTask(
       $repository,
-      $commit->getID(),
       $commit->getPHID(),
       $task_priority,
       $via = 'discovery');

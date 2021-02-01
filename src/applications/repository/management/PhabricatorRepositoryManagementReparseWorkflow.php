@@ -247,7 +247,7 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       // all the requested steps explicitly.
 
       $spec = array(
-        'commitID' => $commit->getID(),
+        'commitPHID' => $commit->getPHID(),
         'only' => !$importing,
         'via' => 'reparse',
       );
