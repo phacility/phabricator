@@ -1759,6 +1759,36 @@ final class PhabricatorUSEnglishTranslation
         'These inline comments will be saved and published.',
       ),
 
+      'Delayed %s task(s).' => array(
+        'Delayed 1 task.',
+        'Delayed %s tasks.',
+      ),
+
+      'Freed %s task lease(s).' => array(
+        'Freed 1 task lease.',
+        'Freed %s task leases.',
+      ),
+
+      'Cancelled %s task(s).' => array(
+        'Cancelled 1 task.',
+        'Cancelled %s tasks.',
+      ),
+
+      'Queued %s task(s) for retry.' => array(
+        'Queued 1 task for retry.',
+        'Queued %s tasks for retry.',
+      ),
+
+      'Reprioritized %s task(s).' => array(
+        'Reprioritized one task.',
+        'Reprioritized %s tasks.',
+      ),
+
+      'Executed %s task(s).' => array(
+        'Executed 1 task.',
+        'Executed %s tasks.',
+      ),
+
     );
   }
 
