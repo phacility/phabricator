@@ -1,0 +1,83 @@
+@title Managing the Worker Queue
+@group fieldmanual
+
+Advanced guide to managing the background worker task queue.
+
+Overview
+========
+
+Phabricator uses daemonized worker processes to execute some tasks (like
+importing repositories and sending mail) in the background.
+
+In most cases, this queue will automatically execute tasks in an appropriate
+order. However, in some cases you may want to exercise greater control over
+which tasks execute, when, and at what priority.
+
+Reference: Priority Levels
+==========================
+
+Tasks queued by Phabricator use these default priority levels:
+
+| Priority | Name | Tasks |
+|---|---|---|
+| 1000 | `ALERTS` | Time-sensitive notifications and email. |
+| 2000 | `DEFAULT` | Normal publishing and processing. |
+| 2500 | `COMMIT` | Import of commits in existing repositories. |
+| 3000 | `BULK` | Edits applied via "Bulk Edit" interface. |
+| 3500 | `INDEX` | Search engine index updates. |
+| 4000 | `IMPORT` | Import of commits in new repositories. |
+
+Tasks with smaller priority numbers execute before tasks with larger priority
+numbers (for example, a task with priority 1000 will execute before a task
+with priority 2000).
+
+Any positive integer is a valid priority level, and if you adjust the priority
+of tasks with `bin/worker priority` you may select any level even if
+Phabricator would never naturally queue tasks at that level. For example, you
+may adjust tasks to priority `5678`, which will make them execute after all
+other types of natural tasks.
+
+Although tasks usually execute in priority order, task execution order is not
+strictly a function of priority, and task priority does not guarantee execution
+order.
+
+Large Repository Imports
+========================
+
+The most common case where you may want to make an adjustment to the default
+behavior of the worker queue is when importing a very large repository like
+the Linux kernel.
+
+Although Phabricator will automatically process imports of new repositories at
+a lower priority level than all other non-import tasks, you may still run into
+issues like these:
+
+  - You may also want to import one or more //other// new repositories, and
+    would prefer they import at a higher priority.
+  - You may find overall repository performance is impacted by the large
+    repository import.
+
+You can manually change the priority of tasks with `bin/worker priority`. For
+example, if your copy of the Linux repository is `R123` and you'd like it to
+import at a lower priority than all other tasks (including other imports of
+new repositories), you can run a command like this:
+
+```
+phabricator/ $ ./bin/worker priority --priority 5000 --container R123
+```
+
+This means: set all tasks associated with container `R123` (in this example,
+the Linux repository) to priority 5000 (which is lower than any natural
+priority).
+
+You can delay tasks until later with `bin/worker delay`, which allows you to
+schedule tasks to execute at night or over the weekend. For example, to
+pause an import for 6 hours, run a command like this:
+
+```
+phabricator/ $ ./bin/worker delay --until "6 hours" --container R123
+```
+
+The selected tasks will not execute until 6 hours from the time this command
+is issued. You can also provide an explicit date, or "now" to let tasks begin
+execution immediately.
