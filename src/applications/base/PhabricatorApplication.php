@@ -490,7 +490,7 @@ abstract class PhabricatorApplication
     return array();
   }
 
-  final private function getCustomPolicySetting($capability) {
+  private function getCustomPolicySetting($capability) {
     if (!$this->isCapabilityEditable($capability)) {
       return null;
     }
@@ -516,7 +516,7 @@ abstract class PhabricatorApplication
   }
 
 
-  final private function getCustomCapabilitySpecification($capability) {
+  private function getCustomCapabilitySpecification($capability) {
     $custom = $this->getCustomCapabilities();
     if (!isset($custom[$capability])) {
       throw new Exception(pht("Unknown capability '%s'!", $capability));

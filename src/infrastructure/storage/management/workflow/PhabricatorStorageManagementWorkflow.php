@@ -156,7 +156,7 @@ abstract class PhabricatorStorageManagementWorkflow
     return $err;
   }
 
-  final private function doAdjustSchemata(
+  private function doAdjustSchemata(
     PhabricatorStorageManagementAPI $api,
     $unsafe) {
 
@@ -913,7 +913,7 @@ abstract class PhabricatorStorageManagementWorkflow
     }
   }
 
-  final private function doUpgradeSchemata(
+  private function doUpgradeSchemata(
     array $apis,
     $apply_only,
     $no_quickstart,

@@ -203,7 +203,7 @@ final class DifferentialHunk
     return implode('', $this->makeContent($include));
   }
 
-  final private function makeContent($include) {
+  private function makeContent($include) {
     $lines = $this->getSplitLines();
     $results = array();
 
