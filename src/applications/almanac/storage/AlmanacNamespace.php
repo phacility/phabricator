@@ -6,7 +6,6 @@ final class AlmanacNamespace
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
     PhabricatorNgramsInterface,
     PhabricatorConduitResultInterface {
@@ -17,13 +16,10 @@ final class AlmanacNamespace
   protected $viewPolicy;
   protected $editPolicy;
 
-  private $almanacProperties = self::ATTACHABLE;
-
   public static function initializeNewNamespace() {
     return id(new self())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
-      ->attachAlmanacProperties(array());
+      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
   }
 
   protected function getConfiguration() {
@@ -110,53 +106,6 @@ final class AlmanacNamespace
     }
 
     return $namespace;
-  }
-
-
-/* -(  AlmanacPropertyInterface  )------------------------------------------- */
-
-
-  public function attachAlmanacProperties(array $properties) {
-    assert_instances_of($properties, 'AlmanacProperty');
-    $this->almanacProperties = mpull($properties, null, 'getFieldName');
-    return $this;
-  }
-
-  public function getAlmanacProperties() {
-    return $this->assertAttached($this->almanacProperties);
-  }
-
-  public function hasAlmanacProperty($key) {
-    $this->assertAttached($this->almanacProperties);
-    return isset($this->almanacProperties[$key]);
-  }
-
-  public function getAlmanacProperty($key) {
-    return $this->assertAttachedKey($this->almanacProperties, $key);
-  }
-
-  public function getAlmanacPropertyValue($key, $default = null) {
-    if ($this->hasAlmanacProperty($key)) {
-      return $this->getAlmanacProperty($key)->getFieldValue();
-    } else {
-      return $default;
-    }
-  }
-
-  public function getAlmanacPropertyFieldSpecifications() {
-    return array();
-  }
-
-  public function newAlmanacPropertyEditEngine() {
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  public function getAlmanacPropertySetTransactionType() {
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  public function getAlmanacPropertyDeleteTransactionType() {
-    throw new PhutilMethodNotImplementedException();
   }
 
 

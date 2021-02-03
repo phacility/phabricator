@@ -6115,7 +6115,6 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorProjectInterface',
-      'AlmanacPropertyInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorNgramsInterface',
       'PhabricatorConduitResultInterface',
