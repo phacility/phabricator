@@ -35,10 +35,15 @@ abstract class PhabricatorRepositoryManagementWorkflow
 
   protected function loadLocalRepositories(
     PhutilArgumentParser $args,
-    $param) {
+    $param,
+    $ignore_locality = false) {
 
     $repositories = $this->loadRepositories($args, $param);
     if (!$repositories) {
+      return $repositories;
+    }
+
+    if ($ignore_locality) {
       return $repositories;
     }
 
