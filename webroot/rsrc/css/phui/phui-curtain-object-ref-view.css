@@ -12,6 +12,10 @@
   border-radius: 3px;
 }
 
+.phui-curtain-object-ref-view + .phui-curtain-object-ref-view {
+  margin-top: 1px;
+}
+
 .phui-curtain-object-ref-view-image-cell {
   min-width: 32px;
   padding-bottom: 24px;
@@ -81,4 +85,13 @@
 
 .phui-curtain-object-ref-view-highlighted {
   background: {$bluebackground};
+}
+
+.phui-curtain-object-ref-view-exiled  {
+  background: {$lightred};
+  opacity: 0.75;
+}
+
+.phui-curtain-object-ref-view-exiled-cell {
+  color: {$red};
 }

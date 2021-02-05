@@ -102,4 +102,66 @@ final class PhabricatorPolicyFilterSet
     $this->queue = array();
   }
 
+  public static function loadHandleViewCapabilities(
+    $viewer,
+    $handles,
+    array $objects) {
+
+    $capabilities = array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+
+    assert_instances_of($objects, 'PhabricatorPolicyInterface');
+
+    if (!$objects) {
+      return;
+    }
+
+    $viewer_map = array();
+    foreach ($handles as $handle_key => $handle) {
+      if (!$handle->hasCapabilities()) {
+        continue;
+      }
+      $viewer_map[$handle->getPHID()] = $handle_key;
+    }
+
+    if (!$viewer_map) {
+      return;
+    }
+
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array_keys($viewer_map))
+      ->execute();
+    $users = mpull($users, null, 'getPHID');
+
+    $filter_set = new self();
+
+    foreach ($users as $user_phid => $user) {
+      foreach ($objects as $object) {
+        foreach ($capabilities as $capability) {
+          $filter_set->addCapability($user, $object, $capability);
+        }
+      }
+    }
+
+    foreach ($users as $user_phid => $user) {
+      $handle_key = $viewer_map[$user_phid];
+      $handle = $handles[$handle_key];
+      foreach ($objects as $object) {
+        foreach ($capabilities as $capability) {
+          $has_capability = $filter_set->hasCapability(
+            $user,
+            $object,
+            $capability);
+
+          $handle->attachCapability(
+            $object,
+            $capability,
+            $has_capability);
+        }
+      }
+    }
+  }
+
 }
