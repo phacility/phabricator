@@ -134,6 +134,7 @@ abstract class PhabricatorWorker extends Phobject {
       array(
         'priority' => 'optional int|null',
         'objectPHID' => 'optional string|null',
+        'containerPHID' => 'optional string|null',
         'delayUntil' => 'optional int|null',
       ));
 
@@ -142,12 +143,14 @@ abstract class PhabricatorWorker extends Phobject {
       $priority = self::PRIORITY_DEFAULT;
     }
     $object_phid = idx($options, 'objectPHID');
+    $container_phid = idx($options, 'containerPHID');
 
     $task = id(new PhabricatorWorkerActiveTask())
       ->setTaskClass($task_class)
       ->setData($data)
       ->setPriority($priority)
-      ->setObjectPHID($object_phid);
+      ->setObjectPHID($object_phid)
+      ->setContainerPHID($container_phid);
 
     $delay = idx($options, 'delayUntil');
     if ($delay) {

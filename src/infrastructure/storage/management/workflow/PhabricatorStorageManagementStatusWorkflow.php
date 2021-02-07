@@ -33,6 +33,7 @@ final class PhabricatorStorageManagementStatusWorkflow
       $table = id(new PhutilConsoleTable())
         ->setShowHeader(false)
         ->addColumn('id', array('title' => pht('ID')))
+        ->addColumn('phase', array('title' => pht('Phase')))
         ->addColumn('host', array('title' => pht('Host')))
         ->addColumn('status', array('title' => pht('Status')))
         ->addColumn('duration', array('title' => pht('Duration')))
@@ -49,16 +50,22 @@ final class PhabricatorStorageManagementStatusWorkflow
           $duration = pht('%s us', new PhutilNumber($duration));
         }
 
-        $table->addRow(array(
-          'id' => $patch->getFullKey(),
-          'host' => $ref->getRefKey(),
-          'status' => in_array($patch->getFullKey(), $applied)
-            ? pht('Applied')
-            : pht('Not Applied'),
-          'duration' => $duration,
-          'type' => $patch->getType(),
-          'name' => $patch->getName(),
-        ));
+        if (in_array($patch->getFullKey(), $applied)) {
+          $status = pht('Applied');
+        } else {
+          $status = pht('Not Applied');
+        }
+
+        $table->addRow(
+          array(
+            'id' => $patch->getFullKey(),
+            'phase' => $patch->getPhase(),
+            'host' => $ref->getRefKey(),
+            'status' => $status,
+            'duration' => $duration,
+            'type' => $patch->getType(),
+            'name' => $patch->getName(),
+          ));
       }
 
       $table->draw();

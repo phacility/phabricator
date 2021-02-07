@@ -125,7 +125,7 @@ abstract class DiffusionRequest extends Phobject {
    *
    * @task new
    */
-  final private function __construct() {
+  private function __construct() {
     // <private>
   }
 
@@ -138,7 +138,7 @@ abstract class DiffusionRequest extends Phobject {
    * @return  DiffusionRequest    New request object.
    * @task new
    */
-  final private static function newFromIdentifier(
+  private static function newFromIdentifier(
     $identifier,
     PhabricatorUser $viewer,
     $need_edit = false) {
@@ -174,7 +174,7 @@ abstract class DiffusionRequest extends Phobject {
    * @return  DiffusionRequest        New request object.
    * @task new
    */
-  final private static function newFromRepository(
+  private static function newFromRepository(
     PhabricatorRepository $repository) {
 
     $map = array(
@@ -205,7 +205,7 @@ abstract class DiffusionRequest extends Phobject {
    * @return void
    * @task new
    */
-  final private function initializeFromDictionary(array $data) {
+  private function initializeFromDictionary(array $data) {
     $blob = idx($data, 'blob');
     if (strlen($blob)) {
       $blob = self::parseRequestBlob($blob, $this->supportsBranches());

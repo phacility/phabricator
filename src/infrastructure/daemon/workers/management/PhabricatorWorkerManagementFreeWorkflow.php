@@ -6,7 +6,7 @@ final class PhabricatorWorkerManagementFreeWorkflow
   protected function didConstruct() {
     $this
       ->setName('free')
-      ->setExamples('**free** --id __id__')
+      ->setExamples('**free** __selectors__')
       ->setSynopsis(
         pht(
           'Free leases on selected tasks. If the daemon holding the lease is '.
@@ -16,13 +16,20 @@ final class PhabricatorWorkerManagementFreeWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
     $tasks = $this->loadTasks($args);
 
+    if (!$tasks) {
+      $this->logWarn(
+        pht('NO TASKS'),
+        pht('No tasks selected to free leases on.'));
+
+      return 0;
+    }
+
+    $free_count = 0;
     foreach ($tasks as $task) {
       if ($task->isArchived()) {
-        $console->writeOut(
-          "**<bg:yellow> %s </bg>** %s\n",
+        $this->logWarn(
           pht('ARCHIVED'),
           pht(
             '%s is archived; archived tasks do not have leases.',
@@ -31,8 +38,7 @@ final class PhabricatorWorkerManagementFreeWorkflow
       }
 
       if ($task->getLeaseOwner() === null) {
-        $console->writeOut(
-          "**<bg:yellow> %s </bg>** %s\n",
+        $this->logWarn(
           pht('FREE'),
           pht(
             '%s has no active lease.',
@@ -40,17 +46,23 @@ final class PhabricatorWorkerManagementFreeWorkflow
         continue;
       }
 
-      $task->setLeaseOwner(null);
-      $task->setLeaseExpires(PhabricatorTime::getNow());
-      $task->save();
+      $task
+        ->setLeaseOwner(null)
+        ->setLeaseExpires(PhabricatorTime::getNow())
+        ->save();
 
-      $console->writeOut(
-        "**<bg:green> %s </bg>** %s\n",
+      $this->logInfo(
         pht('LEASE FREED'),
         pht(
           '%s was freed from its lease.',
           $this->describeTask($task)));
+
+      $free_count++;
     }
+
+    $this->logOkay(
+      pht('DONE'),
+      pht('Freed %s task lease(s).', new PhutilNumber($free_count)));
 
     return 0;
   }

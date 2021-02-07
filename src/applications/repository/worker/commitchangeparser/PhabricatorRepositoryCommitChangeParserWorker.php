@@ -99,14 +99,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
   }
 
   protected function finishParse() {
-    $commit = $this->commit;
-    if ($this->shouldQueueFollowupTasks()) {
-      $this->queueTask(
-        'PhabricatorRepositoryCommitPublishWorker',
-        array(
-          'commitID' => $commit->getID(),
-        ));
-    }
+    $this->queueCommitTask('PhabricatorRepositoryCommitPublishWorker');
   }
 
   private function writeCommitChanges(

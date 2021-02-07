@@ -87,6 +87,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
         ->setDataID($this->getDataID())
         ->setPriority($this->getPriority())
         ->setObjectPHID($this->getObjectPHID())
+        ->setContainerPHID($this->getContainerPHID())
         ->setDateCreated($this->getDateCreated())
         ->insert();
 

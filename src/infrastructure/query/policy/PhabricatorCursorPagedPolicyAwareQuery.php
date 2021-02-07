@@ -135,7 +135,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     );
   }
 
-  final private function getExternalCursorStringForResult($object) {
+  private function getExternalCursorStringForResult($object) {
     $cursor = $this->newExternalCursorStringForResult($object);
 
     if (!is_string($cursor)) {
@@ -154,7 +154,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->externalCursorString;
   }
 
-  final private function setExternalCursorString($external_cursor) {
+  private function setExternalCursorString($external_cursor) {
     $this->externalCursorString = $external_cursor;
     return $this;
   }
@@ -168,17 +168,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
-  final private function getInternalCursorObject() {
+  private function getInternalCursorObject() {
     return $this->internalCursorObject;
   }
 
-  final private function setInternalCursorObject(
+  private function setInternalCursorObject(
     PhabricatorQueryCursor $cursor) {
     $this->internalCursorObject = $cursor;
     return $this;
   }
 
-  final private function getInternalCursorFromExternalCursor(
+  private function getInternalCursorFromExternalCursor(
     $cursor_string) {
 
     $cursor_object = $this->newInternalCursorFromExternalCursor($cursor_string);
@@ -196,7 +196,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $cursor_object;
   }
 
-  final private function getPagingMapFromCursorObject(
+  private function getPagingMapFromCursorObject(
     PhabricatorQueryCursor $cursor,
     array $keys) {
 

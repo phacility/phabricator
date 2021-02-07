@@ -247,8 +247,9 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       // all the requested steps explicitly.
 
       $spec = array(
-        'commitID' => $commit->getID(),
+        'commitPHID' => $commit->getPHID(),
         'only' => !$importing,
+        'via' => 'reparse',
       );
 
       foreach ($classes as $class) {
@@ -258,6 +259,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             $spec,
             array(
               'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+              'objectPHID' => $commit->getPHID(),
+              'containerPHID' => $repository->getPHID(),
             ));
         } catch (PhabricatorWorkerPermanentFailureException $ex) {
           // See T13315. We expect some reparse steps to occasionally raise

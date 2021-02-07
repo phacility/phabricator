@@ -8,9 +8,16 @@ final class PhabricatorPolicyManagementUnlockWorkflow
       ->setName('unlock')
       ->setSynopsis(
         pht(
-          'Unlock an object which has policies that prevent it from being '.
-          'viewed or edited.'))
-      ->setExamples('**unlock** --view __user__ __object__')
+          'Unlock one or more objects by changing their view policies, edit '.
+          'policies, or owners.'))
+      ->setHelp(
+        pht(
+          'Identify each __object__ by passing an object name '.
+          '(like "T123") or a PHID (like "PHID-ABCD-1234...").'.
+          "\n\n".
+          'Not every type of object has an editable view policy, edit '.
+          'policy, or owner, so not all modes will work with all objects. '))
+      ->setExamples('**unlock** --view __user__ __object__ ...')
       ->setArguments(
         array(
           array(

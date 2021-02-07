@@ -1389,7 +1389,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
-  final private function queuePublishing() {
+  private function queuePublishing() {
     $object = $this->publishableObject;
     $xactions = $this->publishableTransactions;
 
@@ -4207,7 +4207,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @return dict<string, wild> Serializable editor state.
    * @task workers
    */
-  final private function getWorkerState() {
+  private function getWorkerState() {
     $state = array();
     foreach ($this->getAutomaticStateProperties() as $property) {
       $state[$property] = $this->$property;
@@ -4336,7 +4336,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @return map<string, wild> Map of encoded values.
    * @task workers
    */
-  final private function encodeStateForStorage(
+  private function encodeStateForStorage(
     array $state,
     array $encodings) {
 
@@ -4382,7 +4382,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @return map<string, wild> Map of decoded values.
    * @task workers
    */
-  final private function decodeStateFromStorage(
+  private function decodeStateFromStorage(
     array $state,
     array $encodings) {
 

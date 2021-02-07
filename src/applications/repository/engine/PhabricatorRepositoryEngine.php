@@ -85,10 +85,9 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
 
   final protected function queueCommitImportTask(
     PhabricatorRepository $repository,
-    $commit_id,
     $commit_phid,
     $task_priority,
-    $via = null) {
+    $via) {
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
@@ -109,7 +108,7 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
     }
 
     $data = array(
-      'commitID' => $commit_id,
+      'commitPHID' => $commit_phid,
     );
 
     if ($via !== null) {
@@ -119,6 +118,7 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
     $options = array(
       'priority' => $task_priority,
       'objectPHID' => $commit_phid,
+      'containerPHID' => $repository->getPHID(),
     );
 
     PhabricatorWorker::scheduleTask($class, $data, $options);

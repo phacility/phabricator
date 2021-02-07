@@ -116,6 +116,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setDataID($this->getDataID())
       ->setPriority($this->getPriority())
       ->setObjectPHID($this->getObjectPHID())
+      ->setContainerPHID($this->getContainerPHID())
       ->setResult($result)
       ->setDuration($duration)
       ->setDateCreated($this->getDateCreated())

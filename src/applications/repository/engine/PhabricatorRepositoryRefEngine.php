@@ -597,7 +597,6 @@ final class PhabricatorRepositoryRefEngine
 
         $this->queueCommitImportTask(
           $repository,
-          $row['id'],
           $row['phid'],
           $task_priority,
           $via = 'ref');
