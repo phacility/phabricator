@@ -64,13 +64,14 @@ Beyond an operating system, you will need **a webserver**.
     works fine.
   - **Other**: Other webservers which can run PHP are also likely to work fine,
     although these installation instructions will not cover how to set them up.
-  - **PHP Builtin Server**: You can use the builtin PHP webserver for
-    development or testing, although it should not be used in production.
+  - **PHP Builtin Server**: Phabricator will not work with the builtin
+    webserver because Phabricator depends on making requests to itself on some
+    workflows, and the builtin webserver is single-threaded.
 
 You will also need:
 
   - **MySQL**: You need MySQL. We strongly recommend MySQL 5.5 or newer.
-  - **PHP**: You need PHP 5.2 or newer.
+  - **PHP**: You need PHP 5.5 or newer.
 
 You'll probably also need a **domain name**. In particular, you should read this
 note:
@@ -124,9 +125,7 @@ Otherwise, here's a general description of what you need to install:
   - PHP (usually "php")
   - Required PHP extensions: mbstring, iconv, mysql (or mysqli), curl, pcntl
     (these might be something like "php-mysql" or "php5-mysqlnd")
-  - Optional PHP extensions: gd, apc (special instructions for APC are available
-    below if you have difficulty installing it), xhprof (instructions below,
-    you only need this if you are developing Phabricator)
+  - Optional PHP extensions: gd
 
 If you already have LAMP setup, you've probably already got everything you need.
 It may also be helpful to refer to the install scripts above, even if they don't
@@ -136,41 +135,11 @@ Now that you have all that stuff installed, grab Phabricator and its
 dependencies:
 
   $ cd somewhere/ # pick some install directory
-  somewhere/ $ git clone https://github.com/phacility/libphutil.git
   somewhere/ $ git clone https://github.com/phacility/arcanist.git
   somewhere/ $ git clone https://github.com/phacility/phabricator.git
 
-= Installing APC (Optional) =
-
-Like everything else written in PHP, Phabricator will run much faster with APC
-installed. You likely need to install "pcre-devel" first:
-
-  sudo yum install pcre-devel
-
-Then you have two options. Either install via PECL (try this first):
-
-  sudo yum install php-pear
-  sudo pecl install apc
-
-**If that doesn't work**, grab the package from PECL directly and follow the
-build instructions there:
-
-http://pecl.php.net/package/APC
-
-Installing APC is optional but **strongly recommended**, especially on
-production hosts.
-
-Once APC is installed, test that it is available by running:
-
-  php -i | grep apc
-
-If it doesn't show up, add:
-
-  extension=apc.so
-
-..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
-
-= Next Steps =
+Next Steps
+==========
 
 Continue by:
 

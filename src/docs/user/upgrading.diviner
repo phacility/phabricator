@@ -43,7 +43,6 @@ To switch to `stable`, check the branch out in each working copy:
 
   phabricator/ $ git checkout stable
   arcanist/ $ git checkout stable
-  libphutil/ $ git checkout stable
 
 You can now follow the upgrade process normally.
 
@@ -54,8 +53,7 @@ Upgrade Process
 IMPORTANT: You **MUST** restart Phabricator after upgrading. For help, see
 @{article:Restarting Phabricator}.
 
-IMPORTANT: You **MUST** upgrade `libphutil`, `arcanist` and `phabricator` at
-the same time.
+IMPORTANT: You **MUST** upgrade `arcanist` and `phabricator` at the same time.
 
 Phabricator runs on many different systems, with many different webservers.
 Given this diversity, we don't currently maintain a comprehensive upgrade
@@ -64,7 +62,7 @@ on every system:
 
   - Stop the webserver (including `php-fpm`, if you use it).
   - Stop the daemons, with `phabricator/bin/phd stop`.
-  - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
+  - Run `git pull` in `arcanist/` and `phabricator/`.
   - Run `phabricator/bin/storage upgrade`.
   - Start the daemons, with `phabricator/bin/phd start`.
   - Restart the webserver (and `php-fpm`, if you stopped it earlier).
@@ -86,7 +84,7 @@ set -x
 # to work without modifications.
 
 # NOTE: This script assumes you are running it from a directory which contains
-# arcanist/, libphutil/, and phabricator/.
+# arcanist/, and phabricator/.
 
 ROOT=`pwd` # You can hard-code the path here instead.
 
@@ -106,9 +104,6 @@ $ROOT/phabricator/bin/phd stop
 sudo /etc/init.d/httpd stop
 
 ### UPDATE WORKING COPIES ######################################################
-
-cd $ROOT/libphutil
-git pull
 
 cd $ROOT/arcanist
 git pull
