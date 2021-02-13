@@ -60,6 +60,7 @@ return array(
     'javelin-behavior-global-drag-and-drop',
     'javelin-behavior-phabricator-reveal-content',
     'phui-hovercard',
+    'phui-hovercard-list',
     'javelin-behavior-phui-hovercards',
     'javelin-color',
     'javelin-fx',

@@ -227,6 +227,43 @@ final class AphrontRequest extends Phobject {
   /**
    * @task data
    */
+  public function getJSONMap($name, $default = array()) {
+    if (!isset($this->requestData[$name])) {
+      return $default;
+    }
+
+    $raw_data = phutil_string_cast($this->requestData[$name]);
+    $raw_data = trim($raw_data);
+    if (!strlen($raw_data)) {
+      return $default;
+    }
+
+    if ($raw_data[0] !== '{') {
+      throw new Exception(
+        pht(
+          'Request parameter "%s" is not formatted properly. Expected a '.
+          'JSON object, but value does not start with "{".',
+          $name));
+    }
+
+    try {
+      $json_object = phutil_json_decode($raw_data);
+    } catch (PhutilJSONParserException $ex) {
+      throw new Exception(
+        pht(
+          'Request parameter "%s" is not formatted properly. Expected a '.
+          'JSON object, but encountered a syntax error: %s.',
+          $name,
+          $ex->getMessage()));
+    }
+
+    return $json_object;
+  }
+
+
+  /**
+   * @task data
+   */
   public function getArr($name, $default = array()) {
     if (isset($this->requestData[$name]) &&
         is_array($this->requestData[$name])) {

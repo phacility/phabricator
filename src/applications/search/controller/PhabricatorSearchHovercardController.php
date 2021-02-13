@@ -9,7 +9,8 @@ final class PhabricatorSearchHovercardController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $phids = $request->getArr('phids');
+
+    $cards = $request->getJSONMap('cards');
 
     // If object names are provided, look them up and pretend they were
     // passed as additional PHIDs. This is primarily useful for debugging,
@@ -23,18 +24,29 @@ final class PhabricatorSearchHovercardController
         ->execute();
 
       foreach ($named_objects as $object) {
-        $phids[] = $object->getPHID();
+        $cards[] = array(
+          'objectPHID' => $object->getPHID(),
+        );
       }
+    }
+
+    $object_phids = array();
+    $handle_phids = array();
+    foreach ($cards as $card) {
+      $object_phid = idx($card, 'objectPHID');
+
+      $handle_phids[] = $object_phid;
+      $object_phids[] = $object_phid;
     }
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->withPHIDs($phids)
+      ->withPHIDs($handle_phids)
       ->execute();
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs($phids)
+      ->withPHIDs($object_phids)
       ->execute();
     $objects = mpull($objects, null, 'getPHID');
 
@@ -67,10 +79,12 @@ final class PhabricatorSearchHovercardController
         array_select_keys($objects, $extension_phids));
     }
 
-    $cards = array();
-    foreach ($phids as $phid) {
-      $handle = $handles[$phid];
-      $object = idx($objects, $phid);
+    $results = array();
+    foreach ($cards as $card_key => $card) {
+      $object_phid = $card['objectPHID'];
+
+      $handle = $handles[$object_phid];
+      $object = idx($objects, $object_phid);
 
       $hovercard = id(new PHUIHovercardView())
         ->setUser($viewer)
@@ -90,18 +104,18 @@ final class PhabricatorSearchHovercardController
         }
       }
 
-      $cards[$phid] = $hovercard;
+      $results[$card_key] = $hovercard;
     }
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())->setContent(
         array(
-          'cards' => $cards,
+          'cards' => $results,
         ));
     }
 
-    foreach ($cards as $key => $hovercard) {
-      $cards[$key] = phutil_tag('div',
+    foreach ($results as $key => $hovercard) {
+      $results[$key] = phutil_tag('div',
         array(
           'class' => 'ml',
         ),
@@ -109,7 +123,7 @@ final class PhabricatorSearchHovercardController
     }
 
     return $this->newPage()
-      ->appendChild($cards)
+      ->appendChild($results)
       ->setShowFooter(false);
   }
 
