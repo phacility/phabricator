@@ -300,15 +300,21 @@ final class PhabricatorObjectHandle
     return $this->renderLinkWithAttributes($name, array());
   }
 
-  public function renderHovercardLink($name = null) {
+  public function renderHovercardLink($name = null, $context_phid = null) {
     Javelin::initBehavior('phui-hovercards');
+
+    $hovercard_spec = array(
+      'objectPHID' => $this->getPHID(),
+    );
+
+    if ($context_phid) {
+      $hovercard_spec['contextPHID'] = $context_phid;
+    }
 
     $attributes = array(
       'sigil' => 'hovercard',
       'meta' => array(
-        'hovercardSpec' => array(
-          'objectPHID' => $this->getPHID(),
-        ),
+        'hovercardSpec' => $hovercard_spec,
       ),
     );
 

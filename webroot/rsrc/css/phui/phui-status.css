@@ -29,10 +29,16 @@
   border-radius: 3px;
 }
 
+.phui-status-item-exiled td {
+  background-color: {$lightredbackground};
+  border-radius: 3px;
+}
+
 .phui-status-list-view td a {
  color: {$darkbluetext};
 }
 
-.phui-status-item-highlighted td.phui-status-item-note {
+.phui-status-item-highlighted td.phui-status-item-note,
+.phui-status-item-exiled td.phui-status-item-note {
   background-color: transparent;
 }
