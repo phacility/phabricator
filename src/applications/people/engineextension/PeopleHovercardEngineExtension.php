@@ -47,12 +47,14 @@ final class PeopleHovercardEngineExtension
       return;
     }
 
+    $is_exiled = $hovercard->getIsExiled();
+
     $user_card = id(new PhabricatorUserCardView())
       ->setProfile($user)
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setIsExiled($is_exiled);
 
     $hovercard->appendChild($user_card);
-
   }
 
 }

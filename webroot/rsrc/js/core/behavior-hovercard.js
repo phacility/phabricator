@@ -32,7 +32,7 @@ JX.behavior('phui-hovercards', function(config, statics) {
       }
 
       var node = e.getNode('hovercard');
-      var data = e.getNodeData('hovercard');
+      var data = e.getNodeData('hovercard').hovercardSpec;
 
       var card = cards.getCard(data);
 

@@ -72,6 +72,17 @@
   color: {$greytext};
 }
 
+.project-card-view .project-card-item-exiled {
+  background-color: {$lightredbackground};
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 0;
+}
+
+.project-card-view .project-card-item-exiled .project-card-item-text {
+  color: {$red};
+}
+
 .project-card-view .project-card-item-icon {
   width: 20px;
 }

@@ -306,7 +306,9 @@ final class PhabricatorObjectHandle
     $attributes = array(
       'sigil' => 'hovercard',
       'meta' => array(
-        'hoverPHID' => $this->getPHID(),
+        'hovercardSpec' => array(
+          'objectPHID' => $this->getPHID(),
+        ),
       ),
     );
 

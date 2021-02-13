@@ -32,11 +32,19 @@ final class PhabricatorSearchHovercardController
 
     $object_phids = array();
     $handle_phids = array();
+    $context_phids = array();
     foreach ($cards as $card) {
       $object_phid = idx($card, 'objectPHID');
 
       $handle_phids[] = $object_phid;
       $object_phids[] = $object_phid;
+
+      $context_phid = idx($card, 'contextPHID');
+
+      if ($context_phid) {
+        $object_phids[] = $context_phid;
+        $context_phids[] = $context_phid;
+      }
     }
 
     $handles = id(new PhabricatorHandleQuery())
@@ -50,11 +58,20 @@ final class PhabricatorSearchHovercardController
       ->execute();
     $objects = mpull($objects, null, 'getPHID');
 
+    $context_objects = array_select_keys($objects, $context_phids);
+
+    if ($context_objects) {
+      PhabricatorPolicyFilterSet::loadHandleViewCapabilities(
+        $viewer,
+        $handles,
+        $context_objects);
+    }
+
     $extensions =
       PhabricatorHovercardEngineExtension::getAllEnabledExtensions();
 
     $extension_maps = array();
-    foreach ($extensions as $key => $extension) {
+    foreach ($extensions as $extension_key => $extension) {
       $extension->setViewer($viewer);
 
       $extension_phids = array();
@@ -64,18 +81,18 @@ final class PhabricatorSearchHovercardController
         }
       }
 
-      $extension_maps[$key] = $extension_phids;
+      $extension_maps[$extension_key] = $extension_phids;
     }
 
     $extension_data = array();
-    foreach ($extensions as $key => $extension) {
-      $extension_phids = $extension_maps[$key];
+    foreach ($extensions as $extension_key => $extension) {
+      $extension_phids = $extension_maps[$extension_key];
       if (!$extension_phids) {
-        unset($extensions[$key]);
+        unset($extensions[$extension_key]);
         continue;
       }
 
-      $extension_data[$key] = $extension->willRenderHovercards(
+      $extension_data[$extension_key] = $extension->willRenderHovercards(
         array_select_keys($objects, $extension_phids));
     }
 
@@ -86,20 +103,35 @@ final class PhabricatorSearchHovercardController
       $handle = $handles[$object_phid];
       $object = idx($objects, $object_phid);
 
+      $context_phid = idx($card, 'contextPHID');
+      if ($context_phid) {
+        $context_object = idx($context_objects, $context_phid);
+      } else {
+        $context_object = null;
+      }
+
       $hovercard = id(new PHUIHovercardView())
         ->setUser($viewer)
         ->setObjectHandle($handle);
 
+      if ($context_object) {
+        if ($handle->hasCapabilities()) {
+          if (!$handle->hasViewCapability($context_object)) {
+            $hovercard->setIsExiled(true);
+          }
+        }
+      }
+
       if ($object) {
         $hovercard->setObject($object);
 
-        foreach ($extension_maps as $key => $extension_phids) {
-          if (isset($extension_phids[$phid])) {
-            $extensions[$key]->renderHovercard(
+        foreach ($extension_maps as $extension_key => $extension_phids) {
+          if (isset($extension_phids[$object_phid])) {
+            $extensions[$extension_key]->renderHovercard(
               $hovercard,
               $handle,
               $object,
-              $extension_data[$key]);
+              $extension_data[$extension_key]);
           }
         }
       }
@@ -114,8 +146,8 @@ final class PhabricatorSearchHovercardController
         ));
     }
 
-    foreach ($results as $key => $hovercard) {
-      $results[$key] = phutil_tag('div',
+    foreach ($results as $result_key => $hovercard) {
+      $results[$result_key] = phutil_tag('div',
         array(
           'class' => 'ml',
         ),

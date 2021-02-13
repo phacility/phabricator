@@ -110,7 +110,6 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
 
       if ($exists) {
         $user = $actual_users[$username];
-        Javelin::initBehavior('phui-hovercards');
 
         // Check if the user has view access to the object she was mentioned in
         if ($policy_object) {
@@ -159,8 +158,13 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
             ->setName('@'.$user->getUserName())
             ->setHref($user_href);
 
+          if ($context_object) {
+            $tag->setContextObject($context_object);
+          }
+
           if ($user_can_not_view) {
-            $tag->addClass('phabricator-remarkup-mention-nopermission');
+            $tag->setIcon('fa-eye-slash red');
+            $tag->setIsExiled(true);
           }
 
           if ($user->getIsDisabled()) {

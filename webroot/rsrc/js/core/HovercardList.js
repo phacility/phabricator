@@ -31,7 +31,8 @@ JX.install('HovercardList', {
       if (!(hovercard_key in this._cards)) {
         var card = new JX.Hovercard()
           .setHovercardKey(hovercard_key)
-          .setObjectPHID(spec.hoverPHID);
+          .setObjectPHID(spec.objectPHID)
+          .setContextPHID(spec.contextPHID || null);
 
         this._cards[hovercard_key] = card;
       }
@@ -76,12 +77,18 @@ JX.install('HovercardList', {
     },
 
     _newHovercardKey: function(spec) {
-      return 'phid=' + spec.hoverPHID;
+      var parts = [
+        spec.objectPHID,
+        spec.contextPHID
+      ];
+
+      return parts.join('/');
     },
 
     _newCardRequest: function(card) {
       return {
-        objectPHID: card.getObjectPHID()
+        objectPHID: card.getObjectPHID(),
+        contextPHID: card.getContextPHID()
       };
     },
 

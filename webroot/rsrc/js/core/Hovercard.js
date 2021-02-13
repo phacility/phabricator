@@ -13,6 +13,7 @@ JX.install('Hovercard', {
   properties: {
     hovercardKey: null,
     objectPHID: null,
+    contextPHID: null,
     isLoading: false,
     isLoaded: false,
     content: null

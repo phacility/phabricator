@@ -638,7 +638,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
             'href' => $commit->getURI(),
             'sigil' => 'hovercard',
             'meta' => array(
-              'hoverPHID' => $commit->getPHID(),
+              'hovercardSpec' => array(
+                'objectPHID' => $commit->getPHID(),
+              ),
             ),
           ),
           $commit->getSummary());
@@ -705,7 +707,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
             'href' => $revision->getURI(),
             'sigil' => 'hovercard',
             'meta' => array(
-              'hoverPHID' => $revision->getPHID(),
+              'hovercardSpec' => array(
+                'objectPHID' => $revision->getPHID(),
+              ),
             ),
           ),
           $revision->getTitle());
