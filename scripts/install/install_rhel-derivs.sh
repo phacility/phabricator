@@ -117,13 +117,6 @@ fi
 
 confirm
 
-if [[ ! -e libphutil ]]
-then
-  git clone https://github.com/phacility/libphutil.git
-else
-  (cd libphutil && git pull --rebase)
-fi
-
 if [[ ! -e arcanist ]]
 then
   git clone https://github.com/phacility/arcanist.git

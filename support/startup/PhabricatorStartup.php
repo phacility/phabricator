@@ -521,12 +521,18 @@ final class PhabricatorStartup {
         "'{$required_version}'.");
     }
 
-    if (@get_magic_quotes_gpc()) {
-      self::didFatal(
-        "Your server is configured with PHP 'magic_quotes_gpc' enabled. This ".
-        "feature is 'highly discouraged' by PHP's developers and you must ".
-        "disable it to run Phabricator. Consult the PHP manual for ".
-        "instructions.");
+    if (function_exists('get_magic_quotes_gpc')) {
+      if (@get_magic_quotes_gpc()) {
+        self::didFatal(
+          'Your server is configured with the PHP language feature '.
+          '"magic_quotes_gpc" enabled.'.
+          "\n\n".
+          'This feature is "highly discouraged" by PHP\'s developers, and '.
+          'has been removed entirely in PHP8.'.
+          "\n\n".
+          'You must disable "magic_quotes_gpc" to run Phabricator. Consult '.
+          'the PHP manual for instructions.');
+      }
     }
 
     if (extension_loaded('apc')) {

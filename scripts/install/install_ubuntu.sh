@@ -93,12 +93,6 @@ sudo a2enmod rewrite  || failed
 
 echo "Downloading Phabricator and dependencies..."
 echo
-if [ ! -e libphutil ]
-then
-  git clone https://github.com/phacility/libphutil.git
-else
-  (cd libphutil && git pull --rebase)
-fi
 
 if [ ! -e arcanist ]
 then
