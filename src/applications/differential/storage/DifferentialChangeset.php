@@ -45,6 +45,7 @@ final class DifferentialChangeset
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'metadata'      => self::SERIALIZATION_JSON,
         'oldProperties' => self::SERIALIZATION_JSON,
@@ -73,6 +74,10 @@ final class DifferentialChangeset
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getPHIDType() {
+    return DifferentialChangesetPHIDType::TYPECONST;
   }
 
   public function getAffectedLineCount() {
