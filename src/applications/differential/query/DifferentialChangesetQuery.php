@@ -4,6 +4,9 @@ final class DifferentialChangesetQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $phids;
+  private $diffPHIDs;
+
   private $diffs;
 
   private $needAttachToDiffs;
@@ -14,9 +17,19 @@ final class DifferentialChangesetQuery
     return $this;
   }
 
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
+
   public function withDiffs(array $diffs) {
     assert_instances_of($diffs, 'DifferentialDiff');
     $this->diffs = $diffs;
+    return $this;
+  }
+
+  public function withDiffPHIDs(array $phids) {
+    $this->diffPHIDs = $phids;
     return $this;
   }
 
@@ -132,6 +145,31 @@ final class DifferentialChangesetQuery
         $conn,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'phid IN (%Ls)',
+        $this->phids);
+    }
+
+    if ($this->diffPHIDs !== null) {
+      $diff_ids = queryfx_all(
+        $conn,
+        'SELECT id FROM %R WHERE phid IN (%Ls)',
+        new DifferentialDiff(),
+        $this->diffPHIDs);
+      $diff_ids = ipull($diff_ids, 'id', null);
+
+      if (!$diff_ids) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        'diffID IN (%Ld)',
+        $diff_ids);
     }
 
     return $where;
