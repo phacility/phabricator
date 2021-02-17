@@ -9,18 +9,47 @@ final class PhutilRemarkupHyperlinkRule extends PhutilRemarkupRule {
   }
 
   public function apply($text) {
+    static $angle_pattern;
+    static $curly_pattern;
+    static $bare_pattern;
+
+    if ($angle_pattern === null) {
+      // See T13608. Limit protocol matches to 32 characters to improve the
+      // performance of the "<protocol>://" pattern, which can take a very long
+      // time to match against long inputs if the maximum length of a protocol
+      // sequence is unrestricted.
+
+      $protocol_fragment = '\w{3,32}';
+      $uri_fragment = '[^\s'.PhutilRemarkupBlockStorage::MAGIC_BYTE.']+';
+
+      $angle_pattern = sprintf(
+        '(<(%s://%s?)>)',
+        $protocol_fragment,
+        $uri_fragment);
+
+      $curly_pattern = sprintf(
+        '({(%s://%s?)})',
+        $protocol_fragment,
+        $uri_fragment);
+
+      $bare_pattern = sprintf(
+        '(%s://%s)',
+        $protocol_fragment,
+        $uri_fragment);
+    }
+
     // Hyperlinks with explicit "<>" around them get linked exactly, without
     // the "<>". Angle brackets are basically special and mean "this is a URL
     // with weird characters". This is assumed to be reasonable because they
-    // don't appear in normal text or normal URLs.
+    // don't appear in most normal text or most normal URLs.
     $text = preg_replace_callback(
-      '@<(\w{3,}://[^\s'.PhutilRemarkupBlockStorage::MAGIC_BYTE.']+?)>@',
+      $angle_pattern,
       array($this, 'markupHyperlinkAngle'),
       $text);
 
     // We match "{uri}", but do not link it by default.
     $text = preg_replace_callback(
-      '@{(\w{3,}://[^\s'.PhutilRemarkupBlockStorage::MAGIC_BYTE.']+?)}@',
+      $curly_pattern,
       array($this, 'markupHyperlinkCurly'),
       $text);
 
@@ -31,8 +60,9 @@ final class PhutilRemarkupHyperlinkRule extends PhutilRemarkupRule {
 
     // NOTE: We're explicitly avoiding capturing stored blocks, so text like
     // `http://www.example.com/[[x | y]]` doesn't get aggressively captured.
+
     $text = preg_replace_callback(
-      '@(\w{3,}://[^\s'.PhutilRemarkupBlockStorage::MAGIC_BYTE.']+)@',
+      $bare_pattern,
       array($this, 'markupHyperlinkUngreedy'),
       $text);
 
@@ -110,7 +140,7 @@ final class PhutilRemarkupHyperlinkRule extends PhutilRemarkupRule {
   }
 
   protected function markupHyperlinkUngreedy($matches) {
-    $match = $matches[1];
+    $match = $matches[0];
     $tail = null;
     $trailing = null;
     if (preg_match('/[;,.:!?]+$/', $match, $trailing)) {
