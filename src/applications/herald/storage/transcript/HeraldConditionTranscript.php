@@ -65,7 +65,7 @@ final class HeraldConditionTranscript extends Phobject {
   }
 
   public function setResult(HeraldConditionResult $result) {
-    $this->resultMap = $result->toMap();
+    $this->resultMap = $result->newResultMap();
     return $this;
   }
 
@@ -73,7 +73,7 @@ final class HeraldConditionTranscript extends Phobject {
     $map = $this->resultMap;
 
     if (is_array($map)) {
-      $result = HeraldConditionResult::newFromMap($map);
+      $result = HeraldConditionResult::newFromResultMap($map);
     } else {
       $legacy_result = $this->result;
 

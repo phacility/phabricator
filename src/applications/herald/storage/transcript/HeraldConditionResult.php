@@ -1,7 +1,7 @@
 <?php
 
 final class HeraldConditionResult
-  extends Phobject {
+  extends HeraldTranscriptResult {
 
   const RESULT_MATCHED = 'matched';
   const RESULT_FAILED = 'failed';
@@ -10,61 +10,20 @@ final class HeraldConditionResult
   const RESULT_EXCEPTION = 'exception';
   const RESULT_UNKNOWN = 'unknown';
 
-  private $resultCode;
-  private $resultData = array();
-
-  public function toMap() {
-    return array(
-      'code' => $this->getResultCode(),
-      'data' => $this->getResultData(),
-    );
-  }
-
-  public static function newFromMap(array $map) {
-    $result_code = idx($map, 'code');
-    $result = self::newFromResultCode($result_code);
-
-    $result_data = idx($map, 'data', array());
-    $result->setResultData($result_data);
-
-    return $result;
-  }
-
   public static function newFromResultCode($result_code) {
-    $map = self::getResultSpecification($result_code);
-
-    $result = new self();
-    $result->resultCode = $result_code;
-
-    return $result;
+    return id(new self())->setResultCode($result_code);
   }
 
-  public function getResultCode() {
-    return $this->resultCode;
-  }
-
-  private function getResultData() {
-    return $this->resultData;
-  }
-
-  public function getIconIcon() {
-    return $this->getSpecificationProperty('icon');
-  }
-
-  public function getIconColor() {
-    return $this->getSpecificationProperty('color.icon');
+  public static function newFromResultMap(array $map) {
+    return id(new self())->loadFromResultMap($map);
   }
 
   public function getIsMatch() {
     return ($this->getSpecificationProperty('match') === true);
   }
 
-  public function getName() {
-    return $this->getSpecificationProperty('name');
-  }
-
   public function newDetailsView() {
-    switch ($this->resultCode) {
+    switch ($this->getResultCode()) {
       case self::RESULT_OBJECT_STATE:
         $reason = $this->getDataProperty('reason');
         $details = HeraldStateReasons::getExplanation($reason);
@@ -105,35 +64,7 @@ final class HeraldConditionResult
     return $details;
   }
 
-  public function setResultData(array $result_data) {
-    $this->resultData = $result_data;
-    return $this;
-  }
-
-  private function getDataProperty($key) {
-    $data = $this->getResultData();
-    return idx($data, $key);
-  }
-
-  private function getSpecificationProperty($key) {
-    $map = self::getResultSpecification($this->resultCode);
-    return $map[$key];
-  }
-
-  private static function getResultSpecification($result_code) {
-    $map = self::getResultSpecificationMap();
-
-    if (!isset($map[$result_code])) {
-      throw new Exception(
-        pht(
-          'Condition result "%s" is unknown.',
-          $result_code));
-    }
-
-    return $map[$result_code];
-  }
-
-  private static function getResultSpecificationMap() {
+  protected function newResultSpecificationMap() {
     return array(
       self::RESULT_MATCHED => array(
         'match' => true,
