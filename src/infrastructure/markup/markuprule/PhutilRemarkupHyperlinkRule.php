@@ -14,10 +14,13 @@ final class PhutilRemarkupHyperlinkRule extends PhutilRemarkupRule {
     static $bare_pattern;
 
     if ($angle_pattern === null) {
-      // See T13608. Limit protocol matches to 32 characters to improve the
-      // performance of the "<protocol>://" pattern, which can take a very long
-      // time to match against long inputs if the maximum length of a protocol
-      // sequence is unrestricted.
+      // See T13608. A previous version of this code matched bare URIs
+      // starting with "\w{3,}", which can take a very long time to match
+      // against long inputs.
+      //
+      // Use a protocol length limit in all patterns for general sanity,
+      // and a negative lookbehind in the bare pattern to avoid explosive
+      // complexity during expression evaluation.
 
       $protocol_fragment = '\w{3,32}';
       $uri_fragment = '[^\s'.PhutilRemarkupBlockStorage::MAGIC_BYTE.']+';
@@ -33,7 +36,7 @@ final class PhutilRemarkupHyperlinkRule extends PhutilRemarkupRule {
         $uri_fragment);
 
       $bare_pattern = sprintf(
-        '(%s://%s)',
+        '((?<!\w)%s://%s)',
         $protocol_fragment,
         $uri_fragment);
     }
