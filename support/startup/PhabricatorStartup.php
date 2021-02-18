@@ -400,6 +400,24 @@ final class PhabricatorStartup {
     // a UTF-8 locale we can encounter problems when launching subprocesses
     // which receive UTF-8 parameters in their command line argument list.
     @setlocale(LC_ALL, 'en_US.UTF-8');
+
+    $config_map = array(
+      // See PHI1894. Keep "args" in exception backtraces.
+      'zend.exception_ignore_args' => 0,
+
+      // See T13100. We'd like the regex engine to fail, rather than segfault,
+      // if handed a pathological regular expression.
+      'pcre.backtrack_limit' => 10000,
+      'pcre.recusion_limit' => 10000,
+
+      // NOTE: Arcanist applies a similar set of startup options for CLI
+      // environments in "init-script.php". Changes here may also be
+      // appropriate to apply there.
+    );
+
+    foreach ($config_map as $config_key => $config_value) {
+      ini_set($config_key, $config_value);
+    }
   }
 
 
