@@ -119,6 +119,15 @@ final class HarbormasterBuildTarget
         'key_build' => array(
           'columns' => array('buildPHID', 'buildStepPHID'),
         ),
+        'key_started' => array(
+          'columns' => array('dateStarted'),
+        ),
+        'key_completed' => array(
+          'columns' => array('dateCompleted'),
+        ),
+        'key_created' => array(
+          'columns' => array('dateCreated'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

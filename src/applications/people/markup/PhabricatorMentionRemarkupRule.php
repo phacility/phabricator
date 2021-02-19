@@ -87,24 +87,36 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
     $engine->setTextMetadata($mentioned_key, $mentioned);
     $context_object = $engine->getConfig('contextObject');
 
+    $policy_object = null;
+    if ($context_object) {
+      if ($context_object instanceof PhabricatorPolicyInterface) {
+        $policy_object = $context_object;
+      }
+    }
+
+    if ($policy_object) {
+      $policy_set = new PhabricatorPolicyFilterSet();
+      foreach ($actual_users as $user) {
+        $policy_set->addCapability(
+          $user,
+          $policy_object,
+          PhabricatorPolicyCapability::CAN_VIEW);
+      }
+    }
+
     foreach ($metadata as $username => $tokens) {
       $exists = isset($actual_users[$username]);
-      $user_has_no_permission = false;
+      $user_can_not_view = false;
 
       if ($exists) {
         $user = $actual_users[$username];
-        Javelin::initBehavior('phui-hovercards');
 
         // Check if the user has view access to the object she was mentioned in
-        if ($context_object
-          && $context_object instanceof PhabricatorPolicyInterface) {
-          if (!PhabricatorPolicyFilter::hasCapability(
+        if ($policy_object) {
+          $user_can_not_view = !$policy_set->hasCapability(
             $user,
-            $context_object,
-            PhabricatorPolicyCapability::CAN_VIEW)) {
-            // User mentioned has no permission to this object
-            $user_has_no_permission = true;
-          }
+            $policy_object,
+            PhabricatorPolicyCapability::CAN_VIEW);
         }
 
         $user_href = '/p/'.$user->getUserName().'/';
@@ -112,7 +124,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
         if ($engine->isHTMLMailMode()) {
           $user_href = PhabricatorEnv::getProductionURI($user_href);
 
-          if ($user_has_no_permission) {
+          if ($user_can_not_view) {
             $colors = '
               border-color: #92969D;
               color: #92969D;
@@ -146,8 +158,13 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
             ->setName('@'.$user->getUserName())
             ->setHref($user_href);
 
-          if ($user_has_no_permission) {
-            $tag->addClass('phabricator-remarkup-mention-nopermission');
+          if ($context_object) {
+            $tag->setContextObject($context_object);
+          }
+
+          if ($user_can_not_view) {
+            $tag->setIcon('fa-eye-slash red');
+            $tag->setIsExiled(true);
           }
 
           if ($user->getIsDisabled()) {

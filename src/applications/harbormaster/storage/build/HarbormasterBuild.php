@@ -128,6 +128,11 @@ final class HarbormasterBuild extends HarbormasterDAO
       'step.timestamp' => null,
       'build.id' => null,
       'initiator.phid' => null,
+
+      'buildable.phid' => null,
+      'buildable.object.phid' => null,
+      'buildable.container.phid' => null,
+      'build.phid' => null,
     );
 
     foreach ($this->getBuildParameters() as $key => $value) {
@@ -145,6 +150,11 @@ final class HarbormasterBuild extends HarbormasterDAO
     $results['build.id'] = $this->getID();
     $results['initiator.phid'] = $this->getInitiatorPHID();
 
+    $results['buildable.phid'] = $buildable->getPHID();
+    $results['buildable.object.phid'] = $object->getPHID();
+    $results['buildable.container.phid'] = $buildable->getContainerPHID();
+    $results['build.phid'] = $this->getPHID();
+
     return $results;
   }
 
@@ -161,6 +171,16 @@ final class HarbormasterBuild extends HarbormasterDAO
       'initiator.phid' => pht(
         'The PHID of the user or Object that initiated the build, '.
         'if applicable.'),
+      'buildable.phid' => pht(
+        'The object PHID of the Harbormaster Buildable being built.'),
+      'buildable.object.phid' => pht(
+        'The object PHID of the object (usually a diff or commit) '.
+        'being built.'),
+      'buildable.container.phid' => pht(
+        'The object PHID of the container (usually a revision or repository) '.
+        'for the object being built.'),
+      'build.phid' => pht(
+        'The object PHID of the Harbormaster Build being built.'),
     );
 
     foreach ($objects as $object) {

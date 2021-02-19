@@ -44,6 +44,8 @@ final class PHUITagView extends AphrontTagView {
   private $shade;
   private $slimShady;
   private $border;
+  private $contextObject;
+  private $isExiled;
 
   public function setType($type) {
     $this->type = $type;
@@ -127,6 +129,24 @@ final class PHUITagView extends AphrontTagView {
     return strlen($this->href) ? 'a' : 'span';
   }
 
+  public function setContextObject($context_object) {
+    $this->contextObject = $context_object;
+    return $this;
+  }
+
+  public function getContextObject() {
+    return $this->contextObject;
+  }
+
+  public function setIsExiled($is_exiled) {
+    $this->isExiled = $is_exiled;
+    return $this;
+  }
+
+  public function getIsExiled() {
+    return $this->isExiled;
+  }
+
   protected function getTagAttributes() {
     require_celerity_resource('phui-tag-view-css');
 
@@ -155,6 +175,10 @@ final class PHUITagView extends AphrontTagView {
       $classes[] = 'phui-tag-'.$this->border;
     }
 
+    if ($this->getIsExiled()) {
+      $classes[] = 'phui-tag-exiled';
+    }
+
     $attributes = array(
       'href' => $this->href,
       'class' => $classes,
@@ -170,10 +194,19 @@ final class PHUITagView extends AphrontTagView {
     if ($this->phid) {
       Javelin::initBehavior('phui-hovercards');
 
+      $hovercard_spec = array(
+        'objectPHID' => $this->phid,
+      );
+
+      $context_object = $this->getContextObject();
+      if ($context_object) {
+        $hovercard_spec['contextPHID'] = $context_object->getPHID();
+      }
+
       $attributes += array(
         'sigil' => 'hovercard',
         'meta' => array(
-          'hoverPHID' => $this->phid,
+          'hovercardSpec' => $hovercard_spec,
         ),
       );
     }

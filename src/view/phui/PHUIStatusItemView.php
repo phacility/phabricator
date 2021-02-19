@@ -8,6 +8,7 @@ final class PHUIStatusItemView extends AphrontTagView {
   private $target;
   private $note;
   private $highlighted;
+  private $isExiled;
 
   const ICON_ACCEPT = 'fa-check-circle';
   const ICON_REJECT = 'fa-times-circle';
@@ -46,6 +47,11 @@ final class PHUIStatusItemView extends AphrontTagView {
     return $this;
   }
 
+  public function setIsExiled($is_exiled) {
+    $this->isExiled = $is_exiled;
+    return $this;
+  }
+
   protected function canAppendChild() {
     return false;
   }
@@ -58,6 +64,10 @@ final class PHUIStatusItemView extends AphrontTagView {
     $classes = array();
     if ($this->highlighted) {
       $classes[] = 'phui-status-item-highlighted';
+    }
+
+    if ($this->isExiled) {
+      $classes[] = 'phui-status-item-exiled';
     }
 
     return array(

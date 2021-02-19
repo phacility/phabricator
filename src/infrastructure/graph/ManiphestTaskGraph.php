@@ -69,7 +69,9 @@ final class ManiphestTaskGraph
           'href' => $object->getURI(),
           'sigil' => 'hovercard',
           'meta' => array(
-            'hoverPHID' => $object->getPHID(),
+            'hovercardSpec' => array(
+              'objectPHID' => $object->getPHID(),
+            ),
           ),
         ),
         $object->getTitle());

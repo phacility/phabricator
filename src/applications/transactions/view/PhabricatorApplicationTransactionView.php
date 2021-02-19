@@ -9,6 +9,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $engine;
   private $showEditActions = true;
   private $isPreview;
+  private $object;
   private $objectPHID;
   private $shouldTerminate = false;
   private $quoteTargetID;
@@ -39,6 +40,16 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function getQuoteTargetID() {
     return $this->quoteTargetID;
+  }
+
+  public function setObject(
+    PhabricatorApplicationTransactionInterface $object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  private function getObject() {
+    return $this->object;
   }
 
   public function setObjectPHID($object_phid) {
@@ -238,6 +249,12 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
       $engine = id(new PhabricatorMarkupEngine())
         ->setViewer($this->getViewer());
+
+      $object = $this->getObject();
+      if ($object) {
+        $engine->setContextObject($object);
+      }
+
       foreach ($this->transactions as $xaction) {
         if (!$xaction->hasComment()) {
           continue;

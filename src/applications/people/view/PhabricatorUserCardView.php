@@ -5,6 +5,7 @@ final class PhabricatorUserCardView extends AphrontTagView {
   private $profile;
   private $viewer;
   private $tag;
+  private $isExiled;
 
   public function setProfile(PhabricatorUser $profile) {
     $this->profile = $profile;
@@ -40,6 +41,15 @@ final class PhabricatorUserCardView extends AphrontTagView {
     return array(
       'class' => implode(' ', $classes),
     );
+  }
+
+  public function setIsExiled($is_exiled) {
+    $this->isExiled = $is_exiled;
+    return $this;
+  }
+
+  public function getIsExiled() {
+    return $this->isExiled;
   }
 
   protected function getTagContent() {
@@ -108,6 +118,15 @@ final class PhabricatorUserCardView extends AphrontTagView {
       }
     }
 
+    if ($this->getIsExiled()) {
+      $body[] = $this->addItem(
+        'fa-eye-slash red',
+        pht('This user can not see this object.'),
+        array(
+          'project-card-item-exiled',
+        ));
+    }
+
     $classes[] = 'project-card-image';
     $image = phutil_tag(
       'img',
@@ -160,17 +179,26 @@ final class PhabricatorUserCardView extends AphrontTagView {
     return $card;
   }
 
-  private function addItem($icon, $value) {
+  private function addItem($icon, $value, $classes = array()) {
+    $classes[] = 'project-card-item';
+
     $icon = id(new PHUIIconView())
       ->addClass('project-card-item-icon')
       ->setIcon($icon);
+
     $text = phutil_tag(
       'span',
       array(
         'class' => 'project-card-item-text',
       ),
       $value);
-    return phutil_tag_div('project-card-item', array($icon, $text));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      array($icon, $text));
   }
 
 }

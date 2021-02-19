@@ -72,22 +72,40 @@ final class DifferentialReviewersField
       return array();
     }
 
+    $viewer = $this->getViewer();
+
+    PhabricatorPolicyFilterSet::loadHandleViewCapabilities(
+      $viewer,
+      $handles,
+      array($revision));
+
     $all_resigned = true;
     $all_disabled = true;
     $any_reviewers = false;
+    $all_exiled = true;
 
     foreach ($this->getValue() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
+      $handle = $handles[$reviewer_phid];
 
       $any_reviewers = true;
 
-      if (!$handles[$reviewer_phid]->isDisabled()) {
+      if (!$handle->isDisabled()) {
         $all_disabled = false;
       }
 
       if (!$reviewer->isResigned()) {
         $all_resigned = false;
       }
+
+      if (!$handle->hasCapabilities()) {
+        $all_exiled = false;
+      } else {
+        if ($handle->hasViewCapability($revision)) {
+          $all_exiled = false;
+        }
+      }
+
     }
 
     $warnings = array();
@@ -101,6 +119,10 @@ final class DifferentialReviewersField
     } else if ($all_resigned) {
       $warnings[] = pht(
         'This revision needs review, but all reviewers have resigned.');
+    } else if ($all_exiled) {
+      $warnings[] = pht(
+        'This revision needs review, but no reviewers have permission '.
+        'to view it.');
     }
 
     return $warnings;

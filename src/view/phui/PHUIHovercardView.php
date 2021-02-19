@@ -18,6 +18,7 @@ final class PHUIHovercardView extends AphrontTagView {
   private $fields = array();
   private $actions = array();
   private $badges = array();
+  private $isExiled;
 
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -41,6 +42,15 @@ final class PHUIHovercardView extends AphrontTagView {
   public function setDetail($detail) {
     $this->detail = $detail;
     return $this;
+  }
+
+  public function setIsExiled($is_exiled) {
+    $this->isExiled = $is_exiled;
+    return $this;
+  }
+
+  public function getIsExiled() {
+    return $this->isExiled;
   }
 
   public function addField($label, $value) {

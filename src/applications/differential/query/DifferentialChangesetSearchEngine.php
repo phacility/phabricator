@@ -38,11 +38,23 @@ final class DifferentialChangesetSearchEngine
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    if ($map['diffPHIDs']) {
+      $query->withDiffPHIDs($map['diffPHIDs']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Diffs'))
+        ->setKey('diffPHIDs')
+        ->setAliases(array('diff', 'diffs', 'diffPHID'))
+        ->setDescription(
+          pht('Find changesets attached to a particular diff.')),
+    );
   }
 
   protected function getURI($path) {

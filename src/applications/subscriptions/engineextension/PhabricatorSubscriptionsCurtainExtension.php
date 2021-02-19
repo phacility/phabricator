@@ -62,16 +62,29 @@ final class PhabricatorSubscriptionsCurtainExtension
       $handles = $viewer->loadHandles($visible_phids);
     }
 
+    PhabricatorPolicyFilterSet::loadHandleViewCapabilities(
+      $viewer,
+      $handles,
+      array($object));
+
     $ref_list = id(new PHUICurtainObjectRefListView())
       ->setViewer($viewer)
       ->setEmptyMessage(pht('None'));
 
     foreach ($visible_phids as $phid) {
+      $handle = $handles[$phid];
+
       $ref = $ref_list->newObjectRefView()
-        ->setHandle($handles[$phid]);
+        ->setHandle($handle);
 
       if ($phid === $viewer_phid) {
         $ref->setHighlighted(true);
+      }
+
+      if ($handle->hasCapabilities()) {
+        if (!$handle->hasViewCapability($object)) {
+          $ref->setExiled(true);
+        }
       }
     }
 

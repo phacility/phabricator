@@ -109,8 +109,10 @@ final class PhabricatorIndexEngine extends Phobject {
 
     $rows = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T WHERE objectPHID = %s AND extensionKey IN (%Ls)',
-      $table->getTableName(),
+      'SELECT version, extensionKey
+        FROM %R
+        WHERE objectPHID = %s AND extensionKey IN (%Ls)',
+      $table,
       $object_phid,
       $extension_keys);
 
@@ -128,22 +130,35 @@ final class PhabricatorIndexEngine extends Phobject {
     $table = new PhabricatorSearchIndexVersion();
     $conn_w = $table->establishConnection('w');
 
+    $now = PhabricatorTime::getNow();
+
+    // See T13587. For now, this is just a marker to make it easy to reindex
+    // documents if some version of the indexing code is later discovered to
+    // be questionable.
+    $index_version = '2021-02-16-A';
+
     $sql = array();
     foreach ($versions as $key => $version) {
       $sql[] = qsprintf(
         $conn_w,
-        '(%s, %s, %s)',
+        '(%s, %s, %s, %s, %d)',
         $object_phid,
         $key,
-        $version);
+        $version,
+        $index_version,
+        $now);
     }
 
     queryfx(
       $conn_w,
-      'INSERT INTO %T (objectPHID, extensionKey, version)
+      'INSERT INTO %R (objectPHID, extensionKey, version,
+          indexVersion, indexEpoch)
         VALUES %LQ
-        ON DUPLICATE KEY UPDATE version = VALUES(version)',
-      $table->getTableName(),
+        ON DUPLICATE KEY UPDATE
+          version = VALUES(version),
+          indexVersion = VALUES(indexVersion),
+          indexEpoch = VALUES(indexEpoch)',
+      $table,
       $sql);
   }
 

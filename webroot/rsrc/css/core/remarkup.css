@@ -291,11 +291,6 @@ video.phabricator-media {
   color: {$greytext};
 }
 
-.phabricator-remarkup-mention-nopermission .phui-tag-core {
-  background: {$lightgreybackground};
-  color: {$lightgreytext};
-}
-
 .phabricator-remarkup .remarkup-note {
   margin: 16px 0;
   padding: 12px;

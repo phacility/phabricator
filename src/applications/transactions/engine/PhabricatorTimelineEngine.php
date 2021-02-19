@@ -84,6 +84,7 @@ abstract class PhabricatorTimelineEngine
 
     return $view
       ->setViewer($viewer)
+      ->setObject($object)
       ->setObjectPHID($object->getPHID())
       ->setTransactions($xactions);
   }

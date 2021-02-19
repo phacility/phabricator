@@ -531,3 +531,15 @@ a.phui-tag-view:hover.phui-tag-disabled .phui-tag-core {
   color: {$blacktext};
   border-color: {$blacktext};
 }
+
+.phui-tag-exiled .phui-tag-core {
+  border-color: {$lightredborder};
+  color: {$red};
+  background: {$lightredbackground};
+}
+
+
+a.phui-tag-view.phui-tag-exiled:hover
+  .phui-tag-core.phui-tag-color-person {
+  border-color: {$red};
+}

@@ -4,7 +4,8 @@ final class DifferentialChangeset
   extends DifferentialDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $diffID;
   protected $oldFile;
@@ -45,6 +46,7 @@ final class DifferentialChangeset
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'metadata'      => self::SERIALIZATION_JSON,
         'oldProperties' => self::SERIALIZATION_JSON,
@@ -73,6 +75,10 @@ final class DifferentialChangeset
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getPHIDType() {
+    return DifferentialChangesetPHIDType::TYPECONST;
   }
 
   public function getAffectedLineCount() {
@@ -728,6 +734,50 @@ final class DifferentialChangeset
       $this->delete();
 
     $this->saveTransaction();
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('diffPHID')
+        ->setType('phid')
+        ->setDescription(pht('The diff the changeset is attached to.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $diff = $this->getDiff();
+
+    $repository = null;
+    if ($diff) {
+      $revision = $diff->getRevision();
+      if ($revision) {
+        $repository = $revision->getRepository();
+      }
+    }
+
+    $absolute_path = $this->getAbsoluteRepositoryPath($repository, $diff);
+    if (strlen($absolute_path)) {
+      $absolute_path = base64_encode($absolute_path);
+    } else {
+      $absolute_path = null;
+    }
+
+    $display_path = $this->getDisplayFilename();
+
+    return array(
+      'diffPHID' => $diff->getPHID(),
+      'path' => array(
+        'displayPath' => $display_path,
+        'absolutePath.base64' => $absolute_path,
+      ),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 
