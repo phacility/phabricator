@@ -78,7 +78,7 @@ final class DifferentialLineAdjustmentMap extends Phobject {
         // If we're tracing the first line and this block is collapsing,
         // compute the offset from the top of the block.
         if (!$is_end && $this->isInverse) {
-          $offset = 0;
+          $offset = 1;
           $cursor = $line - 1;
           while (isset($nmap[$cursor])) {
             $prev = $nmap[$cursor];

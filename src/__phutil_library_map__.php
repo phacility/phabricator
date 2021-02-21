@@ -6519,7 +6519,7 @@ phutil_register_library_map(array(
     'DarkConsoleXHProfPluginAPI' => 'Phobject',
     'DifferentialAction' => 'Phobject',
     'DifferentialActionEmailCommand' => 'MetaMTAEmailTransactionCommand',
-    'DifferentialAdjustmentMapTestCase' => 'PhutilTestCase',
+    'DifferentialAdjustmentMapTestCase' => 'PhabricatorTestCase',
     'DifferentialAffectedPath' => 'DifferentialDAO',
     'DifferentialAsanaRepresentationField' => 'DifferentialCustomField',
     'DifferentialAuditorsCommitMessageField' => 'DifferentialCommitMessageCustomField',
