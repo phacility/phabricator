@@ -1975,7 +1975,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if ($writable) {
       foreach ($refs as $key => $ref) {
         if (!$ref->isWritable()) {
-          unset($results[$key]);
+          unset($refs[$key]);
         }
       }
 
