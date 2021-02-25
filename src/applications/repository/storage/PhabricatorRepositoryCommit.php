@@ -528,6 +528,12 @@ final class PhabricatorRepositoryCommit
     return $data->getCommitterString();
   }
 
+  public function getCommitMessageForDisplay() {
+    $data = $this->getCommitData();
+    $message = $data->getCommitMessage();
+    return $message;
+  }
+
   public function newCommitRef(PhabricatorUser $viewer) {
     $repository = $this->getRepository();
 
