@@ -116,6 +116,20 @@ final class PhabricatorAccessLogConfigOptions
         ->setLocked(true)
         ->setSummary(pht('SSH log format.'))
         ->setDescription($ssh_desc),
+      $this->newOption('log.ssh-error.path', 'string', null)
+        ->setLocked(true)
+        ->setSummary(pht('SSH error log location.'))
+        ->setDescription(
+          pht(
+            'To enable the Phabricator SSH error log, specify a path. Errors '.
+            'occurring in contexts where Phabricator is serving SSH requests '.
+            'will be written to this log.'.
+            "\n\n".
+            'If not set, no log will be written.'))
+        ->addExample(null, pht('Disable SSH error log.'))
+        ->addExample(
+          '/var/log/phabricator/ssh-error.log',
+          pht('Write SSH error log here.')),
     );
   }
 
