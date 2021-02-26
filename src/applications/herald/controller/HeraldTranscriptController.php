@@ -9,6 +9,12 @@ final class HeraldTranscriptController extends HeraldController {
     return $this->adapter;
   }
 
+  public function buildApplicationMenu() {
+    // Use the menu we build in this controller, not the default menu for
+    // Herald.
+    return null;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
@@ -19,6 +25,13 @@ final class HeraldTranscriptController extends HeraldController {
     if (!$xscript) {
       return new Aphront404Response();
     }
+
+    $view_key = $this->getViewKey($request);
+    if (!$view_key) {
+      return new Aphront404Response();
+    }
+
+    $navigation = $this->newSideNavView($xscript, $view_key);
 
     $object = $xscript->getObject();
 
@@ -57,42 +70,21 @@ final class HeraldTranscriptController extends HeraldController {
       $handles = $this->loadViewerHandles($phids);
       $this->handles = $handles;
 
-      if ($xscript->getDryRun()) {
-        $notice = new PHUIInfoView();
-        $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Dry Run'));
-        $notice->appendChild(
-          pht(
-            'This was a dry run to test Herald rules, '.
-            'no actions were executed.'));
-        $content[] = $notice;
-      }
-
       $warning_panel = $this->buildWarningPanel($xscript);
       $content[] = $warning_panel;
 
-      $content[] = array(
-        $this->buildActionTranscriptPanel($xscript),
-        $this->buildObjectTranscriptPanel($xscript),
-        $this->buildTransactionsTranscriptPanel(
-          $object,
-          $xscript),
-        $this->buildProfilerTranscriptPanel($xscript),
-      );
+      $content[] = $this->newContentView($xscript, $view_key);
     }
 
     $crumbs = id($this->buildApplicationCrumbs())
       ->addTextCrumb(
         pht('Transcripts'),
         $this->getApplicationURI('/transcript/'))
-      ->addTextCrumb($xscript->getID())
+      ->addTextCrumb(pht('Transcript %d', $xscript->getID()))
       ->setBorder(true);
 
-    $title = pht('Transcript: %s', $xscript->getID());
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-file');
+    $title = pht('Herald Transcript %s', $xscript->getID());
+    $header = $this->newHeaderView($xscript, $title);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -101,10 +93,8 @@ final class HeraldTranscriptController extends HeraldController {
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->setNavigation($navigation)
+      ->appendChild($view);
   }
 
   protected function renderConditionTestValue($condition, $handles) {
@@ -234,6 +224,7 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   private function buildActionTranscriptPanel(HeraldTranscript $xscript) {
+    $viewer = $this->getViewer();
     $action_xscript = mgroup($xscript->getApplyTranscripts(), 'getRuleID');
 
     $adapter = $this->getAdapter();
@@ -263,7 +254,9 @@ final class HeraldTranscriptController extends HeraldController {
         ->setHeader($rule_xscript->getRuleName())
         ->setHref($rule_uri);
 
-      if (!$rule_xscript->getResult()) {
+      $rule_result = $rule_xscript->getRuleResult();
+
+      if (!$rule_result->getShouldApplyActions()) {
         $rule_item->setDisabled(true);
       }
 
@@ -279,34 +272,20 @@ final class HeraldTranscriptController extends HeraldController {
           ->setTarget(phutil_tag('strong', array(), pht('Conditions'))));
 
       foreach ($cond_xscripts as $cond_xscript) {
-        if ($cond_xscript->isForbidden()) {
-          $icon = 'fa-ban';
-          $color = 'indigo';
-          $result = pht('Forbidden');
-        } else if ($cond_xscript->getResult()) {
-          $icon = 'fa-check';
-          $color = 'green';
-          $result = pht('Passed');
-        } else {
-          $icon = 'fa-times';
-          $color = 'red';
-          $result = pht('Failed');
-        }
+        $result = $cond_xscript->getResult();
 
-        if ($cond_xscript->getNote()) {
-          $note_text = $cond_xscript->getNote();
-          if ($cond_xscript->isForbidden()) {
-            $note_text = HeraldStateReasons::getExplanation($note_text);
-          }
+        $icon = $result->getIconIcon();
+        $color = $result->getIconColor();
+        $name = $result->getName();
 
-          $note = phutil_tag(
+        $result_details = $result->newDetailsView($viewer);
+        if ($result_details !== null) {
+          $result_details = phutil_tag(
             'div',
             array(
               'class' => 'herald-condition-note',
             ),
-            $note_text);
-        } else {
-          $note = null;
+            $result_details);
         }
 
         // TODO: This is not really translatable and should be driven through
@@ -319,33 +298,33 @@ final class HeraldTranscriptController extends HeraldController {
 
         $cond_item = id(new PHUIStatusItemView())
           ->setIcon($icon, $color)
-          ->setTarget($result)
-          ->setNote(array($explanation, $note));
+          ->setTarget($name)
+          ->setNote(array($explanation, $result_details));
 
         $cond_list->addItem($cond_item);
       }
 
-      if ($rule_xscript->isForbidden()) {
-        $last_icon = 'fa-ban';
-        $last_color = 'indigo';
-        $last_result = pht('Forbidden');
-        $last_note = pht('Object state prevented rule evaluation.');
-      } else if ($rule_xscript->getResult()) {
-        $last_icon = 'fa-check-circle';
-        $last_color = 'green';
-        $last_result = pht('Passed');
-        $last_note = pht('Rule passed.');
-      } else {
-        $last_icon = 'fa-times-circle';
-        $last_color = 'red';
-        $last_result = pht('Failed');
-        $last_note = pht('Rule failed.');
+      $rule_result = $rule_xscript->getRuleResult();
+
+      $last_icon = $rule_result->getIconIcon();
+      $last_color = $rule_result->getIconColor();
+      $last_result = $rule_result->getName();
+      $last_note = $rule_result->getDescription();
+
+      $last_details = $rule_result->newDetailsView($viewer);
+      if ($last_details !== null) {
+        $last_details = phutil_tag(
+          'div',
+          array(
+            'class' => 'herald-condition-note',
+          ),
+          $last_details);
       }
 
       $cond_last = id(new PHUIStatusItemView())
         ->setIcon($last_icon, $last_color)
         ->setTarget(phutil_tag('strong', array(), $last_result))
-        ->setNote($last_note);
+        ->setNote(array($last_note, $last_details));
       $cond_list->addItem($cond_last);
 
       $cond_box = id(new PHUIBoxView())
@@ -354,11 +333,10 @@ final class HeraldTranscriptController extends HeraldController {
 
       $rule_item->appendChild($cond_box);
 
-      if (!$rule_xscript->getResult()) {
-        // If the rule didn't pass, don't generate an action transcript since
-        // actions didn't apply.
-        continue;
-      }
+      // Not all rules will have any action transcripts, but we show them
+      // in general because they may have relevant information even when
+      // rules did not take actions. In particular, state-based actions may
+      // forbid rules from matching.
 
       $cond_box->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM);
 
@@ -443,7 +421,22 @@ final class HeraldTranscriptController extends HeraldController {
       ->setHeaderText(pht('Rule Transcript'))
       ->appendChild($rule_list);
 
-    return $box;
+    $content = array();
+
+    if ($xscript->getDryRun()) {
+      $notice = new PHUIInfoView();
+      $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $notice->setTitle(pht('Dry Run'));
+      $notice->appendChild(
+        pht(
+          'This was a dry run to test Herald rules, '.
+          'no actions were executed.'));
+      $content[] = $notice;
+    }
+
+    $content[] = $box;
+
+    return $content;
   }
 
   private function buildObjectTranscriptPanel(HeraldTranscript $xscript) {
@@ -520,35 +513,15 @@ final class HeraldTranscriptController extends HeraldController {
     return $box;
   }
 
-  private function buildTransactionsTranscriptPanel(
-    $object,
-    HeraldTranscript $xscript) {
+  private function buildTransactionsTranscriptPanel(HeraldTranscript $xscript) {
     $viewer = $this->getViewer();
 
-    $object_xscript = $xscript->getObjectTranscript();
-
-    $xaction_phids = $object_xscript->getAppliedTransactionPHIDs();
-
-    // If the value is "null", this is an older transcript or this adapter
-    // does not use transactions. We render nothing.
-    //
-    // If the value is "array()", this is a modern transcript which uses
-    // transactions, there just weren't any applied. Below, we'll render a
-    // "No Transactions Applied" state.
-    if ($xaction_phids === null) {
-      return null;
-    }
-
-    // If this object doesn't implement the right interface, we won't be
-    // able to load the transactions. Just bail.
-    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
-      return null;
-    }
-
-    $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
-      $object);
+    $xaction_phids = $this->getTranscriptTransactionPHIDs($xscript);
 
     if ($xaction_phids) {
+      $object = $xscript->getObject();
+      $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+        $object);
       $xactions = $query
         ->setViewer($viewer)
         ->withPHIDs($xaction_phids)
@@ -702,6 +675,130 @@ final class HeraldTranscriptController extends HeraldController {
       ->setTable($table_view);
 
     return $box_view;
+  }
+
+  private function getViewKey(AphrontRequest $request) {
+    $view_key = $request->getURIData('view');
+
+    if ($view_key === null) {
+      return 'rules';
+    }
+
+    switch ($view_key) {
+      case 'fields':
+      case 'xactions':
+      case 'profile':
+        return $view_key;
+      default:
+        return null;
+    }
+  }
+
+  private function newSideNavView(
+    HeraldTranscript $xscript,
+    $view_key) {
+
+    $base_uri = urisprintf(
+      'transcript/%d/',
+      $xscript->getID());
+
+    $base_uri = $this->getApplicationURI($base_uri);
+    $base_uri = new PhutilURI($base_uri);
+
+    $nav = id(new AphrontSideNavFilterView())
+      ->setBaseURI($base_uri);
+
+    $nav->newLink('rules')
+      ->setHref($base_uri)
+      ->setName(pht('Rules'))
+      ->setIcon('fa-list-ul');
+
+    $nav->newLink('fields')
+      ->setName(pht('Field Values'))
+      ->setIcon('fa-file-text-o');
+
+    $xaction_phids = $this->getTranscriptTransactionPHIDs($xscript);
+    $has_xactions = (bool)$xaction_phids;
+
+    $nav->newLink('xactions')
+      ->setName(pht('Transactions'))
+      ->setIcon('fa-forward')
+      ->setDisabled(!$has_xactions);
+
+    $nav->newLink('profile')
+      ->setName(pht('Profiler'))
+      ->setIcon('fa-tachometer');
+
+    $nav->selectFilter($view_key);
+
+    return $nav;
+  }
+
+  private function newContentView(
+    HeraldTranscript $xscript,
+    $view_key) {
+
+    switch ($view_key) {
+      case 'rules':
+        $content = $this->buildActionTranscriptPanel($xscript);
+        break;
+      case 'fields':
+        $content = $this->buildObjectTranscriptPanel($xscript);
+        break;
+      case 'xactions':
+        $content = $this->buildTransactionsTranscriptPanel($xscript);
+        break;
+      case 'profile':
+        $content = $this->buildProfilerTranscriptPanel($xscript);
+        break;
+      default:
+        throw new Exception(pht('Unknown view key "%s".', $view_key));
+    }
+
+    return $content;
+  }
+
+  private function getTranscriptTransactionPHIDs(HeraldTranscript $xscript) {
+
+    $object_xscript = $xscript->getObjectTranscript();
+    $xaction_phids = $object_xscript->getAppliedTransactionPHIDs();
+
+    // If the value is "null", this is an older transcript or this adapter
+    // does not use transactions.
+    //
+    // (If the value is "array()", this is a modern transcript which uses
+    // transactions, there just weren't any applied.)
+    if ($xaction_phids === null) {
+      return array();
+    }
+
+    $object = $xscript->getObject();
+
+    // If this object doesn't implement the right interface, we won't be
+    // able to load the transactions.
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      return array();
+    }
+
+    return $xaction_phids;
+  }
+
+  private function newHeaderView(HeraldTranscript $xscript, $title) {
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-list-ul');
+
+    if ($xscript->getDryRun()) {
+      $dry_run_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setColor(PHUITagView::COLOR_VIOLET)
+        ->setName(pht('Dry Run'))
+        ->setIcon('fa-exclamation-triangle');
+
+      $header->addTag($dry_run_tag);
+    }
+
+    return $header;
   }
 
 }

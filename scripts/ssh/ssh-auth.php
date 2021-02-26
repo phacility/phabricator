@@ -4,6 +4,11 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/init/init-script.php';
 
+$error_log = id(new PhutilErrorLog())
+  ->setLogName(pht('SSH Error Log'))
+  ->setLogPath(PhabricatorEnv::getEnvConfig('log.ssh-error.path'))
+  ->activateLog();
+
 // TODO: For now, this is using "parseParital()", not "parse()". This allows
 // the script to accept (and ignore) additional arguments. This preserves
 // backward compatibility until installs have time to migrate to the new

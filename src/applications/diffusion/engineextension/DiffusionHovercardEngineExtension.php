@@ -48,7 +48,20 @@ final class DiffusionHovercardEngineExtension
     $handles = $viewer->loadHandles($phids);
 
     $hovercard->setTitle($handle->getName());
-    $hovercard->setDetail($commit->getSummary());
+
+    // See T13620. Use a longer slice of the message than the "summary" here,
+    // since we have at least a few lines of room in the UI.
+    $commit_message = $commit->getCommitMessageForDisplay();
+
+    $message_limit = 512;
+
+    $short_message = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes($message_limit * 4)
+      ->setMaximumGlyphs($message_limit)
+      ->truncateString($commit_message);
+    $short_message = phutil_escape_html_newlines($short_message);
+
+    $hovercard->setDetail($short_message);
 
     $repository = $handles[$repository_phid]->renderLink();
     $hovercard->addField(pht('Repository'), $repository);
@@ -64,7 +77,7 @@ final class DiffusionHovercardEngineExtension
     }
 
     $date = phabricator_date($commit->getEpoch(), $viewer);
-    $hovercard->addField(pht('Date'), $date);
+    $hovercard->addField(pht('Commit Date'), $date);
 
     if (!$commit->isAuditStatusNoAudit()) {
       $status = $commit->getAuditStatusObject();

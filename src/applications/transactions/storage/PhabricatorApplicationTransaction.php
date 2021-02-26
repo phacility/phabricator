@@ -408,7 +408,7 @@ abstract class PhabricatorApplicationTransaction
 
   public function renderHandleLink($phid) {
     if ($this->renderingTarget == self::TARGET_HTML) {
-      return $this->getHandle($phid)->renderLink();
+      return $this->getHandle($phid)->renderHovercardLink();
     } else {
       return $this->getHandle($phid)->getLinkName();
     }

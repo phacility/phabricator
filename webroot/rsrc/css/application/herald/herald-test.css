@@ -4,6 +4,8 @@
 
 .herald-condition-note {
   color: {$red};
+  padding: 4px 0;
+  margin: 4px 0 8px;
 }
 
 textarea.herald-field-value-transcript {

@@ -4,7 +4,12 @@
 $ssh_start_time = microtime(true);
 
 $root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
+require_once $root.'/scripts/init/init-script.php';
+
+$error_log = id(new PhutilErrorLog())
+  ->setLogName(pht('SSH Error Log'))
+  ->setLogPath(PhabricatorEnv::getEnvConfig('log.ssh-error.path'))
+  ->activateLog();
 
 $ssh_log = PhabricatorSSHLog::getLog();
 

@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialAdjustmentMapTestCase extends PhutilTestCase {
+final class DifferentialAdjustmentMapTestCase
+  extends PhabricatorTestCase {
 
   public function testBasicMaps() {
     $change_map = array(
@@ -61,7 +62,6 @@ final class DifferentialAdjustmentMapTestCase extends PhutilTestCase {
       $reduced_map,
       DifferentialLineAdjustmentMap::newFromHunks($hunks)->getMap());
   }
-
 
   public function testInverseMaps() {
     $change_map = array(
@@ -221,6 +221,45 @@ final class DifferentialAdjustmentMapTestCase extends PhutilTestCase {
     $this->assertEqual(3, $map->getFinalOffset());
   }
 
+  public function testUnchangedUpdate() {
+    $diff1 = $this->loadHunks('insert.diff');
+    $diff2 = $this->loadHunks('insert.diff');
+
+    $map = DifferentialLineAdjustmentMap::newInverseMap(
+      DifferentialLineAdjustmentMap::newFromHunks($diff1));
+
+    $map->addMapToChain(
+        DifferentialLineAdjustmentMap::newFromHunks($diff2));
+
+    $actual = array();
+    for ($ii = 1; $ii <= 16; $ii++) {
+      $actual[$ii] = array(
+        $map->mapLine($ii, false),
+        $map->mapLine($ii, true),
+      );
+    }
+
+    $expect = array(
+      1 => array(array(false, false, 1), array(false, false, 1)),
+      2 => array(array(false, false, 2), array(false, false, 2)),
+      3 => array(array(false, false, 3), array(false, false, 3)),
+      4 => array(array(false, false, 4), array(false, false, 4)),
+      5 => array(array(false, false, 5), array(false, false, 5)),
+      6 => array(array(false, false, 6), array(false, false, 6)),
+      7 => array(array(false, false, 7), array(false, false, 7)),
+      8 => array(array(false, false, 8), array(false, false, 8)),
+      9 => array(array(false, false, 9), array(false, false, 9)),
+      10 => array(array(false, false, 10), array(false, false, 13)),
+      11 => array(array(false, 1, 10), array(false, false, 14)),
+      12 => array(array(false, 2, 10), array(false, false, 14)),
+      13 => array(array(false, 3, 10), array(false, false, 14)),
+      14 => array(array(false, false, 14), array(false, false, 14)),
+      15 => array(array(false, false, 15), array(false, false, 15)),
+      16 => array(array(false, false, 16), array(false, false, 16)),
+    );
+
+    $this->assertEqual($expect, $actual);
+  }
 
   public function testChainMaps() {
     // This test simulates porting inlines forward across a rebase.
@@ -258,9 +297,9 @@ final class DifferentialAdjustmentMapTestCase extends PhutilTestCase {
         5 => array(array(false, false, 3), array(false, false, 3)),
         6 => array(array(false, false, 4), array(false, false, 4)),
         7 => array(array(false, false, 5), array(false, false, 8)),
-        8 => array(array(false, 0, 5), array(false, false, 9)),
-        9 => array(array(false, 1, 5), array(false, false, 9)),
-        10 => array(array(false, 2, 5), array(false, false, 9)),
+        8 => array(array(false, 1, 5), array(false, false, 9)),
+        9 => array(array(false, 2, 5), array(false, false, 9)),
+        10 => array(array(false, 3, 5), array(false, false, 9)),
         11 => array(array(false, false, 9), array(false, false, 9)),
         12 => array(array(false, false, 10), array(false, false, 10)),
         13 => array(array(false, false, 11), array(false, false, 11)),

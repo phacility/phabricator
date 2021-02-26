@@ -46,6 +46,7 @@ final class DiffusionRepositoryStorageManagementPanel
     return array(
       $this->buildStorageStatusPanel(),
       $this->buildClusterStatusPanel(),
+      $this->buildRefsStatusPanels(),
     );
   }
 
@@ -249,6 +250,132 @@ final class DiffusionRepositoryStorageManagementPanel
 
     return $this->newBox(pht('Cluster Status'), $table);
   }
+
+  private function buildRefsStatusPanels() {
+    $repository = $this->getRepository();
+
+    $service_phid = $repository->getAlmanacServicePHID();
+    if (!$service_phid) {
+      // If this repository isn't clustered, don't bother rendering anything.
+      // There are enough other context clues that another empty panel isn't
+      // useful.
+      return;
+    }
+
+    $all_protocols = array(
+      'http',
+      'https',
+      'ssh',
+    );
+
+    $readable_panel = $this->buildRefsStatusPanel(
+      pht('Readable Service Refs'),
+      array(
+        'neverProxy' => false,
+        'protocols' => $all_protocols,
+        'writable' => false,
+      ));
+
+    $writable_panel = $this->buildRefsStatusPanel(
+      pht('Writable Service Refs'),
+      array(
+        'neverProxy' => false,
+        'protocols' => $all_protocols,
+        'writable' => true,
+      ));
+
+    return array(
+      $readable_panel,
+      $writable_panel,
+    );
+  }
+
+  private function buildRefsStatusPanel(
+    $title,
+    $options) {
+
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+
+    $caught = null;
+    try {
+      $refs = $repository->getAlmanacServiceRefs($viewer, $options);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+
+    $info_view = null;
+    if ($caught) {
+      $refs = array();
+      $info_view = id(new PHUIInfoView())
+        ->setErrors(
+          array(
+            phutil_escape_html_newlines($caught->getMessage()),
+          ));
+    }
+
+    $phids = array();
+    foreach ($refs as $ref) {
+      $phids[] = $ref->getDevicePHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    $icon_writable = id(new PHUIIconView())
+      ->setIcon('fa-pencil', 'green');
+
+    $icon_unwritable = id(new PHUIIconView())
+      ->setIcon('fa-times', 'grey');
+
+    $rows = array();
+    foreach ($refs as $ref) {
+      $device_phid = $ref->getDevicePHID();
+      $device_handle = $handles[$device_phid];
+
+      if ($ref->isWritable()) {
+        $writable_icon = $icon_writable;
+        $writable_text = pht('Read/Write');
+      } else {
+        $writable_icon = $icon_unwritable;
+        $writable_text = pht('Read Only');
+      }
+
+      $rows[] = array(
+        $device_handle->renderLink(),
+        $ref->getURI(),
+        $writable_icon,
+        $writable_text,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No repository service refs available.'))
+      ->setHeaders(
+        array(
+          pht('Device'),
+          pht('Internal Service URI'),
+          null,
+          pht('I/O'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'wide',
+          'icon',
+          null,
+        ));
+
+    $box_view = $this->newBox($title, $table);
+
+    if ($info_view) {
+      $box_view->setInfoView($info_view);
+    }
+
+    return $box_view;
+  }
+
 
   private function isDisabledGroup(array $binding_group) {
     assert_instances_of($binding_group, 'AlmanacBinding');

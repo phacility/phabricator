@@ -7,10 +7,17 @@ final class HeraldConditionTranscript extends Phobject {
   protected $fieldName;
   protected $condition;
   protected $testValue;
-  protected $note;
-  protected $result;
+  protected $resultMap;
 
-  const RESULT_FORBIDDEN = 'forbidden';
+  // See T13586. Older versions of this record stored a boolean true, boolean
+  // false, or the string "forbidden" in the "$result" field. They stored a
+  // human-readable English-language message or a state code in the "$note"
+  // field.
+
+  // The modern record does not use either field.
+
+  protected $result;
+  protected $note;
 
   public function setRuleID($rule_id) {
     $this->ruleID = $rule_id;
@@ -57,26 +64,39 @@ final class HeraldConditionTranscript extends Phobject {
     return $this->testValue;
   }
 
-  public function setNote($note) {
-    $this->note = $note;
-    return $this;
-  }
-
-  public function getNote() {
-    return $this->note;
-  }
-
-  public function setResult($result) {
-    $this->result = $result;
+  public function setResult(HeraldConditionResult $result) {
+    $this->resultMap = $result->newResultMap();
     return $this;
   }
 
   public function getResult() {
-    return $this->result;
-  }
+    $map = $this->resultMap;
 
-  public function isForbidden() {
-    return ($this->getResult() === self::RESULT_FORBIDDEN);
+    if (is_array($map)) {
+      $result = HeraldConditionResult::newFromResultMap($map);
+    } else {
+      $legacy_result = $this->result;
+
+      $result_data = array();
+
+      if ($legacy_result === 'forbidden') {
+        $result_code = HeraldConditionResult::RESULT_OBJECT_STATE;
+        $result_data = array(
+          'reason' => $this->note,
+        );
+      } else if ($legacy_result === true) {
+        $result_code = HeraldConditionResult::RESULT_MATCHED;
+      } else if ($legacy_result === false) {
+        $result_code = HeraldConditionResult::RESULT_FAILED;
+      } else {
+        $result_code = HeraldConditionResult::RESULT_UNKNOWN;
+      }
+
+      $result = HeraldConditionResult::newFromResultCode($result_code)
+        ->setResultData($result_data);
+    }
+
+    return $result;
   }
 
 }
