@@ -37,8 +37,7 @@ final class PhabricatorGlobalLockTestCase
   }
 
   public function testConnectionPoolWithSpecificConnection() {
-    $conn = id(new HarbormasterScratchTable())
-      ->establishConnection('w');
+    $conn = PhabricatorGlobalLock::newConnection();
 
     PhabricatorGlobalLock::clearConnectionPool();
 
@@ -86,8 +85,7 @@ final class PhabricatorGlobalLockTestCase
   }
 
   public function testExternalConnectionMutationScope() {
-    $conn = id(new HarbormasterScratchTable())
-      ->establishConnection('w');
+    $conn = PhabricatorGlobalLock::newConnection();
 
     $lock_name = $this->newLockName();
     $lock = PhabricatorGlobalLock::newLock($lock_name);
@@ -110,8 +108,7 @@ final class PhabricatorGlobalLockTestCase
   }
 
   public function testMultipleLocks() {
-    $conn = id(new HarbormasterScratchTable())
-      ->establishConnection('w');
+    $conn = PhabricatorGlobalLock::newConnection();
 
     PhabricatorGlobalLock::clearConnectionPool();
 
@@ -143,8 +140,88 @@ final class PhabricatorGlobalLockTestCase
       pht('Expect multiple locks on the same connection to fail.'));
   }
 
+  public function testPoolReleaseOnFailure() {
+    $conn = PhabricatorGlobalLock::newConnection();
+    $lock_name = $this->newLockName();
+
+    PhabricatorGlobalLock::clearConnectionPool();
+
+    $this->assertEqual(
+      0,
+      PhabricatorGlobalLock::getConnectionPoolSize(),
+      pht('Clear Connection Pool'));
+
+    $lock = PhabricatorGlobalLock::newLock($lock_name);
+
+    // NOTE: We're cheating here, since there's a global registry of locks
+    // for the process that we have to bypass. In the real world, this lock
+    // would have to be held by some external process. To simplify this
+    // test case, just use a raw "GET_LOCK()" call to hold the lock.
+
+    $raw_conn = PhabricatorGlobalLock::newConnection();
+    $raw_name = $lock->getName();
+
+    $row = queryfx_one(
+      $raw_conn,
+      'SELECT GET_LOCK(%s, %f)',
+      $raw_name,
+      0);
+    $this->assertTrue((bool)head($row), pht('Establish Raw Lock'));
+
+    $this->assertEqual(
+      0,
+      PhabricatorGlobalLock::getConnectionPoolSize(),
+      pht('Connection Pool with Held Lock'));
+
+    // We expect this sequence to establish a new connection, fail to acquire
+    // the lock, then put the connection in the connection pool. After the
+    // first cycle, the connection should be reused.
+
+    for ($ii = 0; $ii < 3; $ii++) {
+      $this->tryHeldLock($lock_name);
+      $this->assertEqual(
+        1,
+        PhabricatorGlobalLock::getConnectionPoolSize(),
+        pht('Connection Pool After Lock Failure'));
+    }
+
+    PhabricatorGlobalLock::clearConnectionPool();
+
+    // Now, do the same thing with an external connection. This connection
+    // should not be put into the pool! See T13627.
+
+    for ($ii = 0; $ii < 3; $ii++) {
+      $this->tryHeldLock($lock_name, $conn);
+      $this->assertEqual(
+        0,
+        PhabricatorGlobalLock::getConnectionPoolSize(),
+        pht('Connection Pool After External Lock Failure'));
+    }
+  }
+
   private function newLockName() {
     return 'testlock-'.Filesystem::readRandomCharacters(16);
   }
+
+  private function tryHeldLock(
+    $lock_name,
+    AphrontDatabaseConnection $conn = null) {
+
+    $lock = PhabricatorGlobalLock::newLock($lock_name);
+
+    if ($conn) {
+      $lock->setExternalConnection($conn);
+    }
+
+    $caught = null;
+    try {
+      $lock->lock(0);
+    } catch (PhutilLockException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue($caught instanceof PhutilLockException);
+  }
+
 
 }
