@@ -109,6 +109,40 @@ final class PhabricatorGlobalLockTestCase
       pht('Changing connection while locked is forbidden.'));
   }
 
+  public function testMultipleLocks() {
+    $conn = id(new HarbormasterScratchTable())
+      ->establishConnection('w');
+
+    PhabricatorGlobalLock::clearConnectionPool();
+
+    $lock_name_a = $this->newLockName();
+    $lock_name_b = $this->newLockName();
+
+    $lock_a = PhabricatorGlobalLock::newLock($lock_name_a);
+    $lock_a->setExternalConnection($conn);
+
+    $lock_b = PhabricatorGlobalLock::newLock($lock_name_b);
+    $lock_b->setExternalConnection($conn);
+
+    $lock_a->lock();
+
+    $caught = null;
+    try {
+      $lock_b->lock();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+
+    // See T13627. The lock infrastructure must forbid this because it does
+    // not work in versions of MySQL older than 5.7.
+
+    $this->assertTrue(
+      ($caught instanceof Exception),
+      pht('Expect multiple locks on the same connection to fail.'));
+  }
+
   private function newLockName() {
     return 'testlock-'.Filesystem::readRandomCharacters(16);
   }
