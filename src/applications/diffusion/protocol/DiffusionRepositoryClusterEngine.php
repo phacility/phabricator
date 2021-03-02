@@ -311,7 +311,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     $write_lock = PhabricatorRepositoryWorkingCopyVersion::getWriteLock(
       $repository_phid);
 
-    $write_lock->useSpecificConnection($locked_connection);
+    $write_lock->setExternalConnection($locked_connection);
 
     $this->logLine(
       pht(
