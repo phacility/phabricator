@@ -149,6 +149,20 @@ final class PhabricatorGlobalLock extends PhutilLock {
       $conn = $dao->establishConnection('w', $force_new = true);
     }
 
+    // See T13627. We must never hold more than one lock per connection, so
+    // make sure this connection has no existing locks. (Normally, we should
+    // only be able to get here if callers explicitly provide the same external
+    // connection to multiple locks.)
+
+    if ($conn->isHoldingAnyLock()) {
+      throw new Exception(
+        pht(
+          'Unable to establish lock on connection: this connection is '.
+          'already holding a lock. Acquiring a second lock on the same '.
+          'connection would release the first lock in MySQL versions '.
+          'older than 5.7.'));
+    }
+
     // NOTE: Since MySQL will disconnect us if we're idle for too long, we set
     // the wait_timeout to an enormous value, to allow us to hold the
     // connection open indefinitely (or, at least, for 24 days).
@@ -170,7 +184,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
       // is still good. We're done with it, so add it to the pool, just as we
       // would if we were releasing the lock.
 
-      // If we don't  do this, we may establish a huge number of connections
+      // If we don't do this, we may establish a huge number of connections
       // very rapidly if many workers try to acquire a lock at once. For
       // example, this can happen if there are a large number of webhook tasks
       // in the queue.
