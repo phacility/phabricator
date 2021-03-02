@@ -118,6 +118,28 @@ final class PhabricatorGlobalLock extends PhutilLock {
     self::$pool = array();
   }
 
+  public static function newConnection() {
+    // NOTE: Use of the "repository" database is somewhat arbitrary, mostly
+    // because the first client of locks was the repository daemons.
+
+    // We must always use the same database for all locks, because different
+    // databases may be on different hosts if the database is partitioned.
+
+    // However, we don't access any tables so we could use any valid database.
+    // We could build a database-free connection instead, but that's kind of
+    // messy and unusual.
+
+    $dao = new PhabricatorRepository();
+
+    // NOTE: Using "force_new" to make sure each lock is on its own connection.
+
+    // See T13627. This is critically important in versions of MySQL older
+    // than MySQL 5.7, because they can not hold more than one lock per
+    // connection simultaneously.
+
+    return $dao->establishConnection('w', $force_new = true);
+  }
+
 /* -(  Implementation  )----------------------------------------------------- */
 
   protected function doLock($wait) {
@@ -135,18 +157,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
     }
 
     if (!$conn) {
-      // NOTE: Using the 'repository' database somewhat arbitrarily, mostly
-      // because the first client of locks is the repository daemons. We must
-      // always use the same database for all locks, but don't access any
-      // tables so we could use any valid database. We could build a
-      // database-free connection instead, but that's kind of messy and we
-      // might forget about it in the future if we vertically partition the
-      // application.
-      $dao = new PhabricatorRepository();
-
-      // NOTE: Using "force_new" to make sure each lock is on its own
-      // connection.
-      $conn = $dao->establishConnection('w', $force_new = true);
+      $conn = self::newConnection();
     }
 
     // See T13627. We must never hold more than one lock per connection, so
@@ -189,7 +200,12 @@ final class PhabricatorGlobalLock extends PhutilLock {
       // example, this can happen if there are a large number of webhook tasks
       // in the queue.
 
-      self::$pool[] = $conn;
+      // See T13627. If this is an external connection, don't put it into
+      // the shared connection pool.
+
+      if (!$this->externalConnection) {
+        self::$pool[] = $conn;
+      }
 
       throw id(new PhutilLockException($lock_name))
         ->setHint($this->newHint($lock_name, $wait));
