@@ -54,7 +54,7 @@ final class PhabricatorGlobalLockTestCase
 
     $lock_name = $this->newLockName();
     $lock = PhabricatorGlobalLock::newLock($lock_name);
-    $lock->useSpecificConnection($conn);
+    $lock->setExternalConnection($conn);
     $lock->lock();
 
     $this->assertEqual(
@@ -83,6 +83,30 @@ final class PhabricatorGlobalLockTestCase
       pht('Specific Connection, No Lock'));
 
     PhabricatorGlobalLock::clearConnectionPool();
+  }
+
+  public function testExternalConnectionMutationScope() {
+    $conn = id(new HarbormasterScratchTable())
+      ->establishConnection('w');
+
+    $lock_name = $this->newLockName();
+    $lock = PhabricatorGlobalLock::newLock($lock_name);
+    $lock->lock();
+
+    $caught = null;
+    try {
+      $lock->setExternalConnection($conn);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    } catch (Throwable $ex) {
+      $caught = $ex;
+    }
+
+    $lock->unlock();
+
+    $this->assertTrue(
+      ($caught instanceof Exception),
+      pht('Changing connection while locked is forbidden.'));
   }
 
   private function newLockName() {

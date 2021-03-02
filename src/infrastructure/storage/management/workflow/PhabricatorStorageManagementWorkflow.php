@@ -1229,7 +1229,7 @@ abstract class PhabricatorStorageManagementWorkflow
     // log table yet, or may need to adjust it.
 
     return PhabricatorGlobalLock::newLock('adjust', $parameters)
-      ->useSpecificConnection($api->getConn(null))
+      ->setExternalConnection($api->getConn(null))
       ->setDisableLogging(true)
       ->lock();
   }

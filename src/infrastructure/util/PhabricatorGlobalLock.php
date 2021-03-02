@@ -91,8 +91,13 @@ final class PhabricatorGlobalLock extends PhutilLock {
    * @param  AphrontDatabaseConnection
    * @return this
    */
-  public function useSpecificConnection(AphrontDatabaseConnection $conn) {
-    $this->conn = $conn;
+  public function setExternalConnection(AphrontDatabaseConnection $conn) {
+    if ($this->conn) {
+      throw new Exception(
+        pht(
+          'Lock is already held, and must be released before the '.
+          'connection may be changed.'));
+    }
     $this->externalConnection = $conn;
     return $this;
   }
@@ -117,6 +122,12 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
   protected function doLock($wait) {
     $conn = $this->conn;
+
+    if (!$conn) {
+      if ($this->externalConnection) {
+        $conn = $this->externalConnection;
+      }
+    }
 
     if (!$conn) {
       // Try to reuse a connection from the connection pool.
