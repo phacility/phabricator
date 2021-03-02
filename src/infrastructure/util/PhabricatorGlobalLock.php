@@ -30,7 +30,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
   private $parameters;
   private $conn;
-  private $isExternalConnection = false;
+  private $externalConnection;
   private $log;
   private $disableLogging;
 
@@ -93,7 +93,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
    */
   public function useSpecificConnection(AphrontDatabaseConnection $conn) {
     $this->conn = $conn;
-    $this->isExternalConnection = true;
+    $this->externalConnection = $conn;
     return $this;
   }
 
@@ -102,6 +102,16 @@ final class PhabricatorGlobalLock extends PhutilLock {
     return $this;
   }
 
+
+/* -(  Connection Pool  )---------------------------------------------------- */
+
+  public static function getConnectionPoolSize() {
+    return count(self::$pool);
+  }
+
+  public static function clearConnectionPool() {
+    self::$pool = array();
+  }
 
 /* -(  Implementation  )----------------------------------------------------- */
 
@@ -201,9 +211,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
     }
 
     $this->conn = null;
-    $this->isExternalConnection = false;
 
-    if (!$this->isExternalConnection) {
+    if (!$this->externalConnection) {
       $conn->close();
       self::$pool[] = $conn;
     }
