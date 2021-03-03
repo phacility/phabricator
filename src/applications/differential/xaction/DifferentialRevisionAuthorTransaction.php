@@ -95,10 +95,20 @@ final class DifferentialRevisionAuthorTransaction
     }
 
     if ($is_foist) {
-      return pht(
-        '%s foisted this revision upon %s.',
-        $this->renderAuthor(),
-        $this->renderNewHandle());
+      if ($new_phid) {
+        return pht(
+          '%s foisted this revision upon %s.',
+          $this->renderAuthor(),
+          $this->renderNewHandle());
+      } else {
+
+        // This isn't a valid transaction that can be applied, but happens in
+        // the preview if you temporarily delete the tokenizer value.
+
+        return pht(
+          '%s foisted this revision upon...',
+          $this->renderAuthor());
+      }
     }
 
     return pht(
