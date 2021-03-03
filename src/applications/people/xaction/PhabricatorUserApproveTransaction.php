@@ -71,7 +71,10 @@ final class PhabricatorUserApproveTransaction
         continue;
       }
 
-      if (!$actor->getIsAdmin()) {
+      $is_admin = $actor->getIsAdmin();
+      $is_omnipotent = $actor->isOmnipotent();
+
+      if (!$is_admin && !$is_omnipotent) {
         $errors[] = $this->newInvalidError(
           pht('You must be an administrator to approve users.'));
       }
