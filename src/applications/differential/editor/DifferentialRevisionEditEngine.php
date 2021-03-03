@@ -176,6 +176,23 @@ final class DifferentialRevisionEditEngine
       ->setConduitTypeDescription(pht('New revision title.'))
       ->setValue($object->getTitle());
 
+    $author_field = id(new PhabricatorDatasourceEditField())
+      ->setKey(DifferentialRevisionAuthorTransaction::EDITKEY)
+      ->setLabel(pht('Author'))
+      ->setDatasource(new PhabricatorPeopleDatasource())
+      ->setTransactionType(
+        DifferentialRevisionAuthorTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Foist this revision upon someone else.'))
+      ->setConduitDescription(pht('Foist this revision upon another user.'))
+      ->setConduitTypeDescription(pht('New author.'))
+      ->setSingleValue($object->getAuthorPHID());
+
+    if ($viewer->getPHID() === $object->getAuthorPHID()) {
+      $author_field->setCommentActionLabel(pht('Foist Upon'));
+    }
+
+    $fields[] = $author_field;
+
     $fields[] = id(new PhabricatorRemarkupEditField())
       ->setKey(DifferentialRevisionSummaryTransaction::EDITKEY)
       ->setLabel(pht('Summary'))

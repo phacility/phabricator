@@ -198,7 +198,7 @@ final class DifferentialTransactionEditor
         ->setNewValue($want_downgrade);
     }
 
-    $is_commandeer = false;
+    $new_author_phid = null;
     switch ($xaction->getTransactionType()) {
       case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
         if ($this->getIsCloseByCommit()) {
@@ -239,12 +239,22 @@ final class DifferentialTransactionEditor
         break;
 
       case DifferentialRevisionCommandeerTransaction::TRANSACTIONTYPE:
-        $is_commandeer = true;
+        $new_author_phid = $actor_phid;
         break;
+
+      case DifferentialRevisionAuthorTransaction::TRANSACTIONTYPE:
+        $new_author_phid = $xaction->getNewValue();
+        break;
+
     }
 
-    if ($is_commandeer) {
-      $results[] = $this->newCommandeerReviewerTransaction($object);
+    if ($new_author_phid) {
+      $swap_xaction = $this->newSwapReviewersTransaction(
+        $object,
+        $new_author_phid);
+      if ($swap_xaction) {
+        $results[] = $swap_xaction;
+      }
     }
 
     if (!$this->didExpandInlineState) {
@@ -1472,21 +1482,25 @@ final class DifferentialTransactionEditor
     return $this;
   }
 
-  private function newCommandeerReviewerTransaction(
-    DifferentialRevision $revision) {
+  private function newSwapReviewersTransaction(
+    DifferentialRevision $revision,
+    $new_author_phid) {
 
-    $actor_phid = $this->getActingAsPHID();
-    $owner_phid = $revision->getAuthorPHID();
+    $old_author_phid = $revision->getAuthorPHID();
 
-    // If the user is commandeering, add the previous owner as a
-    // reviewer and remove the actor.
+    if ($old_author_phid === $new_author_phid) {
+      return;
+    }
+
+    // If the revision is changing authorship, add the previous author as a
+    // reviewer and remove the new author.
 
     $edits = array(
       '-' => array(
-        $actor_phid,
+        $new_author_phid,
       ),
       '+' => array(
-        $owner_phid,
+        $old_author_phid,
       ),
     );
 
@@ -1502,6 +1516,7 @@ final class DifferentialTransactionEditor
       ->setIsCommandeerSideEffect(true)
       ->setNewValue($edits);
   }
+
 
   public function getActiveDiff($object) {
     if ($this->getIsNewObject()) {
