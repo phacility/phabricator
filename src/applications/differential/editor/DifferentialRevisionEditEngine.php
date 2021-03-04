@@ -187,6 +187,15 @@ final class DifferentialRevisionEditEngine
       ->setConduitTypeDescription(pht('New author.'))
       ->setSingleValue($object->getAuthorPHID());
 
+    // Don't show the "Author" field when creating a revision using the web
+    // workflow, since it adds more noise than signal to this workflow.
+    if ($this->getIsCreate()) {
+      $author_field->setIsHidden(true);
+    }
+
+    // Only show the "Foist Upon" comment action to the current revision
+    // author. Other users can use "Edit Revision", it's just very unlikley
+    // that they're interested in this action.
     if ($viewer->getPHID() === $object->getAuthorPHID()) {
       $author_field->setCommentActionLabel(pht('Foist Upon'));
     }
