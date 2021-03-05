@@ -75,6 +75,14 @@ final class PhabricatorFileEditEngine
         ->setConduitDescription(pht('Rename the file.'))
         ->setConduitTypeDescription(pht('New file name.'))
         ->setValue($object->getName()),
+      id(new PhabricatorTextEditField())
+        ->setKey('alt')
+        ->setLabel(pht('Alt Text'))
+        ->setTransactionType(PhabricatorFileAltTextTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('Human-readable file description.'))
+        ->setConduitDescription(pht('Set the file alt text.'))
+        ->setConduitTypeDescription(pht('New alt text.'))
+        ->setValue($object->getCustomAltText()),
     );
   }
 

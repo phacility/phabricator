@@ -54,9 +54,11 @@ final class PhabricatorAuditStatusConstants extends Phobject {
       case self::AUDIT_NOT_REQUIRED:
         $color = 'blue';
         break;
-      case self::RESIGNED:
       case self::CLOSED:
         $color = 'dark';
+        break;
+      case self::RESIGNED:
+        $color = 'grey';
         break;
       default:
         $color = 'bluegrey';
@@ -68,7 +70,6 @@ final class PhabricatorAuditStatusConstants extends Phobject {
   public static function getStatusIcon($code) {
     switch ($code) {
       case self::AUDIT_NOT_REQUIRED:
-      case self::RESIGNED:
         $icon = PHUIStatusItemView::ICON_OPEN;
         break;
       case self::AUDIT_REQUIRED:
@@ -81,6 +82,9 @@ final class PhabricatorAuditStatusConstants extends Phobject {
       case self::ACCEPTED:
       case self::CLOSED:
         $icon = PHUIStatusItemView::ICON_ACCEPT;
+        break;
+      case self::RESIGNED:
+        $icon = 'fa-times';
         break;
       default:
         $icon = PHUIStatusItemView::ICON_QUESTION;

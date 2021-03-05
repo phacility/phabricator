@@ -63,17 +63,25 @@ final class PhabricatorNotificationQuery
       $this->buildWhereClause($conn),
       $this->buildLimitClause($conn));
 
-    $viewed_map = ipull($data, 'hasViewed', 'chronologicalKey');
+    // See T13623. Although most queries for notifications return unique
+    // stories, this isn't a guarantee.
+    $story_map = ipull($data, null, 'chronologicalKey');
 
     $stories = PhabricatorFeedStory::loadAllFromRows(
-      $data,
+      $story_map,
       $this->getViewer());
+    $stories = mpull($stories, null, 'getChronologicalKey');
 
-    foreach ($stories as $key => $story) {
-      $story->setHasViewed($viewed_map[$key]);
+    $results = array();
+    foreach ($data as $row) {
+      $story_key = $row['chronologicalKey'];
+      $has_viewed = $row['hasViewed'];
+
+      $results[] = id(clone $stories[$story_key])
+        ->setHasViewed($has_viewed);
     }
 
-    return $stories;
+    return $results;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -145,7 +153,11 @@ final class PhabricatorNotificationQuery
   protected function applyExternalCursorConstraintsToQuery(
     PhabricatorCursorPagedPolicyAwareQuery $subquery,
     $cursor) {
-    $subquery->withKeys(array($cursor));
+
+    $subquery
+      ->withKeys(array($cursor))
+      ->setLimit(1);
+
   }
 
   protected function newExternalCursorStringForResult($object) {

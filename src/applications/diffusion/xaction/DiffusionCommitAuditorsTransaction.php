@@ -182,7 +182,7 @@ final class DiffusionCommitAuditorsTransaction
       return $errors;
     }
 
-    $author_phid = $object->getAuthorPHID();
+    $author_phid = $object->getEffectiveAuthorPHID();
     $can_author_close_key = 'audit.can-author-close-audit';
     $can_author_close = PhabricatorEnv::getEnvConfig($can_author_close_key);
 

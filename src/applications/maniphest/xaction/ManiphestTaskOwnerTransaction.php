@@ -127,8 +127,7 @@ final class ManiphestTaskOwnerTransaction
 
       if (!$assignee_list) {
         $errors[] = $this->newInvalidError(
-          pht('User "%s" is not a valid user.',
-          $new));
+          pht('User "%s" is not a valid user.', $new));
       }
     }
     return $errors;

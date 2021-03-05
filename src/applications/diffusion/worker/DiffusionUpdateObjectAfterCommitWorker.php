@@ -148,16 +148,38 @@ final class DiffusionUpdateObjectAfterCommitWorker
     PhabricatorRepositoryCommit $commit,
     DifferentialRevision $revision) {
 
+    $acting_phid = $this->getActingPHID($commit);
+    $acting_user = $this->loadActingUser($acting_phid);
+
+    // See T13625. The "Acting User" is the author of the commit based on the
+    // author string, or the Diffusion application PHID if we could not
+    // identify an author.
+
+    // This user may not be able to view the commit or the revision, and may
+    // also be unable to make API calls. Here, we execute queries and apply
+    // transactions as the omnipotent user.
+
+    // It would probably be better to use the acting user everywhere here, and
+    // exit gracefully if they can't see the revision (this is how the flow
+    // on tasks works). However, without a positive indicator in the UI
+    // explaining "no revision was updated because the author of this commit
+    // can't see anything", this might be fairly confusing, and break workflows
+    // which have worked historically.
+
+    // This isn't, per se, a policy violation (you can't get access to anything
+    // you don't already have access to by making commits that reference
+    // revisions, even if you can't see the commits or revisions), so just
+    // leave it for now.
+
+    $viewer = $this->getViewer();
+
     // Reload the revision to get the active diff, which is currently required
     // by "updateRevisionWithCommit()".
     $revision = id(new DifferentialRevisionQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($viewer)
       ->withIDs(array($revision->getID()))
       ->needActiveDiffs(true)
       ->executeOne();
-
-    $acting_phid = $this->getActingPHID($commit);
-    $acting_user = $this->loadActingUser($acting_phid);
 
     $xactions = array();
 
@@ -177,7 +199,7 @@ final class DiffusionUpdateObjectAfterCommitWorker
       ->setMetadataValue('commitPHID', $commit->getPHID());
 
     $extraction_engine = id(new DifferentialDiffExtractionEngine())
-      ->setViewer($acting_user)
+      ->setViewer($viewer)
       ->setAuthorPHID($acting_phid);
 
     $content_source = $this->newContentSource();
