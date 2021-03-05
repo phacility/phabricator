@@ -161,9 +161,16 @@ final class PhabricatorEmbedFileRemarkupRule
       }
     }
 
+    $alt = null;
     if (isset($options['alt'])) {
-      $attrs['alt'] = $options['alt'];
+      $alt = $options['alt'];
     }
+
+    if (!strlen($alt)) {
+      $alt = $file->getAltText();
+    }
+
+    $attrs['alt'] = $alt;
 
     $img = phutil_tag('img', $attrs);
 
@@ -174,9 +181,10 @@ final class PhabricatorEmbedFileRemarkupRule
         'class'       => $image_class,
         'sigil'       => 'lightboxable',
         'meta'        => array(
-          'phid'     => $file->getPHID(),
-          'uri'      => $file->getBestURI(),
-          'dUri'     => $file->getDownloadURI(),
+          'phid' => $file->getPHID(),
+          'uri' => $file->getBestURI(),
+          'dUri' => $file->getDownloadURI(),
+          'alt' => $alt,
           'viewable' => true,
           'monogram' => $file->getMonogram(),
         ),

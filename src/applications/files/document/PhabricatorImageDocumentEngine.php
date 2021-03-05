@@ -86,6 +86,7 @@ final class PhabricatorImageDocumentEngine
       phutil_tag(
         'img',
         array(
+          'alt' => $file->getAltText(),
           'src' => $file->getBestURI(),
         )));
 
@@ -129,6 +130,7 @@ final class PhabricatorImageDocumentEngine
     $image = phutil_tag(
       'img',
       array(
+        'alt' => $file->getAltText(),
         'src' => $source_uri,
       ));
 

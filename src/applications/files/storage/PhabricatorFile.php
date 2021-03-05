@@ -41,6 +41,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_STORAGE = 'storage';
   const METADATA_INTEGRITY = 'integrity';
   const METADATA_CHUNK = 'chunk';
+  const METADATA_ALT_TEXT = 'alt';
 
   const STATUS_ACTIVE = 'active';
   const STATUS_DELETED = 'deleted';
@@ -1274,6 +1275,72 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return idx($this->metadata, self::METADATA_IMAGE_WIDTH);
   }
 
+  public function getAltText() {
+    $alt = $this->getCustomAltText();
+
+    if (strlen($alt)) {
+      return $alt;
+    }
+
+    return $this->getDefaultAltText();
+  }
+
+  public function getCustomAltText() {
+    return idx($this->metadata, self::METADATA_ALT_TEXT);
+  }
+
+  public function setCustomAltText($value) {
+    $value = phutil_string_cast($value);
+
+    if (!strlen($value)) {
+      $value = null;
+    }
+
+    if ($value === null) {
+      unset($this->metadata[self::METADATA_ALT_TEXT]);
+    } else {
+      $this->metadata[self::METADATA_ALT_TEXT] = $value;
+    }
+
+    return $this;
+  }
+
+  public function getDefaultAltText() {
+    $parts = array();
+
+    $name = $this->getName();
+    if (strlen($name)) {
+      $parts[] = $name;
+    }
+
+    $stats = array();
+
+    $image_x = $this->getImageHeight();
+    $image_y = $this->getImageWidth();
+
+    if ($image_x && $image_y) {
+      $stats[] = pht(
+        "%d\xC3\x97%d px",
+        new PhutilNumber($image_x),
+        new PhutilNumber($image_y));
+    }
+
+    $bytes = $this->getByteSize();
+    if ($bytes) {
+      $stats[] = phutil_format_bytes($bytes);
+    }
+
+    if ($stats) {
+      $parts[] = pht('(%s)', implode(', ', $stats));
+    }
+
+    if (!$parts) {
+      return null;
+    }
+
+    return implode(' ', $parts);
+  }
+
   public function getCanCDN() {
     if (!$this->isViewableImage()) {
       return false;
@@ -1676,6 +1743,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
       'uri' => PhabricatorEnv::getURI($this->getURI()),
       'dataURI' => $this->getCDNURI('data'),
       'size' => (int)$this->getByteSize(),
+      'alt' => array(
+        'custom' => $this->getCustomAltText(),
+        'default' => $this->getDefaultAltText(),
+      ),
     );
   }
 
