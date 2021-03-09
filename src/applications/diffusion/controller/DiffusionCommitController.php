@@ -598,10 +598,6 @@ final class DiffusionCommitController extends DiffusionController {
       $other_requests = array();
 
       foreach ($audit_requests as $audit_request) {
-        if (!$audit_request->isInteresting()) {
-          continue;
-        }
-
         if ($audit_request->isUser()) {
           $user_requests[] = $audit_request;
         } else {

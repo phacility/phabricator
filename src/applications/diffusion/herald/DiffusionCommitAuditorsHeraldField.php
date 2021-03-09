@@ -22,9 +22,11 @@ final class DiffusionCommitAuditorsHeraldField
 
     $phids = array();
     foreach ($audits as $audit) {
-      if ($audit->isActiveAudit()) {
-        $phids[] = $audit->getAuditorPHID();
+      if ($audit->isResigned()) {
+        continue;
       }
+
+      $phids[] = $audit->getAuditorPHID();
     }
 
     return $phids;

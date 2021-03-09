@@ -38,9 +38,7 @@ abstract class DiffusionAuditorsHeraldAction
 
     $current = array();
     foreach ($auditors as $auditor) {
-      if ($auditor->isInteresting()) {
-        $current[] = $auditor->getAuditorPHID();
-      }
+      $current[] = $auditor->getAuditorPHID();
     }
 
     $allowed_types = array(
