@@ -945,7 +945,10 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new DiffusionAuditorsSearchEngineAttachment())
+        ->setAttachmentKey('auditors'),
+    );
   }
 
 
