@@ -284,11 +284,24 @@ final class PhutilSearchQueryCompiler
           $operator = self::OPERATOR_AND;
           break;
         case '':
-          // See T12995. If this query term contains Chinese, Japanese or
-          // Korean characters, treat the term as a substring term by default.
-          // These languages do not separate words with spaces, so the term
-          // search mode is normally useless.
-          if ($enable_functions && !$is_quoted && phutil_utf8_is_cjk($value)) {
+          $use_substring = false;
+
+          if ($enable_functions && !$is_quoted) {
+            // See T12995. If this query term contains Chinese, Japanese or
+            // Korean characters, treat the term as a substring term by default.
+            // These languages do not separate words with spaces, so the term
+            // search mode is normally useless.
+            if (phutil_utf8_is_cjk($value)) {
+              $use_substring = true;
+            } else if (phutil_preg_match('/^_/', $value)) {
+              // See T13632. Assume users searching for any term that begins
+              // with an undescore intend to perform substring search if they
+              // don't provide an explicit search function.
+              $use_substring = true;
+            }
+          }
+
+          if ($use_substring) {
             $operator = self::OPERATOR_SUBSTRING;
           } else {
             $operator = self::OPERATOR_AND;
