@@ -37,6 +37,10 @@ final class PhabricatorAuditRequestStatus extends Phobject {
     return $this->key;
   }
 
+  public function getStatusValueForConduit() {
+    return $this->getMapProperty('value.conduit');
+  }
+
   public function isResigned() {
     return ($this->key === self::RESIGNED);
   }
@@ -53,26 +57,31 @@ final class PhabricatorAuditRequestStatus extends Phobject {
         'name' => pht('Audit Required'),
         'icon' => 'fa-exclamation-circle',
         'icon.color' => 'orange',
+        'value.conduit' => 'audit-required',
       ),
       self::AUDIT_REQUESTED => array(
         'name' => pht('Audit Requested'),
         'icon' => 'fa-exclamation-circle',
         'icon.color' => 'orange',
+        'value.conduit' => 'audit-requested',
       ),
       self::CONCERNED => array(
-        'name' => pht('concern Raised'),
+        'name' => pht('Concern Raised'),
         'icon' => 'fa-times-circle',
         'icon.color' => 'red',
+        'value.conduit' => 'concern-raised',
       ),
       self::ACCEPTED => array(
         'name' => pht('Accepted'),
         'icon' => 'fa-check-circle',
         'icon.color' => 'green',
+        'value.conduit' => 'accepted',
       ),
       self::RESIGNED => array(
         'name' => pht('Resigned'),
         'icon' => 'fa-times',
         'icon.color' => 'grey',
+        'value.conduit' => 'resigned',
       ),
     );
   }

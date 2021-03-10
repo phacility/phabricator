@@ -24,7 +24,7 @@ final class DiffusionAuditorsSearchEngineAttachment
 
       $list[] = array(
         'auditorPHID' => $auditor->getAuditorPHID(),
-        'status' => $status->getStatusValue(),
+        'status' => $status->getStatusValueForConduit(),
       );
     }
 
