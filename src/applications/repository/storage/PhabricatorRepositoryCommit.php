@@ -312,14 +312,14 @@ final class PhabricatorRepositoryCommit
 
     foreach ($requests as $request) {
       switch ($request->getAuditStatus()) {
-        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
+        case PhabricatorAuditRequestStatus::AUDIT_REQUIRED:
+        case PhabricatorAuditRequestStatus::AUDIT_REQUESTED:
           $any_need = true;
           break;
-        case PhabricatorAuditStatusConstants::ACCEPTED:
+        case PhabricatorAuditRequestStatus::ACCEPTED:
           $any_accept = true;
           break;
-        case PhabricatorAuditStatusConstants::CONCERNED:
+        case PhabricatorAuditRequestStatus::CONCERNED:
           $any_concern = true;
           break;
       }

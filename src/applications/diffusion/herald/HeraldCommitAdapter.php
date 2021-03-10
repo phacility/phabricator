@@ -166,8 +166,8 @@ final class HeraldCommitAdapter
   public function loadAuditNeededPackages() {
     if ($this->auditNeededPackages === null) {
       $status_arr = array(
-        PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
-        PhabricatorAuditStatusConstants::CONCERNED,
+        PhabricatorAuditRequestStatus::AUDIT_REQUIRED,
+        PhabricatorAuditRequestStatus::CONCERNED,
       );
       $requests = id(new PhabricatorRepositoryAuditRequest())
           ->loadAllWhere(

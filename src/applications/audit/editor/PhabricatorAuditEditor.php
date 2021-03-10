@@ -178,11 +178,6 @@ final class PhabricatorAuditEditor
     }
     $object->attachAudits($commit->getAudits());
 
-    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
-    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
-    $status_accepted = PhabricatorAuditStatusConstants::ACCEPTED;
-    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
-
     $actor_phid = $this->getActingAsPHID();
     $actor_is_author = ($object->getAuthorPHID()) &&
       ($actor_phid == $object->getAuthorPHID());

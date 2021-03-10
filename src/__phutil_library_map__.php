@@ -2305,7 +2305,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditManagementDeleteWorkflow' => 'applications/audit/management/PhabricatorAuditManagementDeleteWorkflow.php',
     'PhabricatorAuditManagementWorkflow' => 'applications/audit/management/PhabricatorAuditManagementWorkflow.php',
     'PhabricatorAuditReplyHandler' => 'applications/audit/mail/PhabricatorAuditReplyHandler.php',
-    'PhabricatorAuditStatusConstants' => 'applications/audit/constants/PhabricatorAuditStatusConstants.php',
+    'PhabricatorAuditRequestStatus' => 'applications/audit/constants/PhabricatorAuditRequestStatus.php',
     'PhabricatorAuditSynchronizeManagementWorkflow' => 'applications/audit/management/PhabricatorAuditSynchronizeManagementWorkflow.php',
     'PhabricatorAuditTransaction' => 'applications/audit/storage/PhabricatorAuditTransaction.php',
     'PhabricatorAuditTransactionComment' => 'applications/audit/storage/PhabricatorAuditTransactionComment.php',
@@ -8651,7 +8651,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditManagementDeleteWorkflow' => 'PhabricatorAuditManagementWorkflow',
     'PhabricatorAuditManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorAuditReplyHandler' => 'PhabricatorApplicationTransactionReplyHandler',
-    'PhabricatorAuditStatusConstants' => 'Phobject',
+    'PhabricatorAuditRequestStatus' => 'Phobject',
     'PhabricatorAuditSynchronizeManagementWorkflow' => 'PhabricatorAuditManagementWorkflow',
     'PhabricatorAuditTransaction' => 'PhabricatorModularTransaction',
     'PhabricatorAuditTransactionComment' => array(

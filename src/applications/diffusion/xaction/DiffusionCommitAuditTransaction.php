@@ -21,12 +21,12 @@ abstract class DiffusionCommitAuditTransaction
     PhabricatorRepositoryCommit $commit,
     PhabricatorUser $viewer) {
 
-    // This omits various inactive states like "Resigned" and "Not Required".
+    // This omits inactive states; currently just "Resigned".
     $active = array(
-      PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
-      PhabricatorAuditStatusConstants::CONCERNED,
-      PhabricatorAuditStatusConstants::ACCEPTED,
-      PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
+      PhabricatorAuditRequestStatus::AUDIT_REQUIRED,
+      PhabricatorAuditRequestStatus::CONCERNED,
+      PhabricatorAuditRequestStatus::ACCEPTED,
+      PhabricatorAuditRequestStatus::AUDIT_REQUESTED,
     );
     $active = array_fuse($active);
 
@@ -42,7 +42,7 @@ abstract class DiffusionCommitAuditTransaction
       $commit,
       $viewer,
       array(
-        PhabricatorAuditStatusConstants::ACCEPTED,
+        PhabricatorAuditRequestStatus::ACCEPTED,
       ));
   }
 
@@ -53,7 +53,7 @@ abstract class DiffusionCommitAuditTransaction
       $commit,
       $viewer,
       array(
-        PhabricatorAuditStatusConstants::CONCERNED,
+        PhabricatorAuditRequestStatus::CONCERNED,
       ));
   }
 
@@ -117,7 +117,7 @@ abstract class DiffusionCommitAuditTransaction
 
     $map = array();
 
-    $with_authority = ($status != PhabricatorAuditStatusConstants::RESIGNED);
+    $with_authority = ($status != PhabricatorAuditRequestStatus::RESIGNED);
     if ($with_authority) {
       foreach ($audits as $audit) {
         if ($commit->hasAuditAuthority($actor, $audit, $acting_phid)) {

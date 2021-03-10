@@ -98,9 +98,9 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
       }
 
       switch ($status) {
-        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
-        case PhabricatorAuditStatusConstants::CONCERNED:
+        case PhabricatorAuditRequestStatus::AUDIT_REQUIRED:
+        case PhabricatorAuditRequestStatus::AUDIT_REQUESTED:
+        case PhabricatorAuditRequestStatus::CONCERNED:
           $active += array_fuse($request_phids);
           break;
         default:

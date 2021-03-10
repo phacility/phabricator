@@ -898,12 +898,13 @@ final class DiffusionCommitController extends DiffusionController {
 
     $view = new PHUIStatusListView();
     foreach ($audit_requests as $request) {
-      $code = $request->getAuditStatus();
+      $status = $request->getAuditRequestStatusObject();
+
       $item = new PHUIStatusItemView();
       $item->setIcon(
-        PhabricatorAuditStatusConstants::getStatusIcon($code),
-        PhabricatorAuditStatusConstants::getStatusColor($code),
-        PhabricatorAuditStatusConstants::getStatusName($code));
+        $status->getIconIcon(),
+        $status->getIconColor(),
+        $status->getStatusName());
 
       $auditor_phid = $request->getAuditorPHID();
       $target = $viewer->renderHandle($auditor_phid);

@@ -31,7 +31,7 @@ final class DiffusionCommitAcceptTransaction
   }
 
   public function applyExternalEffects($object, $value) {
-    $status = PhabricatorAuditStatusConstants::ACCEPTED;
+    $status = PhabricatorAuditRequestStatus::ACCEPTED;
     $actor = $this->getActor();
     $this->applyAuditorEffect($object, $actor, $value, $status);
   }

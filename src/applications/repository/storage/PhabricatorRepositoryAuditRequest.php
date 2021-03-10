@@ -50,14 +50,13 @@ final class PhabricatorRepositoryAuditRequest
   }
 
   public function isResigned() {
-    switch ($this->getAuditStatus()) {
-      case PhabricatorAuditStatusConstants::RESIGNED:
-        return true;
-    }
-
-    return false;
+    return $this->getAuditRequestStatusObject()->isResigned();
   }
 
+  public function getAuditRequestStatusObject() {
+    $status = $this->getAuditStatus();
+    return PhabricatorAuditRequestStatus::newForStatus($status);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

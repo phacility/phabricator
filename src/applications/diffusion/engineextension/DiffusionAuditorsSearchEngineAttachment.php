@@ -20,8 +20,11 @@ final class DiffusionAuditorsSearchEngineAttachment
 
     $list = array();
     foreach ($auditors as $auditor) {
+      $status = $auditor->getAuditRequestStatusObject();
+
       $list[] = array(
         'auditorPHID' => $auditor->getAuditorPHID(),
+        'status' => $status->getStatusValue(),
       );
     }
 
