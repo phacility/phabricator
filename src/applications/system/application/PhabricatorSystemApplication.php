@@ -25,7 +25,7 @@ final class PhabricatorSystemApplication extends PhabricatorApplication {
       '/status/' => 'PhabricatorStatusController',
       '/debug/' => 'PhabricatorDebugController',
       '/favicon.ico' => 'PhabricatorFaviconController',
-      '/robots.txt' => 'PhabricatorRobotsController',
+      '/robots.txt' => 'PhabricatorRobotsPlatformController',
       '/services/' => array(
         'encoding/' => 'PhabricatorSystemSelectEncodingController',
         'highlight/' => 'PhabricatorSystemSelectHighlightController',
@@ -35,6 +35,14 @@ final class PhabricatorSystemApplication extends PhabricatorApplication {
         '(?P<reason>[^/]+)/' => 'PhabricatorSystemReadOnlyController',
       ),
       '/object/(?P<name>[^/]+)/' => 'PhabricatorSystemObjectController',
+    );
+  }
+
+  public function getResourceRoutes() {
+    return array(
+      '/status/' => 'PhabricatorStatusController',
+      '/favicon.ico' => 'PhabricatorFaviconController',
+      '/robots.txt' => 'PhabricatorRobotsResourceController',
     );
   }
 
