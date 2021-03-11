@@ -11,12 +11,20 @@ $chunk_size = 4096;
 
 $temporary_table = 'tmp_20210215_changeset_id_map';
 
-queryfx(
-  $conn,
-  'CREATE TEMPORARY TABLE %T (
-    changeset_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    changeset_phid VARBINARY(64) NOT NULL)',
-  $temporary_table);
+try {
+  queryfx(
+    $conn,
+    'CREATE TEMPORARY TABLE %T (
+      changeset_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      changeset_phid VARBINARY(64) NOT NULL)',
+    $temporary_table);
+} catch (AphrontAccessDeniedQueryException $ex) {
+  throw new PhutilProxyException(
+    pht(
+      'Failed to "CREATE TEMPORARY TABLE". You may need to "GRANT" the '.
+      'current MySQL user this permission.'),
+    $ex);
+}
 
 $table_iterator = id(new LiskRawMigrationIterator($conn, $table_name))
   ->setPageSize($chunk_size);
