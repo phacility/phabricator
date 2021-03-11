@@ -10,6 +10,7 @@ final class PhabricatorRobotsResourceController
 
     $out[] = 'User-Agent: *';
     $out[] = 'Disallow: /';
+    $out[] = 'Crawl-delay: 1';
 
     return $out;
   }

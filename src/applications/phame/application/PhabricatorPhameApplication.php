@@ -70,7 +70,11 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   }
 
   public function getBlogRoutes() {
-    return $this->getLiveRoutes();
+    return $this->getLiveRoutes() + array(
+      '/status/' => 'PhabricatorStatusController',
+      '/favicon.ico' => 'PhabricatorFaviconController',
+      '/robots.txt' => 'PhabricatorRobotsBlogController',
+    );
   }
 
   private function getLiveRoutes() {
