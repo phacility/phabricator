@@ -181,7 +181,7 @@ final class PhabricatorNotificationQuery
 
   protected function newPagingMapFromPartialObject($object) {
     return array(
-      'key' => $object->getChronologicalKey(),
+      'key' => $object['chronologicalKey'],
     );
   }
 
