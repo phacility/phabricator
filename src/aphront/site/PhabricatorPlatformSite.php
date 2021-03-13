@@ -50,4 +50,8 @@ final class PhabricatorPlatformSite extends PhabricatorSite {
     return $maps;
   }
 
+  public function new404Controller(AphrontRequest $request) {
+    return new PhabricatorPlatform404Controller();
+  }
+
 }

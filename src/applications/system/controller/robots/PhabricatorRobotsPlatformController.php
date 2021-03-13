@@ -1,12 +1,9 @@
 <?php
 
-final class PhabricatorRobotsController extends PhabricatorController {
+final class PhabricatorRobotsPlatformController
+  extends PhabricatorRobotsController {
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
-  public function processRequest() {
+  protected function newRobotsRules() {
     $out = array();
 
     // Prevent indexing of '/diffusion/', since the content is not generally
@@ -29,11 +26,7 @@ final class PhabricatorRobotsController extends PhabricatorController {
     // probably not hugely concerned about cutting-edge SEO.
     $out[] = 'Crawl-delay: 1';
 
-    $content = implode("\n", $out)."\n";
-
-    return id(new AphrontPlainTextResponse())
-      ->setContent($content)
-      ->setCacheDurationInSeconds(phutil_units('2 hours in seconds'))
-      ->setCanCDN(true);
+    return $out;
   }
+
 }

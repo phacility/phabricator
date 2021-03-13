@@ -32,10 +32,6 @@ final class AphrontApplicationConfiguration
     return $request;
   }
 
-  public function build404Controller() {
-    return array(new Phabricator404Controller(), array());
-  }
-
   public function buildRedirectController($uri, $external) {
     return array(
       new PhabricatorRedirectController(),
@@ -504,7 +500,10 @@ final class AphrontApplicationConfiguration
       return array($result, array());
     }
 
-    return $this->build404Controller();
+    throw new Exception(
+      pht(
+        'Aphront site ("%s") failed to build a 404 controller.',
+        get_class($site)));
   }
 
   /**

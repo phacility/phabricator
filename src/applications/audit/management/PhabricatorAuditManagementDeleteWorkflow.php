@@ -153,13 +153,13 @@ final class PhabricatorAuditManagementDeleteWorkflow
 
       foreach ($commit_audits as $audit) {
         $audit_id = $audit->getID();
+        $status = $audit->getAuditRequestStatusObject();
 
         $description = sprintf(
           '%10d %-16s %-16s %s: %s',
           $audit_id,
           $handles[$audit->getAuditorPHID()]->getName(),
-          PhabricatorAuditStatusConstants::getStatusName(
-            $audit->getAuditStatus()),
+          $status->getStatusName(),
           $commit->getRepository()->formatCommitName(
             $commit->getCommitIdentifier()),
           trim($commit->getSummary()));

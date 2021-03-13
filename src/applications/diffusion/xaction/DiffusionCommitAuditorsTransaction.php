@@ -16,7 +16,7 @@ final class DiffusionCommitAuditorsTransaction
     $auditors = $this->generateOldValue($object);
     $old_auditors = $auditors;
 
-    $request_status = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
+    $request_status = PhabricatorAuditRequestStatus::AUDIT_REQUESTED;
 
     $rem = idx($value, '-', array());
     foreach ($rem as $phid) {

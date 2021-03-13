@@ -90,7 +90,7 @@ final class DiffusionCommitRequiredActionResultBucket
     $objects = $this->objects;
 
     $has_concern = array(
-      PhabricatorAuditStatusConstants::CONCERNED,
+      PhabricatorAuditRequestStatus::CONCERNED,
     );
     $has_concern = array_fuse($has_concern);
 
@@ -119,8 +119,8 @@ final class DiffusionCommitRequiredActionResultBucket
     $objects = $this->objects;
 
     $should_audit = array(
-      PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
-      PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
+      PhabricatorAuditRequestStatus::AUDIT_REQUIRED,
+      PhabricatorAuditRequestStatus::AUDIT_REQUESTED,
     );
     $should_audit = array_fuse($should_audit);
 

@@ -598,10 +598,6 @@ final class DiffusionCommitController extends DiffusionController {
       $other_requests = array();
 
       foreach ($audit_requests as $audit_request) {
-        if (!$audit_request->isInteresting()) {
-          continue;
-        }
-
         if ($audit_request->isUser()) {
           $user_requests[] = $audit_request;
         } else {
@@ -902,12 +898,13 @@ final class DiffusionCommitController extends DiffusionController {
 
     $view = new PHUIStatusListView();
     foreach ($audit_requests as $request) {
-      $code = $request->getAuditStatus();
+      $status = $request->getAuditRequestStatusObject();
+
       $item = new PHUIStatusItemView();
       $item->setIcon(
-        PhabricatorAuditStatusConstants::getStatusIcon($code),
-        PhabricatorAuditStatusConstants::getStatusColor($code),
-        PhabricatorAuditStatusConstants::getStatusName($code));
+        $status->getIconIcon(),
+        $status->getIconColor(),
+        $status->getStatusName());
 
       $auditor_phid = $request->getAuditorPHID();
       $target = $viewer->renderHandle($auditor_phid);

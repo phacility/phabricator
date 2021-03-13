@@ -178,12 +178,6 @@ final class PhabricatorAuditEditor
     }
     $object->attachAudits($commit->getAudits());
 
-    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
-    $status_closed = PhabricatorAuditStatusConstants::CLOSED;
-    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
-    $status_accepted = PhabricatorAuditStatusConstants::ACCEPTED;
-    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
-
     $actor_phid = $this->getActingAsPHID();
     $actor_is_author = ($object->getAuthorPHID()) &&
       ($actor_phid == $object->getAuthorPHID());
@@ -491,12 +485,6 @@ final class PhabricatorAuditEditor
     }
 
     foreach ($object->getAudits() as $audit) {
-      if (!$audit->isInteresting()) {
-        // Don't send mail to uninteresting auditors, like packages which
-        // own this code but which audits have not triggered for.
-        continue;
-      }
-
       if (!$audit->isResigned()) {
         $phids[] = $audit->getAuditorPHID();
       }

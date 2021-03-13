@@ -36,7 +36,7 @@ final class DiffusionCommitResignTransaction
   }
 
   public function applyExternalEffects($object, $value) {
-    $status = PhabricatorAuditStatusConstants::RESIGNED;
+    $status = PhabricatorAuditRequestStatus::RESIGNED;
     $actor = $this->getActor();
     $this->applyAuditorEffect($object, $actor, $value, $status);
   }

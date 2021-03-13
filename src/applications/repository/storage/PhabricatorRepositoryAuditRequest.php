@@ -49,38 +49,14 @@ final class PhabricatorRepositoryAuditRequest
     return $this->assertAttached($this->commit);
   }
 
-  public function isActiveAudit() {
-    switch ($this->getAuditStatus()) {
-      case PhabricatorAuditStatusConstants::NONE:
-      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-      case PhabricatorAuditStatusConstants::RESIGNED:
-      case PhabricatorAuditStatusConstants::CLOSED:
-      case PhabricatorAuditStatusConstants::CC:
-        return false;
-    }
-
-    return true;
-  }
-
-  public function isInteresting() {
-    switch ($this->getAuditStatus()) {
-      case PhabricatorAuditStatusConstants::NONE:
-      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-        return false;
-    }
-
-    return true;
-  }
-
   public function isResigned() {
-    switch ($this->getAuditStatus()) {
-      case PhabricatorAuditStatusConstants::RESIGNED:
-        return true;
-    }
-
-    return false;
+    return $this->getAuditRequestStatusObject()->isResigned();
   }
 
+  public function getAuditRequestStatusObject() {
+    $status = $this->getAuditStatus();
+    return PhabricatorAuditRequestStatus::newForStatus($status);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -63,25 +63,7 @@ final class PhabricatorNotificationQuery
       $this->buildWhereClause($conn),
       $this->buildLimitClause($conn));
 
-    // See T13623. Although most queries for notifications return unique
-    // stories, this isn't a guarantee.
-    $story_map = ipull($data, null, 'chronologicalKey');
-
-    $stories = PhabricatorFeedStory::loadAllFromRows(
-      $story_map,
-      $this->getViewer());
-    $stories = mpull($stories, null, 'getChronologicalKey');
-
-    $results = array();
-    foreach ($data as $row) {
-      $story_key = $row['chronologicalKey'];
-      $has_viewed = $row['hasViewed'];
-
-      $results[] = id(clone $stories[$story_key])
-        ->setHasViewed($has_viewed);
-    }
-
-    return $results;
+    return $data;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -111,14 +93,47 @@ final class PhabricatorNotificationQuery
     return $where;
   }
 
-  protected function willFilterPage(array $stories) {
-    foreach ($stories as $key => $story) {
-      if (!$story->isVisibleInNotifications()) {
-        unset($stories[$key]);
+  protected function willFilterPage(array $rows) {
+    // See T13623. The policy model here is outdated and awkward.
+
+    // Users may have notifications about objects they can no longer see.
+    // Two ways this can arise: destroy an object; or change an object's
+    // view policy to exclude a user.
+
+    // "PhabricatorFeedStory::loadAllFromRows()" does its own policy filtering.
+    // This doesn't align well with modern query sequencing, but we should be
+    // able to get away with it by loading here.
+
+    // See T13623. Although most queries for notifications return unique
+    // stories, this isn't a guarantee.
+    $story_map = ipull($rows, null, 'chronologicalKey');
+
+    $viewer = $this->getViewer();
+    $stories = PhabricatorFeedStory::loadAllFromRows($story_map, $viewer);
+    $stories = mpull($stories, null, 'getChronologicalKey');
+
+    $results = array();
+    foreach ($rows as $row) {
+      $story_key = $row['chronologicalKey'];
+      $has_viewed = $row['hasViewed'];
+
+      if (!isset($stories[$story_key])) {
+        // NOTE: We can't call "didRejectResult()" here because we don't have
+        // a policy object to pass.
+        continue;
       }
+
+      $story = id(clone $stories[$story_key])
+        ->setHasViewed($has_viewed);
+
+      if (!$story->isVisibleInNotifications()) {
+        continue;
+      }
+
+      $results[] = $story;
     }
 
-    return $stories;
+    return $results;
   }
 
   protected function getDefaultOrderVector() {
@@ -166,7 +181,7 @@ final class PhabricatorNotificationQuery
 
   protected function newPagingMapFromPartialObject($object) {
     return array(
-      'key' => $object->getChronologicalKey(),
+      'key' => $object['chronologicalKey'],
     );
   }
 

@@ -31,6 +31,17 @@ final class PhabricatorJSONDocumentEngine
     try {
       $data = phutil_json_decode($raw_data);
 
+      // See T13635. "phutil_json_decode()" always turns JSON into a PHP array,
+      // and we lose the distinction between "{}" and "[]". This distinction is
+      // important when rendering a document.
+      $data = json_decode($raw_data, false);
+      if (!$data) {
+        throw new PhabricatorDocumentEngineParserException(
+          pht(
+            'Failed to "json_decode(...)" JSON document after successfully '.
+            'decoding it with "phutil_json_decode(...).'));
+      }
+
       if (preg_match('/^\s*\[/', $raw_data)) {
         $content = id(new PhutilJSON())->encodeAsList($data);
       } else {
@@ -45,6 +56,13 @@ final class PhabricatorJSONDocumentEngine
       $message = $this->newMessage(
         pht(
           'This document is not valid JSON: %s',
+          $ex->getMessage()));
+
+      $content = $raw_data;
+    } catch (PhabricatorDocumentEngineParserException $ex) {
+      $message = $this->newMessage(
+        pht(
+          'Unable to parse this document as JSON: %s',
           $ex->getMessage()));
 
       $content = $raw_data;

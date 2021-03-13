@@ -10,7 +10,7 @@ abstract class AphrontSite extends Phobject {
   abstract public function getRoutingMaps();
 
   public function new404Controller(AphrontRequest $request) {
-    return null;
+    return new Phabricator404Controller();
   }
 
   protected function isHostMatch($host, array $uris) {

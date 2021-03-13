@@ -347,7 +347,16 @@ abstract class AphrontBaseMySQLDatabaseConnection
       case 1142: // Access denied to table
       case 1143: // Access denied to column
       case 1227: // Access denied (e.g., no SUPER for SHOW SLAVE STATUS).
-        throw new AphrontAccessDeniedQueryException($message);
+
+        // See T13622. Try to help users figure out that this is a GRANT
+        // problem.
+
+        $more = pht(
+          'This error usually indicates that you need to "GRANT" the '.
+          'MySQL user additional permissions. See "GRANT" in the MySQL '.
+          'manual for help.');
+
+        throw new AphrontAccessDeniedQueryException("{$message}\n\n{$more}");
       case 1045: // Access denied (auth)
         throw new AphrontInvalidCredentialsQueryException($message);
       case 1146: // No such table

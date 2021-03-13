@@ -8,7 +8,9 @@ final class TransactionSearchConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return pht('Read transactions and comments for an object.');
+    return pht(
+      'Read transactions and comments for a particular object '.
+      'or an entire object type.');
   }
 
   public function getMethodDocumentation() {
@@ -22,6 +24,26 @@ things.
 One common reason to call this method is that you're implmenting a webhook and
 just received a notification that an object has changed. See the Webhooks
 documentation for more detailed discussion of this use case.
+
+One Object Type at a Time
+=========================
+
+This API method can query transactions for any type of object which supports
+transactions, but only one type of object can be queried per call. For example:
+you can retrieve transactions affecting Tasks, or you can retrieve transactions
+affecting Revisions, but a single call can not retrieve both.
+
+This is a technical limitation arising because (among other reasons) there is
+no global ordering on transactions.
+
+To find transactions for a specific object (like a particular task), pass the
+object PHID or an appropriate object identifier (like `T123`) as an
+`objectIdentifier`.
+
+To find all transactions for an object type, pass the object type constant as
+an `objectType`. For example, the correct identifier for tasks is `TASK`. (You
+can quickly find an unknown type constant by looking at the PHID of an object
+of that type.)
 
 Constraints
 ===========
@@ -64,8 +86,9 @@ EOREMARKUP
 
   protected function defineParamTypes() {
     return array(
-      'objectIdentifier' => 'phid|string',
-      'constraints' => 'map<string, wild>',
+      'objectIdentifier' => 'optional phid|string',
+      'objectType' => 'optional string',
+      'constraints' => 'optional map<string, wild>',
     ) + $this->getPagerParamTypes();
   }
 
@@ -81,42 +104,18 @@ EOREMARKUP
     $viewer = $request->getUser();
     $pager = $this->newPager($request);
 
-    $object_name = $request->getValue('objectIdentifier', null);
-    if (!strlen($object_name)) {
-      throw new Exception(
-        pht(
-          'When calling "transaction.search", you must provide an object to '.
-          'retrieve transactions for.'));
-    }
-
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withNames(array($object_name))
-      ->executeOne();
-    if (!$object) {
-      throw new Exception(
-        pht(
-          'No object "%s" exists.',
-          $object_name));
-    }
-
-    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
-      throw new Exception(
-        pht(
-          'Object "%s" (of type "%s") does not implement "%s", so '.
-          'transactions can not be loaded for it.',
-          $object_name,
-          get_class($object),
-          'PhabricatorApplicationTransactionInterface'));
-    }
+    $object = $this->loadTemplateObject($request);
 
     $xaction_query = PhabricatorApplicationTransactionQuery::newQueryForObject(
       $object);
 
     $xaction_query
       ->needHandles(false)
-      ->withObjectPHIDs(array($object->getPHID()))
       ->setViewer($viewer);
+
+    if ($object->getPHID()) {
+      $xaction_query->withObjectPHIDs(array($object->getPHID()));
+    }
 
     $constraints = $request->getValue('constraints', array());
 
@@ -353,6 +352,67 @@ EOREMARKUP
     return array(
       'operations' => $operations,
     );
+  }
+
+  private function loadTemplateObject(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
+
+    $object_identifier = $request->getValue('objectIdentifier');
+    $object_type = $request->getValue('objectType');
+
+    $has_identifier = ($object_identifier !== null);
+    $has_type = ($object_type !== null);
+
+    if (!$has_type && !$has_identifier) {
+      throw new Exception(
+        pht(
+          'Calls to "transaction.search" must specify either an "objectType" '.
+          'or an "objectIdentifier"'));
+    } else if ($has_type && $has_identifier) {
+      throw new Exception(
+        pht(
+          'Calls to "transaction.search" must not specify both an '.
+          '"objectType" and an "objectIdentifier".'));
+    }
+
+    if ($has_type) {
+      $all_types = PhabricatorPHIDType::getAllTypes();
+
+      if (!isset($all_types[$object_type])) {
+        ksort($all_types);
+        throw new Exception(
+          pht(
+            'In call to "transaction.search", specified "objectType" ("%s") '.
+            'is unknown. Valid object types are: %s.',
+            $object_type,
+            implode(', ', array_keys($all_types))));
+      }
+
+      $object = $all_types[$object_type]->newObject();
+    } else {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames(array($object_identifier))
+        ->executeOne();
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'In call to "transaction.search", specified "objectIdentifier" '.
+            '("%s") does not exist.',
+            $object_identifier));
+      }
+    }
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      throw new Exception(
+        pht(
+          'In call to "transaction.search", selected object (of type "%s") '.
+          'does not implement "%s", so transactions can not be loaded for it.',
+          get_class($object),
+          'PhabricatorApplicationTransactionInterface'));
+    }
+
+    return $object;
   }
 
 }

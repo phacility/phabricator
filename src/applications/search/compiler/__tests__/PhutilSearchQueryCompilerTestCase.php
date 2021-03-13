@@ -205,6 +205,20 @@ final class PhutilSearchQueryCompilerTestCase
           'xyz',
         ),
       ),
+
+      // See T12995. Interpret CJK tokens as substring queries since these
+      // languages do not use spaces as word separators.
+      "\xE7\x8C\xAB" => array(
+        array(null, $op_sub, "\xE7\x8C\xAB"),
+      ),
+
+      // See T13632. Interpret tokens that begin with "_" as substring tokens
+      // if no function is specified.
+      '_x _y_ "_z_"' => array(
+        array(null, $op_sub, '_x'),
+        array(null, $op_sub, '_y_'),
+        array(null, $op_and, '_z_'),
+      ),
     );
 
     $this->assertCompileFunctionQueries($function_tests);
