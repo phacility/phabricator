@@ -963,7 +963,7 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recently Open Revisions'));
+      ->setHeader(pht('Recent Open Revisions'));
 
     $list = id(new DifferentialRevisionListView())
       ->setViewer($viewer)
