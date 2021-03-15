@@ -8,8 +8,6 @@
 final class DifferentialRevisionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $pathIDs = array();
-
   private $authors = array();
   private $draftAuthors = array();
   private $ccs = array();
@@ -43,25 +41,6 @@ final class DifferentialRevisionQuery
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
-
-
-  /**
-   * Filter results to revisions which affect a Diffusion path ID in a given
-   * repository. You can call this multiple times to select revisions for
-   * several paths.
-   *
-   * @param int Diffusion repository ID.
-   * @param int Diffusion path ID.
-   * @return this
-   * @task config
-   */
-  public function withPath($repository_id, $path_id) {
-    $this->pathIDs[] = array(
-      'repositoryID' => $repository_id,
-      'pathID'       => $path_id,
-    );
-    return $this;
-  }
 
   /**
    * Find revisions affecting one or more items in a list of paths.
@@ -581,13 +560,6 @@ final class DifferentialRevisionQuery
    */
   private function buildJoinsClause(AphrontDatabaseConnection $conn) {
     $joins = array();
-    if ($this->pathIDs) {
-      $path_table = new DifferentialAffectedPath();
-      $joins[] = qsprintf(
-        $conn,
-        'JOIN %T p ON p.revisionID = r.id',
-        $path_table->getTableName());
-    }
 
     if ($this->paths) {
       $path_table = new DifferentialAffectedPath();
@@ -658,20 +630,6 @@ final class DifferentialRevisionQuery
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $viewer = $this->getViewer();
     $where = array();
-
-    if ($this->pathIDs) {
-      $path_clauses = array();
-      $repo_info = igroup($this->pathIDs, 'repositoryID');
-      foreach ($repo_info as $repository_id => $paths) {
-        $path_clauses[] = qsprintf(
-          $conn,
-          '(p.repositoryID = %d AND p.pathID IN (%Ld))',
-          $repository_id,
-          ipull($paths, 'pathID'));
-      }
-      $path_clauses = qsprintf($conn, '%LO', $path_clauses);
-      $where[] = $path_clauses;
-    }
 
     if ($this->paths !== null) {
       $paths = $this->paths;
@@ -838,10 +796,6 @@ final class DifferentialRevisionQuery
    * @task internal
    */
   protected function shouldGroupQueryResultRows() {
-
-    if (count($this->pathIDs) > 1) {
-      return true;
-    }
 
     if ($this->paths) {
       // (If we have exactly one repository and exactly one path, we don't
