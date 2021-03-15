@@ -340,29 +340,57 @@ final class DifferentialTransactionEditor
         pht('Failed to load revision from transaction finalization.'));
     }
 
+    $active_diff = $new_revision->getActiveDiff();
+    $new_diff_phid = $active_diff->getPHID();
+
     $object->attachReviewers($new_revision->getReviewers());
-    $object->attachActiveDiff($new_revision->getActiveDiff());
+    $object->attachActiveDiff($active_diff);
     $object->attachRepository($new_revision->getRepository());
+
+    $has_new_diff = false;
+    $should_index_paths = false;
+    $should_index_hashes = false;
+    $need_changesets = false;
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
-          $diff = $this->requireDiff($xaction->getNewValue(), true);
+          $need_changesets = true;
 
-          $this->ownersDiff = $diff;
-          $this->ownersChangesets = $diff->getChangesets();
+          $new_diff_phid = $xaction->getNewValue();
+          $has_new_diff = true;
 
-          // Update these denormalized index tables when we attach a new
-          // diff to a revision.
-
-          $this->updateRevisionHashTable($object, $diff);
-
-          id(new DifferentialAffectedPathEngine())
-            ->setRevision($object)
-            ->setDiff($diff)
-            ->updateAffectedPaths();
-
+          $should_index_paths = true;
+          $should_index_hashes = true;
           break;
+        case DifferentialRevisionRepositoryTransaction::TRANSACTIONTYPE:
+          // The "AffectedPath" table denormalizes the repository, so we
+          // want to update the index if the repository changes.
+
+          $need_changesets = true;
+
+          $should_index_paths = true;
+          break;
+      }
+    }
+
+    if ($need_changesets) {
+      $new_diff = $this->requireDiff($new_diff_phid, true);
+
+      if ($should_index_paths) {
+        id(new DifferentialAffectedPathEngine())
+          ->setRevision($object)
+          ->setDiff($new_diff)
+          ->updateAffectedPaths();
+      }
+
+      if ($should_index_hashes) {
+        $this->updateRevisionHashTable($object, $new_diff);
+      }
+
+      if ($has_new_diff) {
+        $this->ownersDiff = $new_diff;
+        $this->ownersChangesets = $new_diff->getChangesets();
       }
     }
 
