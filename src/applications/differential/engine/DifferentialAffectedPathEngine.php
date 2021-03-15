@@ -32,7 +32,7 @@ final class DifferentialAffectedPathEngine
     if ($repository) {
       $repository_id = $repository->getID();
     } else {
-      return;
+      $repository_id = null;
     }
 
     $paths = $this->getAffectedPaths();
@@ -48,10 +48,9 @@ final class DifferentialAffectedPathEngine
     foreach ($path_ids as $path_id) {
       $sql[] = qsprintf(
         $conn,
-        '(%d, %d, %d, %d)',
+        '(%nd, %d, %d)',
         $repository_id,
         $path_id,
-        PhabricatorTime::getNow(),
         $revision->getID());
     }
 
@@ -64,7 +63,7 @@ final class DifferentialAffectedPathEngine
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn,
-          'INSERT INTO %R (repositoryID, pathID, epoch, revisionID) VALUES %LQ',
+          'INSERT INTO %R (repositoryID, pathID, revisionID) VALUES %LQ',
           $table,
           $chunk);
       }
