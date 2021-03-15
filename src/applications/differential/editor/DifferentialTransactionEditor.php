@@ -349,6 +349,9 @@ final class DifferentialTransactionEditor
         case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
           $diff = $this->requireDiff($xaction->getNewValue(), true);
 
+          $this->ownersDiff = $diff;
+          $this->ownersChangesets = $diff->getChangesets();
+
           // Update these denormalized index tables when we attach a new
           // diff to a revision.
 
@@ -1297,13 +1300,6 @@ final class DifferentialTransactionEditor
     $paths = array();
     foreach ($changesets as $changeset) {
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
-    }
-
-    // If this change affected paths, save the changesets so we can apply
-    // Owners rules to them later.
-    if ($paths) {
-      $this->ownersDiff = $diff;
-      $this->ownersChangesets = $changesets;
     }
 
     // Mark this as also touching all parent paths, so you can see all pending
