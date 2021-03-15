@@ -38,7 +38,7 @@ final class DifferentialQueryConduitAPIMethod
       'authors'           => 'optional list<phid>',
       'ccs'               => 'optional list<phid>',
       'reviewers'         => 'optional list<phid>',
-      'paths'             => 'optional list<pair<callsign, path>>',
+      'paths'             => 'unsupported',
       'commitHashes'      => 'optional list<pair<'.$hash_const.', string>>',
       'status'            => 'optional '.$status_const,
       'order'             => 'optional '.$order_const,
@@ -92,48 +92,11 @@ final class DifferentialQueryConduitAPIMethod
     }
 
     if ($path_pairs) {
-      $paths = array();
-      foreach ($path_pairs as $pair) {
-        list($callsign, $path) = $pair;
-        $paths[] = $path;
-      }
-
-      $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs();
-      if (count($path_map) != count($paths)) {
-        $unknown_paths = array();
-        foreach ($paths as $p) {
-          if (!idx($path_map, $p)) {
-            $unknown_paths[] = $p;
-          }
-        }
-        throw id(new ConduitException('ERR-INVALID-PARAMETER'))
-          ->setErrorDescription(
-            pht(
-              'Unknown paths: %s',
-              implode(', ', $unknown_paths)));
-      }
-
-      $repos = array();
-      foreach ($path_pairs as $pair) {
-        list($callsign, $path) = $pair;
-        if (!idx($repos, $callsign)) {
-          $repos[$callsign] = id(new PhabricatorRepositoryQuery())
-            ->setViewer($request->getUser())
-            ->withCallsigns(array($callsign))
-            ->executeOne();
-
-          if (!$repos[$callsign]) {
-            throw id(new ConduitException('ERR-INVALID-PARAMETER'))
-              ->setErrorDescription(
-                pht(
-                  'Unknown repo callsign: %s',
-                  $callsign));
-          }
-        }
-        $repo = $repos[$callsign];
-
-        $query->withPath($repo->getID(), idx($path_map, $path));
-      }
+      throw new Exception(
+        pht(
+          'Parameter "paths" to Conduit API method "differential.query" is '.
+          'no longer supported. Use the "paths" constraint to '.
+          '"differential.revision.search" instead. See T13639.'));
     }
 
     if ($commit_hashes) {
