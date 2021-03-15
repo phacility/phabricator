@@ -986,6 +986,8 @@ final class DifferentialRevisionViewController
     PhabricatorRepository $repository) {
     assert_instances_of($changesets, 'DifferentialChangeset');
 
+    $viewer = $this->getViewer();
+
     $paths = array();
     foreach ($changesets as $changeset) {
       $paths[] = $changeset->getAbsoluteRepositoryPath(
@@ -997,34 +999,30 @@ final class DifferentialRevisionViewController
       return array();
     }
 
-    $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs();
-
-    if (!$path_map) {
-      return array();
-    }
-
     $recent = (PhabricatorTime::getNow() - phutil_units('30 days in seconds'));
 
     $query = id(new DifferentialRevisionQuery())
-      ->setViewer($this->getRequest()->getUser())
+      ->setViewer($viewer)
       ->withIsOpen(true)
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)
       ->needFlags(true)
       ->needDrafts(true)
-      ->needReviewers(true);
-
-    foreach ($path_map as $path => $path_id) {
-      $query->withPath($repository->getID(), $path_id);
-    }
+      ->needReviewers(true)
+      ->withRepositoryPHIDs(
+        array(
+          $repository->getPHID(),
+        ))
+      ->withPaths($paths);
 
     $results = $query->execute();
 
     // Strip out *this* revision.
     foreach ($results as $key => $result) {
       if ($result->getID() == $this->revisionID) {
-        unset($results[$key]);
+       unset($results[$key]);
+       break;
       }
     }
 

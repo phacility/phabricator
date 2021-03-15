@@ -27,6 +27,7 @@ final class DifferentialRevisionQuery
   private $createdEpochMin;
   private $createdEpochMax;
   private $noReviewers;
+  private $paths;
 
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -59,6 +60,18 @@ final class DifferentialRevisionQuery
       'repositoryID' => $repository_id,
       'pathID'       => $path_id,
     );
+    return $this;
+  }
+
+  /**
+   * Find revisions affecting one or more items in a list of paths.
+   *
+   * @param list<string> List of file paths.
+   * @return this
+   * @task config
+   */
+  public function withPaths(array $paths) {
+    $this->paths = $paths;
     return $this;
   }
 
@@ -576,6 +589,14 @@ final class DifferentialRevisionQuery
         $path_table->getTableName());
     }
 
+    if ($this->paths) {
+      $path_table = new DifferentialAffectedPath();
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %R paths ON paths.revisionID = r.id',
+        $path_table);
+    }
+
     if ($this->commitHashes) {
       $joins[] = qsprintf(
         $conn,
@@ -635,6 +656,7 @@ final class DifferentialRevisionQuery
    * @task internal
    */
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
+    $viewer = $this->getViewer();
     $where = array();
 
     if ($this->pathIDs) {
@@ -649,6 +671,45 @@ final class DifferentialRevisionQuery
       }
       $path_clauses = qsprintf($conn, '%LO', $path_clauses);
       $where[] = $path_clauses;
+    }
+
+    if ($this->paths !== null) {
+      $paths = $this->paths;
+
+      $path_map = id(new DiffusionPathIDQuery($paths))
+        ->loadPathIDs();
+
+      if (!$path_map) {
+        // If none of the paths have entries in the PathID table, we can not
+        // possibly find any revisions affecting them.
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        'paths.pathID IN (%Ld)',
+        array_fuse($path_map));
+
+      // If we have repository PHIDs, additionally constrain this query to
+      // try to help MySQL execute it efficiently.
+      if ($this->repositoryPHIDs !== null) {
+        $repositories = id(new PhabricatorRepositoryQuery())
+          ->setViewer($viewer)
+          ->setParentQuery($this)
+          ->withPHIDs($this->repositoryPHIDs)
+          ->execute();
+
+        if (!$repositories) {
+          throw new PhabricatorEmptyQueryException();
+        }
+
+        $repository_ids = mpull($repositories, 'getID');
+
+        $where[] = qsprintf(
+          $conn,
+          'paths.repositoryID IN (%Ld)',
+          $repository_ids);
+      }
     }
 
     if ($this->authors) {
@@ -779,6 +840,12 @@ final class DifferentialRevisionQuery
   protected function shouldGroupQueryResultRows() {
 
     if (count($this->pathIDs) > 1) {
+      return true;
+    }
+
+    if ($this->paths) {
+      // (If we have exactly one repository and exactly one path, we don't
+      // technically need to group, but it's simpler to always group.)
       return true;
     }
 
