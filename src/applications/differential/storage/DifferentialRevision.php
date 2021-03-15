@@ -1022,16 +1022,9 @@ final class DifferentialRevision extends DifferentialDAO
         $engine->destroyObject($diff);
       }
 
-      $conn_w = $this->establishConnection('w');
-
-      // we have to do paths a little differently as they do not have
-      // an id or phid column for delete() to act on
-      $dummy_path = new DifferentialAffectedPath();
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        $dummy_path->getTableName(),
-        $this->getID());
+      id(new DifferentialAffectedPathEngine())
+        ->setRevision($this)
+        ->destroyAffectedPaths();
 
       $viewstate_query = id(new DifferentialViewStateQuery())
         ->setViewer($viewer)
