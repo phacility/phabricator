@@ -24,7 +24,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $isCancelled;
   protected $isAllDay;
   protected $icon;
-  protected $mailKey;
   protected $isStub;
 
   protected $isRecurring = 0;
@@ -360,10 +359,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function save() {
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
-
     $import_uid = $this->getImportUID();
     if ($import_uid !== null) {
       $index = PhabricatorHash::digestForIndex($import_uid);
@@ -405,7 +400,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
         'icon' => 'text32',
-        'mailKey' => 'bytes20',
         'isRecurring' => 'bool',
         'seriesParentPHID' => 'phid?',
         'instanceOfEventPHID' => 'phid?',
@@ -442,9 +436,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorCalendarEventPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhabricatorCalendarEventPHIDType::TYPECONST;
   }
 
   public function getMonogram() {
