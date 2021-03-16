@@ -49,8 +49,8 @@ final class AlmanacDevice
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacDevicePHIDType::TYPECONST);
+  public function getPHIDType() {
+    return AlmanacDevicePHIDType::TYPECONST;
   }
 
   public function save() {
@@ -62,7 +62,9 @@ final class AlmanacDevice
   }
 
   public function getURI() {
-    return '/almanac/device/view/'.$this->getName().'/';
+    return urisprintf(
+      '/almanac/device/view/%s/',
+      $this->getName());
   }
 
   public function rebuildClusterBindingStatus() {
@@ -84,8 +86,8 @@ final class AlmanacDevice
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         queryfx(
           $this->establishConnection('w'),
-          'UPDATE %T SET isBoundToClusterService = %d WHERE id = %d',
-          $this->getTableName(),
+          'UPDATE %R SET isBoundToClusterService = %d WHERE id = %d',
+          $this,
           $this->getIsBoundToClusterService(),
           $this->getID());
       unset($unguarded);
