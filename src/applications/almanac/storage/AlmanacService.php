@@ -14,7 +14,6 @@ final class AlmanacService
 
   protected $name;
   protected $nameIndex;
-  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $serviceType;
@@ -49,7 +48,6 @@ final class AlmanacService
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'nameIndex' => 'bytes12',
-        'mailKey' => 'bytes20',
         'serviceType' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -67,18 +65,14 @@ final class AlmanacService
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacServicePHIDType::TYPECONST);
+  public function getPHIDType() {
+    return AlmanacServicePHIDType::TYPECONST;
   }
 
   public function save() {
     AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
-
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
 
     return parent::save();
   }
