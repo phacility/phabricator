@@ -71,6 +71,7 @@ final class AlmanacDeviceSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'active' => pht('Active Devices'),
       'all' => pht('All Devices'),
     );
 
@@ -78,11 +79,13 @@ final class AlmanacDeviceSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'active':
+        $active_statuses = AlmanacDeviceStatus::getActiveStatusList();
+        return $query->setParameter('statuses', $active_statuses);
       case 'all':
         return $query;
     }
