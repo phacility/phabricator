@@ -31,6 +31,14 @@ final class AlmanacDeviceViewController
       ->setPolicyObject($device)
       ->setHeaderIcon('fa-server');
 
+    $status = $device->getStatusObject();
+    if ($status->hasStatusTag()) {
+      $header->setStatus(
+        $status->getStatusTagIcon(),
+        $status->getStatusTagColor(),
+        $status->getName());
+    }
+
     $issue = null;
     if ($device->isClusterDevice()) {
       $issue = $this->addClusterMessage(

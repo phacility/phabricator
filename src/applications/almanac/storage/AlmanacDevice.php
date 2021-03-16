@@ -17,6 +17,7 @@ final class AlmanacDevice
   protected $nameIndex;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $status;
   protected $isBoundToClusterService;
 
   private $almanacProperties = self::ATTACHABLE;
@@ -25,6 +26,7 @@ final class AlmanacDevice
     return id(new AlmanacDevice())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
+      ->setStatus(AlmanacDeviceStatus::ACTIVE)
       ->attachAlmanacProperties(array())
       ->setIsBoundToClusterService(0);
   }
@@ -35,6 +37,7 @@ final class AlmanacDevice
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'nameIndex' => 'bytes12',
+        'status' => 'text32',
         'isBoundToClusterService' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -98,6 +101,18 @@ final class AlmanacDevice
 
   public function isClusterDevice() {
     return $this->getIsBoundToClusterService();
+  }
+
+  public function getStatusObject() {
+    return $this->newStatusObject();
+  }
+
+  private function newStatusObject() {
+    return AlmanacDeviceStatus::newStatusFromValue($this->getStatus());
+  }
+
+  public function isDisabled() {
+    return $this->getStatusObject()->isDisabled();
   }
 
 
@@ -263,12 +278,22 @@ final class AlmanacDevice
         ->setKey('name')
         ->setType('string')
         ->setDescription(pht('The name of the device.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Device status information.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $status = $this->getStatusObject();
+
     return array(
       'name' => $this->getName(),
+      'status' => array(
+        'value' => $status->getValue(),
+        'name' => $status->getName(),
+      ),
     );
   }
 

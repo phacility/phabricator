@@ -76,6 +76,8 @@ final class AlmanacDeviceEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+    $status_map = $this->getDeviceStatusMap($object);
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -84,7 +86,32 @@ final class AlmanacDeviceEditEngine
         ->setTransactionType(AlmanacDeviceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Device status.'))
+        ->setTransactionType(AlmanacDeviceStatusTransaction::TRANSACTIONTYPE)
+        ->setOptions($status_map)
+        ->setValue($object->getStatus()),
     );
+  }
+
+
+  private function getDeviceStatusMap(AlmanacDevice $device) {
+    $status_map = AlmanacDeviceStatus::getStatusMap();
+
+    // If the device currently has an unknown status, add it to the list for
+    // the dropdown.
+    $status_value = $device->getStatus();
+    if (!isset($status_map[$status_value])) {
+      $status_map = array(
+        $status_value => AlmanacDeviceStatus::newStatusFromValue($status_value),
+      ) + $status_map;
+    }
+
+    $status_map = mpull($status_map, 'getName');
+
+    return $status_map;
   }
 
 }

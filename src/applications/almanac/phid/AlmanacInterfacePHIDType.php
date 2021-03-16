@@ -34,7 +34,8 @@ final class AlmanacInterfacePHIDType extends PhabricatorPHIDType {
 
       $id = $interface->getID();
 
-      $device_name = $interface->getDevice()->getName();
+      $device = $interface->getDevice();
+      $device_name = $device->getName();
       $address = $interface->getAddress();
       $port = $interface->getPort();
       $network = $interface->getNetwork()->getName();
@@ -48,6 +49,10 @@ final class AlmanacInterfacePHIDType extends PhabricatorPHIDType {
 
       $handle->setObjectName(pht('Interface %d', $id));
       $handle->setName($name);
+
+      if ($device->isDisabled()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

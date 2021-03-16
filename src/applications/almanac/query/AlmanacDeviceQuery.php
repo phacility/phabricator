@@ -9,6 +9,7 @@ final class AlmanacDeviceQuery
   private $namePrefix;
   private $nameSuffix;
   private $isClusterDevice;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -32,6 +33,11 @@ final class AlmanacDeviceQuery
 
   public function withNameSuffix($suffix) {
     $this->nameSuffix = $suffix;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -101,6 +107,13 @@ final class AlmanacDeviceQuery
         $conn,
         'device.isBoundToClusterService = %d',
         (int)$this->isClusterDevice);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'device.status IN (%Ls)',
+        $this->statuses);
     }
 
     return $where;

@@ -197,6 +197,10 @@ final class PhabricatorObjectHandle
     return $this->status;
   }
 
+  public function isClosed() {
+    return ($this->status === self::STATUS_CLOSED);
+  }
+
   public function setFullName($full_name) {
     $this->fullName = $full_name;
     return $this;

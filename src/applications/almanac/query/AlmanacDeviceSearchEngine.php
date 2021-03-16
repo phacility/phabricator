@@ -16,6 +16,9 @@ final class AlmanacDeviceSearchEngine
   }
 
   protected function buildCustomSearchFields() {
+    $status_options = AlmanacDeviceStatus::getStatusMap();
+    $status_options = mpull($status_options, 'getName');
+
     return array(
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name Contains'))
@@ -25,6 +28,11 @@ final class AlmanacDeviceSearchEngine
         ->setLabel(pht('Exact Names'))
         ->setKey('names')
         ->setDescription(pht('Search for devices with specific names.')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Statuses'))
+        ->setKey('statuses')
+        ->setDescription(pht('Search for devices with given statuses.'))
+        ->setOptions($status_options),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Cluster Device'))
         ->setKey('isClusterDevice')
@@ -48,6 +56,10 @@ final class AlmanacDeviceSearchEngine
 
     if ($map['isClusterDevice'] !== null) {
       $query->withIsClusterDevice($map['isClusterDevice']);
+    }
+
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
@@ -98,6 +110,19 @@ final class AlmanacDeviceSearchEngine
       if ($device->isClusterDevice()) {
         $item->addIcon('fa-sitemap', pht('Cluster Device'));
       }
+
+      if ($device->isDisabled()) {
+        $item->setDisabled(true);
+      }
+
+      $status = $device->getStatusObject();
+      $icon_icon = $status->getIconIcon();
+      $icon_color = $status->getIconColor();
+      $icon_label = $status->getName();
+
+      $item->setStatusIcon(
+        "{$icon_icon} {$icon_color}",
+        $icon_label);
 
       $list->addItem($item);
     }
