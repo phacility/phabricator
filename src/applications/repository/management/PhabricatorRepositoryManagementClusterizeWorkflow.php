@@ -61,7 +61,7 @@ final class PhabricatorRepositoryManagementClusterizeWorkflow
           array(
             AlmanacClusterRepositoryServiceType::SERVICETYPE,
           ))
-        ->needBindings(true)
+        ->needActiveBindings(true)
         ->executeOne();
       if (!$service) {
         throw new PhutilArgumentUsageException(

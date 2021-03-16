@@ -21,6 +21,7 @@ final class AlmanacService
 
   private $almanacProperties = self::ATTACHABLE;
   private $bindings = self::ATTACHABLE;
+  private $activeBindings = self::ATTACHABLE;
   private $serviceImplementation = self::ATTACHABLE;
 
   public static function initializeNewService($type) {
@@ -91,20 +92,33 @@ final class AlmanacService
   }
 
   public function getActiveBindings() {
-    $bindings = $this->getBindings();
-
-    // Filter out disabled bindings.
-    foreach ($bindings as $key => $binding) {
-      if ($binding->getIsDisabled()) {
-        unset($bindings[$key]);
-      }
-    }
-
-    return $bindings;
+    return $this->assertAttached($this->activeBindings);
   }
 
   public function attachBindings(array $bindings) {
+    $active_bindings = array();
+    foreach ($bindings as $key => $binding) {
+      // Filter out disabled bindings.
+      if ($binding->getIsDisabled()) {
+        continue;
+      }
+
+      // Filter out bindings to disabled devices.
+      if ($binding->getDevice()->isDisabled()) {
+        continue;
+      }
+
+      $active_bindings[$key] = $binding;
+    }
+
+    $this->attachActiveBindings($active_bindings);
+
     $this->bindings = $bindings;
+    return $this;
+  }
+
+  public function attachActiveBindings(array $bindings) {
+    $this->activeBindings = $bindings;
     return $this;
   }
 
@@ -289,6 +303,9 @@ final class AlmanacService
         ->setAttachmentKey('properties'),
       id(new AlmanacBindingsSearchEngineAttachment())
         ->setAttachmentKey('bindings'),
+      id(new AlmanacBindingsSearchEngineAttachment())
+        ->setIsActive(true)
+        ->setAttachmentKey('activeBindings'),
     );
   }
 

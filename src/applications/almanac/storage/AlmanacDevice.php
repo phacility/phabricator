@@ -282,6 +282,10 @@ final class AlmanacDevice
         ->setKey('status')
         ->setType('map<string, wild>')
         ->setDescription(pht('Device status information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('disabled')
+        ->setType('bool')
+        ->setDescription(pht('True if device is disabled.')),
     );
   }
 
@@ -294,6 +298,7 @@ final class AlmanacDevice
         'value' => $status->getValue(),
         'name' => $status->getName(),
       ),
+      'disabled' => $this->isDisabled(),
     );
   }
 

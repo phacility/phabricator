@@ -56,10 +56,20 @@ final class AlmanacBindingTableView extends AphrontView {
 
     $icon_active = id(new PHUIIconView())
       ->setIcon('fa-check')
+      ->setColor('green')
       ->addSigil('has-tooltip')
       ->setMetadata(
         array(
           'tip' => pht('Active'),
+        ));
+
+    $icon_device_disabled = id(new PHUIIconView())
+      ->setIcon('fa-times')
+      ->setColor('grey')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Device Disabled'),
         ));
 
     $rows = array();
@@ -67,10 +77,20 @@ final class AlmanacBindingTableView extends AphrontView {
       $addr = $binding->getInterface()->getAddress();
       $port = $binding->getInterface()->getPort();
 
+      $device = $binding->getDevice();
+      if ($device->isDisabled()) {
+        $binding_icon = $icon_device_disabled;
+      } else if ($binding->getIsDisabled()) {
+        $binding_icon = $icon_disabled;
+      } else {
+        $binding_icon = $icon_active;
+      }
+
       $rows[] = array(
         $binding->getID(),
-        ($binding->getIsDisabled() ? $icon_disabled : $icon_active),
+        $binding_icon,
         $handles->renderHandle($binding->getServicePHID()),
+
         $handles->renderHandle($binding->getDevicePHID()),
         $handles->renderHandle($binding->getInterface()->getNetworkPHID()),
         $binding->getInterface()->renderDisplayAddress(),

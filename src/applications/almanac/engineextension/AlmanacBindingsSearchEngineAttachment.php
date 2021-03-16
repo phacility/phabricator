@@ -3,6 +3,17 @@
 final class AlmanacBindingsSearchEngineAttachment
   extends AlmanacSearchEngineAttachment {
 
+  private $isActive;
+
+  public function setIsActive($is_active) {
+    $this->isActive = $is_active;
+    return $this;
+  }
+
+  public function getIsActive() {
+    return $this->isActive;
+  }
+
   public function getAttachmentName() {
     return pht('Almanac Bindings');
   }
@@ -13,12 +24,24 @@ final class AlmanacBindingsSearchEngineAttachment
 
   public function willLoadAttachmentData($query, $spec) {
     $query->needProperties(true);
-    $query->needBindings(true);
+
+    if ($this->getIsActive()) {
+      $query->needBindings(true);
+    } else {
+      $query->needActiveBindings(true);
+    }
   }
 
   public function getAttachmentForObject($object, $data, $spec) {
     $bindings = array();
-    foreach ($object->getBindings() as $binding) {
+
+    if ($this->getIsActive()) {
+      $service_bindings = $object->getActiveBindings();
+    } else {
+      $service_bindings = $object->getBindings();
+    }
+
+    foreach ($service_bindings as $binding) {
       $bindings[] = $this->getAlmanacBindingDictionary($binding);
     }
 

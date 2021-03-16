@@ -62,6 +62,26 @@ final class AlmanacDeviceStatus
     return $result;
   }
 
+  public static function getActiveStatusList() {
+    $results = array();
+    foreach (self::newDeviceStatusMap() as $status_value => $status) {
+      if (empty($status['disabled'])) {
+        $results[] = $status_value;
+      }
+    }
+    return $results;
+  }
+
+  public static function getDisabledStatusList() {
+    $results = array();
+    foreach (self::newDeviceStatusMap() as $status_value => $status) {
+      if (!empty($status['disabled'])) {
+        $results[] = $status_value;
+      }
+    }
+    return $results;
+  }
+
   private function getDeviceStatusProperty($key, $default = null) {
     $map = self::newDeviceStatusMap();
     $properties = idx($map, $this->getValue(), array());
@@ -81,6 +101,7 @@ final class AlmanacDeviceStatus
         'icon.color' => 'grey',
         'status-tag.icon' => 'fa-times',
         'status-tag.color' => 'indigo',
+        'disabled' => true,
       ),
     );
   }

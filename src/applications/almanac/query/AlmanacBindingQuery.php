@@ -8,6 +8,7 @@ final class AlmanacBindingQuery
   private $servicePHIDs;
   private $devicePHIDs;
   private $interfacePHIDs;
+  private $isActive;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class AlmanacBindingQuery
 
   public function withInterfacePHIDs(array $phids) {
     $this->interfacePHIDs = $phids;
+    return $this;
+  }
+
+  public function withIsActive($active) {
+    $this->isActive = $active;
     return $this;
   }
 
@@ -95,39 +101,79 @@ final class AlmanacBindingQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'binding.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'binding.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->servicePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'servicePHID IN (%Ls)',
+        'binding.servicePHID IN (%Ls)',
         $this->servicePHIDs);
     }
 
     if ($this->devicePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'devicePHID IN (%Ls)',
+        'binding.devicePHID IN (%Ls)',
         $this->devicePHIDs);
     }
 
     if ($this->interfacePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'interfacePHID IN (%Ls)',
+        'binding.interfacePHID IN (%Ls)',
         $this->interfacePHIDs);
     }
 
+    if ($this->isActive !== null) {
+      if ($this->isActive) {
+        $where[] = qsprintf(
+          $conn,
+          '(binding.isDisabled = 0) AND (device.status IN (%Ls))',
+          AlmanacDeviceStatus::getActiveStatusList());
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(binding.isDisabled = 1) OR (device.status IN (%Ls))',
+          AlmanacDeviceStatus::getDisabledStatusList());
+      }
+    }
+
     return $where;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinDeviceTable()) {
+      $device_table = new AlmanacDevice();
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %R device ON binding.devicePHID = device.phid',
+        $device_table);
+    }
+
+    return $joins;
+  }
+
+  private function shouldJoinDeviceTable() {
+    if ($this->isActive !== null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'binding';
   }
 
 }
