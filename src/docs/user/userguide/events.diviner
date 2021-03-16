@@ -23,7 +23,7 @@ the most direct and powerful way to respond to events.
 
 To install event listeners in Phabricator, follow these steps:
 
-  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
+  - Write a listener class which extends @{class@arcanist:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
     see @{article@phabcontrib:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load-libraries`
@@ -40,7 +40,7 @@ see any events the page emitted there. For details on DarkConsole, see
 
 To install event listeners in Arcanist, follow these steps:
 
-  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
+  - Write a listener class which extends @{class@arcanist:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
     see @{article@phabcontrib:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load`

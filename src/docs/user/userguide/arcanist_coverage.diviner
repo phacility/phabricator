@@ -27,9 +27,9 @@ to `src/some/file.php` and give you a detailed coverage report.
 If the test engine enables coverage by default, it will be uploaded to
 Differential and displayed in the right gutter when viewing diffs.
 
-= Enabling Coverage for libphutil, Arcanist and Phabricator =
+= Enabling Coverage for Arcanist and Phabricator =
 
-If you're contributing, libphutil, Arcanist and Phabricator support coverage if
+If you're contributing, Arcanist and Phabricator support coverage if
 you install Xdebug:
 
 http://xdebug.org/

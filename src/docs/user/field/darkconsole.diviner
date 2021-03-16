@@ -48,7 +48,7 @@ Plugin: Error Log
 
 The "Error Log" plugin shows errors that occurred while generating the page,
 similar to the httpd `error.log`. You can send information to the error log
-explicitly with the @{function@libphutil:phlog} function.
+explicitly with the @{function@arcanist:phlog} function.
 
 If errors occurred, a red dot will appear on the plugin tab.
 

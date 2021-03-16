@@ -65,7 +65,7 @@ daemonizing it, so you can see output in your console.
 
 You can get a list of launchable daemons with **phd list**:
 
-  - **libphutil test daemons** are not generally useful unless you are
+  - **test daemons** are not generally useful unless you are
     developing daemon infrastructure or debugging a daemon problem;
   - **PhabricatorTaskmasterDaemon** performs work from a task queue;
   - **PhabricatorRepositoryPullLocalDaemon** daemons track repositories, for

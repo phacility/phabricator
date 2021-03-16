@@ -55,10 +55,9 @@ If you choose to assign a callsign to a repository, it must be unique within an
 install but do not need to be globally unique, so you are free to use the
 single-letter callsigns for brevity. For example, Facebook uses "E" for the
 Engineering repository, "O" for the Ops repository, "Y" for a Yum package
-repository, and so on, while Phabricator uses "P", "ARC", "PHU" for libphutil,
-and "J" for Javelin. Keeping callsigns brief will make them easier to use, and
-the use of one-character callsigns is encouraged if they are reasonably
-evocative.
+repository, and so on, while Phabricator uses "P" and Arcanist uses "ARC".
+Keeping callsigns brief will make them easier to use, and the use of
+one-character callsigns is encouraged if they are reasonably evocative.
 
 If you configure a callsign like `XYZ`, Phabricator will activate callsign URIs
 and activate the callsign identifier (like `rXYZ`) for the repository. These

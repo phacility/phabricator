@@ -212,9 +212,9 @@ outside of our comfort zone.
 Writing and Submitting Patches
 ==================
 
-To actually submit a patch, run `arc diff` in `phabricator/`, `arcanist/`, or
-`libphutil/`. When executed in these directories, `arc` should automatically
-talk to the upstream install. You can add `epriestley` as a reviewer.
+To actually submit a patch, run `arc diff` in `phabricator/` or `arcanist/`.
+When executed in these directories, `arc` should automatically talk to the
+upstream install. You can add `epriestley` as a reviewer.
 
 You should read the relevant coding convention documents before you submit a
 change. If you're a new contributor, you don't need to worry about this too

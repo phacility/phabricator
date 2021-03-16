@@ -83,8 +83,8 @@ You can configure some more options by going to {nav Diffusion > (Select
     You can leave this blank for "All languages".
   - **Uses Symbols From**: If this project depends on other repositories, add
     the other repositories which symbols should be looked for here. For example,
-    Phabricator lists "Arcanist" and "libphutil" because it uses classes and
-    functions from these repositories.
+    Phabricator lists "Arcanist" because it uses classes and functions defined
+    in `arcanist/`.
 
 == External Symbols ==
 

@@ -44,7 +44,7 @@ For instructions on adding new classes, see
 Writing Translatable Code
 =========================
 
-Strings are marked for translation with @{function@libphutil:pht}.
+Strings are marked for translation with @{function@arcanist:pht}.
 
 The `pht()` function takes a string (and possibly some parameters) and returns
 the translated version of that string in the current viewer's locale, if a
@@ -68,7 +68,7 @@ the major rules are:
   - Use parameters to create strings containing user names, object names, etc.
   - Translate full sentences, not sentence fragments.
   - Let the translation framework handle plural rules.
-  - Use @{class@libphutil:PhutilNumber} for numbers.
+  - Use @{class@arcanist:PhutilNumber} for numbers.
   - Let the translation framework handle subject gender rules.
   - Translate all human-readable text, even exceptions and error messages.
 
@@ -323,7 +323,7 @@ pronouns (like "he" and "she") but there are more complex rules in other
 languages, and languages like Czech also require verb agreement.
 
 When a parameter refers to a gendered person, pass an object which implements
-@{interface@libphutil:PhutilPerson} to `pht()` so translators can provide
+@{interface@arcanist:PhutilPerson} to `pht()` so translators can provide
 gendered translation variants.
 
 ```lang=php
@@ -361,8 +361,8 @@ all human-readable text. This rule is unambiguous and easy to follow.
 In cases where similar error or exception text is often repeated, it is
 probably appropriate to define an exception for that category of error rather
 than write the text out repeatedly, anyway. Two examples are
-@{class@libphutil:PhutilInvalidStateException} and
-@{class@libphutil:PhutilMethodNotImplementedException}, which mostly exist to
+@{class@arcanist:PhutilInvalidStateException} and
+@{class@arcanist:PhutilMethodNotImplementedException}, which mostly exist to
 produce a consistent message about a common error state in a convenient way.
 
 There are a handful of error strings in the codebase which may be used before

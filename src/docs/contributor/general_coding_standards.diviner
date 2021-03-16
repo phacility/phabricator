@@ -2,7 +2,7 @@
 @group standards
 
 This document is a general coding standard for contributing to Phabricator,
-Arcanist, libphutil and Diviner.
+Arcanist, and Diviner.
 
 = Overview =
 
@@ -136,7 +136,7 @@ handling and makes it easier to get right than wrong:
   Filesystem::writeFile('file.bak', $data);         //  Best
   do_something_dangerous();
 
-See @{article@libphutil:Command Execution} for details on the APIs used in this
+See @{article@arcanist:Command Execution} for details on the APIs used in this
 example.
 
 = Documentation, Comments and Formatting =

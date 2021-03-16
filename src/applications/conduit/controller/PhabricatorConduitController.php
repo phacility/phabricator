@@ -156,7 +156,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
 
     $parts = array();
 
-    $libphutil_path = 'path/to/libphutil/src/__phutil_library_init__.php';
+    $libphutil_path = 'path/to/arcanist/support/init/init-script.php';
 
     $parts[] = '<?php';
     $parts[] = "\n\n";

@@ -22,48 +22,6 @@ options:
     Encodings" below). This is not completely supported, and repositories with
     files that have multiple encodings are not supported.
 
-= Detecting and Repairing Files =
-
-It is recommended that you write source files only in ASCII text, but
-Phabricator fully supports UTF-8 source files.
-
-If you have a project which isn't valid UTF-8 because a few files have random
-binary nonsense in them, there is a script in libphutil which can help you
-identify and fix them:
-
-  project/ $ libphutil/scripts/utils/utf8.php
-
-Generally, run this script on all source files with "-t" to find files with bad
-byte ranges, and then run it without "-t" on each file to identify where there
-are problems. For example:
-
-  project/ $ find . -type f -name '*.c' -print0 | xargs -0 -n256 ./utf8 -t
-  ./hello_world.c
-
-If this script exits without output, you're in good shape and all the files that
-were identified are valid UTF-8. If it found some problems, you need to repair
-them. You can identify the specific problems by omitting the "-t" flag:
-
-  project/ $ ./utf8.php hello_world.c
-  FAIL  hello_world.c
-
-    3  main()
-    4  {
-    5      printf ("Hello World<0xE9><0xD6>!\n");
-    6  }
-    7
-
-This shows the offending bytes on line 5 (in the actual console display, they'll
-be highlighted). Often a codebase will mostly be valid UTF-8 but have a few
-scattered files that have other things in them, like curly quotes which someone
-copy-pasted from Word into a comment. In these cases, you can just manually
-identify and fix the problems pretty easily.
-
-If you have a prohibitively large number of UTF-8 issues in your source code,
-Phabricator doesn't include any default tools to help you process them in a
-systematic way. You could hack up `utf8.php` as a starting point, or use other
-tools to batch-process your source files.
-
 = Support for Alternate Encodings =
 
 Phabricator has some support for encodings other than UTF-8.

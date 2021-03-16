@@ -90,14 +90,7 @@ have PHP installed, you can download it from <http://www.php.net/>.
 
 To install Arcanist, pick an install directory and clone the code from GitHub:
 
-  some_install_path/ $ git clone https://github.com/phacility/libphutil.git
   some_install_path/ $ git clone https://github.com/phacility/arcanist.git
-
-This should leave you with a directory structure like this
-
-  some_install_path/    # Wherever you chose to install it.
-    arcanist/           # Arcanist-specific code and libraries.
-    libphutil/          # A shared library Arcanist depends upon.
 
 Now add `some_install_path/arcanist/bin/` to your PATH environment variable.
 When you type "arc", you should see something like this:
@@ -110,8 +103,7 @@ trouble getting this far, see these detailed guides:
   - On Windows: @{article:Arcanist User Guide: Windows}
   - On Mac OS X: @{article:Arcanist User Guide: Mac OS X}
 
-You can later upgrade Arcanist and libphutil to the latest versions with
-`arc upgrade`:
+You can later upgrade Arcanist to the latest version with `arc upgrade`:
 
   $ arc upgrade
 
@@ -122,7 +114,7 @@ installed and keep people up to date. Here are some approaches you might be
 able to use:
 
   - Facebook does most development on development servers, which have a standard
-    environment and NFS mounts. Arcanist and libphutil themselves live on an
+    environment and NFS mounts. Arcanist lives on an
     NFS mount, and the default `.bashrc` adds them to the PATH. Updating the
     mount source updates everyone's versions, and new employees have a working
     `arc` when they first log in.
