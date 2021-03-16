@@ -13,7 +13,6 @@ final class AlmanacBinding
   protected $servicePHID;
   protected $devicePHID;
   protected $interfacePHID;
-  protected $mailKey;
   protected $isDisabled;
 
   private $service = self::ATTACHABLE;
@@ -33,7 +32,6 @@ final class AlmanacBinding
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'mailKey' => 'bytes20',
         'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -51,15 +49,8 @@ final class AlmanacBinding
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacBindingPHIDType::TYPECONST);
-  }
-
-  public function save() {
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
-    return parent::save();
+  public function getPHIDType() {
+    return AlmanacBindingPHIDType::TYPECONST;
   }
 
   public function getName() {
@@ -67,7 +58,9 @@ final class AlmanacBinding
   }
 
   public function getURI() {
-    return '/almanac/binding/'.$this->getID().'/';
+    return urisprintf(
+      '/almanac/binding/%s/',
+      $this->getID());
   }
 
   public function getService() {
