@@ -153,14 +153,19 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           ),
           $lint);
 
-        $unit = self::renderDiffUnitStar($unit_status);
-        $unit = phutil_tag(
-          'div',
-          array(
-            'class' => 'lintunit-star',
-            'title' => self::getDiffUnitMessage($unit_status),
-          ),
-          $unit);
+        $status = DifferentialUnitStatus::newStatusFromValue($unit_status);
+
+        $unit_icon = $status->getIconIcon();
+        $unit_color = $status->getIconColor();
+        $unit_name = $status->getName();
+
+        $unit = id(new PHUIIconView())
+          ->setIcon($unit_icon, $unit_color)
+          ->addSigil('has-tooltip')
+          ->setMetadata(
+            array(
+              'tip' => $unit_name,
+            ));
 
         $base = $this->renderBaseRevision($diff);
       } else {
@@ -303,20 +308,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return self::renderDiffStar($star);
   }
 
-  private static function renderDiffUnitStar($unit_status) {
-    static $map = array(
-      DifferentialUnitStatus::UNIT_NONE => self::STAR_NONE,
-      DifferentialUnitStatus::UNIT_OKAY => self::STAR_OKAY,
-      DifferentialUnitStatus::UNIT_WARN => self::STAR_WARN,
-      DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
-      DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
-      DifferentialUnitStatus::UNIT_AUTO_SKIP => self::STAR_SKIP,
-    );
-    $star = idx($map, $unit_status, self::STAR_FAIL);
-
-    return self::renderDiffStar($star);
-  }
-
   public static function getDiffLintMessage(DifferentialDiff $diff) {
     switch ($diff->getLintStatus()) {
       case DifferentialLintStatus::LINT_NONE:
@@ -331,25 +322,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         return pht('Lint Skipped');
       case DifferentialLintStatus::LINT_AUTO_SKIP:
         return pht('Automatic diff as part of commit; lint not applicable.');
-    }
-    return pht('Unknown');
-  }
-
-  public static function getDiffUnitMessage($unit_status) {
-    switch ($unit_status) {
-      case DifferentialUnitStatus::UNIT_NONE:
-        return pht('No Unit Test Coverage');
-      case DifferentialUnitStatus::UNIT_OKAY:
-        return pht('Unit Tests OK');
-      case DifferentialUnitStatus::UNIT_WARN:
-        return pht('Unit Test Warnings');
-      case DifferentialUnitStatus::UNIT_FAIL:
-        return pht('Unit Test Errors');
-      case DifferentialUnitStatus::UNIT_SKIP:
-        return pht('Unit Tests Skipped');
-      case DifferentialUnitStatus::UNIT_AUTO_SKIP:
-        return pht(
-          'Automatic diff as part of commit; unit tests not applicable.');
     }
     return pht('Unknown');
   }
