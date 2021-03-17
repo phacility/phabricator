@@ -84,7 +84,7 @@ final class DifferentialUnitStatus extends Phobject {
       ),
       self::UNIT_AUTO_SKIP => array(
         'name' => pht('Tests Not Applicable'),
-        'icon.icon' => 'fa-upload',
+        'icon.icon' => 'fa-code',
         'icon.color' => 'grey',
       ),
     );

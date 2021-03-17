@@ -139,34 +139,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
 
       if ($diff) {
-        $unit_status = idx(
-          $this->unitStatus,
-          $diff->getPHID(),
-          $diff->getUnitStatus());
-
-        $lint = self::renderDiffLintStar($row['obj']);
-        $lint = phutil_tag(
-          'div',
-          array(
-            'class' => 'lintunit-star',
-            'title' => self::getDiffLintMessage($diff),
-          ),
-          $lint);
-
-        $status = DifferentialUnitStatus::newStatusFromValue($unit_status);
-
-        $unit_icon = $status->getIconIcon();
-        $unit_color = $status->getIconColor();
-        $unit_name = $status->getName();
-
-        $unit = id(new PHUIIconView())
-          ->setIcon($unit_icon, $unit_color)
-          ->addSigil('has-tooltip')
-          ->setMetadata(
-            array(
-              'tip' => $unit_name,
-            ));
-
+        $lint = $this->newLintStatusView($diff);
+        $unit = $this->newUnitStatusView($diff);
         $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
@@ -287,53 +261,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return $content;
   }
 
-  const STAR_NONE = 'none';
-  const STAR_OKAY = 'okay';
-  const STAR_WARN = 'warn';
-  const STAR_FAIL = 'fail';
-  const STAR_SKIP = 'skip';
-
-  private static function renderDiffLintStar(DifferentialDiff $diff) {
-    static $map = array(
-      DifferentialLintStatus::LINT_NONE => self::STAR_NONE,
-      DifferentialLintStatus::LINT_OKAY => self::STAR_OKAY,
-      DifferentialLintStatus::LINT_WARN => self::STAR_WARN,
-      DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
-      DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
-      DifferentialLintStatus::LINT_AUTO_SKIP => self::STAR_SKIP,
-    );
-
-    $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
-
-    return self::renderDiffStar($star);
-  }
-
-  public static function getDiffLintMessage(DifferentialDiff $diff) {
-    switch ($diff->getLintStatus()) {
-      case DifferentialLintStatus::LINT_NONE:
-        return pht('No Linters Available');
-      case DifferentialLintStatus::LINT_OKAY:
-        return pht('Lint OK');
-      case DifferentialLintStatus::LINT_WARN:
-        return pht('Lint Warnings');
-      case DifferentialLintStatus::LINT_FAIL:
-        return pht('Lint Errors');
-      case DifferentialLintStatus::LINT_SKIP:
-        return pht('Lint Skipped');
-      case DifferentialLintStatus::LINT_AUTO_SKIP:
-        return pht('Automatic diff as part of commit; lint not applicable.');
-    }
-    return pht('Unknown');
-  }
-
-  private static function renderDiffStar($star) {
-    $class = 'diff-star-'.$star;
-    return phutil_tag(
-      'span',
-      array('class' => $class),
-      "\xE2\x98\x85");
-  }
-
   private function renderBaseRevision(DifferentialDiff $diff) {
     switch ($diff->getSourceControlSystem()) {
       case 'git':
@@ -373,4 +300,42 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     }
     return $link;
   }
+
+  private function newLintStatusView(DifferentialDiff $diff) {
+    $value = $diff->getLintStatus();
+    $status = DifferentialLintStatus::newStatusFromValue($value);
+
+    $icon = $status->getIconIcon();
+    $color = $status->getIconColor();
+    $name = $status->getName();
+
+    return $this->newDiffStatusIconView($icon, $color, $name);
+  }
+
+  private function newUnitStatusView(DifferentialDiff $diff) {
+    $value = $diff->getUnitStatus();
+
+    // NOTE: We may be overriding the value on the diff with a value from
+    // Harbormaster.
+    $value = idx($this->unitStatus, $diff->getPHID(), $value);
+
+    $status = DifferentialUnitStatus::newStatusFromValue($value);
+
+    $icon = $status->getIconIcon();
+    $color = $status->getIconColor();
+    $name = $status->getName();
+
+    return $this->newDiffStatusIconView($icon, $color, $name);
+  }
+
+  private function newDiffStatusIconView($icon, $color, $name) {
+    return id(new PHUIIconView())
+      ->setIcon($icon, $color)
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => $name,
+        ));
+  }
+
 }

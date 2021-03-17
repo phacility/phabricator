@@ -17,6 +17,7 @@ final class DifferentialConstantsModule
     return array(
       $this->renderRevisionStatuses($viewer),
       $this->renderUnitStatuses($viewer),
+      $this->renderLintStatuses($viewer),
     );
   }
 
@@ -140,5 +141,40 @@ final class DifferentialConstantsModule
 
     return $view;
   }
+
+  private function renderLintStatuses(PhabricatorUser $viewer) {
+    $statuses = DifferentialLintStatus::getStatusMap();
+
+    $rows = array();
+    foreach ($statuses as $status) {
+      $rows[] = array(
+        $status->getValue(),
+        id(new PHUIIconView())
+          ->setIcon($status->getIconIcon(), $status->getIconColor()),
+        $status->getName(),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Value'),
+          pht('Icon'),
+          pht('Name'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          null,
+          'wide pri',
+        ));
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Differential Lint Statuses'))
+      ->setTable($table);
+
+    return $view;
+  }
+
 
 }

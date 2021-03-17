@@ -38,7 +38,6 @@ final class DifferentialLintField
   protected function getDiffPropertyKeys() {
     return array(
       'arc:lint',
-      'arc:lint-excuse',
     );
   }
 
@@ -84,33 +83,18 @@ final class DifferentialLintField
     DifferentialDiff $diff,
     array $messages) {
 
-    $colors = array(
-      DifferentialLintStatus::LINT_NONE => 'grey',
-      DifferentialLintStatus::LINT_OKAY => 'green',
-      DifferentialLintStatus::LINT_WARN => 'yellow',
-      DifferentialLintStatus::LINT_FAIL => 'red',
-      DifferentialLintStatus::LINT_SKIP => 'blue',
-      DifferentialLintStatus::LINT_AUTO_SKIP => 'blue',
-    );
-    $icon_color = idx($colors, $diff->getLintStatus(), 'grey');
+    $status_value = $diff->getLintStatus();
+    $status = DifferentialLintStatus::newStatusFromValue($status_value);
 
-    $message = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
-
-    $excuse = $diff->getProperty('arc:lint-excuse');
-    if (strlen($excuse)) {
-      $excuse = array(
-        phutil_tag('strong', array(), pht('Excuse:')),
-        ' ',
-        phutil_escape_html_newlines($excuse),
-      );
-    }
+    $status_icon = $status->getIconIcon();
+    $status_color = $status->getIconColor();
+    $status_name = $status->getName();
 
     $status = id(new PHUIStatusListView())
       ->addItem(
         id(new PHUIStatusItemView())
-          ->setIcon(PHUIStatusItemView::ICON_STAR, $icon_color)
-          ->setTarget($message)
-          ->setNote($excuse));
+          ->setIcon($status_icon, $status_color)
+          ->setTarget($status_name));
 
     return $status;
   }
