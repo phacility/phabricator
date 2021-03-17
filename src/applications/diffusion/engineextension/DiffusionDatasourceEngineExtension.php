@@ -66,12 +66,12 @@ final class DiffusionDatasourceEngineExtension
       $parts = null;
       if (preg_match('/(.*)(?:\\.|::|->)(.*)/', $symbol, $parts)) {
         return urisprintf(
-          '/diffusion/symbol/%s/?jump=true&context=%s',
+          '/diffusion/symbol/%p/?jump=true&context=%s',
           $parts[2],
           $parts[1]);
       } else {
         return urisprintf(
-          '/diffusion/symbol/%s/?jump=true',
+          '/diffusion/symbol/%p/?jump=true',
           $symbol);
       }
     }
