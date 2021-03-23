@@ -829,9 +829,10 @@ JX.install('DiffInline', {
       if (this._shouldDeleteOnSave()) {
         this._setPreventUndo(true);
         this._applyDelete();
-      } else {
-        this._applySave();
+        return;
       }
+
+      this._applySave();
     },
 
     _shouldDeleteOnSave: function() {
@@ -841,6 +842,29 @@ JX.install('DiffInline', {
       // state we need yet.
 
       return !state.getText().length;
+    },
+
+    _shouldDeleteOnCancel: function() {
+      var state = this._getActiveContentState();
+
+      // TODO: This is greatly simplified, too.
+
+      return !state.getText().length;
+    },
+
+    _shouldUndoOnCancel: function() {
+      var state = this._getActiveContentState().getWireFormat();
+
+      // TODO: This is also simplified.
+
+      var is_empty = this._isVoidContentState(state);
+      var is_same = this._isSameContentState(state, this._originalState);
+
+      if (!is_empty && !is_same) {
+        return true;
+      }
+
+      return false;
     },
 
     _applySave: function() {
@@ -856,6 +880,14 @@ JX.install('DiffInline', {
       var handler = JX.bind(this, this._ondeleteresponse);
 
       var data = this._newRequestData('delete');
+
+      this._applyCall(handler, data);
+    },
+
+    _applyCancel: function(state) {
+      var handler = JX.bind(this, this._onCancelResponse);
+
+      var data = this._newRequestData('cancel', state);
 
       this._applyCall(handler, data);
     },
@@ -903,57 +935,34 @@ JX.install('DiffInline', {
     },
 
     cancel: function() {
-      var state = this._getActiveContentState().getWireFormat();
-
       JX.DOM.remove(this._editRow);
       this._editRow = null;
 
-      var is_empty = this._isVoidContentState(state);
-      var is_same = this._isSameContentState(state, this._originalState);
-      if (!is_empty && !is_same) {
-        this._drawUneditRows(state);
+      if (this._shouldDeleteOnCancel()) {
+        this._setPreventUndo(true);
+        this._applyDelete();
+        return;
       }
 
-      // If this was an empty box and we typed some text and then hit cancel,
-      // don't show the empty concrete inline.
-      if (this._isVoidContentState(this._originalState)) {
-        this.setInvisible(true);
-      } else {
-        this.setInvisible(false);
+      if (this._shouldUndoOnCancel()) {
+        var state = this._getActiveContentState().getWireFormat();
+        this._drawUneditRows(state);
       }
 
       // If you "undo" to restore text ("AB") and then "Cancel", we put you
       // back in the original text state ("A"). We also send the original
       // text ("A") to the server as the current persistent state.
 
-      var uri = this._getInlineURI();
-      var data = this._newRequestData('cancel', this._originalState);
-      var handler = JX.bind(this, this._onCancelResponse);
+      this.setEditing(false);
+      this.setInvisible(false);
 
-      this.setLoading(true);
-
-      new JX.Request(uri, handler)
-        .setData(data)
-        .send();
+      this._applyCancel(this._originalState);
 
       this._didUpdate(true);
     },
 
     _onCancelResponse: function(response) {
-      this.setEditing(false);
-      this.setLoading(false);
-
-      // If the comment was empty when we started editing it (there's no
-      // original text) and empty when we finished editing it (there's no
-      // undo row), just delete the comment.
-      if (this._isVoidContentState(this._originalState) && !this.isUndo()) {
-        this.setDeleted(true);
-
-        JX.DOM.remove(this._row);
-        this._row = null;
-
-        this._didUpdate();
-      }
+      // Nothing to do.
     },
 
     _getSuggestionNode: function(row) {
@@ -970,9 +979,8 @@ JX.install('DiffInline', {
         this._editRow = null;
       }
 
-      this.setLoading(false);
-      this.setInvisible(false);
       this.setEditing(false);
+      this.setInvisible(false);
 
       var new_row = this._drawContentRows(JX.$H(response.view).getNode());
       JX.DOM.remove(this._row);

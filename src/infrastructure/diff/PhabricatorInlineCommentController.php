@@ -248,10 +248,6 @@ abstract class PhabricatorInlineCommentController
         // to set the stored state back to "A".
         $this->updateCommentContentState($inline);
 
-        if ($inline->isVoidComment($viewer)) {
-          $inline->setIsDeleted(1);
-        }
-
         $this->saveComment($inline);
 
         return $this->buildEmptyResponse();
