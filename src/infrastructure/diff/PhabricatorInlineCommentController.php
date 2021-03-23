@@ -186,23 +186,15 @@ abstract class PhabricatorInlineCommentController
         if ($op === 'save') {
           $this->updateCommentContentState($inline);
 
-          $inline->setIsEditing(false);
+          $inline
+            ->setIsEditing(false)
+            ->setIsDeleted(0);
 
-          if (!$inline->isVoidComment($viewer)) {
-            $inline->setIsDeleted(0);
+          $this->saveComment($inline);
 
-            $this->saveComment($inline);
-
-            return $this->buildRenderedCommentResponse(
-              $inline,
-              $this->getIsOnRight());
-          } else {
-            $inline->setIsDeleted(1);
-
-            $this->saveComment($inline);
-
-            return $this->buildEmptyResponse();
-          }
+          return $this->buildRenderedCommentResponse(
+            $inline,
+            $this->getIsOnRight());
         } else {
           // NOTE: At time of writing, the "editing" state of inlines is
           // preserved by simulating a click on "Edit" when the inline loads.

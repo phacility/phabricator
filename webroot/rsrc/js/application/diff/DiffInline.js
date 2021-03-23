@@ -45,6 +45,7 @@ JX.install('DiffInline', {
     _undoRow: null,
     _undoType: null,
     _undoState: null,
+    _preventUndo: false,
 
     _draftRequest: null,
     _skipFocus: false,
@@ -159,6 +160,14 @@ JX.install('DiffInline', {
 
     getEndOffset: function() {
       return this._endOffset;
+    },
+
+    _setPreventUndo: function(prevent_undo) {
+      this._preventUndo = prevent_undo;
+    },
+
+    _getPreventUndo: function() {
+      return this._preventUndo;
     },
 
     setIsSelected: function(is_selected) {
@@ -617,7 +626,9 @@ JX.install('DiffInline', {
         this._editRow = null;
       }
 
-      this._drawUndeleteRows(state);
+      if (!this._getPreventUndo()) {
+        this._drawUndeleteRows(state);
+      }
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -815,17 +826,53 @@ JX.install('DiffInline', {
     },
 
     save: function() {
+      if (this._shouldDeleteOnSave()) {
+        this._setPreventUndo(true);
+        this._applyDelete();
+      } else {
+        this._applySave();
+      }
+    },
+
+    _shouldDeleteOnSave: function() {
       var state = this._getActiveContentState();
-      var handler = JX.bind(this, this._onsubmitresponse);
+
+      // TODO: This is greatly simplified because we don't track all the
+      // state we need yet.
+
+      return !state.getText().length;
+    },
+
+    _applySave: function() {
+      var handler = JX.bind(this, this._onsaveresponse);
+
+      var state = this._getActiveContentState();
+      var data = this._newRequestData('save', state.getWireFormat());
+
+      this._applyCall(handler, data);
+    },
+
+    _applyDelete: function() {
+      var handler = JX.bind(this, this._ondeleteresponse);
+
+      var data = this._newRequestData('delete');
+
+      this._applyCall(handler, data);
+    },
+
+    _applyCall: function(handler, data) {
+      var uri = this._getInlineURI();
+
+      var callback = JX.bind(this, function() {
+        this.setLoading(false);
+        handler.apply(null, arguments);
+      });
 
       this.setLoading(true);
 
-      var uri = this._getInlineURI();
-      var data = this._newRequestData('save', state.getWireFormat());
-
-      new JX.Request(uri, handler)
-        .setData(data)
-        .send();
+      new JX.Workflow(uri, data)
+        .setHandler(callback)
+        .start();
     },
 
     undo: function() {
@@ -917,7 +964,7 @@ JX.install('DiffInline', {
       }
     },
 
-    _onsubmitresponse: function(response) {
+    _onsaveresponse: function(response) {
       if (this._editRow) {
         JX.DOM.remove(this._editRow);
         this._editRow = null;
@@ -927,30 +974,9 @@ JX.install('DiffInline', {
       this.setInvisible(false);
       this.setEditing(false);
 
-      this._onupdate(response);
-    },
-
-    _onupdate: function(response) {
-      var new_row;
-      if (response.view) {
-        new_row = this._drawContentRows(JX.$H(response.view).getNode());
-      }
-
-      // TODO: Save the old row so the action it's undo-able if it was a
-      // delete.
-      var remove_old = true;
-      if (remove_old) {
-        JX.DOM.remove(this._row);
-      }
-
-      // If you delete the content on a comment and save it, it acts like a
-      // delete: the server does not return a new row.
-      if (new_row) {
-        this.bindToRow(new_row);
-      } else {
-        this.setDeleted(true);
-        this._row = null;
-      }
+      var new_row = this._drawContentRows(JX.$H(response.view).getNode());
+      JX.DOM.remove(this._row);
+      this.bindToRow(new_row);
 
       this._didUpdate();
     },
