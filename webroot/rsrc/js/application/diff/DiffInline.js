@@ -612,7 +612,7 @@ JX.install('DiffInline', {
       // read and preserve the text so "Undo" restores it.
       var state = null;
       if (this._editRow) {
-        state = this._readFormState(this._editRow);
+        state = this._getActiveContentState().getWireFormat();
         JX.DOM.remove(this._editRow);
         this._editRow = null;
       }
@@ -856,7 +856,7 @@ JX.install('DiffInline', {
     },
 
     cancel: function() {
-      var state = this._readFormState(this._editRow);
+      var state = this._getActiveContentState().getWireFormat();
 
       JX.DOM.remove(this._editRow);
       this._editRow = null;
@@ -907,28 +907,6 @@ JX.install('DiffInline', {
 
         this._didUpdate();
       }
-    },
-
-    _readFormState: function(row) {
-      var state = this._newContentState();
-
-      var node;
-
-      try {
-        node = JX.DOM.find(row, 'textarea', 'inline-content-text');
-        state.text = node.value;
-      } catch (ex) {
-        // Ignore.
-      }
-
-      node = this._getSuggestionNode(row);
-      if (node) {
-        state.suggestionText = node.value;
-      }
-
-      state.hasSuggestion = this._getActiveContentState().getHasSuggestion();
-
-      return state;
     },
 
     _getSuggestionNode: function(row) {
@@ -1043,7 +1021,7 @@ JX.install('DiffInline', {
         return null;
       }
 
-      var state = this._readFormState(this._editRow);
+      var state = this._getActiveContentState().getWireFormat();
       if (this._isVoidContentState(state)) {
         return null;
       }
