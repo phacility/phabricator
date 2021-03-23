@@ -1,12 +1,14 @@
 /**
  * @provides phabricator-diff-inline
  * @requires javelin-dom
+ *           phabricator-diff-inline-content-state
  * @javelin
  */
 
 JX.install('DiffInline', {
 
   construct : function() {
+    this._activeContentState = new JX.DiffInlineContentState();
   },
 
   members: {
@@ -52,6 +54,8 @@ JX.install('DiffInline', {
     _endOffset: null,
     _isSelected: false,
     _canSuggestEdit: false,
+
+    _activeContentState: null,
 
     bindToRow: function(row) {
       this._row = row;
@@ -785,8 +789,13 @@ JX.install('DiffInline', {
       this.triggerDraft();
     },
 
+    _getActiveContentState: function() {
+      return this._activeContentState;
+    },
+
     setHasSuggestion: function(has_suggestion) {
-      this._hasSuggestion = has_suggestion;
+      var state = this._getActiveContentState();
+      state.setHasSuggestion(has_suggestion);
 
       var button = this._getSuggestionButton();
       var pht = this.getChangeset().getChangesetList().getTranslations();
@@ -806,7 +815,7 @@ JX.install('DiffInline', {
     },
 
     getHasSuggestion: function() {
-      return this._hasSuggestion;
+      return this._getActiveContentState().getHasSuggestion();
     },
 
     save: function() {
@@ -920,7 +929,7 @@ JX.install('DiffInline', {
         state.suggestionText = node.value;
       }
 
-      state.hasSuggestion = this.getHasSuggestion();
+      state.hasSuggestion = this._getActiveContentState().getHasSuggestion();
 
       return state;
     },

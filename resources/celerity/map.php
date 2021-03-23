@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => 'ab3502fe',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => 'ffb69e3d',
-    'differential.pkg.js' => 'd1150814',
+    'differential.pkg.js' => '5e0c7197',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => '78c9885d',
     'maniphest.pkg.css' => '35995d6d',
@@ -385,7 +385,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
     'rsrc/js/application/diff/DiffChangeset.js' => 'd7d3ba75',
     'rsrc/js/application/diff/DiffChangesetList.js' => 'cc2c5de5',
-    'rsrc/js/application/diff/DiffInline.js' => '511a1315',
+    'rsrc/js/application/diff/DiffInline.js' => '09e0c6e5',
+    'rsrc/js/application/diff/DiffInlineContentState.js' => 'cb9e5396',
     'rsrc/js/application/diff/DiffPathView.js' => '8207abf9',
     'rsrc/js/application/diff/DiffTreeView.js' => '5d83623b',
     'rsrc/js/application/differential/behavior-diff-radios.js' => '925fe8cd',
@@ -787,7 +788,8 @@ return array(
     'phabricator-dashboard-css' => '5a205b9d',
     'phabricator-diff-changeset' => 'd7d3ba75',
     'phabricator-diff-changeset-list' => 'cc2c5de5',
-    'phabricator-diff-inline' => '511a1315',
+    'phabricator-diff-inline' => '09e0c6e5',
+    'phabricator-diff-inline-content-state' => 'cb9e5396',
     'phabricator-diff-path-view' => '8207abf9',
     'phabricator-diff-tree-view' => '5d83623b',
     'phabricator-drag-and-drop-file-upload' => '4370900d',
@@ -997,6 +999,10 @@ return array(
     '0922e81d' => array(
       'herald-rule-editor',
       'javelin-behavior',
+    ),
+    '09e0c6e5' => array(
+      'javelin-dom',
+      'phabricator-diff-inline-content-state',
     ),
     '0ad8d31f' => array(
       'javelin-behavior',
@@ -1397,9 +1403,6 @@ return array(
     '506aa3f4' => array(
       'javelin-behavior',
       'javelin-stratcom',
-      'javelin-dom',
-    ),
-    '511a1315' => array(
       'javelin-dom',
     ),
     '5202e831' => array(
@@ -2086,6 +2089,9 @@ return array(
       'javelin-workflow',
       'javelin-json',
     ),
+    'cb9e5396' => array(
+      'javelin-dom',
+    ),
     'cc2c5de5' => array(
       'javelin-install',
       'phuix-button-view',
@@ -2441,6 +2447,7 @@ return array(
       'javelin-behavior-phabricator-object-selector',
       'javelin-behavior-repository-crossreference',
       'javelin-behavior-aphront-more',
+      'phabricator-diff-inline-content-state',
       'phabricator-diff-inline',
       'phabricator-diff-changeset',
       'phabricator-diff-changeset-list',

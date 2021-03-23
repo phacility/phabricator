@@ -212,6 +212,7 @@ return array(
 
     'javelin-behavior-aphront-more',
 
+    'phabricator-diff-inline-content-state',
     'phabricator-diff-inline',
     'phabricator-diff-changeset',
     'phabricator-diff-changeset-list',
