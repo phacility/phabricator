@@ -416,25 +416,12 @@ JX.install('DiffInline', {
         .send();
     },
 
-    _getContentState: function() {
-      var state;
-
-      if (this._editRow) {
-        state = this._readFormState(this._editRow);
-      } else {
-        state = this._originalState;
-      }
-
-      return state;
-    },
-
     reply: function(with_quote) {
       this._closeMenu();
 
       var content_state = this._newContentState();
       if (with_quote) {
-        var text = this._getContentState().text;
-        text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
+        var text = this._getActiveContentState().getTextForQuote();
         content_state.text = text;
       }
 
@@ -607,6 +594,9 @@ JX.install('DiffInline', {
     _readInlineState: function(state) {
       this._id = state.id;
       this._originalState = state.contentState;
+
+      this._getActiveContentState().readWireFormat(state.contentState);
+
       this._canSuggestEdit = state.canSuggestEdit;
     },
 
@@ -790,7 +780,13 @@ JX.install('DiffInline', {
     },
 
     _getActiveContentState: function() {
-      return this._activeContentState;
+      var state = this._activeContentState;
+
+      if (this._editRow) {
+        state.readForm(this._editRow);
+      }
+
+      return state;
     },
 
     setHasSuggestion: function(has_suggestion) {
@@ -819,12 +815,13 @@ JX.install('DiffInline', {
     },
 
     save: function() {
+      var state = this._getActiveContentState();
       var handler = JX.bind(this, this._onsubmitresponse);
 
       this.setLoading(true);
 
       var uri = this._getInlineURI();
-      var data = this._newRequestData('save', this._getContentState());
+      var data = this._newRequestData('save', state.getWireFormat());
 
       new JX.Request(uri, handler)
         .setData(data)
