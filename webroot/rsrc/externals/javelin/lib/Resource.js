@@ -149,6 +149,10 @@ JX.install('Resource', {
         }
       }
 
+      for (var jj = 0; jj < errors.length; jj++) {
+        JX.log(errors[jj]);
+      }
+
       if (errors.length) {
         throw errors[0];
       }

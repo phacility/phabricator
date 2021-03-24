@@ -9,6 +9,7 @@ JX.install('DiffInline', {
 
   construct : function() {
     this._activeContentState = new JX.DiffInlineContentState();
+    this._committedContentState = new JX.DiffInlineContentState();
   },
 
   members: {
@@ -21,7 +22,6 @@ JX.install('DiffInline', {
     _displaySide: null,
     _isNewFile: null,
     _replyToCommentPHID: null,
-    _originalState: null,
     _snippet: null,
     _menuItems: null,
     _documentEngineKey: null,
@@ -56,6 +56,7 @@ JX.install('DiffInline', {
     _isSelected: false,
     _canSuggestEdit: false,
 
+    _committedContentState: null,
     _activeContentState: null,
 
     bindToRow: function(row) {
@@ -336,8 +337,6 @@ JX.install('DiffInline', {
       this._phid = null;
       this._isCollapsed = false;
 
-      this._originalState = null;
-
       return row;
     },
 
@@ -602,7 +601,10 @@ JX.install('DiffInline', {
 
     _readInlineState: function(state) {
       this._id = state.id;
-      this._originalState = state.contentState;
+
+      // TODO: This is not the correct content state after a reload: it is
+      // the draft state.
+      this._getCommittedContentState().readWireFormat(state.contentState);
 
       this._getActiveContentState().readWireFormat(state.contentState);
 
@@ -673,7 +675,10 @@ JX.install('DiffInline', {
       this._editRow = this._drawRows(rows, null, 'edit');
 
       this._drawSuggestionState(this._editRow);
-      this.setHasSuggestion(this._originalState.hasSuggestion);
+
+      // TODO: We're just doing this for the rendering side effect of drawing
+      // the button text.
+      this.setHasSuggestion(this.getHasSuggestion());
     },
 
     _drawRows: function(rows, cursor, type) {
@@ -800,6 +805,10 @@ JX.install('DiffInline', {
       return state;
     },
 
+    _getCommittedContentState: function() {
+      return this._committedContentState;
+    },
+
     setHasSuggestion: function(has_suggestion) {
       var state = this._getActiveContentState();
       state.setHasSuggestion(has_suggestion);
@@ -853,12 +862,13 @@ JX.install('DiffInline', {
     },
 
     _shouldUndoOnCancel: function() {
-      var state = this._getActiveContentState().getWireFormat();
+      var new_state = this._getActiveContentState().getWireFormat();
+      var old_state = this._getCommittedContentState().getWireFormat();
 
       // TODO: This is also simplified.
 
-      var is_empty = this._isVoidContentState(state);
-      var is_same = this._isSameContentState(state, this._originalState);
+      var is_empty = this._isVoidContentState(new_state);
+      var is_same = this._isSameContentState(new_state, old_state);
 
       if (!is_empty && !is_same) {
         return true;
@@ -956,7 +966,8 @@ JX.install('DiffInline', {
       this.setEditing(false);
       this.setInvisible(false);
 
-      this._applyCancel(this._originalState);
+      var old_state = this._getCommittedContentState();
+      this._applyCancel(old_state.getWireFormat());
 
       this._didUpdate(true);
     },
@@ -1184,6 +1195,9 @@ JX.install('DiffInline', {
     },
 
     _isVoidContentState: function(state) {
+      if (!state.text) {
+        return true;
+      }
       return (!state.text.length && !state.suggestionText.length);
     },
 
