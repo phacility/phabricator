@@ -316,10 +316,27 @@ abstract class PhabricatorInlineCommentController
           $this->updateCommentContentState($inline);
         }
 
+        // NOTE: We're writing the comment as "deleted", then reloading to
+        // pick up context and undeleting it. This is silly -- we just want
+        // to load and attach context -- but just loading context is currently
+        // complicated (for example, context relies on cache keys that expect
+        // the inline to have an ID).
+
+        $inline->setIsDeleted(1);
+
         $this->saveComment($inline);
 
         // Reload the inline to attach context.
         $inline = $this->loadCommentByIDForEdit($inline->getID());
+
+        // Now, we can read the source file and set the initial state.
+        $state = $inline->getContentState();
+        $default_suggestion = $inline->getDefaultSuggestionText();
+        $state->setContentSuggestionText($default_suggestion);
+        $inline->setContentState($state);
+        $inline->setIsDeleted(0);
+
+        $this->saveComment($inline);
 
         $edit_dialog = $this->buildEditDialog($inline);
 

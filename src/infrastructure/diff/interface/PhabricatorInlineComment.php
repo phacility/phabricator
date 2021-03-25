@@ -364,6 +364,19 @@ abstract class PhabricatorInlineComment
     return $this->getStorageObject()->getInlineContext();
   }
 
+  public function getDefaultSuggestionText() {
+    $context = $this->getInlineContext();
+
+    if (!$context) {
+      return null;
+    }
+
+    $default = $context->getBodyLines();
+    $default = implode('', $default);
+
+    return $default;
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

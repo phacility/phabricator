@@ -772,21 +772,12 @@ JX.install('DiffInline', {
 
       this.setHasSuggestion(!this.getHasSuggestion());
 
-      // The first time the user actually clicks the button and enables
-      // suggestions for a given editor state, fill the input with the
-      // underlying text if there isn't any text yet.
+      // Resize the suggestion input for size of the text.
       if (this.getHasSuggestion()) {
         if (this._editRow) {
           var node = this._getSuggestionNode(this._editRow);
           if (node) {
-            if (!node.value.length) {
-              var data = JX.Stratcom.getData(node);
-              if (!data.hasSetDefault) {
-                data.hasSetDefault = true;
-                node.value = data.defaultText;
-                node.rows = Math.max(3, node.value.split('\n').length);
-              }
-            }
+            node.rows = Math.max(3, node.value.split('\n').length);
           }
         }
       }
