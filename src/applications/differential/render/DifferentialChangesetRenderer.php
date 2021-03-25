@@ -718,6 +718,9 @@ abstract class DifferentialChangesetRenderer extends Phobject {
 
     foreach ($views as $key => $view) {
       $scaffold = $this->getRowScaffoldForInline($view);
+
+      $scaffold->setIsUndoTemplate(true);
+
       $views[$key] = id(new PHUIDiffInlineCommentTableScaffold())
         ->addRowScaffold($scaffold);
     }
