@@ -8,8 +8,7 @@
 JX.install('DiffInline', {
 
   construct : function() {
-    this._activeContentState = new JX.DiffInlineContentState();
-    this._committedContentState = new JX.DiffInlineContentState();
+    this._state = {};
   },
 
   members: {
@@ -56,8 +55,7 @@ JX.install('DiffInline', {
     _isSelected: false,
     _canSuggestEdit: false,
 
-    _committedContentState: null,
-    _activeContentState: null,
+    _state: null,
 
     bindToRow: function(row) {
       this._row = row;
@@ -602,13 +600,21 @@ JX.install('DiffInline', {
     _readInlineState: function(state) {
       this._id = state.id;
 
-      // TODO: This is not the correct content state after a reload: it is
-      // the draft state.
-      this._getCommittedContentState().readWireFormat(state.contentState);
-
-      this._getActiveContentState().readWireFormat(state.contentState);
+      this._state = {
+        initial: this._newContentStateFromWireFormat(state.state.initial),
+        committed: this._newContentStateFromWireFormat(state.state.committed),
+        active: this._newContentStateFromWireFormat(state.state.active)
+      };
 
       this._canSuggestEdit = state.canSuggestEdit;
+    },
+
+    _newContentStateFromWireFormat: function(map) {
+      if (map === null) {
+        return null;
+      }
+
+      return new JX.DiffInlineContentState().readWireFormat(map);
     },
 
     _ondeleteresponse: function() {
@@ -787,7 +793,7 @@ JX.install('DiffInline', {
     },
 
     _getActiveContentState: function() {
-      var state = this._activeContentState;
+      var state = this._state.active;
 
       if (this._editRow) {
         state.readForm(this._editRow);
@@ -797,7 +803,11 @@ JX.install('DiffInline', {
     },
 
     _getCommittedContentState: function() {
-      return this._committedContentState;
+      return this._state.committed;
+    },
+
+    _getInitialContentState: function() {
+      return this._state.initial;
     },
 
     setHasSuggestion: function(has_suggestion) {
