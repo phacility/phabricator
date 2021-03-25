@@ -172,7 +172,9 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         if ($is_delete) {
-          $inline->setIsDeleted(1);
+          $inline
+            ->setIsEditing(false)
+            ->setIsDeleted(1);
         } else {
           $inline->setIsDeleted(0);
         }

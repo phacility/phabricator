@@ -44,7 +44,6 @@ JX.install('DiffInline', {
     _undoRow: null,
     _undoType: null,
     _undoState: null,
-    _preventUndo: false,
 
     _draftRequest: null,
     _skipFocus: false,
@@ -159,14 +158,6 @@ JX.install('DiffInline', {
 
     getEndOffset: function() {
       return this._endOffset;
-    },
-
-    _setPreventUndo: function(prevent_undo) {
-      this._preventUndo = prevent_undo;
-    },
-
-    _getPreventUndo: function() {
-      return this._preventUndo;
     },
 
     setIsSelected: function(is_selected) {
@@ -452,21 +443,12 @@ JX.install('DiffInline', {
         this._undoText = null;
       }
 
-      var uri = this._getInlineURI();
-      var handler = JX.bind(this, this._oneditresponse);
-
-      var data = this._newRequestData('edit', content_state);
-
-      this.setLoading(true);
-
-      new JX.Request(uri, handler)
-        .setData(data)
-        .send();
+      this._applyEdit(content_state);
     },
 
     delete: function(is_ref) {
       var uri = this._getInlineURI();
-      var handler = JX.bind(this, this._ondeleteresponse);
+      var handler = JX.bind(this, this._ondeleteresponse, false);
 
       // NOTE: This may be a direct delete (the user clicked on the inline
       // itself) or a "refdelete" (the user clicked somewhere else, like the
@@ -586,7 +568,6 @@ JX.install('DiffInline', {
       this._readInlineState(response.inline);
       this._drawEditRows(rows);
 
-      this.setLoading(false);
       this.setInvisible(true);
     },
 
@@ -617,24 +598,24 @@ JX.install('DiffInline', {
       return new JX.DiffInlineContentState().readWireFormat(map);
     },
 
-    _ondeleteresponse: function() {
-      // If there's an existing "unedit" undo element, remove it.
-      if (this._undoRow) {
-        JX.DOM.remove(this._undoRow);
-        this._undoRow = null;
-      }
+    _ondeleteresponse: function(prevent_undo) {
+      if (!prevent_undo) {
+        // If there's an existing "unedit" undo element, remove it.
+        if (this._undoRow) {
+          JX.DOM.remove(this._undoRow);
+          this._undoRow = null;
+        }
 
-      // If there's an existing editor, remove it. This happens when you
-      // delete a comment from the comment preview area. In this case, we
-      // read and preserve the text so "Undo" restores it.
-      var state = null;
-      if (this._editRow) {
-        state = this._getActiveContentState().getWireFormat();
-        JX.DOM.remove(this._editRow);
-        this._editRow = null;
-      }
+        // If there's an existing editor, remove it. This happens when you
+        // delete a comment from the comment preview area. In this case, we
+        // read and preserve the text so "Undo" restores it.
+        var state = null;
+        if (this._editRow) {
+          state = this._getActiveContentState().getWireFormat();
+          JX.DOM.remove(this._editRow);
+          this._editRow = null;
+        }
 
-      if (!this._getPreventUndo()) {
         this._drawUndeleteRows(state);
       }
 
@@ -692,7 +673,6 @@ JX.install('DiffInline', {
       var row = first_row;
       var anchor = cursor || this._row;
       cursor = cursor || this._row.nextSibling;
-
 
       var result_row;
       var next_row;
@@ -837,8 +817,10 @@ JX.install('DiffInline', {
 
     save: function() {
       if (this._shouldDeleteOnSave()) {
-        this._setPreventUndo(true);
-        this._applyDelete();
+        JX.DOM.remove(this._editRow);
+        this._editRow = null;
+
+        this._applyDelete(true);
         return;
       }
 
@@ -846,33 +828,54 @@ JX.install('DiffInline', {
     },
 
     _shouldDeleteOnSave: function() {
-      var state = this._getActiveContentState();
+      var active = this._getActiveContentState();
+      var initial = this._getInitialContentState();
 
-      // TODO: This is greatly simplified because we don't track all the
-      // state we need yet.
+      // When a user clicks "Save", it counts as a "delete" if the content
+      // of the comment is functionally empty.
 
-      return !state.getText().length;
-    },
+      // This isn't a delete if there's any text. Even if the text is a
+      // quote (so the state is the same as the initial state), we preserve
+      // it when the user clicks "Save".
+      if (!active.isTextEmpty()) {
+        return false;
+      }
 
-    _shouldDeleteOnCancel: function() {
-      var state = this._getActiveContentState();
+      // This isn't a delete if there's a suggestion and that suggestion is
+      // different from the initial state. (This means that an inline which
+      // purely suggests a block of code should be deleted is non-empty.)
+      if (active.getHasSuggestion()) {
+        if (!active.isSuggestionSimilar(initial)) {
+          return false;
+        }
+      }
 
-      // TODO: This is greatly simplified, too.
-
-      return !state.getText().length;
+      // Otherwise, this comment is functionally empty, so we can just treat
+      // a "Save" as a "delete".
+      return true;
     },
 
     _shouldUndoOnCancel: function() {
-      var new_state = this._getActiveContentState().getWireFormat();
-      var old_state = this._getCommittedContentState().getWireFormat();
+      var committed = this._getCommittedContentState();
+      var active = this._getActiveContentState();
+      var initial = this._getInitialContentState();
 
-      // TODO: This is also simplified.
+      // When a user clicks "Cancel", we only offer to let them "Undo" the
+      // action if the undo would be substantive.
 
-      var is_empty = this._isVoidContentState(new_state);
-      var is_same = this._isSameContentState(new_state, old_state);
-
-      if (!is_empty && !is_same) {
+      // The undo is substantive if the text is nonempty, and not similar to
+      // the last state.
+      var versus = committed || initial;
+      if (!active.isTextEmpty() && !active.isTextSimilar(versus)) {
         return true;
+      }
+
+      // The undo is substantive if there's a suggestion, and the suggestion
+      // is not similar to the last state.
+      if (active.getHasSuggestion()) {
+        if (!active.isSuggestionSimilar(versus)) {
+          return true;
+        }
       }
 
       return false;
@@ -887,8 +890,8 @@ JX.install('DiffInline', {
       this._applyCall(handler, data);
     },
 
-    _applyDelete: function() {
-      var handler = JX.bind(this, this._ondeleteresponse);
+    _applyDelete: function(prevent_undo) {
+      var handler = JX.bind(this, this._ondeleteresponse, prevent_undo);
 
       var data = this._newRequestData('delete');
 
@@ -899,6 +902,14 @@ JX.install('DiffInline', {
       var handler = JX.bind(this, this._onCancelResponse);
 
       var data = this._newRequestData('cancel', state);
+
+      this._applyCall(handler, data);
+    },
+
+    _applyEdit: function(state) {
+      var handler = JX.bind(this, this._oneditresponse);
+
+      var data = this._newRequestData('edit', state);
 
       this._applyCall(handler, data);
     },
@@ -946,31 +957,41 @@ JX.install('DiffInline', {
     },
 
     cancel: function() {
+      // NOTE: Read the state before we remove the editor. Otherwise, we might
+      // miss text the user has entered into the textarea.
+      var state = this._getActiveContentState().getWireFormat();
+
       JX.DOM.remove(this._editRow);
       this._editRow = null;
 
-      if (this._shouldDeleteOnCancel()) {
-        this._setPreventUndo(true);
-        this._applyDelete();
-        return;
-      }
+      // When a user clicks "Cancel", we delete the comment if it has never
+      // been saved: we don't have a non-empty display state to revert to.
+      var is_delete = (this._getCommittedContentState() === null);
 
-      if (this._shouldUndoOnCancel()) {
-        var state = this._getActiveContentState().getWireFormat();
-        this._drawUneditRows(state);
-      }
+      var is_undo = this._shouldUndoOnCancel();
 
       // If you "undo" to restore text ("AB") and then "Cancel", we put you
       // back in the original text state ("A"). We also send the original
       // text ("A") to the server as the current persistent state.
 
-      this.setEditing(false);
-      this.setInvisible(false);
+      if (is_undo) {
+        this._drawUneditRows(state);
+      }
 
-      var old_state = this._getCommittedContentState();
-      this._applyCancel(old_state.getWireFormat());
+      if (is_delete) {
+        // NOTE: We're always suppressing the undo from "delete". We want to
+        // use the "undo" we just added above instead, which will get us
+        // back to the ephemeral, client-side editor state.
+        this._applyDelete(true);
+      } else {
+        this.setEditing(false);
+        this.setInvisible(false);
 
-      this._didUpdate(true);
+        var old_state = this._getCommittedContentState();
+        this._applyCancel(old_state.getWireFormat());
+
+        this._didUpdate(true);
+      }
     },
 
     _onCancelResponse: function(response) {
@@ -1067,8 +1088,8 @@ JX.install('DiffInline', {
         return null;
       }
 
-      var state = this._getActiveContentState().getWireFormat();
-      if (this._isVoidContentState(state)) {
+      var state = this._getActiveContentState();
+      if (state.isStateEmpty()) {
         return null;
       }
 
@@ -1077,7 +1098,7 @@ JX.install('DiffInline', {
         id: this.getID(),
       };
 
-      JX.copy(draft_data, state);
+      JX.copy(draft_data, state.getWireFormat());
 
       return draft_data;
     },
@@ -1193,22 +1214,8 @@ JX.install('DiffInline', {
         suggestionText: '',
         hasSuggestion: false
       };
-    },
-
-    _isVoidContentState: function(state) {
-      if (!state.text) {
-        return true;
-      }
-      return (!state.text.length && !state.suggestionText.length);
-    },
-
-    _isSameContentState: function(u, v) {
-      return (
-        ((u === null) === (v === null)) &&
-        (u.text === v.text) &&
-        (u.suggestionText === v.suggestionText) &&
-        (u.hasSuggestion === v.hasSuggestion));
     }
+
   }
 
 });

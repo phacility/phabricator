@@ -59,6 +59,72 @@ JX.install('DiffInlineContentState', {
       return text;
     },
 
+    isStateEmpty: function() {
+      return (this.isTextEmpty() && this.isSuggestionEmpty());
+    },
+
+    isTextEmpty: function() {
+      var text = this.getText();
+      if (text === null) {
+        return true;
+      }
+
+      if (this._isStringSimilar(text, '')) {
+        return true;
+      }
+
+      return false;
+    },
+
+    isSuggestionEmpty: function() {
+      if (!this.getHasSuggestion()) {
+        return true;
+      }
+
+      var suggestion = this.getSuggestionText();
+      if (suggestion === null) {
+        return true;
+      }
+
+      if (this._isStringSimilar(suggestion, '')) {
+        return true;
+      }
+
+      return false;
+    },
+
+    isTextSimilar: function(v) {
+      if (!v) {
+        return false;
+      }
+
+      var us = this.getText();
+      var vs = v.getText();
+
+      return this._isStringSimilar(us, vs);
+    },
+
+    isSuggestionSimilar: function(v) {
+      // If we don't have a comparison state, treat them as dissimilar. This
+      // is expected to occur in old inline comments that did not save an
+      // initial state.
+
+      if (!v) {
+        return false;
+      }
+
+      var us = this.getSuggestionText();
+      var vs = v.getSuggestionText();
+
+      return this._isStringSimilar(us, vs);
+    },
+
+    _isStringSimilar: function(u, v) {
+      u = u || '';
+      v = v || '';
+      return (u === v);
+    },
+
     _getSuggestionNode: function(row) {
       try {
         return JX.DOM.find(row, 'textarea', 'inline-content-suggestion');
