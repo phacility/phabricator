@@ -169,8 +169,8 @@ this:
 {
   ...
   "constraints": {
-    "authors": ["PHID-USER-1111", "PHID-USER-2222"],
-    "statuses": ["open", "closed"],
+    "authorPHIDs": ["PHID-USER-1111", "PHID-USER-2222"],
+    "flavors": ["cherry", "orange"],
     ...
   },
   ...

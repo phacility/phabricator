@@ -38,7 +38,11 @@ final class PhabricatorConfigModuleController
     $nav->selectFilter($key);
     $header = $this->buildHeaderView($title);
 
-    $view = $this->buildConfigBoxView($title, $content);
+    if ($content instanceof AphrontTableView) {
+      $view = $this->buildConfigBoxView($title, $content);
+    } else {
+      $view = $content;
+    }
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Extensions/Modules'), $modules_uri)

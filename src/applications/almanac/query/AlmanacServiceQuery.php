@@ -12,6 +12,7 @@ final class AlmanacServiceQuery
   private $nameSuffix;
 
   private $needBindings;
+  private $needActiveBindings;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -56,6 +57,11 @@ final class AlmanacServiceQuery
 
   public function needBindings($need_bindings) {
     $this->needBindings = $need_bindings;
+    return $this;
+  }
+
+  public function needActiveBindings($need_active) {
+    $this->needActiveBindings = $need_active;
     return $this;
   }
 
@@ -160,18 +166,35 @@ final class AlmanacServiceQuery
   }
 
   protected function didFilterPage(array $services) {
-    if ($this->needBindings) {
+    $need_all = $this->needBindings;
+    $need_active = $this->needActiveBindings;
+
+    $need_any = ($need_all || $need_active);
+    $only_active = ($need_active && !$need_all);
+
+    if ($need_any) {
       $service_phids = mpull($services, 'getPHID');
-      $bindings = id(new AlmanacBindingQuery())
+
+      $bindings_query = id(new AlmanacBindingQuery())
         ->setViewer($this->getViewer())
         ->withServicePHIDs($service_phids)
-        ->needProperties($this->getNeedProperties())
-        ->execute();
+        ->needProperties($this->getNeedProperties());
+
+      if ($only_active) {
+        $bindings_query->withIsActive(true);
+      }
+
+      $bindings = $bindings_query->execute();
       $bindings = mgroup($bindings, 'getServicePHID');
 
       foreach ($services as $service) {
         $service_bindings = idx($bindings, $service->getPHID(), array());
-        $service->attachBindings($service_bindings);
+
+        if ($only_active) {
+          $service->attachActiveBindings($service_bindings);
+        } else {
+          $service->attachBindings($service_bindings);
+        }
       }
     }
 

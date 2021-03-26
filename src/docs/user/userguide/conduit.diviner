@@ -19,8 +19,7 @@ The primary ways to make Conduit calls are:
 the API and making calls. This is the best starting point for learning about
 the API. See the next section for details.
 
-`ConduitClient`: This is the official client available in `libphutil`, and
-the one used by `arc`.
+`ConduitClient`: This is the official client available in `arcanist`.
 
 `arc call-conduit`: You can use this `arc` command to execute low-level
 Conduit calls by piping JSON in to stdin. This can provide a simple way

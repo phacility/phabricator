@@ -74,6 +74,8 @@ final class PhabricatorDifferentialApplication
             => 'DifferentialRevisionOperationController',
           'inlines/(?P<id>[1-9]\d*)/'
             => 'DifferentialRevisionInlinesController',
+          'paths/(?P<id>[1-9]\d*)/'
+            => 'DifferentialRevisionAffectedPathsController',
         ),
         'comment/' => array(
           'inline/' => array(

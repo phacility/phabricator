@@ -9,14 +9,11 @@ set -x
 # to work without modifications.
 
 # NOTE: This script assumes you are running it from a directory which contains
-# arcanist/, libphutil/, and phabricator/.
+# arcanist/ and phabricator/.
 
 ROOT=`pwd` # You can hard-code the path here instead.
 
 ### UPDATE WORKING COPIES ######################################################
-
-cd $ROOT/libphutil
-git pull
 
 cd $ROOT/arcanist
 git pull

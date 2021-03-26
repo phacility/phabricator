@@ -1,13 +1,13 @@
 @title Writing Unit Tests
 @group developer
 
-Simple guide to libphutil, Arcanist and Phabricator unit tests.
+Simple guide to Arcanist and Phabricator unit tests.
 
 = Overview =
 
-libphutil, Arcanist and Phabricator provide and use a simple unit test
-framework. This document is aimed at project contributors and describes how to
-use it to add and run tests in these projects or other libphutil libraries.
+Arcanist and Phabricator provide and use a simple unit test framework. This
+document is aimed at project contributors and describes how to use it to add
+and run tests in these projects or other libphutil libraries.
 
 In the general case, you can integrate `arc` with a custom unit test engine
 (like PHPUnit or any other unit testing library) to run tests in other projects.
@@ -16,7 +16,7 @@ for information on customizing engines.
 
 = Adding Tests =
 
-To add new tests to a libphutil, Arcanist or Phabricator module:
+To add new tests to a Arcanist or Phabricator module:
 
   - Create a `__tests__/` directory in the module if it doesn't exist yet.
   - Add classes to the `__tests__/` directory which extend from

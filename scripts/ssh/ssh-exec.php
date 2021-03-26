@@ -146,6 +146,14 @@ try {
           $device_name));
     }
 
+    if ($device->isDisabled()) {
+      throw new Exception(
+        pht(
+          'This request has authenticated as a device ("%s"), but this '.
+          'device is disabled.',
+          $device->getName()));
+    }
+
     // We're authenticated as a device, but we're going to read the user out of
     // the command below.
     $is_cluster_request = true;

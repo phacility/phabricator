@@ -18,7 +18,7 @@ If you merge a list of arrays like this:
 intermediate arrays and copies every element it has previously seen each time
 you iterate.
 
-In a libphutil environment, you can use @{function@libphutil:array_mergev}
+In a libphutil environment, you can use @{function@arcanist:array_mergev}
 instead.
 
 = `var_export()` Hates Baby Animals =
@@ -147,7 +147,7 @@ keys that are naturally sortable with a function that uses native comparison
 instead, and use it to reorder the original array.
 
 In a libphutil environment, you can often do this easily with
-@{function@libphutil:isort} or @{function@libphutil:msort}.
+@{function@arcanist:isort} or @{function@arcanist:msort}.
 
 = `array_intersect()` and `array_diff()` are Also Slow =
 
@@ -270,7 +270,7 @@ new $class_name($argv[0], $argv[1], ...);
 
 ...you'll probably invent a very interesting, very novel solution that is very
 wrong. In a libphutil environment, solve this problem with
-@{function@libphutil:newv}. Elsewhere, copy `newv()`'s implementation.
+@{function@arcanist:newv}. Elsewhere, copy `newv()`'s implementation.
 
 = Equality is not Transitive =
 

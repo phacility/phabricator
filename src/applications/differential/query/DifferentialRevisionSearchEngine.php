@@ -57,6 +57,10 @@ final class DifferentialRevisionSearchEngine
         $map['modifiedEnd']);
     }
 
+    if ($map['affectedPaths']) {
+      $query->withPaths($map['affectedPaths']);
+    }
+
     return $query;
   }
 
@@ -118,6 +122,12 @@ final class DifferentialRevisionSearchEngine
         ->setIsHidden(true)
         ->setDescription(
           pht('Find revisions modified at or before a particular time.')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('affectedPaths')
+        ->setLabel(pht('Affected Paths'))
+        ->setDescription(
+          pht('Search for revisions affecting particular paths.'))
+        ->setIsHidden(true),
     );
   }
 

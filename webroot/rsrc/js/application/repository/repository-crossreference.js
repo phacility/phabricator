@@ -66,13 +66,8 @@ JX.behavior('repository-crossreference', function(config, statics) {
 
         var target = e.getTarget();
 
-        try {
-          // If we're in an inline comment, don't link symbols.
-          if (JX.DOM.findAbove(target, 'div', 'differential-inline-comment')) {
-            return;
-          }
-        } catch (ex) {
-          // Continue if we're not inside an inline comment.
+        if (!canLinkNode(target)) {
+          return;
         }
 
         // If only part of the symbol was edited, the symbol name itself will
@@ -97,6 +92,29 @@ JX.behavior('repository-crossreference', function(config, statics) {
         }
       });
   }
+
+  function canLinkNode(node) {
+    try {
+      // If we're in an inline comment, don't link symbols.
+      if (JX.DOM.findAbove(node, 'div', 'differential-inline-comment')) {
+        return false;
+      }
+    } catch (ex) {
+      // Continue if we're not inside an inline comment.
+    }
+
+    // See T13644. Don't open symbols if we're inside a changeset header.
+    try {
+      if (JX.DOM.findAbove(node, 'h1')) {
+        return false;
+      }
+    } catch (ex) {
+      // Continue if not inside a header.
+    }
+
+    return true;
+  }
+
   function unhighlight() {
     highlighted && JX.DOM.alterClass(highlighted, classHighlight, false);
     highlighted = null;
@@ -159,6 +177,9 @@ JX.behavior('repository-crossreference', function(config, statics) {
     uri_symbol = uri_symbol.trim();
 
     // See T13437. Symbols like "#define" need to be encoded.
+    // See T13644. Symbols like "a/b" must be double-encoded to survive
+    // one layer of decoding by the webserver.
+    uri_symbol = encodeURIComponent(uri_symbol);
     uri_symbol = encodeURIComponent(uri_symbol);
 
     var uri = JX.$U('/diffusion/symbol/' + uri_symbol + '/');
@@ -223,7 +244,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
     var changeset;
     try {
       changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');
-      return JX.Stratcom.getData(changeset).path;
+      return JX.Stratcom.getData(changeset).symbolPath || null;
     } catch (ex) {
       // Ignore.
     }
@@ -315,13 +336,8 @@ JX.behavior('repository-crossreference', function(config, statics) {
 
       var target = e.getTarget();
 
-      try {
-        // If we're in an inline comment, don't link symbols.
-        if (JX.DOM.findAbove(target, 'div', 'differential-inline-comment')) {
-          return;
-        }
-      } catch (ex) {
-        // Continue if we're not inside an inline comment.
+      if (!canLinkNode(target)) {
+        return;
       }
 
       // If only part of the symbol was edited, the symbol name itself will

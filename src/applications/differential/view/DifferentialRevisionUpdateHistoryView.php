@@ -139,29 +139,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
 
       if ($diff) {
-        $unit_status = idx(
-          $this->unitStatus,
-          $diff->getPHID(),
-          $diff->getUnitStatus());
-
-        $lint = self::renderDiffLintStar($row['obj']);
-        $lint = phutil_tag(
-          'div',
-          array(
-            'class' => 'lintunit-star',
-            'title' => self::getDiffLintMessage($diff),
-          ),
-          $lint);
-
-        $unit = self::renderDiffUnitStar($unit_status);
-        $unit = phutil_tag(
-          'div',
-          array(
-            'class' => 'lintunit-star',
-            'title' => self::getDiffUnitMessage($unit_status),
-          ),
-          $unit);
-
+        $lint = $this->newLintStatusView($diff);
+        $unit = $this->newUnitStatusView($diff);
         $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
@@ -282,86 +261,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return $content;
   }
 
-  const STAR_NONE = 'none';
-  const STAR_OKAY = 'okay';
-  const STAR_WARN = 'warn';
-  const STAR_FAIL = 'fail';
-  const STAR_SKIP = 'skip';
-
-  private static function renderDiffLintStar(DifferentialDiff $diff) {
-    static $map = array(
-      DifferentialLintStatus::LINT_NONE => self::STAR_NONE,
-      DifferentialLintStatus::LINT_OKAY => self::STAR_OKAY,
-      DifferentialLintStatus::LINT_WARN => self::STAR_WARN,
-      DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
-      DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
-      DifferentialLintStatus::LINT_AUTO_SKIP => self::STAR_SKIP,
-    );
-
-    $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
-
-    return self::renderDiffStar($star);
-  }
-
-  private static function renderDiffUnitStar($unit_status) {
-    static $map = array(
-      DifferentialUnitStatus::UNIT_NONE => self::STAR_NONE,
-      DifferentialUnitStatus::UNIT_OKAY => self::STAR_OKAY,
-      DifferentialUnitStatus::UNIT_WARN => self::STAR_WARN,
-      DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
-      DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
-      DifferentialUnitStatus::UNIT_AUTO_SKIP => self::STAR_SKIP,
-    );
-    $star = idx($map, $unit_status, self::STAR_FAIL);
-
-    return self::renderDiffStar($star);
-  }
-
-  public static function getDiffLintMessage(DifferentialDiff $diff) {
-    switch ($diff->getLintStatus()) {
-      case DifferentialLintStatus::LINT_NONE:
-        return pht('No Linters Available');
-      case DifferentialLintStatus::LINT_OKAY:
-        return pht('Lint OK');
-      case DifferentialLintStatus::LINT_WARN:
-        return pht('Lint Warnings');
-      case DifferentialLintStatus::LINT_FAIL:
-        return pht('Lint Errors');
-      case DifferentialLintStatus::LINT_SKIP:
-        return pht('Lint Skipped');
-      case DifferentialLintStatus::LINT_AUTO_SKIP:
-        return pht('Automatic diff as part of commit; lint not applicable.');
-    }
-    return pht('Unknown');
-  }
-
-  public static function getDiffUnitMessage($unit_status) {
-    switch ($unit_status) {
-      case DifferentialUnitStatus::UNIT_NONE:
-        return pht('No Unit Test Coverage');
-      case DifferentialUnitStatus::UNIT_OKAY:
-        return pht('Unit Tests OK');
-      case DifferentialUnitStatus::UNIT_WARN:
-        return pht('Unit Test Warnings');
-      case DifferentialUnitStatus::UNIT_FAIL:
-        return pht('Unit Test Errors');
-      case DifferentialUnitStatus::UNIT_SKIP:
-        return pht('Unit Tests Skipped');
-      case DifferentialUnitStatus::UNIT_AUTO_SKIP:
-        return pht(
-          'Automatic diff as part of commit; unit tests not applicable.');
-    }
-    return pht('Unknown');
-  }
-
-  private static function renderDiffStar($star) {
-    $class = 'diff-star-'.$star;
-    return phutil_tag(
-      'span',
-      array('class' => $class),
-      "\xE2\x98\x85");
-  }
-
   private function renderBaseRevision(DifferentialDiff $diff) {
     switch ($diff->getSourceControlSystem()) {
       case 'git':
@@ -401,4 +300,42 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     }
     return $link;
   }
+
+  private function newLintStatusView(DifferentialDiff $diff) {
+    $value = $diff->getLintStatus();
+    $status = DifferentialLintStatus::newStatusFromValue($value);
+
+    $icon = $status->getIconIcon();
+    $color = $status->getIconColor();
+    $name = $status->getName();
+
+    return $this->newDiffStatusIconView($icon, $color, $name);
+  }
+
+  private function newUnitStatusView(DifferentialDiff $diff) {
+    $value = $diff->getUnitStatus();
+
+    // NOTE: We may be overriding the value on the diff with a value from
+    // Harbormaster.
+    $value = idx($this->unitStatus, $diff->getPHID(), $value);
+
+    $status = DifferentialUnitStatus::newStatusFromValue($value);
+
+    $icon = $status->getIconIcon();
+    $color = $status->getIconColor();
+    $name = $status->getName();
+
+    return $this->newDiffStatusIconView($icon, $color, $name);
+  }
+
+  private function newDiffStatusIconView($icon, $color, $name) {
+    return id(new PHUIIconView())
+      ->setIcon($icon, $color)
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => $name,
+        ));
+  }
+
 }

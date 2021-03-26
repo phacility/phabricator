@@ -89,7 +89,7 @@ final class DiffusionRepositoryStorageManagementPanel
             AlmanacClusterRepositoryServiceType::SERVICETYPE,
           ))
         ->withPHIDs(array($service_phid))
-        ->needBindings(true)
+        ->needActiveBindings(true)
         ->executeOne();
       if (!$service) {
         // TODO: Viewer may not have permission to see the service, or it may
@@ -104,7 +104,7 @@ final class DiffusionRepositoryStorageManagementPanel
 
     $rows = array();
     if ($service) {
-      $bindings = $service->getBindings();
+      $bindings = $service->getActiveBindings();
       $bindings = mgroup($bindings, 'getDevicePHID');
 
       // This is an unusual read which always comes from the master.
@@ -117,29 +117,19 @@ final class DiffusionRepositoryStorageManagementPanel
 
       $versions = mpull($versions, null, 'getDevicePHID');
 
-      // List enabled devices first, then sort devices in each group by name.
       $sort = array();
       foreach ($bindings as $key => $binding_group) {
-        $all_disabled = $this->isDisabledGroup($binding_group);
-
         $sort[$key] = id(new PhutilSortVector())
-          ->addInt($all_disabled ? 1 : 0)
           ->addString(head($binding_group)->getDevice()->getName());
       }
       $sort = msortv($sort, 'getSelf');
       $bindings = array_select_keys($bindings, array_keys($sort)) + $bindings;
 
       foreach ($bindings as $binding_group) {
-        $all_disabled = $this->isDisabledGroup($binding_group);
         $any_binding = head($binding_group);
 
-        if ($all_disabled) {
-          $binding_icon = 'fa-times grey';
-          $binding_tip = pht('Disabled');
-        } else {
-          $binding_icon = 'fa-folder-open green';
-          $binding_tip = pht('Active');
-        }
+        $binding_icon = 'fa-folder-open green';
+        $binding_tip = pht('Active');
 
         $binding_icon = id(new PHUIIconView())
           ->setIcon($binding_icon)
@@ -374,19 +364,6 @@ final class DiffusionRepositoryStorageManagementPanel
     }
 
     return $box_view;
-  }
-
-
-  private function isDisabledGroup(array $binding_group) {
-    assert_instances_of($binding_group, 'AlmanacBinding');
-
-    foreach ($binding_group as $binding) {
-      if (!$binding->getIsDisabled()) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
 }

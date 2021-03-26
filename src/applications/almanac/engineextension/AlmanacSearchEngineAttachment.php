@@ -51,6 +51,8 @@ abstract class AlmanacSearchEngineAttachment
       'phid' => $device->getPHID(),
       'name' => $device->getName(),
       'properties' => $this->getAlmanacPropertyList($device),
+      'status' => $device->getStatus(),
+      'disabled' => $device->isDisabled(),
     );
   }
 

@@ -41,7 +41,7 @@ installing software on hosts. You'll need to make sure any hosts are configured
 properly with any software you need, and have tools like `git`, `hg` or `svn`
 that may be required to interact with working copies.
 
-You do **not** need to install PHP, arcanist, libphutil or Phabricator on the
+You do **not** need to install PHP, arcanist, or Phabricator on the
 hosts unless you are specifically running `arc` commands.
 
 **You must configure authentication.** Drydock also does not handle credentials

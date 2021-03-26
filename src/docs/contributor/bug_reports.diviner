@@ -47,10 +47,9 @@ Before you file a report, here are some common solutions to problems:
     issues to be fixed in less than 24 hours, so even if you've updated recently
     you should update again. If you aren't sure how to update, see the next
     section.
-  - **Update Libraries**: Make sure `libphutil/`, `arcanist/` and
-    `phabricator/` are all up to date. Users often update `phabricator/` but
-    forget to update `arcanist/` or `libphutil/`. When you update, make sure you
-    update all three libraries.
+  - **Update Libraries**: Make sure `arcanist/` and `phabricator/` are all up
+    to date. Users often update `phabricator/` but forget to update `arcanist/`.
+    When you update, make sure you update all three libraries.
   - **Restart Apache or PHP-FPM**: Phabricator uses caches which don't get
     reset until you restart Apache or PHP-FPM. After updating, make sure you
     restart.

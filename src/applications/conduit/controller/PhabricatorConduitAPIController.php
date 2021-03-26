@@ -238,6 +238,16 @@ final class PhabricatorConduitAPIController
       if ($object instanceof PhabricatorUser) {
         $user = $object;
       } else {
+        if ($object->isDisabled()) {
+          return array(
+            'ERR-INVALID-AUTH',
+            pht(
+              'The key which signed this request is associated with a '.
+              'disabled device ("%s").',
+              $object->getName()),
+          );
+        }
+
         if (!$stored_key->getIsTrusted()) {
           return array(
             'ERR-INVALID-AUTH',

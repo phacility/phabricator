@@ -2,13 +2,13 @@
 @group standards
 
 This document describes PHP coding standards for Phabricator and related
-projects (like Arcanist and libphutil).
+projects (like Arcanist).
 
 = Overview =
 
 This document outlines technical and style guidelines which are followed in
-libphutil. Contributors should also follow these guidelines. Many of these
-guidelines are automatically enforced by lint.
+Phabricator and Arcanist. Contributors should also follow these guidelines.
+Many of these guidelines are automatically enforced by lint.
 
 These guidelines are essentially identical to the Facebook guidelines, since I
 basically copy-pasted them. If you are already familiar with the Facebook

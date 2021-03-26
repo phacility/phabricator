@@ -46,9 +46,16 @@ final class AlmanacInterfaceDatasource
 
     $results = array();
     foreach ($handles as $handle) {
+      if ($handle->isClosed()) {
+        $closed = pht('Disabled');
+      } else {
+        $closed = null;
+      }
+
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($handle->getName())
-        ->setPHID($handle->getPHID());
+        ->setPHID($handle->getPHID())
+        ->setClosed($closed);
     }
 
     return $results;

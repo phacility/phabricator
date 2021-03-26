@@ -124,7 +124,7 @@ This has a wide array of technical and architectural problems:
     the full power of arbitrary JS execution.
   - It's utterly hideous.
 
-In 2007/2008, we introduced @{function@libphutil:jsprintf} and a function called
+In 2007/2008, we introduced @{function@arcanist:jsprintf} and a function called
 onloadRegister() to solve some of the obvious problems:
 
   lang=php

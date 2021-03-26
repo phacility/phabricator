@@ -14,13 +14,13 @@ final class AlmanacService
 
   protected $name;
   protected $nameIndex;
-  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $serviceType;
 
   private $almanacProperties = self::ATTACHABLE;
   private $bindings = self::ATTACHABLE;
+  private $activeBindings = self::ATTACHABLE;
   private $serviceImplementation = self::ATTACHABLE;
 
   public static function initializeNewService($type) {
@@ -48,7 +48,6 @@ final class AlmanacService
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'nameIndex' => 'bytes12',
-        'mailKey' => 'bytes20',
         'serviceType' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -66,18 +65,14 @@ final class AlmanacService
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacServicePHIDType::TYPECONST);
+  public function getPHIDType() {
+    return AlmanacServicePHIDType::TYPECONST;
   }
 
   public function save() {
     AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
-
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
 
     return parent::save();
   }
@@ -91,20 +86,33 @@ final class AlmanacService
   }
 
   public function getActiveBindings() {
-    $bindings = $this->getBindings();
-
-    // Filter out disabled bindings.
-    foreach ($bindings as $key => $binding) {
-      if ($binding->getIsDisabled()) {
-        unset($bindings[$key]);
-      }
-    }
-
-    return $bindings;
+    return $this->assertAttached($this->activeBindings);
   }
 
   public function attachBindings(array $bindings) {
+    $active_bindings = array();
+    foreach ($bindings as $key => $binding) {
+      // Filter out disabled bindings.
+      if ($binding->getIsDisabled()) {
+        continue;
+      }
+
+      // Filter out bindings to disabled devices.
+      if ($binding->getDevice()->isDisabled()) {
+        continue;
+      }
+
+      $active_bindings[$key] = $binding;
+    }
+
+    $this->attachActiveBindings($active_bindings);
+
     $this->bindings = $bindings;
+    return $this;
+  }
+
+  public function attachActiveBindings(array $bindings) {
+    $this->activeBindings = $bindings;
     return $this;
   }
 
@@ -289,6 +297,9 @@ final class AlmanacService
         ->setAttachmentKey('properties'),
       id(new AlmanacBindingsSearchEngineAttachment())
         ->setAttachmentKey('bindings'),
+      id(new AlmanacBindingsSearchEngineAttachment())
+        ->setIsActive(true)
+        ->setAttachmentKey('activeBindings'),
     );
   }
 

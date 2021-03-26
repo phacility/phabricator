@@ -8,7 +8,6 @@ final class DifferentialAffectedPath extends DifferentialDAO {
 
   protected $repositoryID;
   protected $pathID;
-  protected $epoch;
   protected $revisionID;
 
   protected function getConfiguration() {
@@ -16,14 +15,15 @@ final class DifferentialAffectedPath extends DifferentialDAO {
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => null,
+        'repositoryID' => 'id?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'PRIMARY' => null,
-        'repositoryID' => array(
-          'columns' => array('repositoryID', 'pathID', 'epoch'),
-        ),
         'revisionID' => array(
           'columns' => array('revisionID'),
+        ),
+        'key_path' => array(
+          'columns' => array('pathID', 'repositoryID'),
         ),
       ),
     ) + parent::getConfiguration();

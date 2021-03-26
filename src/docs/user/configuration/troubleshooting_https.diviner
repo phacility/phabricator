@@ -32,7 +32,7 @@ authority and clients have a list of trusted authorities.
 You can self-sign a certificate by creating your own CA, but clients will not
 trust it by default. They need to add the CA as a trusted authority.
 
-For instructions on adding CAs, see `libphutil/resources/ssl/README`.
+For instructions on adding CAs, see `arcanist/resources/ssl/README`.
 
 If you'd prefer that `arc` not verify the identity of the server whatsoever, you
 can use the `https.blindly-trust-domains` setting. This will make it

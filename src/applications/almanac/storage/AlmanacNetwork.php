@@ -10,7 +10,6 @@ final class AlmanacNetwork
     PhabricatorConduitResultInterface {
 
   protected $name;
-  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
 
@@ -25,8 +24,6 @@ final class AlmanacNetwork
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort128',
-        'mailKey' => 'bytes20',
-
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -37,20 +34,14 @@ final class AlmanacNetwork
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacNetworkPHIDType::TYPECONST);
-  }
-
-  public function save() {
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
-
-    return parent::save();
+  public function getPHIDType() {
+    return AlmanacNetworkPHIDType::TYPECONST;
   }
 
   public function getURI() {
-    return '/almanac/network/'.$this->getID().'/';
+    return urisprintf(
+      '/almanac/network/%s/',
+      $this->getID());
   }
 
 

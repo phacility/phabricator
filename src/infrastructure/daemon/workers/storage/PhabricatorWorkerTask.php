@@ -66,7 +66,8 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
     $class = $this->getTaskClass();
 
     try {
-      // NOTE: If the class does not exist, libphutil will throw an exception.
+      // NOTE: If the class does not exist, the autoloader will throw an
+      // exception.
       class_exists($class);
     } catch (PhutilMissingSymbolException $ex) {
       throw new PhabricatorWorkerPermanentFailureException(

@@ -21,7 +21,7 @@ available by looking at all of the subclasses of
 @{class@phabricator:PhabricatorApplication}. It
 discovers available workflows in `arc` by looking at all of the subclasses of
 @{class@arcanist:ArcanistWorkflow}. It discovers available locales
-by looking at all of the subclasses of @{class@libphutil:PhutilLocale}.
+by looking at all of the subclasses of @{class@arcanist:PhutilLocale}.
 
 This pattern holds in many cases, so you can often add functionality by adding
 new classes with no other work. Phabricator will automatically discover and
@@ -49,8 +49,8 @@ This is intended as a quick way to add small pieces of functionality, test new
 features, or get started on a larger project. Extending Phabricator like this
 imposes a small performance penalty compared to using a library.
 
-This directory exists in all libphutil libraries, so you can find similar
-directories in `arcanist/src/extensions/` and `libphutil/src/extensions/`.
+This directory exists in all libphutil libraries, so you can find a similar
+directory in `arcanist/src/extensions/`.
 
 For example, to add a new application, create a file like this one and add it
 to `phabricator/src/extensions/`.
@@ -171,8 +171,8 @@ performing static analysis.
 NOTE: If Phabricator isn't located next to your custom library, specify a
 path which actually points to the `phabricator/` directory.
 
-You do not need to declare dependencies on `arcanist` or `libphutil`,
-since `arc liberate` automatically loads them.
+You do not need to declare dependencies on `arcanist`, since `arc liberate`
+automatically loads them.
 
 Finally, edit your Phabricator config to tell it to load your library at
 runtime, by adding it to `load-libraries`:
@@ -206,8 +206,8 @@ This will automatically regenerate the static map of the library.
 What You Can Extend And Invoke
 ==============================
 
-libphutil, Arcanist and Phabricator are strict about extensibility of classes
-and visibility of methods and properties. Most classes are marked `final`, and
+Arcanist and Phabricator are strict about extensibility of classes and
+visibility of methods and properties. Most classes are marked `final`, and
 methods have the minimum required visibility (protected or private). The goal
 of this strictness is to make it clear what you can safely extend, access, and
 invoke, so your code will keep working as the upstream changes.
@@ -215,8 +215,8 @@ invoke, so your code will keep working as the upstream changes.
 IMPORTANT: We'll still break APIs frequently. The upstream does not support
 extension development, and none of these APIs are stable.
 
-When developing libraries to work with libphutil, Arcanist and Phabricator, you
-should respect method and property visibility.
+When developing libraries to work with Arcanist and Phabricator, you should
+respect method and property visibility.
 
 If you want to add features but can't figure out how to do it without changing
 Phabricator code, here are some approaches you may be able to take:

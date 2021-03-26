@@ -4,7 +4,10 @@ final class DiffusionSymbolController extends DiffusionController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+
+    // See T13638 for discussion of escaping.
     $name = $request->getURIData('name');
+    $name = phutil_unescape_uri_path_component($name);
 
     $query = id(new DiffusionSymbolQuery())
       ->setViewer($viewer)

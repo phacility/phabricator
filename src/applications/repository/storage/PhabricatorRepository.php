@@ -1151,7 +1151,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   /**
    * Get a parsed object representation of the repository's remote URI..
    *
-   * @return wild A @{class@libphutil:PhutilURI}.
+   * @return wild A @{class@arcanist:PhutilURI}.
    * @task uri
    */
   public function getRemoteURIObject() {
@@ -2109,7 +2109,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       throw new Exception(
         pht(
           'The Almanac service for this repository is not bound to any '.
-          'interfaces.'));
+          'active interfaces.'));
     }
 
     $uris = array();
@@ -2531,7 +2531,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $service = id(new AlmanacServiceQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($service_phid))
-      ->needBindings(true)
+      ->needActiveBindings(true)
       ->needProperties(true)
       ->executeOne();
     if (!$service) {
