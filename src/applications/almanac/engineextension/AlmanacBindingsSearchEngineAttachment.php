@@ -26,9 +26,9 @@ final class AlmanacBindingsSearchEngineAttachment
     $query->needProperties(true);
 
     if ($this->getIsActive()) {
-      $query->needBindings(true);
-    } else {
       $query->needActiveBindings(true);
+    } else {
+      $query->needBindings(true);
     }
   }
 
