@@ -63,48 +63,66 @@ final class DiffusionLowLevelResolveRefsQuery
     $unresolved = array_fuse($this->refs);
     $results = array();
 
-    // First, resolve branches and tags.
-    $ref_map = id(new DiffusionLowLevelGitRefQuery())
-      ->setRepository($repository)
-      ->withRefTypes(
-        array(
-          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
-          PhabricatorRepositoryRefCursor::TYPE_TAG,
-        ))
-      ->execute();
-    $ref_map = mgroup($ref_map, 'getShortName');
-
-    $tag_prefix = 'refs/tags/';
+    $possible_symbols = array();
     foreach ($unresolved as $ref) {
-      if (empty($ref_map[$ref])) {
+
+      // See T13647. If this symbol is exactly 40 hex characters long, it may
+      // never resolve as a branch or tag name. Filter these symbols out for
+      // consistency with Git behavior -- and to avoid an expensive
+      // "git for-each-ref" when resolving only commit hashes, which happens
+      // during repository updates.
+
+      if (preg_match('(^[a-f0-9]{40}\z)', $ref)) {
         continue;
       }
 
-      foreach ($ref_map[$ref] as $result) {
-        $fields = $result->getRawFields();
-        $objectname = idx($fields, 'refname');
-        if (!strncmp($objectname, $tag_prefix, strlen($tag_prefix))) {
-          $type = 'tag';
-        } else {
-          $type = 'branch';
+      $possible_symbols[$ref] = $ref;
+    }
+
+    // First, resolve branches and tags.
+    if ($possible_symbols) {
+      $ref_map = id(new DiffusionLowLevelGitRefQuery())
+        ->setRepository($repository)
+        ->withRefTypes(
+          array(
+            PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+            PhabricatorRepositoryRefCursor::TYPE_TAG,
+          ))
+        ->execute();
+      $ref_map = mgroup($ref_map, 'getShortName');
+
+      $tag_prefix = 'refs/tags/';
+      foreach ($possible_symbols as $ref) {
+        if (empty($ref_map[$ref])) {
+          continue;
         }
 
-        $info = array(
-          'type' => $type,
-          'identifier' => $result->getCommitIdentifier(),
-        );
-
-        if ($type == 'tag') {
-          $alternate = idx($fields, 'objectname');
-          if ($alternate) {
-            $info['alternate'] = $alternate;
+        foreach ($ref_map[$ref] as $result) {
+          $fields = $result->getRawFields();
+          $objectname = idx($fields, 'refname');
+          if (!strncmp($objectname, $tag_prefix, strlen($tag_prefix))) {
+            $type = 'tag';
+          } else {
+            $type = 'branch';
           }
+
+          $info = array(
+            'type' => $type,
+            'identifier' => $result->getCommitIdentifier(),
+          );
+
+          if ($type == 'tag') {
+            $alternate = idx($fields, 'objectname');
+            if ($alternate) {
+              $info['alternate'] = $alternate;
+            }
+          }
+
+          $results[$ref][] = $info;
         }
 
-        $results[$ref][] = $info;
+        unset($unresolved[$ref]);
       }
-
-      unset($unresolved[$ref]);
     }
 
     // If we resolved everything, we're done.
