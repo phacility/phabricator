@@ -21,7 +21,7 @@ to lowest priority:
   - **Database**: Values are stored in the database and edited from the web UI
     by administrators. They have the highest priority and override other
     settings.
-  - **Local**: Values are stored in `conf/local/config.json` and edited by
+  - **Local**: Values are stored in `conf/local/local.json` and edited by
     running `bin/config`.
   - **Config Files**: Values are stored in a config file in `conf/`. The file
     to use is selected by writing to `conf/local/ENVIRONMENT`, or setting the
