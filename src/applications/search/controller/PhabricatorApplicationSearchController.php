@@ -965,7 +965,11 @@ final class PhabricatorApplicationSearchController
   private function readExportFormatPreference() {
     $viewer = $this->getViewer();
     $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
-    return $viewer->getUserSetting($export_key);
+    $value = $viewer->getUserSetting($export_key);
+    if (is_array($value)) {
+      return "";
+    }
+    return $value;
   }
 
   private function writeExportFormatPreference($value) {
