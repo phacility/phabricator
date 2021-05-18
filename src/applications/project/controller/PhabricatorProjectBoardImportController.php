@@ -47,6 +47,8 @@ final class PhabricatorProjectBoardImportController
       $import_phid = $request->getArr('importProjectPHID');
       $import_phid = reset($import_phid);
 
+      $import_triggers = $request->getBool('importTriggers');
+
       $import_columns = id(new PhabricatorProjectColumnQuery())
         ->setViewer($viewer)
         ->withProjectPHIDs(array($import_phid))
@@ -74,6 +76,7 @@ final class PhabricatorProjectBoardImportController
           ->setProjectPHID($project->getPHID())
           ->setName($import_column->getName())
           ->setProperties($import_column->getProperties())
+          ->setTriggerPHID($import_triggers ? $import_column->getTriggerPHID() : null)
           ->save();
       }
       $xactions = array();
@@ -101,11 +104,20 @@ final class PhabricatorProjectBoardImportController
         ->setParameters(array('mustHaveColumns' => true))
       ->setLimit(1));
 
+    $import_trigger_checkbox = id(new AphrontFormCheckboxControl())
+      ->setLabel(pht('Import Triggers'))
+      ->addCheckbox(
+        'importTriggers',
+        1,
+        pht('Import triggers from source workboard (Link same trigger IDs).'),
+        false);
+
     return $this->newDialog()
       ->setTitle(pht('Import Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendParagraph(pht('Choose a project to import columns from:'))
       ->appendChild($proj_selector)
+      ->appendControl($import_trigger_checkbox)
       ->addCancelButton($board_uri)
       ->addSubmitButton(pht('Import'));
   }
