@@ -117,7 +117,7 @@ final class PhabricatorProjectBoardImportController
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendParagraph(pht('Choose a project to import columns from:'))
       ->appendChild($proj_selector)
-      ->appendControl($import_trigger_checkbox)
+      ->appendChild($import_trigger_checkbox)
       ->addCancelButton($board_uri)
       ->addSubmitButton(pht('Import'));
   }
