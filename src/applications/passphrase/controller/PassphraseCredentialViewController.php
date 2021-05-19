@@ -145,7 +145,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setName(pht('Show Secret'))
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI("reveal/{$id}/"))
-          ->setDisabled(!$can_edit || $is_locked)
+          ->setDisabled($is_locked)
           ->setWorkflow(true));
 
       if ($type->hasPublicKey()) {
