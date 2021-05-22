@@ -402,6 +402,10 @@ final class PhabricatorObjectHandle
   }
 
   public function hasCapabilities() {
+    if (!$this->isComplete()) {
+      return false;
+    }
+
     return ($this->getType() === PhabricatorPeopleUserPHIDType::TYPECONST);
   }
 

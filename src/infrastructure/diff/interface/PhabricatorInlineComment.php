@@ -336,13 +336,29 @@ abstract class PhabricatorInlineComment
     return $this->newContentState()->readFromRequest($request);
   }
 
-  public function getContentState() {
-    $state = $this->newContentState();
+  public function getInitialContentState() {
+    return $this->getNamedContentState('inline.state.initial');
+  }
 
-    $storage = $this->getStorageObject();
-    $storage_map = $storage->getAttribute('inline.state');
-    if (is_array($storage_map)) {
-      $state->readStorageMap($storage_map);
+  public function setInitialContentState(
+    PhabricatorInlineCommentContentState $state) {
+    return $this->setNamedContentState('inline.state.initial', $state);
+  }
+
+  public function getCommittedContentState() {
+    return $this->getNamedContentState('inline.state.committed');
+  }
+
+  public function setCommittedContentState(
+    PhabricatorInlineCommentContentState $state) {
+    return $this->setNamedContentState('inline.state.committed', $state);
+  }
+
+  public function getContentState() {
+    $state = $this->getNamedContentState('inline.state');
+
+    if (!$state) {
+      $state = $this->newContentState();
     }
 
     $state->setContentText($this->getContent());
@@ -351,17 +367,86 @@ abstract class PhabricatorInlineComment
   }
 
   public function setContentState(PhabricatorInlineCommentContentState $state) {
+    $this->setContent($state->getContentText());
+
+    return $this->setNamedContentState('inline.state', $state);
+  }
+
+  private function getNamedContentState($key) {
+    $storage = $this->getStorageObject();
+
+    $storage_map = $storage->getAttribute($key);
+    if (!is_array($storage_map)) {
+      return null;
+    }
+
+    $state = $this->newContentState();
+    $state->readStorageMap($storage_map);
+    return $state;
+  }
+
+  private function setNamedContentState(
+    $key,
+    PhabricatorInlineCommentContentState $state) {
+
     $storage = $this->getStorageObject();
     $storage_map = $state->newStorageMap();
-    $storage->setAttribute('inline.state', $storage_map);
-
-    $this->setContent($state->getContentText());
+    $storage->setAttribute($key, $storage_map);
 
     return $this;
   }
 
   public function getInlineContext() {
     return $this->getStorageObject()->getInlineContext();
+  }
+
+  public function getContentStateMapForEdit(PhabricatorUser $viewer) {
+    return $this->getWireContentStateMap(true, $viewer);
+  }
+
+  public function getContentStateMap() {
+    return $this->getWireContentStateMap(false, null);
+  }
+
+  private function getWireContentStateMap(
+    $is_edit,
+    PhabricatorUser $viewer = null) {
+
+    $initial_state = $this->getInitialContentState();
+    $committed_state = $this->getCommittedContentState();
+
+    if ($is_edit) {
+      $active_state = $this->getContentStateForEdit($viewer);
+    } else {
+      $active_state = $this->getContentState();
+    }
+
+    return array(
+      'initial' => $this->getWireContentState($initial_state),
+      'committed' => $this->getWireContentState($committed_state),
+      'active' => $this->getWireContentState($active_state),
+    );
+  }
+
+  private function getWireContentState($content_state) {
+    if ($content_state === null) {
+      return null;
+    }
+
+    return $content_state->newStorageMap();
+  }
+
+  public function getDefaultSuggestionText() {
+    $context = $this->getInlineContext();
+
+    if (!$context) {
+      return null;
+    }
+
+    $default = $context->getBodyLines();
+    $default = implode('', $default);
+
+    return $default;
   }
 
 

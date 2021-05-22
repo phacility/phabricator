@@ -93,7 +93,7 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
       'startOffset' => $inline->getStartOffset(),
       'endOffset' => $inline->getEndOffset(),
       'on_right' => $this->getIsOnRight(),
-      'contentState' => $inline->getContentState()->newStorageMap(),
+      'state' => $inline->getContentStateMap(),
     );
   }
 

@@ -172,7 +172,9 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentByIDForEdit($this->getCommentID());
 
         if ($is_delete) {
-          $inline->setIsDeleted(1);
+          $inline
+            ->setIsEditing(false)
+            ->setIsDeleted(1);
         } else {
           $inline->setIsDeleted(0);
         }
@@ -180,64 +182,60 @@ abstract class PhabricatorInlineCommentController
         $this->saveComment($inline);
 
         return $this->buildEmptyResponse();
-      case 'edit':
       case 'save':
         $inline = $this->loadCommentByIDForEdit($this->getCommentID());
-        if ($op === 'save') {
+
+        $this->updateCommentContentState($inline);
+
+        $inline
+          ->setIsEditing(false)
+          ->setIsDeleted(0);
+
+        // Since we're saving the comment, update the committed state.
+        $active_state = $inline->getContentState();
+        $inline->setCommittedContentState($active_state);
+
+        $this->saveComment($inline);
+
+        return $this->buildRenderedCommentResponse(
+          $inline,
+          $this->getIsOnRight());
+      case 'edit':
+        $inline = $this->loadCommentByIDForEdit($this->getCommentID());
+
+        // NOTE: At time of writing, the "editing" state of inlines is
+        // preserved by simulating a click on "Edit" when the inline loads.
+
+        // In this case, we don't want to "saveComment()", because it
+        // recalculates object drafts and purges versioned drafts.
+
+        // The recalculation is merely unnecessary (state doesn't change)
+        // but purging drafts means that loading a page and then closing it
+        // discards your drafts.
+
+        // To avoid the purge, only invoke "saveComment()" if we actually
+        // have changes to apply.
+
+        $is_dirty = false;
+        if (!$inline->getIsEditing()) {
+          $inline
+            ->setIsDeleted(0)
+            ->setIsEditing(true);
+
+          $is_dirty = true;
+        }
+
+        if ($this->hasContentState()) {
           $this->updateCommentContentState($inline);
-
-          $inline->setIsEditing(false);
-
-          if (!$inline->isVoidComment($viewer)) {
-            $inline->setIsDeleted(0);
-
-            $this->saveComment($inline);
-
-            return $this->buildRenderedCommentResponse(
-              $inline,
-              $this->getIsOnRight());
-          } else {
-            $inline->setIsDeleted(1);
-
-            $this->saveComment($inline);
-
-            return $this->buildEmptyResponse();
-          }
+          $is_dirty = true;
         } else {
-          // NOTE: At time of writing, the "editing" state of inlines is
-          // preserved by simulating a click on "Edit" when the inline loads.
+          PhabricatorInlineComment::loadAndAttachVersionedDrafts(
+            $viewer,
+            array($inline));
+        }
 
-          // In this case, we don't want to "saveComment()", because it
-          // recalculates object drafts and purges versioned drafts.
-
-          // The recalculation is merely unnecessary (state doesn't change)
-          // but purging drafts means that loading a page and then closing it
-          // discards your drafts.
-
-          // To avoid the purge, only invoke "saveComment()" if we actually
-          // have changes to apply.
-
-          $is_dirty = false;
-          if (!$inline->getIsEditing()) {
-            $inline
-              ->setIsDeleted(0)
-              ->setIsEditing(true);
-
-            $is_dirty = true;
-          }
-
-          if ($this->hasContentState()) {
-            $this->updateCommentContentState($inline);
-            $is_dirty = true;
-          } else {
-            PhabricatorInlineComment::loadAndAttachVersionedDrafts(
-              $viewer,
-              array($inline));
-          }
-
-          if ($is_dirty) {
-            $this->saveComment($inline);
-          }
+        if ($is_dirty) {
+          $this->saveComment($inline);
         }
 
         $edit_dialog = $this->buildEditDialog($inline)
@@ -255,10 +253,6 @@ abstract class PhabricatorInlineCommentController
         // clicks cancel to return to the previous state ("A"), we also want
         // to set the stored state back to "A".
         $this->updateCommentContentState($inline);
-
-        if ($inline->isVoidComment($viewer)) {
-          $inline->setIsDeleted(1);
-        }
 
         $this->saveComment($inline);
 
@@ -328,10 +322,30 @@ abstract class PhabricatorInlineCommentController
           $this->updateCommentContentState($inline);
         }
 
+        // NOTE: We're writing the comment as "deleted", then reloading to
+        // pick up context and undeleting it. This is silly -- we just want
+        // to load and attach context -- but just loading context is currently
+        // complicated (for example, context relies on cache keys that expect
+        // the inline to have an ID).
+
+        $inline->setIsDeleted(1);
+
         $this->saveComment($inline);
 
         // Reload the inline to attach context.
         $inline = $this->loadCommentByIDForEdit($inline->getID());
+
+        // Now, we can read the source file and set the initial state.
+        $state = $inline->getContentState();
+        $default_suggestion = $inline->getDefaultSuggestionText();
+        $state->setContentSuggestionText($default_suggestion);
+
+        $inline->setInitialContentState($state);
+        $inline->setContentState($state);
+
+        $inline->setIsDeleted(0);
+
+        $this->saveComment($inline);
 
         $edit_dialog = $this->buildEditDialog($inline);
 
@@ -456,6 +470,7 @@ abstract class PhabricatorInlineCommentController
     PhabricatorInlineComment $inline,
     $view,
     $is_edit) {
+    $viewer = $this->getViewer();
 
     if ($inline->getReplyToCommentPHID()) {
       $can_suggest = false;
@@ -464,18 +479,15 @@ abstract class PhabricatorInlineCommentController
     }
 
     if ($is_edit) {
-      $viewer = $this->getViewer();
-      $content_state = $inline->getContentStateForEdit($viewer);
+      $state = $inline->getContentStateMapForEdit($viewer);
     } else {
-      $content_state = $inline->getContentState();
+      $state = $inline->getContentStateMap();
     }
-
-    $state_map = $content_state->newStorageMap();
 
     $response = array(
       'inline' => array(
         'id' => $inline->getID(),
-        'contentState' => $state_map,
+        'state' => $state,
         'canSuggestEdit' => $can_suggest,
       ),
       'view' => hsprintf('%s', $view),

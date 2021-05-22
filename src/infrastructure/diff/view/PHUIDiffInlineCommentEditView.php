@@ -114,9 +114,6 @@ final class PHUIDiffInlineCommentEditView
     $main = $state->getContentSuggestionText();
     $main_count = count(phutil_split_lines($main));
 
-    $default = $context->getBodyLines();
-    $default = implode('', $default);
-
     // Browsers ignore one leading newline in text areas. Add one so that
     // any actual leading newlines in the content are preserved.
     $main = "\n".$main;
@@ -127,9 +124,6 @@ final class PHUIDiffInlineCommentEditView
         'class' => 'inline-suggestion-input PhabricatorMonospaced',
         'rows' => max(3, $main_count + 1),
         'sigil' => 'inline-content-suggestion',
-        'meta' => array(
-          'defaultText' => $default,
-        ),
       ),
       $main);
 

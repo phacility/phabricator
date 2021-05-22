@@ -671,9 +671,6 @@ JX.install('DiffChangeset', {
       // Code shared by autoload and context responses.
 
       this._loadChangesetState(response);
-
-      JX.Stratcom.invoke('differential-inline-comment-refresh');
-
       this._rebuildAllInlines();
 
       JX.Stratcom.invoke('resize');
@@ -846,9 +843,7 @@ JX.install('DiffChangeset', {
     },
 
     _rebuildAllInlines: function() {
-      if (this._inlines === null) {
-        this._inlines = [];
-      }
+      this._inlines = [];
 
       var rows = JX.DOM.scry(this._node, 'tr');
       var ii;

@@ -10,6 +10,16 @@
 abstract class PHUIDiffInlineCommentRowScaffold extends AphrontView {
 
   private $views = array();
+  private $isUndoTemplate;
+
+  final public function setIsUndoTemplate($is_undo_template) {
+    $this->isUndoTemplate = $is_undo_template;
+    return $this;
+  }
+
+  final public function getIsUndoTemplate() {
+    return $this->isUndoTemplate;
+  }
 
   public function getInlineViews() {
     return $this->views;
@@ -21,11 +31,28 @@ abstract class PHUIDiffInlineCommentRowScaffold extends AphrontView {
   }
 
   protected function getRowAttributes() {
+    $is_undo_template = $this->getIsUndoTemplate();
+
     $is_hidden = false;
-    foreach ($this->getInlineViews() as $view) {
-      if ($view->isHidden()) {
-        $is_hidden = true;
+    if ($is_undo_template) {
+
+      // NOTE: When this scaffold is turned into an "undo" template, it is
+      // important it not have any metadata: the metadata reference will be
+      // copied to each instance of the row. This is a complicated mess; for
+      // now, just sneak by without generating metadata when rendering undo
+      // templates.
+
+      $metadata = null;
+    } else {
+      foreach ($this->getInlineViews() as $view) {
+        if ($view->isHidden()) {
+          $is_hidden = true;
+        }
       }
+
+      $metadata = array(
+        'hidden' => $is_hidden,
+      );
     }
 
     $classes = array();
@@ -37,9 +64,7 @@ abstract class PHUIDiffInlineCommentRowScaffold extends AphrontView {
     $result = array(
       'class' => implode(' ', $classes),
       'sigil' => 'inline-row',
-      'meta' => array(
-        'hidden' => $is_hidden,
-      ),
+      'meta' => $metadata,
     );
 
     return $result;
