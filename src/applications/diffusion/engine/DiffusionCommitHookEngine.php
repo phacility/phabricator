@@ -216,13 +216,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $event->setRejectCode($this->rejectCode);
     $event->setRejectDetails($this->rejectDetails);
 
-    $event->openTransaction();
-      $event->save();
-      foreach ($all_updates as $update) {
-        $update->setPushEventPHID($event->getPHID());
-        $update->save();
-      }
-    $event->saveTransaction();
+    $event->saveWithLogs($all_updates);
 
     if ($caught) {
       throw $caught;

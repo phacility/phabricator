@@ -901,4 +901,41 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
         new PhutilNumber($duration)));
   }
 
+  public function newMaintenanceEvent() {
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+    $now = PhabricatorTime::getNow();
+
+    $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
+      ->setRepositoryPHID($repository->getPHID())
+      ->setEpoch($now)
+      ->setPusherPHID($this->getEffectiveActingAsPHID())
+      ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT);
+
+    return $event;
+  }
+
+  public function newMaintenanceLog() {
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+    $now = PhabricatorTime::getNow();
+
+    $device = AlmanacKeys::getLiveDevice();
+    if ($device) {
+      $device_phid = $device->getPHID();
+    } else {
+      $device_phid = null;
+    }
+
+    return PhabricatorRepositoryPushLog::initializeNewLog($viewer)
+      ->setDevicePHID($device_phid)
+      ->setRepositoryPHID($repository->getPHID())
+      ->attachRepository($repository)
+      ->setEpoch($now)
+      ->setPusherPHID($this->getEffectiveActingAsPHID())
+      ->setChangeFlags(PhabricatorRepositoryPushLog::CHANGEFLAG_MAINTENANCE)
+      ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_MAINTENANCE)
+      ->setRefNew('');
+  }
+
 }
