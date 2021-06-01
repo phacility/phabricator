@@ -71,6 +71,17 @@ final class PhabricatorDashboardPanelEditEngine
     return $panel;
   }
 
+  protected function newEditableObjectForDocumentation() {
+    $panel = parent::newEditableObjectForDocumentation();
+
+    $text_type = id(new PhabricatorDashboardTextPanelType())
+      ->getPanelTypeKey();
+
+    $panel->setPanelType($text_type);
+
+    return $panel;
+  }
+
   protected function newObjectQuery() {
     return new PhabricatorDashboardPanelQuery();
   }
