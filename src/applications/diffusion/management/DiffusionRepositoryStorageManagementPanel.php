@@ -190,15 +190,19 @@ final class DiffusionRepositoryStorageManagementPanel
           }
         }
 
+        $last_writer = null;
+        $writer_epoch = null;
         if ($write_properties) {
           $writer_phid = idx($write_properties, 'userPHID');
-          $last_writer = $viewer->renderHandle($writer_phid);
+
+          if ($writer_phid) {
+            $last_writer = $viewer->renderHandle($writer_phid);
+          }
 
           $writer_epoch = idx($write_properties, 'epoch');
-          $writer_epoch = phabricator_datetime($writer_epoch, $viewer);
-        } else {
-          $last_writer = null;
-          $writer_epoch = null;
+          if ($writer_epoch) {
+            $writer_epoch = phabricator_datetime($writer_epoch, $viewer);
+          }
         }
 
         $rows[] = array(

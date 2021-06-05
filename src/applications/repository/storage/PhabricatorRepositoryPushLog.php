@@ -18,6 +18,7 @@ final class PhabricatorRepositoryPushLog
   const REFTYPE_BOOKMARK = 'bookmark';
   const REFTYPE_COMMIT = 'commit';
   const REFTYPE_REF = 'ref';
+  const REFTYPE_MAINTENANCE = 'maintenance';
 
   const CHANGEFLAG_ADD = 1;
   const CHANGEFLAG_DELETE = 2;
@@ -27,6 +28,7 @@ final class PhabricatorRepositoryPushLog
   const CHANGEFLAG_ENORMOUS = 32;
   const CHANGEFLAG_OVERSIZED = 64;
   const CHANGEFLAG_TOUCHES = 128;
+  const CHANGEFLAG_MAINTENANCE = 256;
 
   const REJECT_ACCEPT = 0;
   const REJECT_DANGEROUS = 1;
@@ -70,6 +72,7 @@ final class PhabricatorRepositoryPushLog
       self::CHANGEFLAG_ENORMOUS => pht('Enormous'),
       self::CHANGEFLAG_OVERSIZED => pht('Oversized'),
       self::CHANGEFLAG_TOUCHES => pht('Touches Too Many Paths'),
+      self::CHANGEFLAG_MAINTENANCE => pht('Maintenance'),
     );
   }
 

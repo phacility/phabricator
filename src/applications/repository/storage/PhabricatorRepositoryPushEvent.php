@@ -81,6 +81,21 @@ final class PhabricatorRepositoryPushEvent
     return $this->assertAttached($this->logs);
   }
 
+  public function saveWithLogs(array $logs) {
+    assert_instances_of($logs, 'PhabricatorRepositoryPushLog');
+
+    $this->openTransaction();
+      $this->save();
+      foreach ($logs as $log) {
+        $log->setPushEventPHID($this->getPHID());
+        $log->save();
+      }
+    $this->saveTransaction();
+
+    $this->attachLogs($logs);
+
+    return $this;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

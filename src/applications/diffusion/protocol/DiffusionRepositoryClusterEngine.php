@@ -11,6 +11,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
   private $repository;
   private $viewer;
+  private $actingAsPHID;
   private $logger;
 
   private $clusterWriteLock;
@@ -42,6 +43,23 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
   public function setLog(DiffusionRepositoryClusterEngineLogInterface $log) {
     $this->logger = $log;
     return $this;
+  }
+
+  public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  public function getActingAsPHID() {
+    return $this->actingAsPHID;
+  }
+
+  private function getEffectiveActingAsPHID() {
+    if ($this->actingAsPHID) {
+      return $this->actingAsPHID;
+    }
+
+    return $this->getViewer()->getPHID();
   }
 
 
@@ -402,7 +420,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       $repository_phid,
       $device_phid,
       array(
-        'userPHID' => $viewer->getPHID(),
+        'userPHID' => $this->getEffectiveActingAsPHID(),
         'epoch' => PhabricatorTime::getNow(),
         'devicePHID' => $device_phid,
       ),
@@ -432,8 +450,6 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     if ($repository->isHosted()) {
       return;
     }
-
-    $viewer = $this->getViewer();
 
     $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
@@ -883,6 +899,43 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
         $handles[$user_phid]->getName(),
         $handles[$device_phid]->getName(),
         new PhutilNumber($duration)));
+  }
+
+  public function newMaintenanceEvent() {
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+    $now = PhabricatorTime::getNow();
+
+    $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
+      ->setRepositoryPHID($repository->getPHID())
+      ->setEpoch($now)
+      ->setPusherPHID($this->getEffectiveActingAsPHID())
+      ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT);
+
+    return $event;
+  }
+
+  public function newMaintenanceLog() {
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+    $now = PhabricatorTime::getNow();
+
+    $device = AlmanacKeys::getLiveDevice();
+    if ($device) {
+      $device_phid = $device->getPHID();
+    } else {
+      $device_phid = null;
+    }
+
+    return PhabricatorRepositoryPushLog::initializeNewLog($viewer)
+      ->setDevicePHID($device_phid)
+      ->setRepositoryPHID($repository->getPHID())
+      ->attachRepository($repository)
+      ->setEpoch($now)
+      ->setPusherPHID($this->getEffectiveActingAsPHID())
+      ->setChangeFlags(PhabricatorRepositoryPushLog::CHANGEFLAG_MAINTENANCE)
+      ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_MAINTENANCE)
+      ->setRefNew('');
   }
 
 }

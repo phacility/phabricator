@@ -523,6 +523,87 @@ Retaining separate backup snapshots will improve your ability to recover more
 data more easily in a wider range of disaster situations.
 
 
+Ad-Hoc Maintenance Locks
+========================
+
+Occasionally, you may want to perform maintenance to a clustered repository
+which requires you modify the actual content of the repository.
+
+For example: you might want to delete a large number of old or temporary
+branches; or you might want to merge a very large number of commits from
+another source.
+
+These operations may be prohibitively slow or complex to perform using normal
+pushes. In cases where you would prefer to directly modify a working copy, you
+can use a maintenance lock to safely make a working copy mutable.
+
+If you simply perform this kind of content-modifying maintenance by directly
+modifying the repository on disk with commands like `git update-ref`, your
+changes may either encounter conflicts or encounter problems with change
+propagation.
+
+You can encounter conflicts because directly modifying the working copy on disk
+won't prevent users or Phabricator itself from performing writes to the same
+working copy at the same time. Phabricator does not compromise the lower-level
+locks provided by the VCS so this is theoretically safe -- and this rarely
+causes any significant problems in practice -- but doesn't make things any
+simpler or easier.
+
+Your changes may fail to propagate because writing directly to the repository
+doesn't turn it into the new cluster leader after your writes complete. If
+another node accepts the next push, it will become the new leader -- without
+your changes -- and all other nodes will synchronize from it.
+
+Note that some maintenance operations (like `git gc`, `git prune`, or
+`git  repack`) do not modify repository content. In theory, these operations do
+not require a maintenance lock: lower-level Git locks should protect
+them from conflicts, and they can not be affected by propagation issues because
+they do not propagate. In practice, these operations are not conflict-free in
+all circumstances. Using a maintenance lock may be overkill, but it's probably
+still a good idea.
+
+To use a maintenance lock:
+
+  - Open two terminal windows. You'll use one window to hold the lock and a
+    second window to perform maintenance.
+  - Run `bin/repository lock <repository> ...` in one terminal.
+  - When the process reports that repositories are locked, switch to the second
+    terminal and perform maintenance. The `repository lock` process should
+    still be running in your first terminal.
+  - After maintenance completes, switch back to the first terminal and answer
+    the prompt to confirm maintenance is complete.
+
+The workflow looks something like this:
+
+```
+$ ./bin/repository lock R2
+
+These repositories will be locked:
+
+      - R2 Git Test Repository
+
+While the lock is held: users will be unable to write to this repository,
+and you may safely perform working copy maintenance on this node in another
+terminal window.
+
+    Lock repositories and begin maintenance? [y/N] y
+
+Repositories are now locked. You may begin maintenance in another terminal
+window. Keep this process running until you complete the maintenance, then
+confirm that you are ready to release the locks.
+
+    Ready to release the locks? [y/N] y
+
+Done.
+```
+
+As maintenance completes, the push log for the repository will be updated to
+reflect that you performed maintenance.
+
+If the lock is interrupted, you may encounter a "Write Interruptions" condition
+described earlier in this document. See that section for details. In most
+cases, you can resolve this issue by demoting the node you are working on.
+
 Next Steps
 ==========
 
