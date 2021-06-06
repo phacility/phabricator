@@ -392,8 +392,11 @@ final class PhabricatorStartup {
     ini_set('memory_limit', -1);
 
     // If we have libxml, disable the incredibly dangerous entity loader.
+    // PHP 8 deprecates this function and disables this by default; remove once
+    // PHP 7 is no longer supported or a future version has removed the function
+    // entirely.
     if (function_exists('libxml_disable_entity_loader')) {
-      libxml_disable_entity_loader(true);
+      @libxml_disable_entity_loader(true);
     }
 
     // See T13060. If the locale for this process (the parent process) is not
