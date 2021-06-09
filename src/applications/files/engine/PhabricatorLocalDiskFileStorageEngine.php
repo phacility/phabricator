@@ -45,6 +45,12 @@ final class PhabricatorLocalDiskFileStorageEngine
     // put a couple of subdirectories up front to avoid a situation where we
     // have one directory with a zillion files in it, since this is generally
     // bad news.
+
+    /*
+     * #RIVIGO_CUSTOM
+     * added mode 777 while creating dir as user is specified root
+     */
+
     do {
       $name = md5(mt_rand());
       $name = preg_replace('/^(..)(..)(.*)$/', '\\1/\\2/\\3', $name);
@@ -55,7 +61,7 @@ final class PhabricatorLocalDiskFileStorageEngine
 
     $parent = $root.'/'.dirname($name);
     if (!Filesystem::pathExists($parent)) {
-      execx('mkdir -p %s', $parent);
+      execx('mkdir -p -m777 %s', $parent);
     }
 
     AphrontWriteGuard::willWrite();

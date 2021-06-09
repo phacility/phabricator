@@ -77,11 +77,19 @@ foreach ($parser->getAttachments() as $attachment) {
     continue;
   }
 
+  /**
+   * #RIVIGO_CUSTOM
+   * Setting default attachment file policy to Users,
+   * as most of the mails are sent by ops users who don't have account in
+   * phabricator.
+   * If Some phabricator user send email, he'll still be set as author
+   */
+
   $file = PhabricatorFile::newFromFileData(
     $attachment->getContent(),
     array(
       'name' => $attachment->getFilename(),
-      'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      'viewPolicy' => PhabricatorPolicies::POLICY_USER,
     ));
   $attachments[] = $file->getPHID();
 }

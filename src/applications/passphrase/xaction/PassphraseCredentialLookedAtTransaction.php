@@ -36,4 +36,10 @@ final class PassphraseCredentialLookedAtTransaction
     return true;
   }
 
+  public function getRequiredCapabilities(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return PhabricatorPolicyCapability::CAN_VIEW;
+  }
+
 }
