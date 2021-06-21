@@ -35,7 +35,7 @@ $ROOT/phabricator/bin/phd stop
 # appropriate command for your system.
 # NOTE: If you're running php-fpm, you should stop it here too.
 
-sudo /etc/init.d/httpd stop
+sudo /etc/init.d/apache2 stop
 
 
 # Upgrade the database schema. You may want to add the "--force" flag to allow
@@ -44,7 +44,7 @@ $ROOT/phabricator/bin/storage upgrade
 
 # Restart the webserver. As above, this depends on your system and webserver.
 # NOTE: If you're running php-fpm, restart it here too.
-sudo /etc/init.d/httpd start
+sudo /etc/init.d/apache2 start
 
 # Restart daemons.
 $ROOT/phabricator/bin/phd start

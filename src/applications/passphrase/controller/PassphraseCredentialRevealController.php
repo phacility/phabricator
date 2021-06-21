@@ -13,7 +13,6 @@ final class PassphraseCredentialRevealController
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->needSecrets(true)
       ->executeOne();

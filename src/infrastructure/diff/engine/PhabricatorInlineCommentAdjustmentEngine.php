@@ -143,7 +143,7 @@ final class PhabricatorInlineCommentAdjustmentEngine
 
     // Find the smallest "new" changeset ID. We'll consider everything
     // larger than this to be "newer", and everything smaller to be "older".
-    $first_new_id = min(mpull($new, 'getID'));
+    $first_new_id = !$new ? 0 : min(mpull($new, 'getID'));
 
     $results = array();
     foreach ($inlines as $inline) {

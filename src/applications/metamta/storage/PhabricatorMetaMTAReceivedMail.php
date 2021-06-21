@@ -1,4 +1,7 @@
 <?php
+$root = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+require_once $root.'/externals/html2text/html2text.php';
+require_once $root.'/externals/html2text/src/Html2TextException.php';
 
 final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
@@ -151,6 +154,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $this->dropMailFromPhabricator();
       $this->dropMailAlreadyReceived();
       $this->dropEmptyMail();
+      $this->dropEmailReplies();
 
       $sender = $this->loadSender();
       if ($sender) {
@@ -329,7 +333,45 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   public function getRawTextBody() {
-    return idx($this->bodies, 'text');
+      //return idx($this->bodies, 'text');
+      return $this->getParsedHTMLBody();
+  }
+
+    /**
+     * #RIVIGO_CUSTOM
+     * SRC: https://github.com/soundasleep/html2text
+     * Location : ~/externals/html2text
+     * Try processing html body by converting to text using Html2Text lib
+     * getRawTextBody will call custom method getParsedHTMLBody and if any exception occurs, will fall back to
+     * returning text body
+     */
+
+  public function getParsedHTMLBody() {
+      try {
+          $html_parsed_body = convert_html_to_text(idx($this->bodies, 'html'),true);
+      } catch (\Soundasleep\Html2TextException $e) {
+          return idx($this->bodies, 'text');
+      }
+      return $html_parsed_body;
+  }
+
+    /**
+     * #RIVIGO_CUSTOM
+     * Skip processing reply and reply-all emails.
+     * By default all mail clients and outlook append 'in-reply-to' header
+     * throw STATUS_DUPLICATE Exception if header is present
+     */
+
+  public function dropEmailReplies() {
+      if (!$this->getHeader('in-reply-to')) {
+          return;
+      }
+
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+          MetaMTAReceivedMailStatus::STATUS_DUPLICATE,
+          pht(
+              "Ignoring email with '%s' header to avoid duplicate tickets.",
+              'in-reply-to'));
   }
 
   /**

@@ -189,7 +189,6 @@ final class DiffusionUpdateObjectAfterCommitWorker
       DifferentialRevisionHasCommitEdgeType::EDGECONST);
 
     $match_data = $this->getUpdateProperty('revisionMatchData');
-
     $type_close = DifferentialRevisionCloseTransaction::TRANSACTIONTYPE;
     $xactions[] = $revision->getApplicationTransactionTemplate()
       ->setTransactionType($type_close)
