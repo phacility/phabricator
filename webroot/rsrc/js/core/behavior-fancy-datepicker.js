@@ -424,6 +424,13 @@ JX.behavior('fancy-datepicker', function(config, statics) {
             value_m += 12;
             value_y--;
           }
+          // This relies on months greater than 11 rolling over into the next
+          // year and days less than 1 rolling back into the previous month.
+          var last_date = new Date(value_y, value_m, 0);
+          if (value_d > last_date.getDate()) {
+            // The date falls outside the new month, so stuff it back in.
+            value_d = last_date.getDate();
+          }
           break;
         case 'd':
           // User clicked a day.

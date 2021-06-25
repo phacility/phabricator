@@ -10,6 +10,7 @@ final class PhabricatorOwnersPackageQuery
   private $repositoryPHIDs;
   private $paths;
   private $statuses;
+  private $authorityModes;
 
   private $controlMap = array();
   private $controlResults;
@@ -74,6 +75,11 @@ final class PhabricatorOwnersPackageQuery
     // We need to load paths to execute control queries.
     $this->needPaths = true;
 
+    return $this;
+  }
+
+  public function withAuthorityModes(array $modes) {
+    $this->authorityModes = $modes;
     return $this;
   }
 
@@ -229,6 +235,13 @@ final class PhabricatorOwnersPackageQuery
           $indexes);
       }
       $where[] = qsprintf($conn, '%LO', $clauses);
+    }
+
+    if ($this->authorityModes !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'authorityMode IN (%Ls)',
+        $this->authorityModes);
     }
 
     return $where;

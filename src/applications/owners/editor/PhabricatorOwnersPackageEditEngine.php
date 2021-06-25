@@ -90,6 +90,9 @@ EOTEXT
     $dominion_map = PhabricatorOwnersPackage::getDominionOptionsMap();
     $dominion_map = ipull($dominion_map, 'name');
 
+    $authority_map = PhabricatorOwnersPackage::getAuthorityOptionsMap();
+    $authority_map = ipull($authority_map, 'name');
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -118,6 +121,16 @@ EOTEXT
         ->setIsCopyable(true)
         ->setValue($object->getDominion())
         ->setOptions($dominion_map),
+      id(new PhabricatorSelectEditField())
+        ->setKey('authority')
+        ->setLabel(pht('Authority'))
+        ->setDescription(
+          pht('Change package authority rules.'))
+        ->setTransactionType(
+          PhabricatorOwnersPackageAuthorityTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setValue($object->getAuthorityMode())
+        ->setOptions($authority_map),
       id(new PhabricatorSelectEditField())
         ->setKey('autoReview')
         ->setLabel(pht('Auto Review'))
