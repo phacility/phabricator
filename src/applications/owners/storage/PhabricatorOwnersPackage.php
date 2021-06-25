@@ -21,6 +21,7 @@ final class PhabricatorOwnersPackage
   protected $dominion;
   protected $properties = array();
   protected $auditingState;
+  protected $authorityMode;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -41,6 +42,9 @@ final class PhabricatorOwnersPackage
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
 
+  const AUTHORITY_STRONG = 'strong';
+  const AUTHORITY_WEAK = 'weak';
+
   const PROPERTY_IGNORED = 'ignored';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
@@ -58,6 +62,7 @@ final class PhabricatorOwnersPackage
       ->setAuditingState(PhabricatorOwnersAuditRule::AUDITING_NONE)
       ->setAutoReview(self::AUTOREVIEW_NONE)
       ->setDominion(self::DOMINION_STRONG)
+      ->setAuthorityMode(self::AUTHORITY_STRONG)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->attachPaths(array())
@@ -115,6 +120,19 @@ final class PhabricatorOwnersPackage
     );
   }
 
+  public static function getAuthorityOptionsMap() {
+    return array(
+      self::AUTHORITY_STRONG => array(
+        'name' => pht('Strong (Package Owns Paths)'),
+        'short' => pht('Strong'),
+      ),
+      self::AUTHORITY_WEAK => array(
+        'name' => pht('Weak (Package Watches Paths)'),
+        'short' => pht('Weak'),
+      ),
+    );
+  }
+
   protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
@@ -130,6 +148,7 @@ final class PhabricatorOwnersPackage
         'status' => 'text32',
         'autoReview' => 'text32',
         'dominion' => 'text32',
+        'authorityMode' => 'text32',
       ),
     ) + parent::getConfiguration();
   }
@@ -568,6 +587,10 @@ final class PhabricatorOwnersPackage
     return PhabricatorOwnersAuditRule::newFromState($this->getAuditingState());
   }
 
+  public function getHasStrongAuthority() {
+    return ($this->getAuthorityMode() === self::AUTHORITY_STRONG);
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -697,6 +720,10 @@ final class PhabricatorOwnersPackage
         ->setType('map<string, wild>')
         ->setDescription(pht('Dominion setting information.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authority')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Authority setting information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('ignored')
         ->setType('map<string, wild>')
         ->setDescription(pht('Ignored attribute information.')),
@@ -747,6 +774,23 @@ final class PhabricatorOwnersPackage
       'short' => $dominion_short,
     );
 
+
+    $authority_value = $this->getAuthorityMode();
+    $authority_map = self::getAuthorityOptionsMap();
+    if (isset($authority_map[$authority_value])) {
+      $authority_label = $authority_map[$authority_value]['name'];
+      $authority_short = $authority_map[$authority_value]['short'];
+    } else {
+      $authority_label = pht('Unknown ("%s")', $authority_value);
+      $authority_short = pht('Unknown ("%s")', $authority_value);
+    }
+
+    $authority = array(
+      'value' => $authority_value,
+      'label' => $authority_label,
+      'short' => $authority_short,
+    );
+
     // Force this to always emit as a JSON object even if empty, never as
     // a JSON list.
     $ignored = $this->getIgnoredPathAttributes();
@@ -762,6 +806,7 @@ final class PhabricatorOwnersPackage
       'review' => $review,
       'audit' => $audit,
       'dominion' => $dominion,
+      'authority' => $authority,
       'ignored' => $ignored,
     );
   }

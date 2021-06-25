@@ -197,6 +197,12 @@ final class PhabricatorOwnersDetailController
     $name = idx($spec, 'short', $dominion);
     $view->addProperty(pht('Dominion'), $name);
 
+    $authority_mode = $package->getAuthorityMode();
+    $authority_map = PhabricatorOwnersPackage::getAuthorityOptionsMap();
+    $spec = idx($authority_map, $authority_mode, array());
+    $name = idx($spec, 'short', $authority_mode);
+    $view->addProperty(pht('Authority'), $name);
+
     $auto = $package->getAutoReview();
     $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
     $spec = idx($autoreview_map, $auto, array());

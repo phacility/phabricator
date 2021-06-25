@@ -311,9 +311,17 @@ final class DifferentialRevision extends DifferentialDAO
     // which the actor may be able to use their authority over to gain the
     // ability to force-accept for other packages. This query doesn't apply
     // dominion rules yet, and we'll bypass those rules later on.
+
+    // See T13657. We ignore "watcher" packages which don't grant their owners
+    // permission to force accept anything.
+
     $authority_query = id(new PhabricatorOwnersPackageQuery())
       ->setViewer($viewer)
       ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+      ->withAuthorityModes(
+        array(
+          PhabricatorOwnersPackage::AUTHORITY_STRONG,
+        ))
       ->withAuthorityPHIDs(array($viewer->getPHID()))
       ->withControl($repository_phid, $paths);
     $authority_packages = $authority_query->execute();
