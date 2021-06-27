@@ -252,7 +252,7 @@ final class PhabricatorAuthStartController
 
     $message = pht(
       'ERROR: You are making a Conduit API request to "%s", but the correct '.
-      'HTTP request path to use in order to access a COnduit method is "%s" '.
+      'HTTP request path to use in order to access a Conduit method is "%s" '.
       '(for example, "%s"). Check your configuration.',
       $request_path,
       $conduit_path,
