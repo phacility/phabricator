@@ -166,6 +166,15 @@ final class DiffusionHistoryQueryConduitAPIMethod
 
     $last = null;
     foreach (array_reverse($lines) as $line) {
+      // In the event additional log output is included in future mercurial
+      // updates, if the line does not contain any semi-colon then log it and
+      // ignore it.
+      if (strpos($line, ';') === false) {
+        phlog(pht(
+          'Unexpected output from mercurial "log --debug" command: %s',
+          $line));
+        continue;
+      }
       list($hash, $parents) = explode(';', $line);
       $parents = trim($parents);
       if (!$parents) {

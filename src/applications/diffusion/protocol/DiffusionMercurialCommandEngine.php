@@ -71,12 +71,36 @@ final class DiffusionMercurialCommandEngine
     //
     // Separately, it may fail to write to a different branch cache, and may
     // encounter issues reading the branch cache.
+    //
+    // When Mercurial repositories are hosted on external systems with
+    // multi-user environments it's possible that the branch cache is computed
+    // on a revision which does not end up being published. When this happens it
+    // will recompute the cache but also print out "invalid branch cache".
+    //
+    // https://www.mercurial-scm.org/pipermail/mercurial/2014-June/047239.html
+    //
+    // When observing a repository which uses largefiles, the debug output may
+    // also contain extraneous output about largefile changes.
+    //
+    // At some point Mercurial added/improved support for pager used when
+    // command output is large. It includes printing out debug information that
+    // the pager is being started for a command. This seems to happen despite
+    // the output of the command being piped/read from another process.
+    //
+    // When printing color output Mercurial may run into some issue with the
+    // terminal info. This should never happen in Phabricator since color
+    // output should be turned off, however in the event it shows up we should
+    // filter it out anyways.
 
     $ignore = array(
       'ignoring untrusted configuration option',
       "couldn't write revision branch cache:",
       "couldn't write branch cache:",
       'invalid branchheads cache',
+      'invalid branch cache',
+      'updated patterns: .hglf',
+      'starting pager for command',
+      'no terminfo entry for',
     );
 
     foreach ($ignore as $key => $pattern) {
