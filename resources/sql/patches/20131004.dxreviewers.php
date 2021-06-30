@@ -29,8 +29,7 @@ foreach (new LiskMigrationIterator($table) as $revision) {
   foreach ($reviewer_phids as $dst) {
     if (phid_get_type($dst) == PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
       // At least one old install ran into some issues here. Skip the row if we
-      // can't figure out what the destination PHID is. See here:
-      // https://github.com/phacility/phabricator/pull/507
+      // can't figure out what the destination PHID is.
       continue;
     }
 
