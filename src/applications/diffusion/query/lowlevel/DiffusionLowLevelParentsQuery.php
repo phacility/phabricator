@@ -47,23 +47,23 @@ final class DiffusionLowLevelParentsQuery
   private function loadMercurialParents() {
     $repository = $this->getRepository();
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --debug --limit 1 --template={parents} --rev %s',
-      $this->identifier);
+    $hg_analyzer = PhutilBinaryAnalyzer::getForBinary('hg');
+    if ($hg_analyzer->isMercurialTemplatePnodeAvailable()) {
+      $hg_log_template = '{p1.node} {p2.node}';
+    } else {
+      $hg_log_template = '{p1node} {p2node}';
+    }
 
-    $stdout = DiffusionMercurialCommandEngine::filterMercurialDebugOutput(
-      $stdout);
+    list($stdout) = $repository->execxLocalCommand(
+      'log --limit 1 --template %s --rev %s',
+      $hg_log_template,
+      $this->identifier);
 
     $hashes = preg_split('/\s+/', trim($stdout));
     foreach ($hashes as $key => $value) {
-      // Mercurial parents look like "23:ad9f769d6f786fad9f76d9a" -- we want
-      // to strip out the local rev part.
-      list($local, $global) = explode(':', $value);
-      $hashes[$key] = $global;
-
-      // With --debug we get 40-character hashes but also get the "000000..."
-      // hash for missing parents; ignore it.
-      if (preg_match('/^0+$/', $global)) {
+      // We get 40-character hashes but also get the "000000..." hash for
+      // missing parents; ignore it.
+      if (preg_match('/^0+\z/', $value)) {
         unset($hashes[$key]);
       }
     }
