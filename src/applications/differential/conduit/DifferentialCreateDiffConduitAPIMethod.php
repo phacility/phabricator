@@ -78,6 +78,18 @@ final class DifferentialCreateDiffConduitAPIMethod
       if ($repository) {
         $repository_phid = $repository->getPHID();
         $repository_uuid = $repository->getUUID();
+
+        // Check for VCS compatibility
+        $local_vcs = $request->getValue('sourceControlSystem');
+        $repository_vcs = $repository->getVersionControlSystem();
+        if ($local_vcs != $repository_vcs) {
+          throw new Exception(pht(
+            "Local VCS (%s) is different from the one defined in the repository (%s).\r\n"
+            . 'To use Phabricator with git-cinnabar please follow the docs at '
+            . 'https://moz-conduit.readthedocs.io/en/latest/phabricator-user.html#using-git-cinnabar',
+            $local_vcs,
+            $repository_vcs));
+        }
       }
     }
 
