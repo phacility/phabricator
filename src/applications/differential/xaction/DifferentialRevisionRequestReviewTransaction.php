@@ -114,6 +114,27 @@ final class DifferentialRevisionRequestReviewTransaction
           'revisions.'));
     }
 
+    // When revisions automatically promote out of "Draft" after builds finish,
+    // the viewer may be acting as the Harbormaster application or is in the
+    // secure-revision group
+    $in_secure_revision = id(new PhabricatorProjectQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withMemberPHIDs(array($viewer->getPHID()))
+      ->withNames(array('secure-revision'))
+      ->executeOne();
+    if (
+      !$viewer->isOmnipotent()
+      && !$in_secure_revision
+      && !$this->isViewerRevisionAuthor($object, $viewer)
+    ) {
+      throw new Exception(
+        pht(
+          'You can not request review of this revision because you are not ' .
+          'the author of the revision or in the proper permissions group.'
+        )
+      );
+    }
+
     $this->getActorSourceType($object, $viewer);
   }
 

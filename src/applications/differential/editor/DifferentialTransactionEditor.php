@@ -525,11 +525,6 @@ final class DifferentialTransactionEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    if (!$object->getShouldBroadcast()) {
-      return false;
-    }
-
     return true;
   }
 
@@ -1527,121 +1522,6 @@ final class DifferentialTransactionEditor
 
 
   protected function didApplyTransactions($object, array $xactions) {
-    // In a moment, we're going to try to publish draft revisions which have
-    // completed all their builds. However, we only want to do that if the
-    // actor is either the revision author or an omnipotent user (generally,
-    // the Harbormaster application).
-
-    // If we let any actor publish the revision as a side effect of other
-    // changes then an unlucky third party who innocently comments on the draft
-    // can end up racing Harbormaster and promoting the revision. At best, this
-    // is confusing. It can also run into validation problems with the "Request
-    // Review" transaction. See PHI309 for some discussion.
-    $author_phid = $object->getAuthorPHID();
-    $viewer = $this->requireActor();
-    $can_undraft =
-      ($this->getActingAsPHID() === $author_phid) ||
-      ($viewer->isOmnipotent());
-
-    // If a draft revision has no outstanding builds and we're automatically
-    // making drafts public after builds finish, make the revision public.
-    if ($can_undraft) {
-      $auto_undraft = !$object->getHoldAsDraft();
-    } else {
-      $auto_undraft = false;
-    }
-
-    $can_promote = false;
-    $can_demote = false;
-
-    // "Draft" revisions can promote to "Review Requested" after builds pass,
-    // or demote to "Changes Planned" after builds fail.
-    if ($object->isDraft()) {
-      $can_promote = true;
-      $can_demote = true;
-    }
-
-    // See PHI584. "Changes Planned" revisions which are not yet broadcasting
-    // can promote to "Review Requested" if builds pass.
-
-    // This pass is presumably the result of someone restarting the builds and
-    // having them work this time, perhaps because the builds are not perfectly
-    // reliable or perhaps because someone fixed some issue with build hardware
-    // or some other dependency.
-
-    // Currently, there's no legitimate way to end up in this state except
-    // through automatic demotion, so this behavior should not generate an
-    // undue level of confusion or ambiguity. Also note that these changes can
-    // not demote again since they've already been demoted once.
-    if ($object->isChangePlanned()) {
-      if (!$object->getShouldBroadcast()) {
-        $can_promote = true;
-      }
-    }
-
-    if (($can_promote || $can_demote) && $auto_undraft) {
-      $status = $this->loadCompletedBuildableStatus($object);
-
-      $is_passed = ($status === HarbormasterBuildableStatus::STATUS_PASSED);
-      $is_failed = ($status === HarbormasterBuildableStatus::STATUS_FAILED);
-
-      if ($is_passed && $can_promote) {
-        // When Harbormaster moves a revision out of the draft state, we
-        // attribute the action to the revision author since this is more
-        // natural and more useful.
-
-        // Additionally, we change the acting PHID for the transaction set
-        // to the author if it isn't already a user so that mail comes from
-        // the natural author.
-        $acting_phid = $this->getActingAsPHID();
-        $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
-        if (phid_get_type($acting_phid) != $user_type) {
-          $this->setActingAsPHID($author_phid);
-        }
-
-        $xaction = $object->getApplicationTransactionTemplate()
-          ->setAuthorPHID($author_phid)
-          ->setTransactionType(
-            DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE)
-          ->setNewValue(true);
-
-        // If we're creating this revision and immediately moving it out of
-        // the draft state, mark this as a create transaction so it gets
-        // hidden in the timeline and mail, since it isn't interesting: it
-        // is as though the draft phase never happened.
-        if ($this->getIsNewObject()) {
-          $xaction->setIsCreateTransaction(true);
-        }
-
-        // Queue this transaction and apply it separately after the current
-        // batch of transactions finishes so that Herald can fire on the new
-        // revision state. See T13027 for discussion.
-        $this->queueTransaction($xaction);
-      } else if ($is_failed && $can_demote) {
-        // When demoting a revision, we act as "Harbormaster" instead of
-        // the author since this feels a little more natural.
-        $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
-          ->getPHID();
-
-        $xaction = $object->getApplicationTransactionTemplate()
-          ->setAuthorPHID($harbormaster_phid)
-          ->setMetadataValue('draft.demote', true)
-          ->setTransactionType(
-            DifferentialRevisionPlanChangesTransaction::TRANSACTIONTYPE)
-          ->setNewValue(true);
-
-        $this->queueTransaction($xaction);
-      }
-    }
-
-    // If the revision is new or was a draft, and is no longer a draft, we
-    // might be sending the first email about it.
-
-    // This might mean it was created directly into a non-draft state, or
-    // it just automatically undrafted after builds finished, or a user
-    // explicitly promoted it out of the draft state with an action like
-    // "Request Review".
-
     // If we haven't sent any email about it yet, mark this email as the first
     // email so the mail gets enriched with "SUMMARY" and "TEST PLAN".
 
