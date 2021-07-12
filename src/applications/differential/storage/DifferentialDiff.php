@@ -143,7 +143,7 @@ final class DifferentialDiff
       DifferentialDefaultViewCapability::CAPABILITY);
 
     $diff = id(new DifferentialDiff())
-      ->setViewPolicy($view_policy);
+      ->setViewPolicy($actor->getPHID() ?: $view_policy);
 
     return $diff;
   }
