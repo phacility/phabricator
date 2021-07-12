@@ -1,0 +1,6 @@
+/**
+ * @provides bmo-auth-css
+ */
+
+ /* Hide the admin login */
+ form[action="/auth/login/password:self/"] { display: none; }
