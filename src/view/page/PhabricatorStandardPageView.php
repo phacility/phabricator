@@ -463,6 +463,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           'or the error log.'));
     }
 
+    $motd = new MozillaMOTD();
+    $motd_chrome = $motd->render();
+
     $main_page = phutil_tag(
       'div',
       array(
@@ -472,6 +475,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       array(
         $developer_warning,
         $header_chrome,
+        $motd_chrome,
         phutil_tag(
           'div',
           array(
