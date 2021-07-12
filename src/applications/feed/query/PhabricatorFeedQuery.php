@@ -1,12 +1,18 @@
 <?php
 
-final class PhabricatorFeedQuery
+class PhabricatorFeedQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $filterPHIDs;
   private $chronologicalKeys;
   private $rangeMin;
   private $rangeMax;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withFilterPHIDs(array $phids) {
     $this->filterPHIDs = $phids;
@@ -106,6 +112,13 @@ final class PhabricatorFeedQuery
         $this->rangeMax);
     }
 
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'story.id IN (%Ld)',
+        $this->ids);
+    }
+
     return $where;
   }
 
@@ -147,17 +160,17 @@ final class PhabricatorFeedQuery
     );
   }
 
-  protected function applyExternalCursorConstraintsToQuery(
+  public function applyExternalCursorConstraintsToQuery(
     PhabricatorCursorPagedPolicyAwareQuery $subquery,
     $cursor) {
     $subquery->withChronologicalKeys(array($cursor));
   }
 
-  protected function newExternalCursorStringForResult($object) {
+  public function newExternalCursorStringForResult($object) {
     return $object->getChronologicalKey();
   }
 
-  protected function newPagingMapFromPartialObject($object) {
+  public function newPagingMapFromPartialObject($object) {
     // This query is unusual, and the "object" is a raw result row.
     return array(
       'key' => $object['chronologicalKey'],
