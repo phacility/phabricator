@@ -407,6 +407,8 @@ final class PhabricatorAuditEditor
         ->setMetadataValue('edge:type', $reverts_edge)
         ->setNewValue(array('+' => $reverted_phids));
 
+      $this->reopenRevertedRevisions($reverted_objects);
+
       $phid_map[] = $reverted_phids;
     }
 
@@ -867,4 +869,66 @@ final class PhabricatorAuditEditor
     $commit->attachAudits($with_auditors->getAudits());
   }
 
+  private function reopenRevertedRevisions($reverted_objects) {
+    $commits = array();
+    $revisions = array();
+    foreach ($reverted_objects as $object) {
+      if ($object instanceof PhabricatorRepositoryCommit) {
+        $commits[] = $object;
+      }
+      if ($object instanceof PhabricatorDifferentialRevision) {
+        $revisions[] = $object;
+      }
+    }
+
+    $revision_phids = mpull($revisions, 'getPHID');
+
+    // When a commit "reverts <hash>", we want to reopen any revisions
+    // associated with that commit hash. Find all the revisions associated
+    // with reverted commits.
+    if ($commits) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($commits, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            DiffusionCommitHasRevisionEdgeType::EDGECONST
+          ));
+      $edge_query->execute();
+
+      $more_revision_phids = $edge_query->getDestinationPHIDs();
+      foreach ($more_revision_phids as $revision_phid) {
+        $revision_phids[] = $revision_phid;
+      }
+    }
+
+    if (!$revision_phids) {
+      return;
+    }
+
+    $viewer = $this->getActor();
+
+    // Now, find associated revisions in the "Published" status and reopen
+    // them.
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($revision_phids)
+      ->withStatuses(
+        array(
+          DifferentialRevisionStatus::PUBLISHED,
+        ))
+      ->execute();
+
+    foreach ($revisions as $revision) {
+      $editor_template = $revision->getApplicationTransactionEditor();
+
+      $xactions = array();
+      $xactions[] = $revision->getApplicationTransactionTemplate()
+        ->setTransactionType(
+          DifferentialRevisionReopenTransaction::TRANSACTIONTYPE)
+        ->setNewValue(true);
+
+      $editor = $this->newSubEditor($editor_template)
+        ->applyTransactions($revision, $xactions);
+    }
+  }
 }
