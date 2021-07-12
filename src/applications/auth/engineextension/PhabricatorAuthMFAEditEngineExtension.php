@@ -11,7 +11,7 @@ final class PhabricatorAuthMFAEditEngineExtension
   }
 
   public function isExtensionEnabled() {
-    return true;
+    return false;
   }
 
   public function getExtensionName() {
