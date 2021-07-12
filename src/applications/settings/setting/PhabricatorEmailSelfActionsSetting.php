@@ -22,8 +22,8 @@ final class PhabricatorEmailSelfActionsSetting
 
   protected function getControlInstructions() {
     return pht(
-      'If you disable **Self Actions**, Phabricator will not notify '.
-      'you about actions you take.');
+      'If you disable **Self Actions**, Legacy Phabricator Notifications '.
+      'will not notify you about actions you take.');
   }
 
   public function getSettingDefaultValue() {
