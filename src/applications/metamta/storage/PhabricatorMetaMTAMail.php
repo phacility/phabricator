@@ -831,7 +831,7 @@ final class PhabricatorMetaMTAMail
    */
   public function buildRecipientList() {
     $actors = $this->loadAllActors();
-    $actors = $this->filterDeliverableActors($actors);
+    $actors = $this->filterDeliverableByAnyMailActors($actors);
     return mpull($actors, 'getPHID');
   }
 
@@ -881,11 +881,11 @@ final class PhabricatorMetaMTAMail
     return array_keys($results);
   }
 
-  private function filterDeliverableActors(array $actors) {
+  private function filterDeliverableByAnyMailActors(array $actors) {
     assert_instances_of($actors, 'PhabricatorMetaMTAActor');
     $deliverable_actors = array();
     foreach ($actors as $phid => $actor) {
-      if ($actor->isDeliverable()) {
+      if ($actor->isDeliverableByAnyMail()) {
         $deliverable_actors[$phid] = $actor;
       }
     }
@@ -1038,12 +1038,16 @@ final class PhabricatorMetaMTAMail
       }
     }
 
-    // Exclude recipients who don't want any mail. This rule is very strong
+    // Apply recipients' mail settings. This rule is very strong
     // and runs last.
     foreach ($all_prefs as $phid => $prefs) {
-      $exclude = $prefs->getSettingValue(
+      $setting = $prefs->getSettingValue(
         PhabricatorEmailNotificationsSetting::SETTINGKEY);
-      if ($exclude) {
+
+      if ($setting == PhabricatorEmailNotificationsSetting::VALUE_MOZILLA_MAIL) {
+        $actors[$phid]->setExternallyDeliverable(
+          PhabricatorMetaMTAActor::REASON_MOZILLA_EMAILS);
+      } else if ($setting == PhabricatorEmailNotificationsSetting::VALUE_NO_MAIL) {
         $actors[$phid]->setUndeliverable(
           PhabricatorMetaMTAActor::REASON_MAIL_DISABLED);
       }

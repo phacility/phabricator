@@ -4,6 +4,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
 
   const STATUS_DELIVERABLE = 'deliverable';
   const STATUS_UNDELIVERABLE = 'undeliverable';
+  const STATUS_EXTERNALLY_DELIVERABLE = 'externally-deliverable';
 
   const REASON_NONE = 'none';
   const REASON_UNLOADABLE = 'unloadable';
@@ -22,6 +23,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
   const REASON_ROUTE_AS_MAIL = 'route-as-mail';
   const REASON_UNVERIFIED = 'unverified';
   const REASON_MUTED = 'muted';
+  const REASON_MOZILLA_EMAILS = 'mozilla-emails';
 
   private $phid;
   private $emailAddress;
@@ -78,8 +80,23 @@ final class PhabricatorMetaMTAActor extends Phobject {
     return $this;
   }
 
+  public function setExternallyDeliverable($reason) {
+    $this->reasons[] = $reason;
+    $this->status = self::STATUS_EXTERNALLY_DELIVERABLE;
+  }
+
   public function isDeliverable() {
     return ($this->status === self::STATUS_DELIVERABLE);
+  }
+
+  public function isDeliverableByAnyMail() {
+    /**
+     * Unlike isDeliverable(), which is `true` only if
+     * this actor is deliverable by the built-in mail system,
+     * this function returns `true` if the actor will be delivered
+     * email by any mail system (built-in OR Mozilla).
+     */
+    return ($this->status !== self::STATUS_UNDELIVERABLE);
   }
 
   public function getDeliverabilityReasons() {
