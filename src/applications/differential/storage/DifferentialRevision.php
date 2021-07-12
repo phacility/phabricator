@@ -78,6 +78,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
+      ->setEditPolicy($view_policy)
       ->setAuthorPHID($actor->getPHID())
       ->attachRepository(null)
       ->attachActiveDiff(null)
