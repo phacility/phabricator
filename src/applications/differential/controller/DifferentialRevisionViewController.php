@@ -180,6 +180,9 @@ final class DifferentialRevisionViewController
 
     $request_uri = $request->getRequestURI();
 
+    $moz_warnings = new DifferentialRevisionWarning();
+    $moz_warnings = $moz_warnings->createWarnings($viewer, $revision);
+
     $large = $request->getStr('large');
 
     $large_warning =
@@ -636,6 +639,7 @@ final class DifferentialRevisionViewController
       ->setMainColumn(
         array(
           $operations_box,
+          $moz_warnings,
           $info_view,
           $details,
           $diff_detail_box,
