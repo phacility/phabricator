@@ -47,6 +47,7 @@ final class PhabricatorDifferentialExtractWorkflow
           $extract));
     }
 
+    $commit->attachCommitData($commit->loadCommitData());
     $diff = id(new DifferentialDiffExtractionEngine())
       ->setViewer($viewer)
       ->newDiffFromCommit($commit);

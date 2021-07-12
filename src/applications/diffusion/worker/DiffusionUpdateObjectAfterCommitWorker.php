@@ -203,7 +203,7 @@ final class DiffusionUpdateObjectAfterCommitWorker
       ->setAuthorPHID($acting_phid);
 
     $content_source = $this->newContentSource();
-
+    $commit->attachCommitData($commit->loadCommitData());
     $extraction_engine->updateRevisionWithCommit(
       $revision,
       $commit,

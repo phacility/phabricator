@@ -113,7 +113,40 @@ final class DifferentialDiffExtractionEngine extends Phobject {
 
     // TODO: Attach binary files.
 
-    return $diff->save();
+    $diff->save();
+
+    $commit_data = $commit->getCommitData();
+    $message = $commit_data->getCommitMessage();
+
+    $properties = array(
+      'local:commits' => array(
+        $identifier => array(
+          'author' => $commit_data->getCommitDetail('authorName'),
+          'commit' => $identifier,
+          'rev' => $identifier,
+          'authorEmail' => $commit_data->getCommitDetail('authorEmail'),
+          'summary' => $commit_data->summarizeCommitMessage($message),
+          'message' => $message,
+        ),
+      ),
+    );
+
+    foreach ($properties as $name => $value) {
+      $property = id(new DifferentialDiffProperty())->loadOneWhere(
+        'diffID = %d AND name = %s',
+        $diff->getID(),
+        $name);
+      if (!$property) {
+        $property = id(new DifferentialDiffProperty())
+          ->setDiffID($diff->getID())
+          ->setName($name);
+      }
+      $property
+        ->setData($value)
+        ->save();
+    }
+
+    return $diff;
   }
 
   public function isDiffChangedBeforeCommit(
