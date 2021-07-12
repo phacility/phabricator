@@ -165,6 +165,7 @@ final class AphrontApplicationConfiguration
     PhabricatorStartup::beginStartupPhase('startup.done');
 
     DarkConsoleErrorLogPluginAPI::registerErrorHandler();
+    SentryLoggerPlugin::registerErrorHandler();
 
     $response = PhabricatorSetupCheck::willProcessRequest();
     if ($response) {
