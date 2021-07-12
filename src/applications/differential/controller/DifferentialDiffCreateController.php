@@ -104,8 +104,28 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->setObject($diff_object)
       ->execute();
 
+    $lando_warning = null;
     $info_view = null;
     if (!$request->isFormPost()) {
+      $lando_link = phutil_tag(
+        'a',
+        array(
+          'href' => PhabricatorEnv::getEnvConfig('lando-ui.url'),
+          'target' => '_blank',
+        ),
+        pht('Lando'));
+      $lando_warning = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(
+          array(
+            array(
+              pht(
+                'Please use moz-phab, arc, or another Phabricator client '.
+                'to submit patches if you want them to be landable using '),
+              $lando_link,
+              pht('.')
+            )
+          ));
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(
@@ -205,6 +225,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $view = id(new PHUITwoColumnView())
       ->setFooter(array(
+        $lando_warning,
         $form_box,
         $info_view,
       ));
