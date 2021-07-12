@@ -28,7 +28,7 @@ final class DifferentialRevisionEditEngine
   }
 
   public function isEngineConfigurable() {
-    return false;
+    return true;
   }
 
   protected function newEditableObject() {
