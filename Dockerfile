@@ -1,4 +1,4 @@
-FROM php:7.4.20-fpm-alpine AS base
+FROM php:7.4.19-fpm-alpine AS base
 
 LABEL maintainer="dkl@mozilla.com"
 
