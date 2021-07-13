@@ -32,21 +32,13 @@ final class HarbormasterBuildViewController
       ->setPolicyObject($build)
       ->setHeaderIcon('fa-cubes');
 
-    $is_restarting = $build->isRestarting();
+    $status = $build->getBuildPendingStatusObject();
 
-    if ($is_restarting) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Restarting'));
-    } else if ($build->isPausing()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Pausing'));
-    } else if ($build->isResuming()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Resuming'));
-    } else if ($build->isAborting()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Aborting'));
-    }
+    $status_icon = $status->getIconIcon();
+    $status_color = $status->getIconColor();
+    $status_name = $status->getName();
+
+    $page_header->setStatus($status_icon, $status_color, $status_name);
 
     $max_generation = (int)$build->getBuildGeneration();
     if ($max_generation === 0) {
@@ -55,7 +47,7 @@ final class HarbormasterBuildViewController
       $min_generation = 1;
     }
 
-    if ($is_restarting) {
+    if ($build->isRestarting()) {
       $max_generation = $max_generation + 1;
     }
 
@@ -624,10 +616,6 @@ final class HarbormasterBuildViewController
       pht('Build Plan'),
       $handles[$build->getBuildPlanPHID()]->renderLink());
 
-    $properties->addProperty(
-      pht('Status'),
-      $this->getStatus($build));
-
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
@@ -679,31 +667,6 @@ final class HarbormasterBuildViewController
       ->setHeaderText(pht('History'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
-  }
-
-
-  private function getStatus(HarbormasterBuild $build) {
-    $status_view = new PHUIStatusListView();
-
-    $item = new PHUIStatusItemView();
-
-    if ($build->isPausing()) {
-      $status_name = pht('Pausing');
-      $icon = PHUIStatusItemView::ICON_RIGHT;
-      $color = 'dark';
-    } else {
-      $status = $build->getBuildStatus();
-      $status_name =
-        HarbormasterBuildStatus::getBuildStatusName($status);
-      $icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
-      $color = HarbormasterBuildStatus::getBuildStatusColor($status);
-    }
-
-    $item->setTarget($status_name);
-    $item->setIcon($icon, $color);
-    $status_view->addItem($item);
-
-    return $status_view;
   }
 
   private function buildMessages(array $messages) {

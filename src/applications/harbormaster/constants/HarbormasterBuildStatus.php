@@ -12,6 +12,11 @@ final class HarbormasterBuildStatus extends Phobject {
   const STATUS_PAUSED = 'paused';
   const STATUS_DEADLOCKED = 'deadlocked';
 
+  const PENDING_PAUSING = 'x-pausing';
+  const PENDING_RESUMING = 'x-resuming';
+  const PENDING_RESTARTING = 'x-restarting';
+  const PENDING_ABORTING = 'x-aborting';
+
   private $key;
   private $properties;
 
@@ -48,6 +53,10 @@ final class HarbormasterBuildStatus extends Phobject {
     return $this->getProperty('isComplete');
   }
 
+  public function isPending() {
+    return $this->getProperty('isPending');
+  }
+
   public function isPassed() {
     return ($this->key === self::STATUS_PASSED);
   }
@@ -56,6 +65,33 @@ final class HarbormasterBuildStatus extends Phobject {
     return ($this->key === self::STATUS_FAILED);
   }
 
+  public function isAborting() {
+    return ($this->key === self::PENDING_ABORTING);
+  }
+
+  public function isRestarting() {
+    return ($this->key === self::PENDING_RESTARTING);
+  }
+
+  public function isResuming() {
+    return ($this->key === self::PENDING_RESUMING);
+  }
+
+  public function isPausing() {
+    return ($this->key === self::PENDING_PAUSING);
+  }
+
+  public function getIconIcon() {
+    return $this->getProperty('icon');
+  }
+
+  public function getIconColor() {
+    return $this->getProperty('color');
+  }
+
+  public function getName() {
+    return $this->getProperty('name');
+  }
 
   /**
    * Get a human readable name for a build status constant.
@@ -134,6 +170,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'yellow',
         'isBuilding' => false,
         'isComplete' => false,
+        'isPending' => false,
       ),
       self::STATUS_PENDING => array(
         'name' => pht('Pending'),
@@ -142,6 +179,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'yellow',
         'isBuilding' => true,
         'isComplete' => false,
+        'isPending' => false,
       ),
       self::STATUS_BUILDING => array(
         'name' => pht('Building'),
@@ -150,6 +188,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'yellow',
         'isBuilding' => true,
         'isComplete' => false,
+        'isPending' => false,
       ),
       self::STATUS_PASSED => array(
         'name' => pht('Passed'),
@@ -158,6 +197,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'green',
         'isBuilding' => false,
         'isComplete' => true,
+        'isPending' => false,
       ),
       self::STATUS_FAILED => array(
         'name' => pht('Failed'),
@@ -166,6 +206,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'red',
         'isBuilding' => false,
         'isComplete' => true,
+        'isPending' => false,
       ),
       self::STATUS_ABORTED => array(
         'name' => pht('Aborted'),
@@ -174,6 +215,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'red',
         'isBuilding' => false,
         'isComplete' => true,
+        'isPending' => false,
       ),
       self::STATUS_ERROR => array(
         'name' => pht('Unexpected Error'),
@@ -182,6 +224,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'red',
         'isBuilding' => false,
         'isComplete' => true,
+        'isPending' => false,
       ),
       self::STATUS_PAUSED => array(
         'name' => pht('Paused'),
@@ -190,6 +233,7 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'yellow',
         'isBuilding' => false,
         'isComplete' => false,
+        'isPending' => false,
       ),
       self::STATUS_DEADLOCKED => array(
         'name' => pht('Deadlocked'),
@@ -198,6 +242,43 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'red',
         'isBuilding' => false,
         'isComplete' => true,
+        'isPending' => false,
+      ),
+      self::PENDING_PAUSING => array(
+        'name' => pht('Pausing'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+        'isPending' => true,
+      ),
+      self::PENDING_RESUMING => array(
+        'name' => pht('Resuming'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+        'isPending' => true,
+      ),
+      self::PENDING_RESTARTING => array(
+        'name' => pht('Restarting'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+        'isPending' => true,
+      ),
+      self::PENDING_ABORTING => array(
+        'name' => pht('Aborting'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+        'isPending' => true,
       ),
     );
   }

@@ -212,6 +212,64 @@ final class HarbormasterBuild extends HarbormasterDAO
     return "/harbormaster/build/{$id}/";
   }
 
+  public function getBuildPendingStatusObject() {
+
+    // NOTE: If a build has multiple unprocessed messages, we'll ignore
+    // messages that are obsoleted by a later or stronger message.
+    //
+    // For example, if a build has both "pause" and "abort" messages in queue,
+    // we just ignore the "pause" message and perform an "abort", since pausing
+    // first wouldn't affect the final state, so we can just skip it.
+    //
+    // Likewise, if a build has both "restart" and "abort" messages, the most
+    // recent message is controlling: we'll take whichever action a command
+    // was most recently issued for.
+
+    $is_restarting = false;
+    $is_aborting = false;
+    $is_pausing = false;
+    $is_resuming = false;
+
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getType();
+      switch ($message_type) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_restarting = true;
+          $is_aborting = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_ABORT:
+          $is_aborting = true;
+          $is_restarting = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_PAUSE:
+          $is_pausing = true;
+          $is_resuming = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+          $is_resuming = true;
+          $is_pausing = false;
+          break;
+      }
+    }
+
+    $pending_status = null;
+    if ($is_restarting) {
+      $pending_status = HarbormasterBuildStatus::PENDING_RESTARTING;
+    } else if ($is_aborting) {
+      $pending_status = HarbormasterBuildStatus::PENDING_ABORTING;
+    } else if ($is_pausing) {
+      $pending_status = HarbormasterBuildStatus::PENDING_PAUSING;
+    } else if ($is_resuming) {
+      $pending_status = HarbormasterBuildStatus::PENDING_RESUMING;
+    }
+
+    if ($pending_status !== null) {
+      return HarbormasterBuildStatus::newBuildStatusObject($pending_status);
+    }
+
+    return $this->getBuildStatusObject();
+  }
+
   protected function getBuildStatusObject() {
     $status_key = $this->getBuildStatus();
     return HarbormasterBuildStatus::newBuildStatusObject($status_key);
@@ -309,7 +367,9 @@ final class HarbormasterBuild extends HarbormasterDAO
 
     return !$this->isComplete() &&
            !$this->isPaused() &&
-           !$this->isPausing();
+           !$this->isPausing() &&
+           !$this->isRestarting() &&
+           !$this->isAborting();
   }
 
   public function canAbortBuild() {
@@ -317,7 +377,9 @@ final class HarbormasterBuild extends HarbormasterDAO
       return false;
     }
 
-    return !$this->isComplete();
+    return
+      !$this->isComplete() &&
+      !$this->isAborting();
   }
 
   public function canResumeBuild() {
@@ -325,78 +387,27 @@ final class HarbormasterBuild extends HarbormasterDAO
       return false;
     }
 
-    return $this->isPaused() &&
-           !$this->isResuming();
+    return
+      $this->isPaused() &&
+      !$this->isResuming() &&
+      !$this->isRestarting() &&
+      !$this->isAborting();
   }
 
   public function isPausing() {
-    $is_pausing = false;
-    foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getType();
-      switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_PAUSE:
-          $is_pausing = true;
-          break;
-        case HarbormasterBuildCommand::COMMAND_RESUME:
-        case HarbormasterBuildCommand::COMMAND_RESTART:
-          $is_pausing = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_ABORT:
-          $is_pausing = true;
-          break;
-      }
-    }
-
-    return $is_pausing;
+    return $this->getBuildPendingStatusObject()->isPausing();
   }
 
   public function isResuming() {
-    $is_resuming = false;
-    foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getType();
-      switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_RESTART:
-        case HarbormasterBuildCommand::COMMAND_RESUME:
-          $is_resuming = true;
-          break;
-        case HarbormasterBuildCommand::COMMAND_PAUSE:
-          $is_resuming = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_ABORT:
-          $is_resuming = false;
-          break;
-      }
-    }
-
-    return $is_resuming;
+    return $this->getBuildPendingStatusObject()->isResuming();
   }
 
   public function isRestarting() {
-    $is_restarting = false;
-    foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getType();
-      switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_RESTART:
-          $is_restarting = true;
-          break;
-      }
-    }
-
-    return $is_restarting;
+    return $this->getBuildPendingStatusObject()->isRestarting();
   }
 
   public function isAborting() {
-    $is_aborting = false;
-    foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getType();
-      switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_ABORT:
-          $is_aborting = true;
-          break;
-      }
-    }
-
-    return $is_aborting;
+    return $this->getBuildPendingStatusObject()->isAborting();
   }
 
   public function markUnprocessedMessagesAsProcessed() {
