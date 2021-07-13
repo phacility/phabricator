@@ -104,13 +104,13 @@ final class HarbormasterBuildQuery
     }
 
     $build_phids = mpull($page, 'getPHID');
-    $commands = id(new HarbormasterBuildCommand())->loadAllWhere(
+    $messages = id(new HarbormasterBuildCommand())->loadAllWhere(
       'targetPHID IN (%Ls) ORDER BY id ASC',
       $build_phids);
-    $commands = mgroup($commands, 'getTargetPHID');
+    $messages = mgroup($messages, 'getTargetPHID');
     foreach ($page as $build) {
-      $unprocessed_commands = idx($commands, $build->getPHID(), array());
-      $build->attachUnprocessedCommands($unprocessed_commands);
+      $unprocessed_messages = idx($messages, $build->getPHID(), array());
+      $build->attachUnprocessedMessages($unprocessed_messages);
     }
 
     if ($this->needBuildTargets) {

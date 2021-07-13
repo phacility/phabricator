@@ -127,7 +127,7 @@ final class HarbormasterBuildEngine extends Phobject {
       $build->save();
     }
 
-    $build->deleteUnprocessedCommands();
+    $build->markUnprocessedMessagesAsProcessed();
 
     if ($build->getBuildStatus() == HarbormasterBuildStatus::STATUS_BUILDING) {
       $this->updateBuildSteps($build);

@@ -18,7 +18,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
   private $buildTargets = self::ATTACHABLE;
-  private $unprocessedCommands = self::ATTACHABLE;
+  private $unprocessedMessages = self::ATTACHABLE;
 
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
@@ -28,7 +28,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function delete() {
     $this->openTransaction();
-      $this->deleteUnprocessedCommands();
+      $this->deleteUnprocessedMessages();
       $result = parent::delete();
     $this->saveTransaction();
 
@@ -222,15 +222,15 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
 
-/* -(  Build Commands  )----------------------------------------------------- */
+/* -(  Build Messages  )----------------------------------------------------- */
 
 
-  private function getUnprocessedCommands() {
-    return $this->assertAttached($this->unprocessedCommands);
+  private function getUnprocessedMessages() {
+    return $this->assertAttached($this->unprocessedMessages);
   }
 
-  public function attachUnprocessedCommands(array $commands) {
-    $this->unprocessedCommands = $commands;
+  public function attachUnprocessedMessages(array $messages) {
+    $this->unprocessedMessages = $messages;
     return $this;
   }
 
@@ -330,9 +330,9 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isPausing() {
     $is_pausing = false;
-    foreach ($this->getUnprocessedCommands() as $command_object) {
-      $command = $command_object->getCommand();
-      switch ($command) {
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getCommand();
+      switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_PAUSE:
           $is_pausing = true;
           break;
@@ -351,9 +351,9 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isResuming() {
     $is_resuming = false;
-    foreach ($this->getUnprocessedCommands() as $command_object) {
-      $command = $command_object->getCommand();
-      switch ($command) {
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getCommand();
+      switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
         case HarbormasterBuildCommand::COMMAND_RESUME:
           $is_resuming = true;
@@ -372,9 +372,9 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isRestarting() {
     $is_restarting = false;
-    foreach ($this->getUnprocessedCommands() as $command_object) {
-      $command = $command_object->getCommand();
-      switch ($command) {
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getCommand();
+      switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
           $is_restarting = true;
           break;
@@ -386,9 +386,9 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isAborting() {
     $is_aborting = false;
-    foreach ($this->getUnprocessedCommands() as $command_object) {
-      $command = $command_object->getCommand();
-      switch ($command) {
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getCommand();
+      switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_ABORT:
           $is_aborting = true;
           break;
@@ -398,10 +398,16 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $is_aborting;
   }
 
-  public function deleteUnprocessedCommands() {
-    foreach ($this->getUnprocessedCommands() as $key => $command_object) {
-      $command_object->delete();
-      unset($this->unprocessedCommands[$key]);
+  public function markUnprocessedMessagesAsProcessed() {
+    // TODO: See T13072. This is a placeholder until BuildCommand and
+    // BuildMessage merge.
+    return $this->deleteUnprocessedMessages();
+  }
+
+  public function deleteUnprocessedMessages() {
+    foreach ($this->getUnprocessedMessages() as $key => $message_object) {
+      $message_object->delete();
+      unset($this->unprocessedMessages[$key]);
     }
 
     return $this;
@@ -452,7 +458,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
   }
 
-  public function sendMessage(PhabricatorUser $viewer, $command) {
+  public function sendMessage(PhabricatorUser $viewer, $message_type) {
     // TODO: This should not be an editor transaction, but there are plans to
     // merge BuildCommand into BuildMessage which should moot this. As this
     // exists today, it can race against BuildEngine.
@@ -476,7 +482,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
     $xaction = id(new HarbormasterBuildTransaction())
       ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-      ->setNewValue($command);
+      ->setNewValue($message_type);
 
     $editor->applyTransactions($this, array($xaction));
   }
