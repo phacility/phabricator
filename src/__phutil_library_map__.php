@@ -7597,7 +7597,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildArtifactPHIDType' => 'PhabricatorPHIDType',
     'HarbormasterBuildArtifactQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildAutoplan' => 'Phobject',
-    'HarbormasterBuildCommand' => 'HarbormasterDAO',
+    'HarbormasterBuildCommand' => 'Phobject',
     'HarbormasterBuildDependencyDatasource' => 'PhabricatorTypeaheadDatasource',
     'HarbormasterBuildEngine' => 'Phobject',
     'HarbormasterBuildFailureException' => 'Exception',

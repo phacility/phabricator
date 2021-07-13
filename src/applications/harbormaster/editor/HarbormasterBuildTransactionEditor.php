@@ -93,10 +93,10 @@ final class HarbormasterBuildTransactionEditor
       return;
     }
 
-    id(new HarbormasterBuildCommand())
+    HarbormasterBuildMessage::initializeNewMessage($actor)
       ->setAuthorPHID($xaction->getAuthorPHID())
-      ->setTargetPHID($build->getPHID())
-      ->setCommand($command)
+      ->setReceiverPHID($build->getPHID())
+      ->setType($command)
       ->save();
 
     PhabricatorWorker::scheduleTask(

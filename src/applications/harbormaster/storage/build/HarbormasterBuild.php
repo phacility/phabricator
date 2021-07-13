@@ -230,6 +230,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function attachUnprocessedMessages(array $messages) {
+    assert_instances_of($messages, 'HarbormasterBuildMessage');
     $this->unprocessedMessages = $messages;
     return $this;
   }
@@ -331,7 +332,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isPausing() {
     $is_pausing = false;
     foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getCommand();
+      $message_type = $message_object->getType();
       switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_PAUSE:
           $is_pausing = true;
@@ -352,7 +353,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isResuming() {
     $is_resuming = false;
     foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getCommand();
+      $message_type = $message_object->getType();
       switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
         case HarbormasterBuildCommand::COMMAND_RESUME:
@@ -373,7 +374,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isRestarting() {
     $is_restarting = false;
     foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getCommand();
+      $message_type = $message_object->getType();
       switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
           $is_restarting = true;
@@ -387,7 +388,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isAborting() {
     $is_aborting = false;
     foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getCommand();
+      $message_type = $message_object->getType();
       switch ($message_type) {
         case HarbormasterBuildCommand::COMMAND_ABORT:
           $is_aborting = true;
@@ -399,9 +400,13 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function markUnprocessedMessagesAsProcessed() {
-    // TODO: See T13072. This is a placeholder until BuildCommand and
-    // BuildMessage merge.
-    return $this->deleteUnprocessedMessages();
+    foreach ($this->getUnprocessedMessages() as $key => $message_object) {
+      $message_object
+        ->setIsConsumed(1)
+        ->save();
+    }
+
+    return $this;
   }
 
   public function deleteUnprocessedMessages() {
