@@ -1,0 +1,6 @@
+{
+  "load": [
+    "/app/phabricator/src/",
+    "/app/moz-extensions/src/"
+  ]
+}

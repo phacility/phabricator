@@ -1,0 +1,72 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+version: '3.4'
+services:
+  # Phabricator Containers
+  phabricator.test:
+    image: nginx:alpine
+    volumes:
+      - ./docker/phabricator/site.conf:/etc/nginx/conf.d/default.conf:ro
+      - phabricator-app:/app
+    restart: on-failure
+    depends_on:
+      - phabricator
+      - tinyproxy
+
+  phabricator:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    entrypoint: /app/entrypoint.sh
+    command: dev_start
+    environment: &phab_env
+      - MYSQL_HOST=phabdb
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASS=password
+      - PHABRICATOR_URI=http://phabricator.test/
+      - PHABRICATOR_CDN_URI=http://phabricator.test/
+      - BUGZILLA_URL=http://bmo.test
+      - BUGZILLA_AUTOMATION_USER=phab-bot@bmo.tld
+      - BUGZILLA_AUTOMATION_API_KEY=8G4ly8JkxbypZgh5XrdiHWExVEjPq5S3HvMBll1K
+    restart: on-failure
+    depends_on:
+      - phabdb
+    volumes:
+      - phabricator-app:/app
+
+  test_phab:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: test
+    entrypoint: /app/entrypoint.sh
+    command: test_phab
+    environment: *phab_env
+    restart: on-failure
+    depends_on:
+      - phabdb
+
+  phabdb:
+    image: mysql:5.7
+    volumes:
+      - phabricator-mysql-db:/var/lib/mysql
+      - ./docker/phabricator/mysql:/etc/mysql/conf.d:ro
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    restart: on-failure
+
+  # Other Support Containers
+  tinyproxy:
+    build:
+      context: docker/tinyproxy
+      dockerfile: ./Dockerfile
+    ports:
+      - "1090:1090"
+
+# Volume Containers
+volumes:
+  phabricator-mysql-db:
+  phabricator-app:

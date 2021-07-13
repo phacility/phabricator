@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Dump the customized config keys with values to a JSON file
+ * suitable for use as a local.json file.
+ */
+
+require_once '/app/phabricator/scripts/init/init-setup.php';
+
+$console = PhutilConsole::getConsole();
+
+$options = PhabricatorApplicationConfigOptions::loadAllOptions();
+
+$result = array();
+
+foreach ($options as $option) {
+  $key = $option->getKey();
+  $final_value = null;
+
+  $config = new PhabricatorConfigLocalSource();
+  $local_value = $config->getKeys(array($key));
+  if (!empty($local_value)) {
+    $final_value = reset($local_value);
+  }
+
+  try {
+    $database_config = new PhabricatorConfigDatabaseSource('default');
+    $database_value = $database_config->getKeys(array($key));
+    if (!empty($database_value)) {
+      $final_value = reset($database_value);
+    }
+  } catch (Exception $e) {}
+
+  // null values will fall back to the coded default
+  if ($final_value) {
+    $result[$key] = $final_value;
+  }
+}
+
+$json = new PhutilJSON();
+$console->writeOut($json->encodeFormatted($result));

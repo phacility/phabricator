@@ -1,0 +1,38 @@
+{
+  "name": "Phabricator",
+  "description": "Mozilla's Phabricator instance for code review",
+  "repository": {
+    "url": "https://github.com/mozilla-conduit/phabricator",
+    "license": "Apache License, Version 2.0",
+    "tests": "https://circleci.com/gh/mozilla-conduit/phabricator/tree/master"
+  },
+  "participate": {
+    "home": "https://wiki.mozilla.org/Phabricator",
+    "docs": "https://moz-conduit.readthedocs.io/en/latest/phabricator-user.html",
+    "mailing-list": "https://www.mozilla.org/en-US/about/forums/#tools",
+    "irc": "irc://irc.mozilla.org/#phabricator",
+    "irc-contacts": [
+      "mcote"
+    ]
+  },
+  "bugs": {
+    "list": "https://bugzilla.mozilla.org/buglist.cgi?resolution=---&component=Phabricator%20%28Upstream%29&component=Phabricator%20Extensions&product=Conduit",
+    "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit",
+    "mentored": "https://bugzilla.mozilla.org/buglist.cgi?o1=isnotempty&f1=bug_mentor&resolution=---&query_format=advanced&component=Phabricator%20%28Upstream%29&component=Phabricator%20Extensions&product=Conduit"
+  },
+  "urls": {
+    "prod": "https://phabricator.services.mozilla.com",
+    "stage": "https://phabricator.allizom.org",
+    "dev": "https://phabricator-dev.allizom.org"
+  },
+  "keywords": [
+    "phabricator",
+    "php",
+    "code-review",
+    "git",
+    "mercurial",
+    "hg",
+    "productivity",
+    "version-control"
+  ]
+}

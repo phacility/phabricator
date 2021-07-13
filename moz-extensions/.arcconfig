@@ -1,0 +1,5 @@
+{
+  "load": [
+    "/app/phabricator/src/"
+  ]
+}

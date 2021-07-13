@@ -1,0 +1,15 @@
+{
+    "name": "mozilla/phabricator-extensions",
+    "type": "project",
+    "require": {
+        "sentry/sentry": "^2.3",
+        "php-http/curl-client": "^2.1",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "ext-json": "*"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    }
+}

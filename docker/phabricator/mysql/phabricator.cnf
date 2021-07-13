@@ -1,0 +1,4 @@
+[mysqld]
+max_allowed_packet=33554432
+sql_mode=STRICT_ALL_TABLES
+innodb_buffer_pool_size=64M
