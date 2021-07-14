@@ -182,6 +182,7 @@ class ResolveComments {
     return PhabricatorMarkupEngine::newMarkupEngine(array())
       ->setConfig('viewer', PhabricatorUser::getOmnipotentUser())
       ->setConfig('uri.base', PhabricatorEnv::getProductionURI('/'))
+      ->setConfig('uri.full', true)
       ->setMode($mode);
   }
 }
