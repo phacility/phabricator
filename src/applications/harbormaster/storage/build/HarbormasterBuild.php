@@ -207,61 +207,17 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $this->getBuildStatusObject()->isFailed();
   }
 
+  public function isPending() {
+    return $this->getBuildstatusObject()->isPending();
+  }
+
   public function getURI() {
     $id = $this->getID();
     return "/harbormaster/build/{$id}/";
   }
 
   public function getBuildPendingStatusObject() {
-
-    // NOTE: If a build has multiple unprocessed messages, we'll ignore
-    // messages that are obsoleted by a later or stronger message.
-    //
-    // For example, if a build has both "pause" and "abort" messages in queue,
-    // we just ignore the "pause" message and perform an "abort", since pausing
-    // first wouldn't affect the final state, so we can just skip it.
-    //
-    // Likewise, if a build has both "restart" and "abort" messages, the most
-    // recent message is controlling: we'll take whichever action a command
-    // was most recently issued for.
-
-    $is_restarting = false;
-    $is_aborting = false;
-    $is_pausing = false;
-    $is_resuming = false;
-
-    foreach ($this->getUnprocessedMessages() as $message_object) {
-      $message_type = $message_object->getType();
-      switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_RESTART:
-          $is_restarting = true;
-          $is_aborting = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_ABORT:
-          $is_aborting = true;
-          $is_restarting = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_PAUSE:
-          $is_pausing = true;
-          $is_resuming = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_RESUME:
-          $is_resuming = true;
-          $is_pausing = false;
-          break;
-      }
-    }
-
-    $pending_status = null;
-    if ($is_restarting) {
-      $pending_status = HarbormasterBuildStatus::PENDING_RESTARTING;
-    } else if ($is_aborting) {
-      $pending_status = HarbormasterBuildStatus::PENDING_ABORTING;
-    } else if ($is_pausing) {
-      $pending_status = HarbormasterBuildStatus::PENDING_PAUSING;
-    } else if ($is_resuming) {
-      $pending_status = HarbormasterBuildStatus::PENDING_RESUMING;
-    }
+    list($pending_status) = $this->getUnprocessedMessageState();
 
     if ($pending_status !== null) {
       return HarbormasterBuildStatus::newBuildStatusObject($pending_status);
@@ -285,6 +241,72 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   private function getUnprocessedMessages() {
     return $this->assertAttached($this->unprocessedMessages);
+  }
+
+  public function getUnprocessedMessagesForApply() {
+    $unprocessed_state = $this->getUnprocessedMessageState();
+    list($pending_status, $apply_messages) = $unprocessed_state;
+
+    return $apply_messages;
+  }
+
+  private function getUnprocessedMessageState() {
+    // NOTE: If a build has multiple unprocessed messages, we'll ignore
+    // messages that are obsoleted by a later or stronger message.
+    //
+    // For example, if a build has both "pause" and "abort" messages in queue,
+    // we just ignore the "pause" message and perform an "abort", since pausing
+    // first wouldn't affect the final state, so we can just skip it.
+    //
+    // Likewise, if a build has both "restart" and "abort" messages, the most
+    // recent message is controlling: we'll take whichever action a command
+    // was most recently issued for.
+
+    $is_restarting = false;
+    $is_aborting = false;
+    $is_pausing = false;
+    $is_resuming = false;
+
+    $apply_messages = array();
+
+    foreach ($this->getUnprocessedMessages() as $message_object) {
+      $message_type = $message_object->getType();
+      switch ($message_type) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_restarting = true;
+          $is_aborting = false;
+          $apply_messages = array($message_object);
+          break;
+        case HarbormasterBuildCommand::COMMAND_ABORT:
+          $is_aborting = true;
+          $is_restarting = false;
+          $apply_messages = array($message_object);
+          break;
+        case HarbormasterBuildCommand::COMMAND_PAUSE:
+          $is_pausing = true;
+          $is_resuming = false;
+          $apply_messages = array($message_object);
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+          $is_resuming = true;
+          $is_pausing = false;
+          $apply_messages = array($message_object);
+          break;
+      }
+    }
+
+    $pending_status = null;
+    if ($is_restarting) {
+      $pending_status = HarbormasterBuildStatus::PENDING_RESTARTING;
+    } else if ($is_aborting) {
+      $pending_status = HarbormasterBuildStatus::PENDING_ABORTING;
+    } else if ($is_pausing) {
+      $pending_status = HarbormasterBuildStatus::PENDING_PAUSING;
+    } else if ($is_resuming) {
+      $pending_status = HarbormasterBuildStatus::PENDING_RESUMING;
+    }
+
+    return array($pending_status, $apply_messages);
   }
 
   public function attachUnprocessedMessages(array $messages) {
@@ -475,32 +497,61 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function sendMessage(PhabricatorUser $viewer, $message_type) {
-    // TODO: This should not be an editor transaction, but there are plans to
-    // merge BuildCommand into BuildMessage which should moot this. As this
-    // exists today, it can race against BuildEngine.
+    HarbormasterBuildMessage::initializeNewMessage($viewer)
+      ->setReceiverPHID($this->getPHID())
+      ->setType($message_type)
+      ->save();
 
-    // This is a bogus content source, but this whole flow should be obsolete
-    // soon.
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorConsoleContentSource::SOURCECONST);
+    PhabricatorWorker::scheduleTask(
+      'HarbormasterBuildWorker',
+      array(
+        'buildID' => $this->getID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+        'containerPHID' => $this->getBuildablePHID(),
+      ));
+  }
 
-    $editor = id(new HarbormasterBuildTransactionEditor())
-      ->setActor($viewer)
-      ->setContentSource($content_source)
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true);
+  public function releaseAllArtifacts(PhabricatorUser $viewer) {
+    $targets = id(new HarbormasterBuildTargetQuery())
+      ->setViewer($viewer)
+      ->withBuildPHIDs(array($this->getPHID()))
+      ->withBuildGenerations(array($this->getBuildGeneration()))
+      ->execute();
 
-    $viewer_phid = $viewer->getPHID();
-    if (!$viewer_phid) {
-      $acting_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
-      $editor->setActingAsPHID($acting_phid);
+    if (!$targets) {
+      return;
     }
 
-    $xaction = id(new HarbormasterBuildTransaction())
-      ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-      ->setNewValue($message_type);
+    $target_phids = mpull($targets, 'getPHID');
 
-    $editor->applyTransactions($this, array($xaction));
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer($viewer)
+      ->withBuildTargetPHIDs($target_phids)
+      ->withIsReleased(false)
+      ->execute();
+    foreach ($artifacts as $artifact) {
+      $artifact->releaseArtifact();
+    }
+  }
+
+  public function restartBuild(PhabricatorUser $viewer) {
+    // TODO: This should become transactional.
+
+    // We're restarting the build, so release all previous artifacts.
+    $this->releaseAllArtifacts($viewer);
+
+    // Increment the build generation counter on the build.
+    $this->setBuildGeneration($this->getBuildGeneration() + 1);
+
+    // Currently running targets should periodically check their build
+    // generation (which won't have changed) against the build's generation.
+    // If it is different, they will automatically stop what they're doing
+    // and abort.
+
+    // Previously we used to delete targets, logs and artifacts here. Instead,
+    // leave them around so users can view previous generations of this build.
   }
 
 

@@ -65,48 +65,32 @@ final class HarbormasterBuildTransactionEditor
     HarbormasterBuild $build,
     HarbormasterBuildTransaction $xaction) {
 
-    $command = $xaction->getNewValue();
+    $actor = $this->getActor();
+    $message_type = $xaction->getNewValue();
 
-    switch ($command) {
-      case HarbormasterBuildCommand::COMMAND_RESTART:
-        $issuable = $build->canRestartBuild();
+    // TODO: Restore logic that tests if the command can issue without causing
+    // anything to lapse into an invalid state. This should not be the same
+    // as the logic which powers the web UI: for example, if an "abort" is
+    // queued we want to disable "Abort" in the web UI, but should obviously
+    // process it here.
+
+    switch ($message_type) {
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        // TODO: This should move to external effects, perhaps.
+        $build->releaseAllArtifacts($actor);
+        $build->setBuildStatus(HarbormasterBuildStatus::STATUS_ABORTED);
         break;
-      case HarbormasterBuildCommand::COMMAND_PAUSE:
-        $issuable = $build->canPauseBuild();
+      case HarbormasterBuildCommand::COMMAND_RESTART:
+        $build->restartBuild($actor);
+        $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
         break;
       case HarbormasterBuildCommand::COMMAND_RESUME:
-        $issuable = $build->canResumeBuild();
+        $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
         break;
-      case HarbormasterBuildCommand::COMMAND_ABORT:
-        $issuable = $build->canAbortBuild();
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
+        $build->setBuildStatus(HarbormasterBuildStatus::STATUS_PAUSED);
         break;
-      default:
-        throw new Exception(pht('Unknown command %s', $command));
     }
-
-    if (!$issuable) {
-      return;
-    }
-
-    $actor = $this->getActor();
-    if (!$build->canIssueCommand($actor, $command)) {
-      return;
-    }
-
-    HarbormasterBuildMessage::initializeNewMessage($actor)
-      ->setAuthorPHID($xaction->getAuthorPHID())
-      ->setReceiverPHID($build->getPHID())
-      ->setType($command)
-      ->save();
-
-    PhabricatorWorker::scheduleTask(
-      'HarbormasterBuildWorker',
-      array(
-        'buildID' => $build->getID(),
-      ),
-      array(
-        'objectPHID' => $build->getPHID(),
-      ));
   }
 
   protected function applyCustomExternalTransaction(
