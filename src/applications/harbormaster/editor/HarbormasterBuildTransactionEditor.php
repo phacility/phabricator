@@ -14,7 +14,6 @@ final class HarbormasterBuildTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = HarbormasterBuildTransaction::TYPE_CREATE;
     $types[] = HarbormasterBuildTransaction::TYPE_COMMAND;
 
     return $types;
@@ -25,7 +24,6 @@ final class HarbormasterBuildTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case HarbormasterBuildTransaction::TYPE_CREATE:
       case HarbormasterBuildTransaction::TYPE_COMMAND:
         return null;
     }
@@ -38,8 +36,6 @@ final class HarbormasterBuildTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case HarbormasterBuildTransaction::TYPE_CREATE:
-        return true;
       case HarbormasterBuildTransaction::TYPE_COMMAND:
         return $xaction->getNewValue();
     }
@@ -52,8 +48,6 @@ final class HarbormasterBuildTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case HarbormasterBuildTransaction::TYPE_CREATE:
-        return;
       case HarbormasterBuildTransaction::TYPE_COMMAND:
         return $this->executeBuildCommand($object, $xaction);
     }
@@ -98,7 +92,6 @@ final class HarbormasterBuildTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case HarbormasterBuildTransaction::TYPE_CREATE:
       case HarbormasterBuildTransaction::TYPE_COMMAND:
         return;
     }
