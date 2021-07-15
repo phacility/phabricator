@@ -4,9 +4,49 @@ final class HarbormasterBuildMessageResumeTransaction
   extends HarbormasterBuildMessageTransaction {
 
   const TRANSACTIONTYPE = 'message/resume';
+  const MESSAGETYPE = 'resume';
 
-  public function getMessageType() {
-    return 'resume';
+  public function getHarbormasterBuildMessageName() {
+    return pht('Resume Build');
+  }
+
+  public function getHarbormasterBuildableMessageName() {
+    return pht('Resume Builds');
+  }
+
+  public function getHarbormasterBuildableMessageEffect() {
+    return pht('Build will resume.');
+  }
+
+  public function newConfirmPromptTitle() {
+    return pht('Really resume build?');
+  }
+
+  public function newConfirmPromptBody() {
+    return pht(
+      'Work will continue on the build. Really resume?');
+  }
+
+  public function newBuildableConfirmPromptTitle(
+    array $builds,
+    array $sendable) {
+    return pht(
+      'Really resume %s build(s)?',
+      phutil_count($builds));
+  }
+
+  public function newBuildableConfirmPromptBody(
+    array $builds,
+    array $sendable) {
+
+    if (count($sendable) === count($builds)) {
+      return pht(
+        'Work will continue on all builds. Really resume?');
+    } else {
+      return pht(
+        'You can only resume some builds. Work will continue on builds '.
+        'you have permission to resume.');
+    }
   }
 
   public function getTitle() {
@@ -24,6 +64,52 @@ final class HarbormasterBuildMessageResumeTransaction
     $build = $object;
 
     $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
+  }
+
+  protected function newCanApplyMessageAssertion(
+    PhabricatorUser $viewer,
+    HarbormasterBuild $build) {
+
+    if ($build->isAutobuild()) {
+      throw new HarbormasterRestartException(
+        pht('Unable to Resume Build'),
+        pht(
+          'You can not resume a build that uses an autoplan.'));
+    }
+
+    if (!$build->isPaused()) {
+      throw new HarbormasterRestartException(
+        pht('Unable to Resume Build'),
+        pht(
+          'You can not resume this build because it is not paused. You can '.
+          'only resume a paused build.'));
+    }
+
+  }
+
+  protected function newCanSendMessageAssertion(
+    PhabricatorUser $viewer,
+    HarbormasterBuild $build) {
+
+    if ($build->isResuming()) {
+      throw new HarbormasterRestartException(
+        pht('Unable to Resume Build'),
+        pht(
+          'You can not resume this build beacuse it is already resuming.'));
+    }
+
+    if ($build->isRestarting()) {
+      throw new HarbormasterRestartException(
+        pht('Unable to Resume Build'),
+        pht('You can not resume this build because it is already restarting.'));
+    }
+
+    if ($build->isAborting()) {
+      throw new HarbormasterRestartException(
+        pht('Unable to Resume Build'),
+        pht('You can not resume this build because it is already aborting.'));
+    }
+
   }
 
 }

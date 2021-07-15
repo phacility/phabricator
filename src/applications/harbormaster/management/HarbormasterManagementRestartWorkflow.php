@@ -61,21 +61,24 @@ final class HarbormasterManagementRestartWorkflow
       throw new ArcanistUserAbortException();
     }
 
+    $message = new HarbormasterBuildMessageRestartTransaction();
+
     foreach ($builds as $build) {
       $this->logInfo(
         pht('RESTARTING'),
         pht('Build %d: %s', $build->getID(), $build->getName()));
 
-      if (!$build->canRestartBuild()) {
+      try {
+        $message->assertCanSendMessage($viewer, $build);
+      } catch (HarbormasterRestartException $ex) {
         $this->logWarn(
           pht('INVALID'),
-          pht('Build can not be restarted.'));
-        continue;
+          $ex->newDisplayString());
       }
 
       $build->sendMessage(
         $viewer,
-        HarbormasterBuildCommand::COMMAND_RESTART);
+        $message->getHarbormasterBuildMessageType());
 
       $this->logOkay(
         pht('QUEUED'),

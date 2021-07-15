@@ -533,63 +533,31 @@ final class HarbormasterBuildViewController
 
     $curtain = $this->newCurtainView($build);
 
-    $can_restart =
-      $build->canRestartBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_RESTART);
+    $messages = array(
+      new HarbormasterBuildMessageRestartTransaction(),
+      new HarbormasterBuildMessagePauseTransaction(),
+      new HarbormasterBuildMessageResumeTransaction(),
+      new HarbormasterBuildMessageAbortTransaction(),
+    );
 
-    $can_pause =
-      $build->canPauseBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_PAUSE);
+    foreach ($messages as $message) {
+      $can_send = $message->canSendMessage($viewer, $build);
 
-    $can_resume =
-      $build->canResumeBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_RESUME);
+      $message_uri = urisprintf(
+        '/build/%s/%d/',
+        $message->getHarbormasterBuildMessageType(),
+        $id);
+      $message_uri = $this->getApplicationURI($message_uri);
 
-    $can_abort =
-      $build->canAbortBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_ABORT);
+      $action = id(new PhabricatorActionView())
+        ->setName($message->getHarbormasterBuildMessageName())
+        ->setIcon($message->getIcon())
+        ->setHref($message_uri)
+        ->setDisabled(!$can_send)
+        ->setWorkflow(true);
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Restart Build'))
-        ->setIcon('fa-repeat')
-        ->setHref($this->getApplicationURI('/build/restart/'.$id.'/'))
-        ->setDisabled(!$can_restart)
-        ->setWorkflow(true));
-
-    if ($build->canResumeBuild()) {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Resume Build'))
-          ->setIcon('fa-play')
-          ->setHref($this->getApplicationURI('/build/resume/'.$id.'/'))
-          ->setDisabled(!$can_resume)
-          ->setWorkflow(true));
-    } else {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Pause Build'))
-          ->setIcon('fa-pause')
-          ->setHref($this->getApplicationURI('/build/pause/'.$id.'/'))
-          ->setDisabled(!$can_pause)
-          ->setWorkflow(true));
+      $curtain->addAction($action);
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Abort Build'))
-        ->setIcon('fa-exclamation-triangle')
-        ->setHref($this->getApplicationURI('/build/abort/'.$id.'/'))
-        ->setDisabled(!$can_abort)
-        ->setWorkflow(true));
 
     return $curtain;
   }

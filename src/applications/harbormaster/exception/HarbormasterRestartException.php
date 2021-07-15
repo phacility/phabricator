@@ -30,4 +30,13 @@ final class HarbormasterRestartException extends Exception {
     return $this->body;
   }
 
+  public function newDisplayString() {
+    $title = $this->getTitle();
+
+    $body = $this->getBody();
+    $body = implode("\n\n", $body);
+
+    return pht('%s: %s', $title, $body);
+  }
+
 }

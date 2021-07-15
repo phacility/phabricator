@@ -221,8 +221,8 @@ final class HarbormasterBuildStatus extends Phobject {
       ),
       self::STATUS_PAUSED => array(
         'name' => pht('Paused'),
-        'icon' => 'fa-minus-circle',
-        'color' => 'dark',
+        'icon' => 'fa-pause',
+        'color' => 'yellow',
         'color.ansi' => 'yellow',
         'isBuilding' => false,
         'isComplete' => false,
