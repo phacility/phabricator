@@ -124,13 +124,15 @@ final class HarbormasterBuildEngine extends Phobject {
 
     $xactions = array();
 
+    $message_xaction = HarbormasterBuildMessageTransaction::TRANSACTIONTYPE;
+
     $messages = $build->getUnprocessedMessagesForApply();
     foreach ($messages as $message) {
       $message_type = $message->getType();
 
       $xactions[] = $build->getApplicationTransactionTemplate()
         ->setAuthorPHID($message->getAuthorPHID())
-        ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
+        ->setTransactionType($message_xaction)
         ->setNewValue($message_type);
     }
 
