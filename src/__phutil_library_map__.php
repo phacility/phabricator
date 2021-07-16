@@ -338,6 +338,7 @@ phutil_register_library_map(array(
     'ChatLogConduitAPIMethod' => 'applications/chatlog/conduit/ChatLogConduitAPIMethod.php',
     'ChatLogQueryConduitAPIMethod' => 'applications/chatlog/conduit/ChatLogQueryConduitAPIMethod.php',
     'ChatLogRecordConduitAPIMethod' => 'applications/chatlog/conduit/ChatLogRecordConduitAPIMethod.php',
+    'ConduitAPIDocumentationPage' => 'applications/conduit/data/ConduitAPIDocumentationPage.php',
     'ConduitAPIMethod' => 'applications/conduit/method/ConduitAPIMethod.php',
     'ConduitAPIMethodTestCase' => 'applications/conduit/method/__tests__/ConduitAPIMethodTestCase.php',
     'ConduitAPIRequest' => 'applications/conduit/protocol/ConduitAPIRequest.php',
@@ -6430,6 +6431,7 @@ phutil_register_library_map(array(
     'ChatLogConduitAPIMethod' => 'ConduitAPIMethod',
     'ChatLogQueryConduitAPIMethod' => 'ChatLogConduitAPIMethod',
     'ChatLogRecordConduitAPIMethod' => 'ChatLogConduitAPIMethod',
+    'ConduitAPIDocumentationPage' => 'Phobject',
     'ConduitAPIMethod' => array(
       'Phobject',
       'PhabricatorPolicyInterface',

@@ -38,9 +38,7 @@ abstract class PhabricatorEditEngineAPIMethod
       PhabricatorEnv::getDoclink('Conduit API: Using Edit Endpoints'));
   }
 
-  final public function getMethodDocumentation() {
-    $viewer = $this->getViewer();
-
+  final protected function newDocumentationPages(PhabricatorUser $viewer) {
     $engine = $this->newEditEngine()
       ->setViewer($viewer);
 
@@ -48,16 +46,15 @@ abstract class PhabricatorEditEngineAPIMethod
 
     $out = array();
 
-    $out[] = $this->buildEditTypesBoxes($engine, $types);
-
-    return $out;
+    return $this->buildEditTypesDocumentationPages($viewer, $engine, $types);
   }
 
-  private function buildEditTypesBoxes(
+  private function buildEditTypesDocumentationPages(
+    PhabricatorUser $viewer,
     PhabricatorEditEngine $engine,
     array $types) {
 
-    $boxes = array();
+    $pages = array();
 
     $summary_info = pht(
       'This endpoint supports these types of transactions. See below for '.
@@ -83,12 +80,14 @@ abstract class PhabricatorEditEngineAPIMethod
           'wide',
         ));
 
-    $boxes[] = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Transaction Types'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($summary_info))
-      ->appendChild($summary_table);
+    $title = pht('Transaction Summary');
+    $content = array(
+      $this->buildRemarkup($summary_info),
+      $summary_table,
+    );
+
+    $pages[] = $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('types');
 
     foreach ($types as $type) {
       $section = array();
@@ -130,15 +129,18 @@ abstract class PhabricatorEditEngineAPIMethod
             'wide',
           ));
 
-      $boxes[] = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Transaction Type: %s', $type->getEditType()))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($section))
-      ->appendChild($type_table);
+      $title = $type->getEditType();
+      $content = array(
+        $this->buildRemarkup($section),
+        $type_table,
+      );
+
+      $pages[] = $this->newDocumentationBoxPage($viewer, $title, $content)
+        ->setAnchor($type->getEditType())
+        ->setIconIcon('fa-pencil');
     }
 
-    return $boxes;
+    return $pages;
   }
 
 

@@ -60,7 +60,7 @@ abstract class PhabricatorSearchEngineAPIMethod
       PhabricatorEnv::getDoclink('Conduit API: Using Search Endpoints'));
   }
 
-  final public function getMethodDocumentation() {
+  final protected function newDocumentationPages(PhabricatorUser $viewer) {
     $viewer = $this->getViewer();
 
     $engine = $this->newSearchEngine()
@@ -70,17 +70,18 @@ abstract class PhabricatorSearchEngineAPIMethod
 
     $out = array();
 
-    $out[] = $this->buildQueriesBox($engine);
-    $out[] = $this->buildConstraintsBox($engine);
-    $out[] = $this->buildOrderBox($engine, $query);
-    $out[] = $this->buildFieldsBox($engine);
-    $out[] = $this->buildAttachmentsBox($engine);
-    $out[] = $this->buildPagingBox($engine);
+    $out[] = $this->buildQueriesDocumentationPage($viewer, $engine);
+    $out[] = $this->buildConstraintsDocumentationPage($viewer, $engine);
+    $out[] = $this->buildOrderDocumentationPage($viewer, $engine, $query);
+    $out[] = $this->buildFieldsDocumentationPage($viewer, $engine);
+    $out[] = $this->buildAttachmentsDocumentationPage($viewer, $engine);
+    $out[] = $this->buildPagingDocumentationPage($viewer, $engine);
 
     return $out;
   }
 
-  private function buildQueriesBox(
+  private function buildQueriesDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine) {
     $viewer = $this->getViewer();
 
@@ -140,15 +141,18 @@ EOTEXT
           null,
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Builtin and Saved Queries'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($info))
-      ->appendChild($table);
+    $title = pht('Prebuilt Queries');
+    $content = array(
+      $this->newRemarkupDocumentationView($info),
+      $table,
+    );
+
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('queries');
   }
 
-  private function buildConstraintsBox(
+  private function buildConstraintsDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine) {
 
     $info = pht(<<<EOTEXT
@@ -281,16 +285,21 @@ EOTEXT
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Custom Query Constraints'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($info))
-      ->appendChild($table)
-      ->appendChild($constant_lists);
+
+    $title = pht('Constraints');
+    $content = array(
+      $this->newRemarkupDocumentationView($info),
+      $table,
+      $constant_lists,
+    );
+
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('constraints')
+      ->setIconIcon('fa-filter');
   }
 
-  private function buildOrderBox(
+  private function buildOrderDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine,
     $query) {
 
@@ -388,18 +397,21 @@ EOTEXT
           'wide',
         ));
 
+    $title = pht('Result Ordering');
+    $content = array(
+      $this->newRemarkupDocumentationView($orders_info),
+      $orders_table,
+      $this->newRemarkupDocumentationView($columns_info),
+      $columns_table,
+    );
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Result Ordering'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($orders_info))
-      ->appendChild($orders_table)
-      ->appendChild($this->newRemarkupDocumentationView($columns_info))
-      ->appendChild($columns_table);
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('ordering')
+      ->setIconIcon('fa-sort-numeric-asc');
   }
 
-  private function buildFieldsBox(
+  private function buildFieldsDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine) {
 
     $info = pht(<<<EOTEXT
@@ -470,15 +482,19 @@ EOTEXT
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Object Fields'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($info))
-      ->appendChild($table);
+    $title = pht('Object Fields');
+    $content = array(
+      $this->newRemarkupDocumentationView($info),
+      $table,
+    );
+
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('fields')
+      ->setIconIcon('fa-cube');
   }
 
-  private function buildAttachmentsBox(
+  private function buildAttachmentsDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine) {
 
     $info = pht(<<<EOTEXT
@@ -560,15 +576,19 @@ EOTEXT
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Attachments'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($info))
-      ->appendChild($table);
+    $title = pht('Attachments');
+    $content = array(
+      $this->newRemarkupDocumentationView($info),
+      $table,
+    );
+
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('attachments')
+      ->setIconIcon('fa-cubes');
   }
 
-  private function buildPagingBox(
+  private function buildPagingDocumentationPage(
+    PhabricatorUser $viewer,
     PhabricatorApplicationSearchEngine $engine) {
 
     $info = pht(<<<EOTEXT
@@ -631,11 +651,14 @@ if `before` is `null`, there are no previous results available.
 EOTEXT
       );
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Paging and Limits'))
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->newRemarkupDocumentationView($info));
+    $title = pht('Paging and Limits');
+    $content = array(
+      $this->newRemarkupDocumentationView($info),
+    );
+
+    return $this->newDocumentationBoxPage($viewer, $title, $content)
+      ->setAnchor('paging')
+      ->setIconIcon('fa-clone');
   }
 
 }
