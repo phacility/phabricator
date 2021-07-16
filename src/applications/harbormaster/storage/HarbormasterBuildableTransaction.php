@@ -27,17 +27,21 @@ final class HarbormasterBuildableTransaction
           $this->renderHandleLink($author_phid));
       case self::TYPE_COMMAND:
         switch ($new) {
-          case HarbormasterBuildCommand::COMMAND_RESTART:
+          case HarbormasterBuildMessageRestartTransaction::MESSAGETYPE:
             return pht(
               '%s restarted this buildable.',
               $this->renderHandleLink($author_phid));
-          case HarbormasterBuildCommand::COMMAND_RESUME:
+          case HarbormasterBuildMessageResumeTransaction::MESSAGETYPE:
             return pht(
               '%s resumed this buildable.',
               $this->renderHandleLink($author_phid));
-          case HarbormasterBuildCommand::COMMAND_PAUSE:
+          case HarbormasterBuildMessagePauseTransaction::MESSAGETYPE:
             return pht(
               '%s paused this buildable.',
+              $this->renderHandleLink($author_phid));
+          case HarbormasterBuildMessageAbortTransaction::MESSAGETYPE:
+            return pht(
+              '%s aborted this buildable.',
               $this->renderHandleLink($author_phid));
         }
     }
@@ -55,12 +59,14 @@ final class HarbormasterBuildableTransaction
         return 'fa-plus';
       case self::TYPE_COMMAND:
         switch ($new) {
-          case HarbormasterBuildCommand::COMMAND_RESTART:
+          case HarbormasterBuildMessageRestartTransaction::MESSAGETYPE:
             return 'fa-backward';
-          case HarbormasterBuildCommand::COMMAND_RESUME:
+          case HarbormasterBuildMessageResumeTransaction::MESSAGETYPE:
             return 'fa-play';
-          case HarbormasterBuildCommand::COMMAND_PAUSE:
+          case HarbormasterBuildMessagePauseTransaction::MESSAGETYPE:
             return 'fa-pause';
+          case HarbormasterBuildMessageAbortTransaction::MESSAGETYPE:
+            return 'fa-exclamation-triangle';
         }
     }
 
@@ -78,7 +84,7 @@ final class HarbormasterBuildableTransaction
         return 'green';
       case self::TYPE_COMMAND:
         switch ($new) {
-          case HarbormasterBuildCommand::COMMAND_PAUSE:
+          case HarbormasterBuildMessagePauseTransaction::MESSAGETYPE:
             return 'red';
         }
     }

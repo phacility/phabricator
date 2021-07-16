@@ -272,22 +272,22 @@ final class HarbormasterBuild extends HarbormasterDAO
     foreach ($this->getUnprocessedMessages() as $message_object) {
       $message_type = $message_object->getType();
       switch ($message_type) {
-        case HarbormasterBuildCommand::COMMAND_RESTART:
+        case HarbormasterBuildMessageRestartTransaction::MESSAGETYPE:
           $is_restarting = true;
           $is_aborting = false;
           $apply_messages = array($message_object);
           break;
-        case HarbormasterBuildCommand::COMMAND_ABORT:
+        case HarbormasterBuildMessageAbortTransaction::MESSAGETYPE:
           $is_aborting = true;
           $is_restarting = false;
           $apply_messages = array($message_object);
           break;
-        case HarbormasterBuildCommand::COMMAND_PAUSE:
+        case HarbormasterBuildMessagePauseTransaction::MESSAGETYPE:
           $is_pausing = true;
           $is_resuming = false;
           $apply_messages = array($message_object);
           break;
-        case HarbormasterBuildCommand::COMMAND_RESUME:
+        case HarbormasterBuildMessageResumeTransaction::MESSAGETYPE:
           $is_resuming = true;
           $is_pausing = false;
           $apply_messages = array($message_object);
