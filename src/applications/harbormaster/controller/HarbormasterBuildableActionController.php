@@ -111,17 +111,13 @@ final class HarbormasterBuildableActionController
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true);
 
+      $xaction_type = HarbormasterBuildableMessageTransaction::TRANSACTIONTYPE;
+
       $xaction = id(new HarbormasterBuildableTransaction())
-        ->setTransactionType(HarbormasterBuildableTransaction::TYPE_COMMAND)
+        ->setTransactionType($xaction_type)
         ->setNewValue($action);
 
       $editor->applyTransactions($buildable, array($xaction));
-
-      $build_editor = id(new HarbormasterBuildTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
 
       foreach ($can_send as $build) {
         $build->sendMessage(
