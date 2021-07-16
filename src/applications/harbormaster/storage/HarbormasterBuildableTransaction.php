@@ -3,7 +3,6 @@
 final class HarbormasterBuildableTransaction
   extends PhabricatorApplicationTransaction {
 
-  const TYPE_CREATE = 'harbormaster:buildable:create';
   const TYPE_COMMAND = 'harbormaster:buildable:command';
 
   public function getApplicationName() {
@@ -21,10 +20,6 @@ final class HarbormasterBuildableTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_CREATE:
-        return pht(
-          '%s created this buildable.',
-          $this->renderHandleLink($author_phid));
       case self::TYPE_COMMAND:
         switch ($new) {
           case HarbormasterBuildMessageRestartTransaction::MESSAGETYPE:
@@ -55,8 +50,6 @@ final class HarbormasterBuildableTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_CREATE:
-        return 'fa-plus';
       case self::TYPE_COMMAND:
         switch ($new) {
           case HarbormasterBuildMessageRestartTransaction::MESSAGETYPE:
@@ -80,8 +73,6 @@ final class HarbormasterBuildableTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_CREATE:
-        return 'green';
       case self::TYPE_COMMAND:
         switch ($new) {
           case HarbormasterBuildMessagePauseTransaction::MESSAGETYPE:
