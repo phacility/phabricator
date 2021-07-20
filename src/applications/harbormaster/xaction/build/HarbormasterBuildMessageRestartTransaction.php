@@ -105,7 +105,7 @@ final class HarbormasterBuildMessageRestartTransaction
     HarbormasterBuild $build) {
 
     if ($build->isAutobuild()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Can Not Restart Autobuild'),
         pht(
           'This build can not be restarted because it is an automatic '.
@@ -118,7 +118,7 @@ final class HarbormasterBuildMessageRestartTransaction
     // See T13526. Users who can't see the "BuildPlan" can end up here with
     // no object. This is highly questionable.
     if (!$plan) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('No Build Plan Permission'),
         pht(
           'You can not restart this build because you do not have '.
@@ -132,7 +132,7 @@ final class HarbormasterBuildMessageRestartTransaction
     $never_restartable = HarbormasterBuildPlanBehavior::RESTARTABLE_NEVER;
     $is_never = ($option_key === $never_restartable);
     if ($is_never) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Build Plan Prevents Restart'),
         pht(
           'This build can not be restarted because the build plan is '.
@@ -143,7 +143,7 @@ final class HarbormasterBuildMessageRestartTransaction
     $is_failed = ($option_key === $failed_restartable);
     if ($is_failed) {
       if (!$this->isFailed()) {
-        throw new HarbormasterRestartException(
+        throw new HarbormasterMessageException(
           pht('Only Restartable if Failed'),
           pht(
             'This build can not be restarted because the build plan is '.
@@ -159,7 +159,7 @@ final class HarbormasterBuildMessageRestartTransaction
     HarbormasterBuild $build) {
 
     if ($build->isRestarting()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Already Restarting'),
         pht(
           'This build is already restarting. You can not reissue a restart '.

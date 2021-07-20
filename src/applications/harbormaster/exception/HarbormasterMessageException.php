@@ -1,6 +1,6 @@
 <?php
 
-final class HarbormasterRestartException extends Exception {
+final class HarbormasterMessageException extends Exception {
 
   private $title;
   private $body = array();

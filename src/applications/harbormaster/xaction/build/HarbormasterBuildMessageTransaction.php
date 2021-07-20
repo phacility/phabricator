@@ -86,7 +86,7 @@ abstract class HarbormasterBuildMessageTransaction
     try {
       $this->assertCanApplyMessage($viewer, $build);
       return true;
-    } catch (HarbormasterRestartException $ex) {
+    } catch (HarbormasterMessageException $ex) {
       return false;
     }
   }
@@ -98,7 +98,7 @@ abstract class HarbormasterBuildMessageTransaction
     try {
       $this->assertCanSendMessage($viewer, $build);
       return true;
-    } catch (HarbormasterRestartException $ex) {
+    } catch (HarbormasterMessageException $ex) {
       return false;
     }
   }
@@ -117,7 +117,7 @@ abstract class HarbormasterBuildMessageTransaction
     // See T13526. Users without permission to access the build plan can
     // currently end up here with no "BuildPlan" object.
     if (!$plan) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('No Build Plan Permission'),
         pht(
           'You can not issue this command because you do not have '.
@@ -133,7 +133,7 @@ abstract class HarbormasterBuildMessageTransaction
           $plan,
           PhabricatorPolicyCapability::CAN_EDIT);
       } catch (PhabricatorPolicyException $ex) {
-        throw new HarbormasterRestartException(
+        throw new HarbormasterMessageException(
           pht('Insufficent Build Plan Permission'),
           pht(
             'The build plan for this build is configured to prevent '.

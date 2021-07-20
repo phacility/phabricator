@@ -88,14 +88,14 @@ final class HarbormasterBuildMessageAbortTransaction
     HarbormasterBuild $build) {
 
     if ($build->isAutobuild()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Abort Build'),
         pht(
           'You can not abort a build that uses an autoplan.'));
     }
 
     if ($build->isComplete()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Abort Build'),
         pht(
           'You can not abort this biuld because it is already complete.'));
@@ -107,7 +107,7 @@ final class HarbormasterBuildMessageAbortTransaction
     HarbormasterBuild $build) {
 
     if ($build->isAborting()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Abort Build'),
         pht(
           'You can not abort this build because it is already aborting.'));

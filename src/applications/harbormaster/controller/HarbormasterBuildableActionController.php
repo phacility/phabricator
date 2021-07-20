@@ -43,7 +43,7 @@ final class HarbormasterBuildableActionController
       try {
         $message->assertCanSendMessage($viewer, $build);
         $can_send[$key] = $build;
-      } catch (HarbormasterRestartException $ex) {
+      } catch (HarbormasterMessageException $ex) {
         $exception = $ex;
       }
 

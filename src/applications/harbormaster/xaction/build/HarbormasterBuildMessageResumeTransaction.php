@@ -75,14 +75,14 @@ final class HarbormasterBuildMessageResumeTransaction
     HarbormasterBuild $build) {
 
     if ($build->isAutobuild()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Resume Build'),
         pht(
           'You can not resume a build that uses an autoplan.'));
     }
 
     if (!$build->isPaused() && !$build->isPausing()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Resume Build'),
         pht(
           'You can not resume this build because it is not paused. You can '.
@@ -96,20 +96,20 @@ final class HarbormasterBuildMessageResumeTransaction
     HarbormasterBuild $build) {
 
     if ($build->isResuming()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Resume Build'),
         pht(
           'You can not resume this build beacuse it is already resuming.'));
     }
 
     if ($build->isRestarting()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Resume Build'),
         pht('You can not resume this build because it is already restarting.'));
     }
 
     if ($build->isAborting()) {
-      throw new HarbormasterRestartException(
+      throw new HarbormasterMessageException(
         pht('Unable to Resume Build'),
         pht('You can not resume this build because it is already aborting.'));
     }

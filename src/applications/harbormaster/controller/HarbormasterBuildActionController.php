@@ -41,7 +41,7 @@ final class HarbormasterBuildActionController
 
     try {
       $xaction->assertCanSendMessage($viewer, $build);
-    } catch (HarbormasterRestartException $ex) {
+    } catch (HarbormasterMessageException $ex) {
       return $this->newDialog()
         ->setTitle($ex->getTitle())
         ->appendChild($ex->getBody())

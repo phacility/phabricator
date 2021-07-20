@@ -70,7 +70,7 @@ final class HarbormasterManagementRestartWorkflow
 
       try {
         $message->assertCanSendMessage($viewer, $build);
-      } catch (HarbormasterRestartException $ex) {
+      } catch (HarbormasterMessageException $ex) {
         $this->logWarn(
           pht('INVALID'),
           $ex->newDisplayString());
