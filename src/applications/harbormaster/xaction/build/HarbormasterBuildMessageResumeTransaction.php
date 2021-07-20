@@ -27,6 +27,10 @@ final class HarbormasterBuildMessageResumeTransaction
       'Work will continue on the build. Really resume?');
   }
 
+  public function getHarbormasterBuildMessageDescription() {
+    return pht('Resume work on a previously paused build.');
+  }
+
   public function newBuildableConfirmPromptTitle(
     array $builds,
     array $sendable) {
@@ -77,7 +81,7 @@ final class HarbormasterBuildMessageResumeTransaction
           'You can not resume a build that uses an autoplan.'));
     }
 
-    if (!$build->isPaused()) {
+    if (!$build->isPaused() && !$build->isPausing()) {
       throw new HarbormasterRestartException(
         pht('Unable to Resume Build'),
         pht(

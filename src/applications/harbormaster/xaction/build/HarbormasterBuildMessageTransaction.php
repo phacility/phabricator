@@ -8,6 +8,7 @@ abstract class HarbormasterBuildMessageTransaction
   }
 
   abstract public function getHarbormasterBuildMessageName();
+  abstract public function getHarbormasterBuildMessageDescription();
   abstract public function getHarbormasterBuildableMessageName();
   abstract public function getHarbormasterBuildableMessageEffect();
 
@@ -42,11 +43,17 @@ abstract class HarbormasterBuildMessageTransaction
     );
   }
 
-  final public static function getTransactionObjectForMessageType(
-    $message_type) {
+  final public static function getAllMessages() {
     $message_xactions = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->execute();
+
+    return $message_xactions;
+  }
+
+  final public static function getTransactionObjectForMessageType(
+    $message_type) {
+    $message_xactions = self::getAllMessages();
 
     foreach ($message_xactions as $message_xaction) {
       $xaction_type = $message_xaction->getHarbormasterBuildMessageType();

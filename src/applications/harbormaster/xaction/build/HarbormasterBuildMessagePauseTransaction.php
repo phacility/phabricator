@@ -28,6 +28,11 @@ final class HarbormasterBuildMessagePauseTransaction
       'complete. You can resume the build later.');
   }
 
+
+  public function getHarbormasterBuildMessageDescription() {
+    return pht('Pause the build.');
+  }
+
   public function newBuildableConfirmPromptTitle(
     array $builds,
     array $sendable) {

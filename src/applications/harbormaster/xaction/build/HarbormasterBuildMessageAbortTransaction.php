@@ -27,6 +27,10 @@ final class HarbormasterBuildMessageAbortTransaction
       'Progress on this build will be discarded. Really abort build?');
   }
 
+  public function getHarbormasterBuildMessageDescription() {
+    return pht('Abort the build, discarding progress.');
+  }
+
   public function newBuildableConfirmPromptTitle(
     array $builds,
     array $sendable) {

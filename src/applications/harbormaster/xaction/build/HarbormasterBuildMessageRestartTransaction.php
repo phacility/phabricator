@@ -28,6 +28,11 @@ final class HarbormasterBuildMessageRestartTransaction
       'Side effects of the build will occur again. Really restart build?');
   }
 
+
+  public function getHarbormasterBuildMessageDescription() {
+    return pht('Restart the build, discarding all progress.');
+  }
+
   public function newBuildableConfirmPromptTitle(
     array $builds,
     array $sendable) {

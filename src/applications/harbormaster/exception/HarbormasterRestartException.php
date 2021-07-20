@@ -9,7 +9,11 @@ final class HarbormasterRestartException extends Exception {
     $this->setTitle($title);
     $this->appendParagraph($body);
 
-    parent::__construct($title);
+    parent::__construct(
+      pht(
+        '%s: %s',
+        $title,
+        $body));
   }
 
   public function setTitle($title) {
