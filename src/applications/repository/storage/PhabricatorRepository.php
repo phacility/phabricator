@@ -499,7 +499,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function passthruRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    return $this->newRemoteCommandPassthru($args)->execute();
+    return $this->newRemoteCommandPassthru($args)->resolve();
   }
 
   private function newRemoteCommandFuture(array $argv) {
@@ -540,7 +540,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function passthruLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    return $this->newLocalCommandPassthru($args)->execute();
+    return $this->newLocalCommandPassthru($args)->resolve();
   }
 
   private function newLocalCommandFuture(array $argv) {
