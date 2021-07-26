@@ -1282,7 +1282,7 @@ final class DifferentialRevisionViewController
   }
 
   private function buildUnitMessagesView(
-    $diff,
+    DifferentialDiff $diff,
     DifferentialRevision $revision) {
     $viewer = $this->getViewer();
 
@@ -1310,14 +1310,8 @@ final class DifferentialRevisionViewController
       return null;
     }
 
-    $excuse = null;
-    if ($diff->hasDiffProperty('arc:unit-excuse')) {
-      $excuse = $diff->getProperty('arc:unit-excuse');
-    }
-
     return id(new HarbormasterUnitSummaryView())
       ->setViewer($viewer)
-      ->setExcuse($excuse)
       ->setBuildable($diff->getBuildable())
       ->setUnitMessages($diff->getUnitMessages())
       ->setLimit(5)

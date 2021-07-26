@@ -42,7 +42,7 @@ final class DifferentialDiff
   private $unsavedChangesets = array();
   private $changesets = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
-  private $properties = array();
+  private $properties = self::ATTACHABLE;
   private $buildable = self::ATTACHABLE;
 
   private $unitMessages = self::ATTACHABLE;
@@ -338,6 +338,9 @@ final class DifferentialDiff
   }
 
   public function attachProperty($key, $value) {
+    if (!is_array($this->properties)) {
+      $this->properties = array();
+    }
     $this->properties[$key] = $value;
     return $this;
   }
