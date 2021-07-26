@@ -8,7 +8,7 @@ final class PhrictionMarkupPreviewController
     $viewer = $request->getUser();
 
     $text = $request->getStr('text');
-    $slug = $request->getURIData('slug');
+    $slug = $request->getStr('slug');
 
     $output = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())

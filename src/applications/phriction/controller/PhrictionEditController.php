@@ -316,9 +316,17 @@ final class PhrictionEditController
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
+    $preview_uri = '/phriction/preview/';
+    $preview_uri = new PhutilURI(
+      $preview_uri,
+      array(
+        'slug' => $document->getSlug(),
+      ));
+    $preview_uri = phutil_string_cast($preview_uri);
+
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader($content->getTitle())
-      ->setPreviewURI('/phriction/preview/'.$document->getSlug())
+      ->setPreviewURI($preview_uri)
       ->setControlID('document-textarea')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
