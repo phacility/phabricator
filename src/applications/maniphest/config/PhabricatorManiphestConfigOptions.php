@@ -247,6 +247,80 @@ EOTEXT
     $json = new PhutilJSON();
     $status_example = $json->encodeFormatted($status_example);
 
+    $category_type = 'maniphest.categories';
+    $category_defaults = array();
+
+    $category_description = $this->deformat(pht(<<<EOTEXT
+Allows you to edit, add, or remove the task categories available in Maniphest,
+like "BF", "Zoom Ops". The configuration should contain a map
+of category constants to category specifications (see below for examples).
+
+The keys you can provide in a specification are:
+
+  - `name` //Required string.// Name of the category, like "BF".
+  - `app` //Zoom/Compass/Prime/Oracle/Freight.
+  - `subcategories` //List of strings.// Subcategories list, like ["CN Creation", "CN Edit"].
+  - `silly` //Optional bool.// Marks this status as silly, and thus wholly
+    inappropriate for use by serious businesses.
+  - `disabled` //Optional bool.// Marks this status as no longer in use so
+    tasks can not be created or edited to have this status. Existing tasks with
+    this status will not be affected, but you can batch edit them or let them
+    die out on their own.
+
+Categories will appear in the UI in the alphabetical order. Note that any category
+marked `silly` does not appear if Phabricator
+is configured with `phabricator.serious-business` set to true.
+
+EOTEXT
+    ));
+
+    $category_example = array(
+      'zoom.bf' => array(
+        'name' => pht('BF'),
+        'app' => pht('Zoom'),
+        'subcategories' => array(pht('CN Creation'), pht('CN Deletion')),
+      ),
+    );
+
+    $json = new PhutilJSON();
+    $category_example = $json->encodeFormatted($category_example);
+
+    $escalation_type = 'maniphest.escalation';
+    $escalation_defaults = array();
+
+    $escalation_description = $this->deformat(pht(<<<EOTEXT
+Allows you to edit, add, or remove the task escalation list available in Maniphest,
+like "People Support", "Finance auditor". The configuration should contain a map
+of escalation constants to escalation specifications (see below for examples).
+
+The keys you can provide in a specification are:
+
+  - `project` //Required string.// Project of the escalation, like "Oracle" or "ZTS".
+  - `escalate_to` //List of strings.// Escalate to list, like ["CE Team", "DEPS Desk"].
+  - `silly` //Optional bool.// Marks this status as silly, and thus wholly
+    inappropriate for use by serious businesses.
+  - `disabled` //Optional bool.// Marks this status as no longer in use so
+    tasks can not be created or edited to have this status. Existing tasks with
+    this status will not be affected, but you can batch edit them or let them
+    die out on their own.
+
+Escalation list will appear in the UI in the alphabetical order. Note that any escalation
+marked `silly` does not appear if Phabricator
+is configured with `phabricator.serious-business` set to true.
+
+EOTEXT
+    ));
+
+    $escalation_example = array(
+      'oracle' => array(
+        'project' => pht('Oracle'),
+        'escalate_to' => array(pht('COD/DOD Team'), pht('DEPS Desk')),
+      ),
+    );
+
+    $json = new PhutilJSON();
+    $escalation_example = $json->encodeFormatted($escalation_example);
+
     // This is intentionally blank for now, until we can move more Maniphest
     // logic to custom fields.
     $default_fields = array();
@@ -506,6 +580,14 @@ EOTEXT
         ->setSummary(pht('Configure Maniphest task statuses.'))
         ->setDescription($status_description)
         ->addExample($status_example, pht('Minimal Valid Config')),
+      $this->newOption('maniphest.categories', $category_type, $category_defaults)
+        ->setSummary(pht('Configure Maniphest task categories.'))
+        ->setDescription($category_description)
+        ->addExample($category_example, pht('Minimal Valid Config')),
+      $this->newOption('maniphest.escalation', $escalation_type, $escalation_defaults)
+        ->setSummary(pht('Configure Maniphest task escalation.'))
+        ->setDescription($escalation_description)
+        ->addExample($escalation_example, pht('Minimal Valid Config')),
       $this->newOption('maniphest.default-priority', 'int', 90)
         ->setSummary(pht('Default task priority for create flows.'))
         ->setDescription(
