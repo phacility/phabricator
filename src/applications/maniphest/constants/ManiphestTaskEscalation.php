@@ -30,10 +30,10 @@ final class ManiphestTaskEscalation extends ManiphestConstants {
         $val = $escalation['project'] . " / " . $escalateTo;
         $temp[$val] = $escalateTo;
       }
-      asort($temp);
+      ksort($temp);
       $result[$escalation['project']] = $temp;
     }
-    asort($result);
+    ksort($result);
     return array_merge(array("NA" => "NA"), $result);
   }
 

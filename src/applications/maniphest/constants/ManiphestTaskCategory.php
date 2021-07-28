@@ -30,10 +30,10 @@ final class ManiphestTaskCategory extends ManiphestConstants {
         $val = $category['app'] . " / " . $category['name'] . " / " . $subcategory;
         $temp[$val] = $subcategory;
       }
-      asort($temp);
+      ksort($temp);
       $result[$category['app'] . " / " . $category['name']] = $temp;
     }
-    asort($result);
+    ksort($result);
     return array_merge(array("NA" => "NA"), $result);
   }
 
