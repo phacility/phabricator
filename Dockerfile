@@ -107,6 +107,10 @@ COPY --chown=app composer.json composer.lock ./
 RUN mkdir ${COMPOSER_VENDOR_DIR} \
     && composer install --no-dev
 
+# Copy mercurial extension, and enable it.
+COPY --chown=app hgext hgext
+COPY --chown=app .hgrc /app/.hgrc
+
 # Configure Phabricator to use moz-extensions library
 RUN \
     mkdir /app/phabricator/conf/custom/ && \
