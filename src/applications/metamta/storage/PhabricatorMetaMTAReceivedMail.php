@@ -363,15 +363,31 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
      */
 
   public function dropEmailReplies() {
-      if (!$this->getHeader('in-reply-to')) {
-          return;
-      }
-
-      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+    if (!$this->getHeader('in-reply-to')) {
+      // not a reply message
+      return;
+    }
+    if (!$this->getHeader('references')) {
+      // We don't know the original references for this mail.
+      return;
+    }
+    $references = explode(",", $this->getHeader('references'));
+    foreach($references as $reference) {
+      $reference_hash = PhabricatorHash::digestForIndex($reference);
+      $messages = $this->loadAllWhere(
+        'messageIDHash = %s LIMIT 1',
+        $reference_hash);
+      $messages_count = count($messages);
+      if ($messages_count > 0) {
+        // We have ticket against one of the original mails.
+        throw new PhabricatorMetaMTAReceivedMailProcessingException(
           MetaMTAReceivedMailStatus::STATUS_DUPLICATE,
           pht(
-              "Ignoring email with '%s' header to avoid duplicate tickets.",
-              'in-reply-to'));
+            "Ignoring email with '%s' reference in header (hash: '%s') to avoid duplicate tickets.",
+            $reference,
+            $reference_hash));
+      }
+    }
   }
 
   /**
