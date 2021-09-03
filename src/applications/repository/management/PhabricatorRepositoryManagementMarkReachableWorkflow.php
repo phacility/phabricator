@@ -48,11 +48,11 @@ final class PhabricatorRepositoryManagementMarkReachableWorkflow
   }
 
   private function markReachable(PhabricatorRepository $repository) {
-    if (!$repository->isGit()) {
+    if (!$repository->isGit() && !$repository->isHg()) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Only Git repositories are supported, this repository ("%s") is '.
-          'not a Git repository.',
+          'Only Git and Mercurial repositories are supported, unable to '.
+          'operate on this repository ("%s").',
           $repository->getDisplayName()));
     }
 
@@ -65,7 +65,12 @@ final class PhabricatorRepositoryManagementMarkReachableWorkflow
 
     $flag = PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE;
 
-    $graph = new PhabricatorGitGraphStream($repository);
+    if ($repository->isGit()) {
+      $graph = new PhabricatorGitGraphStream($repository);
+    } else if ($repository->isHg()) {
+      $graph = new PhabricatorMercurialGraphStream($repository);
+    }
+
     foreach ($commits as $commit) {
       $identifier = $commit->getCommitIdentifier();
 
