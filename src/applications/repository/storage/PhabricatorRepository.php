@@ -2269,10 +2269,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $never_proxy);
 
     if (!$client) {
-      $result = id(new ConduitCall($method, $params))
-        ->setUser($viewer)
-        ->execute();
-      $future = new ImmediateFuture($result);
+      $conduit_call = id(new ConduitCall($method, $params))
+        ->setUser($viewer);
+      $future = new MethodCallFuture($conduit_call, 'execute');
     } else {
       $future = $client->callMethod($method, $params);
     }
