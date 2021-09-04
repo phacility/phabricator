@@ -2,7 +2,6 @@
 
 final class DiffusionRepositoryController extends DiffusionController {
 
-  private $historyFuture;
   private $browseFuture;
   private $branchButton = null;
   private $branchFuture;
@@ -191,15 +190,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $path = $drequest->getPath();
 
     $futures = array();
-    $this->historyFuture = $this->callConduitMethod(
-      'diffusion.historyquery',
-      array(
-        'commit' => $commit,
-        'path' => $path,
-        'offset' => 0,
-        'limit' => 15,
-      ));
-    $futures[] = $this->historyFuture;
 
     $browse_pager = id(new PHUIPagerView())
       ->readFromRequest($request);
@@ -230,31 +220,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       // Just resolve all the futures before continuing.
     }
 
-    $phids = array();
     $content = array();
-
-    try {
-      $history_results = $this->historyFuture->resolve();
-      $history = DiffusionPathChange::newFromConduit(
-        $history_results['pathChanges']);
-
-      foreach ($history as $item) {
-        $data = $item->getCommitData();
-        if ($data) {
-          if ($data->getCommitDetail('authorPHID')) {
-            $phids[$data->getCommitDetail('authorPHID')] = true;
-          }
-          if ($data->getCommitDetail('committerPHID')) {
-            $phids[$data->getCommitDetail('committerPHID')] = true;
-          }
-        }
-      }
-      $history_exception = null;
-    } catch (Exception $ex) {
-      $history_results = null;
-      $history = null;
-      $history_exception = $ex;
-    }
 
     try {
       $browse_results = $this->browseFuture->resolve();
@@ -264,27 +230,12 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browse_paths = $browse_results->getPaths();
       $browse_paths = $browse_pager->sliceResults($browse_paths);
 
-      foreach ($browse_paths as $item) {
-        $data = $item->getLastCommitData();
-        if ($data) {
-          if ($data->getCommitDetail('authorPHID')) {
-            $phids[$data->getCommitDetail('authorPHID')] = true;
-          }
-          if ($data->getCommitDetail('committerPHID')) {
-            $phids[$data->getCommitDetail('committerPHID')] = true;
-          }
-        }
-      }
-
       $browse_exception = null;
     } catch (Exception $ex) {
       $browse_results = null;
       $browse_paths = null;
       $browse_exception = $ex;
     }
-
-    $phids = array_keys($phids);
-    $handles = $this->loadViewerHandles($phids);
 
     if ($browse_results) {
       $readme = $this->renderDirectoryReadme($browse_results);
@@ -296,7 +247,6 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browse_results,
       $browse_paths,
       $browse_exception,
-      $handles,
       $browse_pager);
 
     if ($readme) {
@@ -524,7 +474,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_results,
     $browse_paths,
     $browse_exception,
-    array $handles,
     PHUIPagerView $pager) {
 
     require_celerity_resource('diffusion-icons-css');
@@ -547,8 +496,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $browse_table = id(new DiffusionBrowseTableView())
       ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setHandles($handles);
+      ->setDiffusionRequest($drequest);
     if ($browse_paths) {
       $browse_table->setPaths($browse_paths);
     } else {

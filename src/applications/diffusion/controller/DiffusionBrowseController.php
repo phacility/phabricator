@@ -298,22 +298,8 @@ final class DiffusionBrowseController extends DiffusionController {
       $empty_result->setDiffusionBrowseResultSet($results);
       $empty_result->setView($request->getStr('view'));
     } else {
-      $phids = array();
-      foreach ($results->getPaths() as $result) {
-        $data = $result->getLastCommitData();
-        if ($data) {
-          if ($data->getCommitDetail('authorPHID')) {
-            $phids[$data->getCommitDetail('authorPHID')] = true;
-          }
-        }
-      }
-
-      $phids = array_keys($phids);
-      $handles = $this->loadViewerHandles($phids);
-
       $browse_table = id(new DiffusionBrowseTableView())
         ->setDiffusionRequest($drequest)
-        ->setHandles($handles)
         ->setPaths($results->getPaths())
         ->setUser($request->getUser());
 
