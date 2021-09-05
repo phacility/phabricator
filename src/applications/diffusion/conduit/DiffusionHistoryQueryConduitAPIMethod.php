@@ -145,8 +145,8 @@ final class DiffusionHistoryQueryConduitAPIMethod
     } else {
       $revset_arg = hgsprintf(
         'reverse(ancestors(%s)) and branch(%s)',
-        $drequest->getBranch(),
-        $commit_hash);
+        $commit_hash,
+        $drequest->getBranch());
     }
 
     $hg_analyzer = PhutilBinaryAnalyzer::getForBinary('hg');
