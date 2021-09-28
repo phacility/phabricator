@@ -56,33 +56,62 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       'vurisprintf',
       $settings['uri'],
       $variables);
-
     $method = nonempty(idx($settings, 'method'), 'POST');
 
-    $future = id(new HTTPSFuture($uri))
-      ->setMethod($method)
-      ->setTimeout(60);
+    $sleepDuration = 30;
+    $retry = 0;
+    while (true) {
+      $future = id(new HTTPSFuture($uri))
+        ->setMethod($method)
+        ->setTimeout(60);
 
-    $credential_phid = $this->getSetting('credential');
-    if ($credential_phid) {
-      $key = PassphrasePasswordKey::loadFromPHID(
-        $credential_phid,
-        $viewer);
-      $future->setHTTPBasicAuthCredentials(
-        $key->getUsernameEnvelope()->openEnvelope(),
-        $key->getPasswordEnvelope());
+      $credential_phid = $this->getSetting('credential');
+      if ($credential_phid) {
+        $key = PassphrasePasswordKey::loadFromPHID(
+          $credential_phid,
+          $viewer);
+        $future->setHTTPBasicAuthCredentials(
+          $key->getUsernameEnvelope()->openEnvelope(),
+          $key->getPasswordEnvelope());
+      }
+
+      $this->resolveFutures(
+        $build,
+        $build_target,
+        array($future));
+
+      $this->logHTTPResponse($build, $build_target, $future, $uri);
+
+      list($status) = $future->resolve();
+      try {
+        $this->emitBuildResultMetric($build->getBuildPlan()->getID(), $status->getStatusCode());
+      } catch (Exception $e) {
+        echo 'Caught exception while sending Jenkins metrics to statsd: ',  $e->getMessage(), "\n";
+      }
+      if (!$status->isError()) {
+        return;
+      }
+      if ($retry == 2) {
+        throw new HarbormasterBuildFailureException();
+      }
+      sleep($sleepDuration);
+      $sleepDuration *= 2;
+      $retry++;
     }
+  }
 
-    $this->resolveFutures(
-      $build,
-      $build_target,
-      array($future));
-
-    $this->logHTTPResponse($build, $build_target, $future, $uri);
-
-    list($status) = $future->resolve();
-    if ($status->isError()) {
-      throw new HarbormasterBuildFailureException();
+  public function emitBuildResultMetric($plan, $status) {
+    $template = 'echo "phabricator_build_result_total:1|c|#plan:$plan,status:$status" | nc -w 1 -u apollo-statsd.integration-tests.svc.cluster.local 8125';
+    $vars = array(
+      '$plan' => $plan,
+      '$status' => $status,
+    );
+    $command = strtr($template, $vars);
+    $output = null;
+    $retval = null;
+    exec($command, $output, $retval);
+    if ($retval != 0) {
+      echo 'Error while emitting metrics to statsd: ', $output, "\n";
     }
   }
 
@@ -112,5 +141,4 @@ final class HarbormasterHTTPRequestBuildStepImplementation
   public function supportsWaitForMessage() {
     return true;
   }
-
 }
