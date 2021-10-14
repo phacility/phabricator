@@ -1,5 +1,5 @@
 {
-    "name": "mozilla/phabricator-extensions",
+    "name": "mozilla/phabricator",
     "type": "project",
     "require": {
         "sentry/sentry": "^2.3",
