@@ -8,4 +8,9 @@ interface PhabricatorReviewer {
    * @return EmailRecipient[]
    */
   public function toRecipients(string $actorEmail): array;
+
+  /**
+   * @return EmailRecipient[]
+   */
+  public function getWatchersAsRecipients(string $actorEmail): array;
 }

@@ -15,4 +15,9 @@ class UserPhabricatorReviewer implements PhabricatorReviewer {
   public function toRecipients(string $actorEmail): array {
     return array_filter([EmailRecipient::from($this->rawUser, $actorEmail)]);
   }
+
+  public function getWatchersAsRecipients(string $actorEmail): array
+  {
+    return [];
+  }
 }

@@ -62,12 +62,13 @@ class PhabricatorUserStore {
       // This is a group reviewer
       $project = self::fetchProject($PHID);
       $users = array_values($this->queryAll($project->getMemberPHIDs()));
-      return new GroupPhabricatorReviewer($project->getDisplayName(), $users);
+      $watchers = array_values($this->queryAll($project->getWatcherPHIDs()));
+      return new GroupPhabricatorReviewer($project->getDisplayName(), $users, $watchers);
     } else if (substr($PHID, 0, strlen('PHID-OPKG')) == 'PHID-OPKG') {
       // This is a "code owner" reviewer
       $package = self::fetchPackage($PHID);
       $users = array_values($this->queryAll($package->getOwnerPHIDs()));
-      return new GroupPhabricatorReviewer($package->getName(), $users);
+      return new GroupPhabricatorReviewer($package->getName(), $users, []);
     } else {
       // PHID type must be "PHID-USER".
       // So, this is a single user reviewer.
@@ -95,6 +96,7 @@ class PhabricatorUserStore {
     return (new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->needMembers(true)
+      ->needWatchers(true)
       ->withPHIDs([$PHID])
       ->executeOne();
   }
