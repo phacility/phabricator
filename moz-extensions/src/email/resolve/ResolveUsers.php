@@ -46,14 +46,9 @@ class ResolveUsers {
    * @return EmailReviewer[]
    */
   public function resolveReviewers(bool $revisionChangedToNeedReview): array {
-    $rawReviewers = $this->rawRevision->getReviewers();
+    $rawReviewers = $this->resolveUnresignedReviewers();
     $reviewers = [];
     foreach ($rawReviewers as $reviewerPHID => $rawReviewer) {
-      if ($rawReviewer->isResigned()) {
-        // In the future, we could show resigned reviewers in the email body
-        continue;
-      }
-
       $allReviewerStatuses = array_map(function($reviewer) {
         return $reviewer->getReviewerStatus();
       }, $rawReviewers);
@@ -64,7 +59,6 @@ class ResolveUsers {
       $reviewers[] = new EmailReviewer($reviewer->name(), $isActionable, $status, $reviewer->toRecipients($this->actorEmail));
     }
     return $reviewers;
-
   }
 
   /**
@@ -72,10 +66,15 @@ class ResolveUsers {
    */
   public function resolveSubscribersAsRecipients(): array {
     $recipientPHIDs = PhabricatorSubscribersQuery::loadSubscribersForPHID($this->rawRevision->getPHID());
-
     $recipientUsers = array_map(fn (string $phid) => $this->userStore->findAllBySubscribersById($phid), $recipientPHIDs);
     $recipientUsers = array_merge(...$recipientUsers); // Flatten array of arrays
     $recipients = array_map(fn (PhabricatorUser $user) => EmailRecipient::from($user, $this->actorEmail), $recipientUsers);
+
+    foreach (array_keys($this->resolveUnresignedReviewers()) as $reviewerPHID) {
+      $reviewer = $this->userStore->findReviewerByPHID($reviewerPHID);
+      $recipients = array_merge($recipients, $reviewer->getWatchersAsRecipients($this->actorEmail));
+    }
+
     return array_values(array_filter($recipients));
   }
 
@@ -94,5 +93,16 @@ class ResolveUsers {
     }
 
     return array_merge($subscribers, $reviewers, $authorList);
+  }
+
+  /**
+   * @return Phabricatoruser[]
+   */
+  private function resolveUnresignedReviewers(): array {
+    $reviewers = $this->rawRevision->getReviewers();
+    return array_filter($reviewers, function($rawReviewer) {
+      // In the future, we could show resigned reviewers in the email body
+      return !$rawReviewer->isResigned();
+    });
   }
 }
