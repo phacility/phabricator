@@ -84,7 +84,7 @@ final class HarbormasterHTTPRequestBuildStepImplementation
 
       list($status) = $future->resolve();
       try {
-        $this->emitBuildResultMetric($build->getBuildPlan()->getID(), $status->getStatusCode());
+        $this->emitBuildResultMetric($build->getBuildPlan()->getID(), $status->getStatusCode(), $retry);
       } catch (Exception $e) {
         echo 'Caught exception while sending Jenkins metrics to statsd: ',  $e->getMessage(), "\n";
       }
@@ -100,19 +100,29 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     }
   }
 
-  public function emitBuildResultMetric($plan, $status) {
-    $template = 'echo "phabricator_build_result_total:1|c|#plan:$plan,status:$status" | nc -w 1 -u apollo-statsd.integration-tests.svc.cluster.local 8125';
+  public function emitBuildResultMetric($plan, $status, $retry) {
+    $template = 'echo "phabricator_build_result_total:1|c|#plan:$plan,status:$status,retry:$retry" | nc -w 3 -vu apollo-statsd.integration-tests.svc.cluster.local 8125';
     $vars = array(
       '$plan' => $plan,
       '$status' => $status,
+      '$retry' => $retry,
     );
     $command = strtr($template, $vars);
+    echo $command;
+
+    $metrics_retry = 0;
+    $retval = 0;
     $output = null;
-    $retval = null;
-    exec($command, $output, $retval);
-    if ($retval != 0) {
-      echo 'Error while emitting metrics to statsd: ', $output, "\n";
+    while ($metrics_retry < 3) {
+      exec($command, $output, $retval);
+      if ($retval == 0) {
+        return;
+      }
+      $metrics_retry++;
+      sleep(1);
     }
+    echo "Got error code $retval when sending metrics to statsd with output:\n";
+    print_r($output);
   }
 
   public function getFieldSpecifications() {
