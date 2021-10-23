@@ -4,6 +4,7 @@ LABEL maintainer="dkl@mozilla.com"
 
 # These are unlikely to change from version to version of the container
 EXPOSE 9000
+EXPOSE 9003
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 CMD ["/app/entrypoint.sh", "start"]
 
@@ -151,12 +152,20 @@ FROM base as development
 
 USER root
 RUN apk add --no-cache $PHPIZE_DEPS \
-    && pecl install xdebug-2.9.0 \
+    && pecl install xdebug-3.1.1 \
     && docker-php-ext-enable xdebug
 
 RUN { \
         echo '[xdebug]'; \
-        echo 'xdebug.remote_enable=1'; \
+        echo 'zend_extension=xdebug'; \
+        echo 'xdebug.mode=debug'; \
+        echo 'xdebug.start_with_request=yes'; \
+        echo 'xdebug.remote_handler=dbgp'; \
+        echo 'xdebug.client_host=172.17.0.1'; \
+        echo 'xdebug.remote_connect_back=true'; \
+        echo 'xdebug.log="/tmp/xdebug.log"'; \
+        echo 'xdebug.remote_host=172.17.0.1'; \
+        echo ''; \
     } | tee /usr/local/etc/php/conf.d/xdebug.ini
 
 USER app
