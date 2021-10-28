@@ -45,9 +45,10 @@ services:
     entrypoint: /app/entrypoint.sh
     command: test_phab
     environment: *phab_env
-    restart: on-failure
     depends_on:
       - phabdb
+    volumes:
+      - phabricator-moz-extensions-local:/app/moz-extensions
 
   phabdb:
     image: mysql:5.7
@@ -70,3 +71,9 @@ services:
 volumes:
   phabricator-mysql-db:
   phabricator-app:
+  phabricator-moz-extensions-local:
+    driver: local
+    driver_opts:
+      type: none
+      device: '$PWD/moz-extensions'
+      o: bind
