@@ -183,6 +183,13 @@ final class PhabricatorFileQuery
         $always_visible = true;
       }
 
+      // DEVX-2087: skip file policy check if it is PUBLIC or ALL_USERS
+      $file_view_policy = $file->getViewPolicy();
+      if ($file_view_policy == PhabricatorPolicies::POLICY_PUBLIC ||
+          $file_view_policy == PhabricatorPolicies::POLICY_USER) {
+        $always_visible = true;
+      }
+
       if ($always_visible) {
         // We just treat these files as though they aren't attached to
         // anything. This saves a query in common cases when we're loading
