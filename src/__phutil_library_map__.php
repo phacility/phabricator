@@ -6769,8 +6769,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionCloseDetailsController' => 'DifferentialController',
     'DifferentialRevisionCloseTransaction' => 'DifferentialRevisionActionTransaction',
     'DifferentialRevisionClosedStatusDatasource' => 'PhabricatorTypeaheadDatasource',
-    // DEVX-2064
-    // 'DifferentialRevisionCommandeerTransaction' => 'DifferentialRevisionActionTransaction',
+    'DifferentialRevisionCommandeerTransaction' => 'DifferentialRevisionActionTransaction',
     'DifferentialRevisionContentAddedHeraldField' => 'DifferentialRevisionHeraldField',
     'DifferentialRevisionContentHeraldField' => 'DifferentialRevisionHeraldField',
     'DifferentialRevisionContentRemovedHeraldField' => 'DifferentialRevisionHeraldField',
