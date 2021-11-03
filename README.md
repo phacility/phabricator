@@ -39,7 +39,9 @@ preconfigured Firefox.
 ## Preconfigured users:
 
 For performing administration tasks in Phabricator, first log out of
-Phabricator and then go to http://phabricator.test/?admin=1
+Phabricator and then go to the login page with the `Login using BMO` button
+and add `?admin=1` to the URL. You can also navigate directly to
+http://phabricator.test/auth/login/password:self/
 
 `user:admin`, `password:password123456789!`
 
