@@ -81,6 +81,10 @@ class PhabricatorUserStore {
    * @return PhabricatorUser[]
    */
   public function queryAll(array $PHIDs): array {
+    if (empty($PHIDs)) {
+      return [];
+    }
+
     $users = (new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs($PHIDs)
