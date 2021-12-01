@@ -122,7 +122,7 @@ EOTEXT
     foreach ($abort_builds as $abort_build) {
       $abort_build->sendMessage(
         $viewer,
-        HarbormasterBuildCommand::COMMAND_ABORT);
+        HarbormasterBuildMessageAbortTransaction::MESSAGETYPE);
     }
   }
 

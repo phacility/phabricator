@@ -11,9 +11,7 @@ final class EdgeSearchConduitAPIMethod
     return pht('Read edge relationships between objects.');
   }
 
-  public function getMethodDocumentation() {
-    $viewer = $this->getViewer();
-
+  protected function newDocumentationPages(PhabricatorUser $viewer) {
     $rows = array();
     foreach ($this->getConduitEdgeTypeMap() as $key => $type) {
       $inverse_constant = $type->getInverseEdgeConstant();
@@ -48,17 +46,11 @@ final class EdgeSearchConduitAPIMethod
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edge Types'))
-      ->setTable($types_table);
-  }
 
-  public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
-  }
-
-  public function getMethodStatusDescription() {
-    return pht('This method is new and experimental.');
+    return array(
+      $this->newDocumentationBoxPage($viewer, pht('Edge Types'), $types_table)
+        ->setAnchor('types'),
+    );
   }
 
   protected function defineParamTypes() {

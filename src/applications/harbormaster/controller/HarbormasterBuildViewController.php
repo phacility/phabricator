@@ -32,21 +32,13 @@ final class HarbormasterBuildViewController
       ->setPolicyObject($build)
       ->setHeaderIcon('fa-cubes');
 
-    $is_restarting = $build->isRestarting();
+    $status = $build->getBuildPendingStatusObject();
 
-    if ($is_restarting) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Restarting'));
-    } else if ($build->isPausing()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Pausing'));
-    } else if ($build->isResuming()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Resuming'));
-    } else if ($build->isAborting()) {
-      $page_header->setStatus(
-        'fa-exclamation-triangle', 'red', pht('Aborting'));
-    }
+    $status_icon = $status->getIconIcon();
+    $status_color = $status->getIconColor();
+    $status_name = $status->getName();
+
+    $page_header->setStatus($status_icon, $status_color, $status_name);
 
     $max_generation = (int)$build->getBuildGeneration();
     if ($max_generation === 0) {
@@ -55,7 +47,7 @@ final class HarbormasterBuildViewController
       $min_generation = 1;
     }
 
-    if ($is_restarting) {
+    if ($build->isRestarting()) {
       $max_generation = $max_generation + 1;
     }
 
@@ -541,63 +533,31 @@ final class HarbormasterBuildViewController
 
     $curtain = $this->newCurtainView($build);
 
-    $can_restart =
-      $build->canRestartBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_RESTART);
+    $messages = array(
+      new HarbormasterBuildMessageRestartTransaction(),
+      new HarbormasterBuildMessagePauseTransaction(),
+      new HarbormasterBuildMessageResumeTransaction(),
+      new HarbormasterBuildMessageAbortTransaction(),
+    );
 
-    $can_pause =
-      $build->canPauseBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_PAUSE);
+    foreach ($messages as $message) {
+      $can_send = $message->canSendMessage($viewer, $build);
 
-    $can_resume =
-      $build->canResumeBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_RESUME);
+      $message_uri = urisprintf(
+        '/build/%s/%d/',
+        $message->getHarbormasterBuildMessageType(),
+        $id);
+      $message_uri = $this->getApplicationURI($message_uri);
 
-    $can_abort =
-      $build->canAbortBuild() &&
-      $build->canIssueCommand(
-        $viewer,
-        HarbormasterBuildCommand::COMMAND_ABORT);
+      $action = id(new PhabricatorActionView())
+        ->setName($message->getHarbormasterBuildMessageName())
+        ->setIcon($message->getIcon())
+        ->setHref($message_uri)
+        ->setDisabled(!$can_send)
+        ->setWorkflow(true);
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Restart Build'))
-        ->setIcon('fa-repeat')
-        ->setHref($this->getApplicationURI('/build/restart/'.$id.'/'))
-        ->setDisabled(!$can_restart)
-        ->setWorkflow(true));
-
-    if ($build->canResumeBuild()) {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Resume Build'))
-          ->setIcon('fa-play')
-          ->setHref($this->getApplicationURI('/build/resume/'.$id.'/'))
-          ->setDisabled(!$can_resume)
-          ->setWorkflow(true));
-    } else {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Pause Build'))
-          ->setIcon('fa-pause')
-          ->setHref($this->getApplicationURI('/build/pause/'.$id.'/'))
-          ->setDisabled(!$can_pause)
-          ->setWorkflow(true));
+      $curtain->addAction($action);
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Abort Build'))
-        ->setIcon('fa-exclamation-triangle')
-        ->setHref($this->getApplicationURI('/build/abort/'.$id.'/'))
-        ->setDisabled(!$can_abort)
-        ->setWorkflow(true));
 
     return $curtain;
   }
@@ -623,10 +583,6 @@ final class HarbormasterBuildViewController
     $properties->addProperty(
       pht('Build Plan'),
       $handles[$build->getBuildPlanPHID()]->renderLink());
-
-    $properties->addProperty(
-      pht('Status'),
-      $this->getStatus($build));
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Properties'))
@@ -679,31 +635,6 @@ final class HarbormasterBuildViewController
       ->setHeaderText(pht('History'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
-  }
-
-
-  private function getStatus(HarbormasterBuild $build) {
-    $status_view = new PHUIStatusListView();
-
-    $item = new PHUIStatusItemView();
-
-    if ($build->isPausing()) {
-      $status_name = pht('Pausing');
-      $icon = PHUIStatusItemView::ICON_RIGHT;
-      $color = 'dark';
-    } else {
-      $status = $build->getBuildStatus();
-      $status_name =
-        HarbormasterBuildStatus::getBuildStatusName($status);
-      $icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
-      $color = HarbormasterBuildStatus::getBuildStatusColor($status);
-    }
-
-    $item->setTarget($status_name);
-    $item->setIcon($icon, $color);
-    $status_view->addItem($item);
-
-    return $status_view;
   }
 
   private function buildMessages(array $messages) {

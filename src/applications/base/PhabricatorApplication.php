@@ -135,10 +135,9 @@ abstract class PhabricatorApplication
 
 
   /**
-   * Returns true if an application is first-party (developed by Phacility)
-   * and false otherwise.
+   * Returns true if an application is first-party and false otherwise.
    *
-   * @return bool True if this application is developed by Phacility.
+   * @return bool True if this application is first-party.
    */
   final public function isFirstParty() {
     $where = id(new ReflectionClass($this))->getFileName();

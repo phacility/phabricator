@@ -138,6 +138,12 @@ final class PhutilICSWriterTestCase extends PhutilTestCase {
   private function assertICS($name, $actual) {
     $path = dirname(__FILE__).'/data/'.$name;
     $data = Filesystem::readFile($path);
+
+    $data = str_replace(
+      '${PRODID}',
+      PhutilICSWriter::getICSPRODID(),
+      $data);
+
     $this->assertEqual($data, $actual, pht('ICS: %s', $name));
   }
 

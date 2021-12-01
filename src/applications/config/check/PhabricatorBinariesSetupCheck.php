@@ -120,17 +120,11 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $bad_versions = array(
-            // We need 1.9 for HTTP cloning, see T3046.
-            '< 1.9' => pht(
-              'The minimum supported version of Mercurial is 1.9, which was '.
-              'released in 2011.'),
-            '= 2.1' => pht(
-              'This version of Mercurial returns a bad exit code '.
-              'after a successful pull.'),
-            '= 2.2' => pht(
-              'This version of Mercurial has a significant memory leak, fixed '.
-              'in 2.2.1. Pushing fails with this version as well; see %s.',
-              'T3046#54922'),
+            // We need 2.4 for utilizing `{p1node}` keyword in templates, see
+            // D21679 and D21681.
+            '< 2.4' => pht(
+              'The minimum supported version of Mercurial is 2.4, which was '.
+              'released in 2012.'),
           );
           break;
       }

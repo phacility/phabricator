@@ -56,7 +56,7 @@ final class PhabricatorConfigConsoleController
       ->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Phabricator Configuation'))
+      ->setHeaderText(pht('Phabricator Configuration'))
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setObjectList($menu);
 
@@ -72,7 +72,7 @@ final class PhabricatorConfigConsoleController
       ->setFooter($launcher_view);
 
     return $this->newPage()
-      ->setTitle(pht('Phabricator Configuation'))
+      ->setTitle(pht('Phabricator Configuration'))
       ->setCrumbs($crumbs)
       ->appendChild($view);
   }

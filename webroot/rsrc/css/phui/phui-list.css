@@ -75,10 +75,9 @@
   padding: 4px 10px;
 }
 
-.phui-list-sidenav .phui-list-item-has-icon .phui-list-item-indented {
-  padding-left: 18px;
+.phabricator-side-menu .phui-list-item-has-icon .phui-list-item-indented {
+  padding-left: 24px;
 }
-
 
 .device-desktop .phui-list-sidenav .phui-list-item-href:hover {
   background: {$sky};

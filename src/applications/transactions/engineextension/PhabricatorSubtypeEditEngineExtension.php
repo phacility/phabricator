@@ -21,7 +21,7 @@ final class PhabricatorSubtypeEditEngineExtension
   public function supportsObject(
     PhabricatorEditEngine $engine,
     PhabricatorApplicationTransactionInterface $object) {
-    return $engine->supportsSubtypes();
+    return ($object instanceof PhabricatorEditEngineSubtypeInterface);
   }
 
   public function buildCustomEditFields(
