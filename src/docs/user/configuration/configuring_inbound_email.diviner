@@ -42,9 +42,9 @@ Some available approaches for delivering mail to Phabricator are:
 
 | Receive Mail With | Setup | Cost | Notes |
 |--------|-------|------|-------|
-| Mailgun | Easy | Cheap | Recommended |
 | Postmark | Easy | Cheap | Recommended |
 | SendGrid | Easy | Cheap | |
+| Mailgun | Easy | Cheap | Discouraged |
 | Local MTA | Difficult | Free | Discouraged |
 
 The remainder of this document walks through configuring Phabricator to
@@ -183,6 +183,9 @@ like this:
     example domain with your actual domain.
   - Configure a mailer in `cluster.mailers` with your Mailgun API key.
 
+Use of Mailgun is discouraged because of concerns that they may not be a
+trustworthy custodian of sensitive data. See <https://phurl.io/u/mailgun> for
+discussion and context.
 
 Postmark Setup
 ==============
