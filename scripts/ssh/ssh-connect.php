@@ -154,6 +154,6 @@ $pattern = implode(' ', $pattern);
 array_unshift($arguments, $pattern);
 
 $err = newv('PhutilExecPassthru', $arguments)
-  ->execute();
+  ->resolve();
 
 exit($err);

@@ -88,21 +88,116 @@ final class PhabricatorConduitConsoleController
     $crumbs->addTextCrumb($method->getAPIMethodName());
     $crumbs->setBorder(true);
 
+    $documentation_pages = $method->getDocumentationPages($viewer);
+
+    $documentation_view = $this->newDocumentationView(
+      $method,
+      $documentation_pages);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(
+
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('overview'),
         $info_box,
-        $method->getMethodDocumentation(),
+
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('documentation'),
+        $documentation_view,
+
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('call'),
         $form_box,
+
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('examples'),
         $this->renderExampleBox($method, null),
       ));
 
     $title = $method->getAPIMethodName();
 
+    $nav = $this->newNavigationView($method, $documentation_pages);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
+  }
+
+  private function newDocumentationView(
+    ConduitAPIMethod $method,
+    array $documentation_pages) {
+    assert_instances_of($documentation_pages, 'ConduitAPIDocumentationPage');
+
+    $viewer = $this->getViewer();
+
+    $description_properties = id(new PHUIPropertyListView());
+
+    $description_properties->addTextContent(
+      new PHUIRemarkupView($viewer, $method->getMethodDescription()));
+
+    $description_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Method Description'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($description_properties);
+
+    $view = array();
+    $view[] = $description_box;
+
+    foreach ($documentation_pages as $page) {
+      $view[] = $page->newView();
+    }
+
+    return $view;
+  }
+
+  private function newNavigationView(
+    ConduitAPIMethod $method,
+    array $documentation_pages) {
+    assert_instances_of($documentation_pages, 'ConduitAPIDocumentationPage');
+
+    $console_uri = urisprintf(
+      '/method/%s/',
+      $method->getAPIMethodName());
+    $console_uri = $this->getApplicationURI($console_uri);
+    $console_uri = new PhutilURI($console_uri);
+
+    $nav = id(new AphrontSideNavFilterView())
+      ->setBaseURI($console_uri);
+
+    $nav->selectFilter(null);
+
+    $nav->newLink('overview')
+      ->setHref('#overview')
+      ->setName(pht('Overview'))
+      ->setIcon('fa-list');
+
+    $nav->newLink('documentation')
+      ->setHref('#documentation')
+      ->setName(pht('Documentation'))
+      ->setIcon('fa-book');
+
+    foreach ($documentation_pages as $page) {
+      $nav->newLink($page->getAnchor())
+        ->setHref('#'.$page->getAnchor())
+        ->setName($page->getName())
+        ->setIcon($page->getIconIcon())
+        ->setIndented(true);
+    }
+
+    $nav->newLink('call')
+      ->setHref('#call')
+      ->setName(pht('Call Method'))
+      ->setIcon('fa-play');
+
+    $nav->newLink('examples')
+      ->setHref('#examples')
+      ->setName(pht('Examples'))
+      ->setIcon('fa-folder-open-o');
+
+    return $nav;
   }
 
   private function buildMethodProperties(ConduitAPIMethod $method) {
@@ -171,7 +266,6 @@ final class PhabricatorConduitConsoleController
       pht('Errors'),
       $error_description);
 
-
     $scope = $method->getRequiredScope();
     switch ($scope) {
       case ConduitAPIMethod::SCOPE_ALWAYS:
@@ -200,11 +294,6 @@ final class PhabricatorConduitConsoleController
         ' ',
         $oauth_description,
       ));
-
-    $view->addSectionHeader(
-      pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
-    $view->addTextContent(
-      new PHUIRemarkupView($viewer, $method->getMethodDescription()));
 
     return $view;
   }

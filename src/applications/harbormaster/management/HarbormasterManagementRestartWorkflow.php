@@ -32,10 +32,10 @@ final class HarbormasterManagementRestartWorkflow
 
     if (!$ids && !$active) {
       throw new PhutilArgumentUsageException(
-        pht('Use --id or --active to select builds.'));
+        pht('Use "--id" or "--active" to select builds.'));
     } if ($ids && $active) {
       throw new PhutilArgumentUsageException(
-        pht('Use one of --id or --active to select builds, but not both.'));
+        pht('Use one of "--id" or "--active" to select builds, but not both.'));
     }
 
     $query = id(new HarbormasterBuildQuery())
@@ -48,50 +48,41 @@ final class HarbormasterManagementRestartWorkflow
     }
     $builds = $query->execute();
 
-    $console = PhutilConsole::getConsole();
     $count = count($builds);
     if (!$count) {
-      $console->writeOut("%s\n", pht('No builds to restart.'));
+      $this->logSkip(
+        pht('SKIP'),
+        pht('No builds to restart.'));
       return 0;
     }
+
     $prompt = pht('Restart %s build(s)?', new PhutilNumber($count));
     if (!phutil_console_confirm($prompt)) {
-      $console->writeOut("%s\n", pht('Cancelled.'));
-      return 1;
+      throw new ArcanistUserAbortException();
     }
 
-    $app_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
-    $editor = id(new HarbormasterBuildTransactionEditor())
-      ->setActor($viewer)
-      ->setActingAsPHID($app_phid)
-      ->setContentSource($this->newContentSource());
+    $message = new HarbormasterBuildMessageRestartTransaction();
+
     foreach ($builds as $build) {
-      $console->writeOut(
-        "<bg:blue> %s </bg> %s\n",
+      $this->logInfo(
         pht('RESTARTING'),
         pht('Build %d: %s', $build->getID(), $build->getName()));
-      if (!$build->canRestartBuild()) {
-        $console->writeOut(
-          "<bg:yellow> %s </bg> %s\n",
-          pht('INVALID'),
-          pht('Cannot be restarted.'));
-        continue;
-      }
-      $xactions = array();
-      $xactions[] = id(new HarbormasterBuildTransaction())
-        ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-        ->setNewValue(HarbormasterBuildCommand::COMMAND_RESTART);
+
       try {
-        $editor->applyTransactions($build, $xactions);
-      } catch (Exception $e) {
-        $message = phutil_console_wrap($e->getMessage(), 2);
-        $console->writeOut(
-          "<bg:red> %s </bg>\n%s\n",
-          pht('FAILED'),
-          $message);
-        continue;
+        $message->assertCanSendMessage($viewer, $build);
+      } catch (HarbormasterMessageException $ex) {
+        $this->logWarn(
+          pht('INVALID'),
+          $ex->newDisplayString());
       }
-      $console->writeOut("<bg:green> %s </bg>\n", pht('SUCCESS'));
+
+      $build->sendMessage(
+        $viewer,
+        $message->getHarbormasterBuildMessageType());
+
+      $this->logOkay(
+        pht('QUEUED'),
+        pht('Sent a restart message to build.'));
     }
 
     return 0;

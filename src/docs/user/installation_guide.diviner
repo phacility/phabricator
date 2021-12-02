@@ -102,22 +102,7 @@ your own risk and expect that your skills may be tested.
 Installing Required Components
 ==============================
 
-If you are installing on Ubuntu or an RedHat derivative, there are install
-scripts available which should handle most of the things discussed in this
-document for you:
-
-  - **RedHat Derivatives**:
-    [[ https://secure.phabricator.com/diffusion/P/browse/master/scripts/install/install_rhel-derivs.sh
-     | install_rhel-derivs.sh ]]
-  - **Ubuntu**:
-    [[ https://secure.phabricator.com/diffusion/P/browse/master/scripts/install/install_ubuntu.sh
-     | install_ubuntu.sh ]]
-
-If those work for you, you can skip directly to the
-@{article:Configuration Guide}. These scripts are also available in the
-`scripts/install` directory in the project itself.
-
-Otherwise, here's a general description of what you need to install:
+Here's a general description of what you need to install:
 
   - git (usually called "git" in package management systems)
   - Apache (usually "httpd" or "apache2") (or nginx)

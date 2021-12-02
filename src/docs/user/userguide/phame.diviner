@@ -84,10 +84,7 @@ External Blogs
 
 WARNING: This feature is still a prototype and has some known issues.
 
-You can host a Phame blog on an external domain, like `blog.mycompany.com`. The
-Phacility corporate blog is an example of an external Phame blog:
-
-> https://blog.phacility.com/
+You can host a Phame blog on an external domain, like `blog.mycompany.com`.
 
 External blogs are public (they do not require login) and are only supported if
 your Phabricator install is also public. You can make an install public by

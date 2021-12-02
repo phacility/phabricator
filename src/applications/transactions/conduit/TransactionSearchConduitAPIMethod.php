@@ -13,7 +13,7 @@ final class TransactionSearchConduitAPIMethod
       'or an entire object type.');
   }
 
-  public function getMethodDocumentation() {
+  protected function newDocumentationPages(PhabricatorUser $viewer) {
     $markup = pht(<<<EOREMARKUP
 When an object (like a task) is edited, Phabricator creates a "transaction"
 and applies it. This list of transactions on each object is the basis for
@@ -77,11 +77,10 @@ EOREMARKUP
 
     $markup = $this->newRemarkupDocumentationView($markup);
 
-    return id(new PHUIObjectBoxView())
-      ->setCollapsed(true)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setHeaderText(pht('Method Details'))
-      ->appendChild($markup);
+    return array(
+      $this->newDocumentationBoxPage($viewer, pht('Method Details'), $markup)
+        ->setAnchor('details'),
+    );
   }
 
   protected function defineParamTypes() {
