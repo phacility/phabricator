@@ -49,6 +49,19 @@ services:
     depends_on:
       - phabdb
 
+  test_phab_local:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: test
+    entrypoint: /app/entrypoint.sh
+    command: test_phab
+    environment: *phab_env
+    depends_on:
+      - phabdb
+    volumes:
+      - phabricator-moz-extensions-local:/app/moz-extensions
+
   phabdb:
     image: mysql:5.7
     volumes:
@@ -70,3 +83,9 @@ services:
 volumes:
   phabricator-mysql-db:
   phabricator-app:
+  phabricator-moz-extensions-local:
+    driver: local
+    driver_opts:
+      type: none
+      device: '$PWD/moz-extensions'
+      o: bind

@@ -51,6 +51,12 @@ def buildtest(ctx):
 
 
 @task
+def buildtestlocal(ctx):
+    """Test phabricator extensions."""
+    ctx.run("docker-compose build test_phab_local")
+
+
+@task
 def test(ctx):
     """Test phabricator extensions."""
     ctx.run("docker-compose run test_phab")
