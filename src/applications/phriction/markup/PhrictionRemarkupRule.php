@@ -273,13 +273,6 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       return null;
     }
 
-    // Handle content when it's a preview for the Phriction editor.
-    if (is_array($context)) {
-      if (idx($context, 'phriction.isPreview')) {
-        return idx($context, 'phriction.slug');
-      }
-    }
-
     if ($context instanceof PhrictionContent) {
       return $context->getSlug();
     }

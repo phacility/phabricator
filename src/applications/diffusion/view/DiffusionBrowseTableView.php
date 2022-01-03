@@ -3,17 +3,10 @@
 final class DiffusionBrowseTableView extends DiffusionView {
 
   private $paths;
-  private $handles = array();
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
     $this->paths = $paths;
-    return $this;
-  }
-
-  public function setHandles(array $handles) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-    $this->handles = $handles;
     return $this;
   }
 
@@ -29,7 +22,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $need_pull = array();
     $rows = array();
-    $show_edit = false;
     foreach ($this->paths as $path) {
       $full_path = $base_path.$path->getPath();
 

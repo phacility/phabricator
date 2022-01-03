@@ -1,6 +1,6 @@
 <?php
 
-final class HarbormasterRestartException extends Exception {
+final class HarbormasterMessageException extends Exception {
 
   private $title;
   private $body = array();
@@ -9,7 +9,11 @@ final class HarbormasterRestartException extends Exception {
     $this->setTitle($title);
     $this->appendParagraph($body);
 
-    parent::__construct($title);
+    parent::__construct(
+      pht(
+        '%s: %s',
+        $title,
+        $body));
   }
 
   public function setTitle($title) {
@@ -28,6 +32,15 @@ final class HarbormasterRestartException extends Exception {
 
   public function getBody() {
     return $this->body;
+  }
+
+  public function newDisplayString() {
+    $title = $this->getTitle();
+
+    $body = $this->getBody();
+    $body = implode("\n\n", $body);
+
+    return pht('%s: %s', $title, $body);
   }
 
 }

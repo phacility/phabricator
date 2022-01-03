@@ -780,8 +780,7 @@ final class PhabricatorRepositoryDiscoveryEngine
   }
 
   private function markUnreachableCommits(PhabricatorRepository $repository) {
-    // For now, this is only supported for Git.
-    if (!$repository->isGit()) {
+    if (!$repository->isGit() && !$repository->isHg()) {
       return;
     }
 
@@ -799,7 +798,11 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     // We can share a single graph stream across all the checks we need to do.
-    $stream = new PhabricatorGitGraphStream($repository);
+    if ($repository->isGit()) {
+      $stream = new PhabricatorGitGraphStream($repository);
+    } else if ($repository->isHg()) {
+      $stream = new PhabricatorMercurialGraphStream($repository);
+    }
 
     foreach ($old_refs as $old_ref) {
       $identifier = $old_ref->getCommitIdentifier();
@@ -812,7 +815,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function markUnreachableFrom(
     PhabricatorRepository $repository,
-    PhabricatorGitGraphStream $stream,
+    PhabricatorRepositoryGraphStream $stream,
     $identifier) {
 
     $unreachable = array();

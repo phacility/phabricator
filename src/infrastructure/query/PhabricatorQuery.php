@@ -87,7 +87,7 @@ abstract class PhabricatorQuery extends Phobject {
         foreach ($this->flattenSubclause($part) as $subpart) {
           $result[] = $subpart;
         }
-      } else if (strlen($part)) {
+      } else if (($part !== null) && strlen($part)) {
         $result[] = $part;
       }
     }

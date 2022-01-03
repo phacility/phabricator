@@ -22,24 +22,13 @@ final class HarbormasterBuildActionController
       return new Aphront404Response();
     }
 
-    switch ($action) {
-      case HarbormasterBuildCommand::COMMAND_RESTART:
-        $can_issue = $build->canRestartBuild();
-        break;
-      case HarbormasterBuildCommand::COMMAND_PAUSE:
-        $can_issue = $build->canPauseBuild();
-        break;
-      case HarbormasterBuildCommand::COMMAND_RESUME:
-        $can_issue = $build->canResumeBuild();
-        break;
-      case HarbormasterBuildCommand::COMMAND_ABORT:
-        $can_issue = $build->canAbortBuild();
-        break;
-      default:
-        return new Aphront400Response();
-    }
+    $xaction =
+      HarbormasterBuildMessageTransaction::getTransactionObjectForMessageType(
+        $action);
 
-    $build->assertCanIssueCommand($viewer, $action);
+    if (!$xaction) {
+      return new Aphront404Response();
+    }
 
     switch ($via) {
       case 'buildable':
@@ -50,100 +39,29 @@ final class HarbormasterBuildActionController
         break;
     }
 
-    if ($request->isDialogFormPost() && $can_issue) {
-      $build->sendMessage($viewer, $action);
+    try {
+      $xaction->assertCanSendMessage($viewer, $build);
+    } catch (HarbormasterMessageException $ex) {
+      return $this->newDialog()
+        ->setTitle($ex->getTitle())
+        ->appendChild($ex->getBody())
+        ->addCancelButton($return_uri);
+    }
+
+    if ($request->isDialogFormPost()) {
+      $build->sendMessage($viewer, $xaction->getHarbormasterBuildMessageType());
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
-    switch ($action) {
-      case HarbormasterBuildCommand::COMMAND_RESTART:
-        if ($can_issue) {
-          $title = pht('Really restart build?');
-          $body = pht(
-            'Progress on this build will be discarded and the build will '.
-            'restart. Side effects of the build will occur again. Really '.
-            'restart build?');
-          $submit = pht('Restart Build');
-        } else {
-          try {
-            $build->assertCanRestartBuild();
-            throw new Exception(pht('Expected to be unable to restart build.'));
-          } catch (HarbormasterRestartException $ex) {
-            $title = $ex->getTitle();
-            $body = $ex->getBody();
-          }
-        }
-        break;
-      case HarbormasterBuildCommand::COMMAND_ABORT:
-        if ($can_issue) {
-          $title = pht('Really abort build?');
-          $body = pht(
-            'Progress on this build will be discarded. Really '.
-            'abort build?');
-          $submit = pht('Abort Build');
-        } else {
-          $title = pht('Unable to Abort Build');
-          $body = pht('You can not abort this build.');
-        }
-        break;
-      case HarbormasterBuildCommand::COMMAND_PAUSE:
-        if ($can_issue) {
-          $title = pht('Really pause build?');
-          $body = pht(
-            'If you pause this build, work will halt once the current steps '.
-            'complete. You can resume the build later.');
-          $submit = pht('Pause Build');
-        } else {
-          $title = pht('Unable to Pause Build');
-          if ($build->isComplete()) {
-            $body = pht(
-              'This build is already complete. You can not pause a completed '.
-              'build.');
-          } else if ($build->isPaused()) {
-            $body = pht(
-              'This build is already paused. You can not pause a build which '.
-              'has already been paused.');
-          } else if ($build->isPausing()) {
-            $body = pht(
-              'This build is already pausing. You can not reissue a pause '.
-              'command to a pausing build.');
-          } else {
-            $body = pht(
-              'This build can not be paused.');
-          }
-        }
-        break;
-      case HarbormasterBuildCommand::COMMAND_RESUME:
-        if ($can_issue) {
-          $title = pht('Really resume build?');
-          $body = pht(
-            'Work will continue on the build. Really resume?');
-          $submit = pht('Resume Build');
-        } else {
-          $title = pht('Unable to Resume Build');
-          if ($build->isResuming()) {
-            $body = pht(
-              'This build is already resuming. You can not reissue a resume '.
-              'command to a resuming build.');
-          } else if (!$build->isPaused()) {
-            $body = pht(
-              'This build is not paused. You can only resume a paused '.
-              'build.');
-          }
-        }
-        break;
-    }
+    $title = $xaction->newConfirmPromptTitle();
+    $body = $xaction->newConfirmPromptBody();
+    $submit = $xaction->getHarbormasterBuildMessageName();
 
-    $dialog = $this->newDialog()
+    return $this->newDialog()
       ->setTitle($title)
       ->appendChild($body)
-      ->addCancelButton($return_uri);
-
-    if ($can_issue) {
-      $dialog->addSubmitButton($submit);
-    }
-
-    return $dialog;
+      ->addCancelButton($return_uri)
+      ->addSubmitButton($submit);
   }
 
 }

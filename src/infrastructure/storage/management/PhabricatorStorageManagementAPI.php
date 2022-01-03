@@ -89,6 +89,17 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     return $this->namespace.'_'.$fragment;
   }
 
+  public function getInternalDatabaseName($name) {
+    $namespace = $this->getNamespace();
+
+    $prefix = $namespace.'_';
+    if (strncmp($name, $prefix, strlen($prefix))) {
+      return null;
+    }
+
+    return substr($name, strlen($prefix));
+  }
+
   public function getDisplayName() {
     return $this->getRef()->getDisplayName();
   }

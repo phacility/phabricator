@@ -12,6 +12,11 @@ final class HarbormasterBuildStatus extends Phobject {
   const STATUS_PAUSED = 'paused';
   const STATUS_DEADLOCKED = 'deadlocked';
 
+  const PENDING_PAUSING = 'x-pausing';
+  const PENDING_RESUMING = 'x-resuming';
+  const PENDING_RESTARTING = 'x-restarting';
+  const PENDING_ABORTING = 'x-aborting';
+
   private $key;
   private $properties;
 
@@ -56,6 +61,37 @@ final class HarbormasterBuildStatus extends Phobject {
     return ($this->key === self::STATUS_FAILED);
   }
 
+  public function isAborting() {
+    return ($this->key === self::PENDING_ABORTING);
+  }
+
+  public function isRestarting() {
+    return ($this->key === self::PENDING_RESTARTING);
+  }
+
+  public function isResuming() {
+    return ($this->key === self::PENDING_RESUMING);
+  }
+
+  public function isPausing() {
+    return ($this->key === self::PENDING_PAUSING);
+  }
+
+  public function isPending() {
+    return ($this->key === self::STATUS_PENDING);
+  }
+
+  public function getIconIcon() {
+    return $this->getProperty('icon');
+  }
+
+  public function getIconColor() {
+    return $this->getProperty('color');
+  }
+
+  public function getName() {
+    return $this->getProperty('name');
+  }
 
   /**
    * Get a human readable name for a build status constant.
@@ -185,8 +221,8 @@ final class HarbormasterBuildStatus extends Phobject {
       ),
       self::STATUS_PAUSED => array(
         'name' => pht('Paused'),
-        'icon' => 'fa-minus-circle',
-        'color' => 'dark',
+        'icon' => 'fa-pause',
+        'color' => 'yellow',
         'color.ansi' => 'yellow',
         'isBuilding' => false,
         'isComplete' => false,
@@ -198,6 +234,38 @@ final class HarbormasterBuildStatus extends Phobject {
         'color.ansi' => 'red',
         'isBuilding' => false,
         'isComplete' => true,
+      ),
+      self::PENDING_PAUSING => array(
+        'name' => pht('Pausing'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+      ),
+      self::PENDING_RESUMING => array(
+        'name' => pht('Resuming'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+      ),
+      self::PENDING_RESTARTING => array(
+        'name' => pht('Restarting'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
+      ),
+      self::PENDING_ABORTING => array(
+        'name' => pht('Aborting'),
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => false,
       ),
     );
   }

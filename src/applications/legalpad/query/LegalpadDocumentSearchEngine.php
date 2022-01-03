@@ -53,7 +53,7 @@ final class LegalpadDocumentSearchEngine
     }
 
     if ($map['contributorPHIDs']) {
-      $query->withContributorPHIDs($map['creatorPHIDs']);
+      $query->withContributorPHIDs($map['contributorPHIDs']);
     }
 
     if ($map['creatorPHIDs']) {

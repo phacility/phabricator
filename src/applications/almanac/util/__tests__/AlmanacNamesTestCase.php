@@ -30,7 +30,7 @@ final class AlmanacNamesTestCase extends PhabricatorTestCase {
 
       'abc' => true,
       'a.b' => true,
-      'db.phacility.instance' => true,
+      'db.companyname.instance' => true,
       'web002.useast.example.com' => true,
       'master.example-corp.com' => true,
 

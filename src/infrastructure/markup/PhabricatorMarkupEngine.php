@@ -42,7 +42,7 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $objects = array();
   private $viewer;
   private $contextObject;
-  private $version = 20;
+  private $version = 21;
   private $engineCaches = array();
   private $auxiliaryConfig = array();
 
@@ -504,6 +504,7 @@ final class PhabricatorMarkupEngine extends Phobject {
 
     $rules = array();
     $rules[] = new PhutilRemarkupEscapeRemarkupRule();
+    $rules[] = new PhutilRemarkupEvalRule();
     $rules[] = new PhutilRemarkupMonospaceRule();
 
 

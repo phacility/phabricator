@@ -40,8 +40,33 @@ abstract class ConduitAPIMethod
    */
   abstract public function getMethodDescription();
 
-  public function getMethodDocumentation() {
-    return null;
+  final public function getDocumentationPages(PhabricatorUser $viewer) {
+    $pages = $this->newDocumentationPages($viewer);
+    return $pages;
+  }
+
+  protected function newDocumentationPages(PhabricatorUser $viewer) {
+    return array();
+  }
+
+  final protected function newDocumentationPage(PhabricatorUser $viewer) {
+    return id(new ConduitAPIDocumentationPage())
+      ->setIconIcon('fa-chevron-right');
+  }
+
+  final protected function newDocumentationBoxPage(
+    PhabricatorUser $viewer,
+    $title,
+    $content) {
+
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($content);
+
+    return $this->newDocumentationPage($viewer)
+      ->setName($title)
+      ->setContent($box_view);
   }
 
   abstract protected function defineParamTypes();

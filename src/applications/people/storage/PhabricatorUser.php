@@ -275,7 +275,8 @@ final class PhabricatorUser
       $this->setConduitCertificate($this->generateConduitCertificate());
     }
 
-    if (!strlen($this->getAccountSecret())) {
+    $secret = $this->getAccountSecret();
+    if (($secret === null) || !strlen($secret)) {
       $this->setAccountSecret(Filesystem::readRandomCharacters(64));
     }
 

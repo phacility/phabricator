@@ -60,6 +60,16 @@ final class PhabricatorMetaMTAMemberQuery extends PhabricatorQuery {
         }
         $package_map[$package->getPHID()] = $package_owners;
       }
+
+      // See T13648. We may have packages that no longer exist or can't be
+      // loaded (for example, because they have been destroyed). Give them
+      // empty entries in the map so we return a mapping for all input PHIDs.
+
+      foreach ($package_phids as $package_phid) {
+        if (!isset($package_map[$package_phid])) {
+          $package_map[$package_phid] = array();
+        }
+      }
     }
 
     $results = array();

@@ -49,6 +49,7 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   public function continueBuild() {
+    $viewer = $this->getViewer();
     $build = $this->getBuild();
 
     $lock_key = 'harbormaster.build:'.$build->getID();
@@ -68,7 +69,7 @@ final class HarbormasterBuildEngine extends Phobject {
 
       $lock->unlock();
 
-      $this->releaseAllArtifacts($build);
+      $build->releaseAllArtifacts($viewer);
 
       throw $ex;
     }
@@ -99,56 +100,66 @@ final class HarbormasterBuildEngine extends Phobject {
 
     // If we are no longer building for any reason, release all artifacts.
     if (!$build->isBuilding()) {
-      $this->releaseAllArtifacts($build);
+      $build->releaseAllArtifacts($viewer);
     }
   }
 
   private function updateBuild(HarbormasterBuild $build) {
-    if ($build->isAborting()) {
-      $this->releaseAllArtifacts($build);
-      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_ABORTED);
-      $build->save();
+    $viewer = $this->getViewer();
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorDaemonContentSource::SOURCECONST);
+
+    $acting_phid = $viewer->getPHID();
+    if (!$acting_phid) {
+      $acting_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
     }
 
-    if (($build->getBuildStatus() == HarbormasterBuildStatus::STATUS_PENDING) ||
-        ($build->isRestarting())) {
-      $this->restartBuild($build);
-      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
-      $build->save();
+    $editor = $build->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($acting_phid)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+
+    $messages = $build->getUnprocessedMessagesForApply();
+    foreach ($messages as $message) {
+      $message_type = $message->getType();
+
+      $message_xaction =
+        HarbormasterBuildMessageTransaction::getTransactionTypeForMessageType(
+          $message_type);
+
+      if (!$message_xaction) {
+        continue;
+      }
+
+      $xactions[] = $build->getApplicationTransactionTemplate()
+        ->setAuthorPHID($message->getAuthorPHID())
+        ->setTransactionType($message_xaction)
+        ->setNewValue($message_type);
     }
 
-    if ($build->isResuming()) {
-      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
-      $build->save();
+    if (!$xactions) {
+      if ($build->isPending()) {
+        // TODO: This should be a transaction.
+
+        $build->restartBuild($viewer);
+        $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
+        $build->save();
+      }
     }
 
-    if ($build->isPausing() && !$build->isComplete()) {
-      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_PAUSED);
-      $build->save();
+    if ($xactions) {
+      $editor->applyTransactions($build, $xactions);
+      $build->markUnprocessedMessagesAsProcessed();
     }
-
-    $build->deleteUnprocessedCommands();
 
     if ($build->getBuildStatus() == HarbormasterBuildStatus::STATUS_BUILDING) {
       $this->updateBuildSteps($build);
     }
-  }
-
-  private function restartBuild(HarbormasterBuild $build) {
-
-    // We're restarting the build, so release all previous artifacts.
-    $this->releaseAllArtifacts($build);
-
-    // Increment the build generation counter on the build.
-    $build->setBuildGeneration($build->getBuildGeneration() + 1);
-
-    // Currently running targets should periodically check their build
-    // generation (which won't have changed) against the build's generation.
-    // If it is different, they will automatically stop what they're doing
-    // and abort.
-
-    // Previously we used to delete targets, logs and artifacts here. Instead,
-    // leave them around so users can view previous generations of this build.
   }
 
   private function updateBuildSteps(HarbormasterBuild $build) {
@@ -594,29 +605,6 @@ final class HarbormasterBuildEngine extends Phobject {
       ->setActingAsPHID($harbormaster_phid)
       ->setContentSource($daemon_source)
       ->publishBuildable($old, $new);
-  }
-
-  private function releaseAllArtifacts(HarbormasterBuild $build) {
-    $targets = id(new HarbormasterBuildTargetQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBuildPHIDs(array($build->getPHID()))
-      ->withBuildGenerations(array($build->getBuildGeneration()))
-      ->execute();
-
-    if (count($targets) === 0) {
-      return;
-    }
-
-    $target_phids = mpull($targets, 'getPHID');
-
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBuildTargetPHIDs($target_phids)
-      ->withIsReleased(false)
-      ->execute();
-    foreach ($artifacts as $artifact) {
-      $artifact->releaseArtifact();
-    }
   }
 
   private function releaseQueuedArtifacts() {

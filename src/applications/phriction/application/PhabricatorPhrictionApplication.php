@@ -61,7 +61,7 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
         'new/'                        => 'PhrictionNewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhrictionMoveController',
 
-        'preview/(?P<slug>.*/)' => 'PhrictionMarkupPreviewController',
+        'preview/' => 'PhrictionMarkupPreviewController',
         'diff/(?P<id>[1-9]\d*)/' => 'PhrictionDiffController',
 
         $this->getEditRoutePattern('document/edit/')

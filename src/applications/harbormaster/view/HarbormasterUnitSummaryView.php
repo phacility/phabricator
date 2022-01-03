@@ -5,7 +5,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
   private $buildable;
   private $messages;
   private $limit;
-  private $excuse;
   private $showViewAll;
 
   public function setBuildable(HarbormasterBuildable $buildable) {
@@ -20,11 +19,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
 
   public function setLimit($limit) {
     $this->limit = $limit;
-    return $this;
-  }
-
-  public function setExcuse($excuse) {
-    $this->excuse = $excuse;
     return $this;
   }
 
@@ -86,21 +80,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
 
     if ($this->limit) {
       $table->setLimit($this->limit);
-    }
-
-    $excuse = $this->excuse;
-    if (strlen($excuse)) {
-      $excuse_icon = id(new PHUIIconView())
-        ->setIcon('fa-commenting-o red');
-
-      $table->setNotice(
-        array(
-          $excuse_icon,
-          ' ',
-          phutil_tag('strong', array(), pht('Excuse:')),
-          ' ',
-          $excuse,
-        ));
     }
 
     $box->setTable($table);

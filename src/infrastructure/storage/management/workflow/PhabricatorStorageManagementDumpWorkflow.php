@@ -44,6 +44,16 @@ final class PhabricatorStorageManagementDumpWorkflow
               'With __--output__, overwrite the output file if it already '.
               'exists.'),
           ),
+          array(
+            'name' => 'database',
+            'param' => 'database-name',
+            'help' => pht(
+              'Dump only tables in the named database (or databases, if '.
+              'the flag is repeated). Specify database names without the '.
+              'namespace prefix (that is: use "differential", not '.
+              '"phabricator_differential").'),
+            'repeat' => true,
+          ),
         ));
   }
 
@@ -57,6 +67,8 @@ final class PhabricatorStorageManagementDumpWorkflow
     $is_overwrite = $args->getArg('overwrite');
     $is_noindex = $args->getArg('no-indexes');
     $is_replica = $args->getArg('for-replica');
+
+    $database_filter = $args->getArg('database');
 
     if ($is_compress) {
       if ($output_file === null) {
@@ -128,11 +140,60 @@ final class PhabricatorStorageManagementDumpWorkflow
     $schemata = $actual_map[$ref_key];
     $expect = $expect_map[$ref_key];
 
+    if ($database_filter) {
+      $internal_names = array();
+
+      $expect_databases = $expect->getDatabases();
+      foreach ($expect_databases as $expect_database) {
+        $database_name = $expect_database->getName();
+
+        $internal_name = $api->getInternalDatabaseName($database_name);
+        if ($internal_name !== null) {
+          $internal_names[$internal_name] = $database_name;
+        }
+      }
+
+      ksort($internal_names);
+
+      $seen = array();
+      foreach ($database_filter as $filter) {
+        if (!isset($internal_names[$filter])) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Database "%s" is unknown. This script can only dump '.
+              'databases known to the current version of Phabricator. '.
+              'Valid databases are: %s.',
+              $filter,
+              implode(', ', array_keys($internal_names))));
+        }
+
+        if (isset($seen[$filter])) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Database "%s" is specified more than once. Specify each '.
+              'database at most once.',
+              $filter));
+        }
+
+        $seen[$filter] = true;
+      }
+
+      $dump_databases = array_select_keys($internal_names, $database_filter);
+      $dump_databases = array_fuse($dump_databases);
+    } else {
+      $dump_databases = array_keys($schemata->getDatabases());
+      $dump_databases = array_fuse($dump_databases);
+    }
+
     $with_caches = $is_replica;
     $with_indexes = !$is_noindex;
 
     $targets = array();
     foreach ($schemata->getDatabases() as $database_name => $database) {
+      if (!isset($dump_databases[$database_name])) {
+        continue;
+      }
+
       $expect_database = $expect->getDatabase($database_name);
       foreach ($database->getTables() as $table_name => $table) {
 

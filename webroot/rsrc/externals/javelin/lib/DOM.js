@@ -124,7 +124,7 @@ JX.install('HTML', {
           'will not do the right thing with this.');
       }
 
-      // TODO(epriestley): May need to deny <option> more broadly, see
+      // TODO: May need to deny <option> more broadly, see
       // http://support.microsoft.com/kb/829907 and the whole mess in the
       // heavy stack. But I seem to have gotten away without cloning into the
       // documentFragment below, so this may be a nonissue.
@@ -147,7 +147,7 @@ JX.install('HTML', {
       wrapper.innerHTML = this._content;
       var fragment = document.createDocumentFragment();
       while (wrapper.firstChild) {
-        // TODO(epriestley): Do we need to do a bunch of cloning junk here?
+        // TODO: Do we need to do a bunch of cloning junk here?
         // See heavy stack. I'm disconnecting the nodes instead; this seems
         // to work but maybe my test case just isn't extensive enough.
         fragment.appendChild(wrapper.removeChild(wrapper.firstChild));

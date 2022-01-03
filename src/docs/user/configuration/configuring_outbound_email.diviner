@@ -17,7 +17,6 @@ including a local mailer or various third-party services. Options include:
 | Send Mail With | Setup | Cost | Inbound | Media | Notes |
 |----------------|-------|------|---------|-------|-------|
 | Postmark | Easy | Cheap | Yes | Email | Recommended |
-| Mailgun | Easy | Cheap | Yes | Email | Recommended |
 | Amazon SES | Easy | Cheap | No | Email | |
 | SendGrid | Medium | Cheap | Yes | Email | |
 | Twilio | Easy | Cheap | No | SMS | Recommended |
@@ -26,14 +25,15 @@ including a local mailer or various third-party services. Options include:
 | Local SMTP | Hard | Free | No | Email | sendmail, postfix, etc |
 | Custom | Hard | Free | No | All | Write a custom mailer. |
 | Drop in a Hole | Easy | Free | No | All | Drops mail in a deep, dark hole. |
+| Mailgun | Easy | Cheap | Yes | Email | Discouraged |
 
 See below for details on how to select and configure mail delivery for each
 mailer.
 
-For email, Postmark or Mailgun are recommended because they make it easy to
-set up inbound and outbound mail and have good track records in our production
-services. Other services will also generally work well, but they may be more
-difficult to set up.
+For email, Postmark is recommended because it makes it easy to set up inbound
+and outbound mail and has a good track record in our production services. Other
+services will also generally work well, but they may be more difficult to set
+up.
 
 For SMS, Twilio or SNS are recommended. They're also your only upstream
 options.
@@ -87,8 +87,8 @@ A valid `cluster.mailers` configuration looks something like this:
 ```lang=json
 [
   {
-    "key": "mycompany-mailgun",
-    "type": "mailgun",
+    "key": "mycompany-postmark",
+    "type": "postmark",
     "options": {
       "domain": "mycompany.com",
       "api-key": "..."
@@ -118,12 +118,12 @@ The supported keys for each mailer are:
 
 The `type` field can be used to select these mailer services:
 
-  - `mailgun`: Use Mailgun.
   - `ses`: Use Amazon SES.
   - `sendgrid`: Use SendGrid.
   - `postmark`: Use Postmark.
   - `twilio`: Use Twilio.
   - `sns`: Use Amazon SNS.
+  - `mailgun`: Use Mailgun.
 
 It also supports these local mailers:
 
@@ -204,11 +204,12 @@ The option accepts a list of CIDR ranges, like `1.2.3.4/16` (IPv4) or
 [
   "50.31.156.6/32",
   "50.31.156.77/32",
-  "18.217.206.57/32"
+  "18.217.206.57/32",
+  "3.134.147.250/32"
 ]
 ```
 
-The default address ranges were last updated in January 2019, and were
+The default address ranges were last updated in December 2021, and were
 documented at: <https://postmarkapp.com/support/article/800-ips-for-firewalls>
 
 
@@ -219,6 +220,10 @@ Mailer: Mailgun
 |---------|
 | Inbound | Yes
 |---------|
+
+Use of Mailgun is discouraged because of concerns that they may not be a
+trustworthy custodian of sensitive data. See <https://phurl.io/u/mailgun> for
+discussion and context.
 
 Mailgun is a third-party email delivery service. You can learn more at
 <https://www.mailgun.com>. Mailgun is easy to configure and works well.
@@ -339,7 +344,7 @@ Since you'll be sending the mail yourself, you are subject to things like SPF
 rules, blackholes, and MTA configuration which are beyond the scope of this
 document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
-do any of this, strongly consider using Postmark or Mailgun instead.
+do any of this, strongly consider using Postmark instead.
 
 To use this mailer, set `type` to `sendmail`, then configure these `options`:
 
@@ -416,7 +421,7 @@ highest priority group and go through them randomly, then fall back to the
 next group.
 
 For example, if you have two SMTP servers and you want to balance requests
-between them and then fall back to Mailgun if both fail, configure priorities
+between them and then fall back to Postmark if both fail, configure priorities
 like this:
 
 ```lang=json
@@ -434,8 +439,8 @@ like this:
     "options": "..."
   },
   {
-    "key": "mailgun-fallback",
-    "type": "mailgun",
+    "key": "postmark-fallback",
+    "type": "postmark",
     "options": "..."
   }
 }
@@ -450,7 +455,7 @@ example, there are no other priority groups.
 
 If it still hasn't sent the mail, Phabricator will try servers which are not
 in any priority group, in the configured order. In this example there is
-only one such server, so it will try to send via Mailgun.
+only one such server, so it will try to send via Postmark.
 
 
 Message-ID Headers

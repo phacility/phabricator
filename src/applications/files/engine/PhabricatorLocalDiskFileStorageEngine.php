@@ -26,6 +26,7 @@ final class PhabricatorLocalDiskFileStorageEngine
 
   public function canWriteFiles() {
     $path = PhabricatorEnv::getEnvConfig('storage.local-disk.path');
+    $path = phutil_string_cast($path);
     return (bool)strlen($path);
   }
 

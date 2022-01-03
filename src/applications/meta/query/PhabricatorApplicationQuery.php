@@ -89,7 +89,7 @@ final class PhabricatorApplicationQuery
       }
     }
 
-    if (strlen($this->nameContains)) {
+    if ($this->nameContains !== null) {
       foreach ($apps as $key => $app) {
         if (stripos($app->getName(), $this->nameContains) === false) {
           unset($apps[$key]);

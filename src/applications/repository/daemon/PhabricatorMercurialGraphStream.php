@@ -16,13 +16,23 @@ final class PhabricatorMercurialGraphStream
   private $local          = array();
   private $localParents   = array();
 
-  public function __construct(PhabricatorRepository $repository, $commit) {
+  public function __construct(PhabricatorRepository $repository,
+    $start_commit = null) {
+
     $this->repository = $repository;
 
+    $command = 'log --template %s --rev %s';
+    $template = '{rev}\1{node}\1{date}\1{parents}\2';
+    if ($start_commit !== null) {
+      $revset = hgsprintf('reverse(ancestors(%s))', $start_commit);
+    } else {
+      $revset = 'reverse(all())';
+    }
+
     $future = $repository->getLocalCommandFuture(
-      'log --template %s --rev %s',
-      '{rev}\1{node}\1{date}\1{parents}\2',
-      hgsprintf('reverse(ancestors(%s))', $commit));
+      $command,
+      $template,
+      $revset);
 
     $this->iterator = new LinesOfALargeExecFuture($future);
     $this->iterator->setDelimiter("\2");

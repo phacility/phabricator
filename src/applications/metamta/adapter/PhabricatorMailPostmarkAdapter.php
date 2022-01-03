@@ -33,10 +33,11 @@ final class PhabricatorMailPostmarkAdapter
         //
         // "Configuring Outbound Email" should be updated if this changes.
         //
-        // These addresses were last updated in January 2019.
+        // These addresses were last updated in December 2021.
         '50.31.156.6/32',
         '50.31.156.77/32',
         '18.217.206.57/32',
+        '3.134.147.250/32',
       ),
     );
   }

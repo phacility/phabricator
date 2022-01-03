@@ -49,7 +49,7 @@ final class PhabricatorMetronome
   }
 
   public function setOffsetFromSeed($seed) {
-    $offset = PhabricatorHash::digestToRange($seed, 0, PHP_INT_MAX);
+    $offset = PhabricatorHash::digestToRange($seed, 0, 0x7FFFFFFF);
     return $this->setOffset($offset);
   }
 
