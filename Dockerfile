@@ -93,7 +93,7 @@ COPY --chown=app scripts phabricator/scripts
 COPY --chown=app src phabricator/src
 COPY --chown=app support phabricator/support
 COPY --chown=app webroot phabricator/webroot
-RUN git clone https://github.com/mozilla-conduit/arcanist arcanist \
+RUN git clone https://github.com/mozilla-conduit/arcanist -b stable arcanist \
     && ./arcanist/support/xhpast/build-xhpast.php
 
 # Install Python dependencies
