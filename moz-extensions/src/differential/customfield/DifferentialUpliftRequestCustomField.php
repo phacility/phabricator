@@ -131,6 +131,11 @@ final class DifferentialUpliftRequestCustomField
       ->withNames(array('uplift'))
       ->executeOne();
 
+    // The `uplift` project isn't created or can't be found.
+    if (!(bool)$uplift_project) {
+        return false;
+    }
+
     // If the `uplift` project PHID is in the set of all project PHIDs
     // attached to the repo, return `true`.
     if (in_array($uplift_project->getPHID(), $repository_projects)) {
