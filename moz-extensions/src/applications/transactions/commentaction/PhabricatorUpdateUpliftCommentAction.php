@@ -4,23 +4,20 @@ class PhabricatorUpdateUpliftCommentAction
   extends PhabricatorEditEngineCommentAction {
 
   public function getPHUIXControlType() {
-    return 'remarkup';
+    return 'form';
   }
 
   public function getPHUIXControlSpecification() {
     $value = $this->getValue();
 
-    if (empty($value)) {
+    if (empty($value) || $value == null) {
       $value = $this->getInitialValue();
     }
 
-    if (empty($value)) {
-      $value = null;
-    }
-
     return array(
-      'value' => pht($value),
+        'questions' => $value,
     );
+
   }
 
 }
