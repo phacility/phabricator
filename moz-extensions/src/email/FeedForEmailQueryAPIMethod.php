@@ -264,6 +264,11 @@ final class FeedForEmailQueryAPIMethod extends ConduitAPIMethod {
           }
         } else if ($eventKind->publicKind == EventKind::$UPDATE) {
           $reviewers = $resolveUsers->resolveReviewers($resolveRevisionStatus->resolveIsNeedingReview());
+          if (!$resolveCodeChange->resolveAnyDiffChanges()) {
+            // There were no changes as part of this update, so don't
+            // send an email for it.
+            continue;
+          }
           if ($isSecure) {
             $body = new SecureEmailRevisionUpdated(
               $resolveRevisionStatus->resolveLandoLink(),
