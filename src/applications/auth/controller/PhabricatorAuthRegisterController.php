@@ -525,7 +525,8 @@ final class PhabricatorAuthRegisterController
           ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($value_username)
-          ->setError($e_username));
+          ->setError($e_username)
+          ->setDisabled(true));
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
