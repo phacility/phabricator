@@ -519,14 +519,13 @@ final class PhabricatorAuthRegisterController
               ->setAuthProvider($provider)));
     }
 
-    if ($can_edit_username) {
+    if ($can_edit_username && $is_default) {
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($value_username)
-          ->setError($e_username)
-          ->setDisabled(true));
+          ->setError($e_username));
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
