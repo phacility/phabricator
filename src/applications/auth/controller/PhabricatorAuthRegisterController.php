@@ -198,7 +198,7 @@ final class PhabricatorAuthRegisterController
       ->setDefaultUsername($default_username)
       ->setDefaultEmail($default_email)
       ->setDefaultRealName($default_realname)
-      ->setCanEditUsername(true)
+      ->setCanEditUsername(($default_username === null))
       ->setCanEditEmail(($default_email === null))
       ->setCanEditRealName(true)
       ->setShouldVerifyEmail(false);
@@ -519,7 +519,7 @@ final class PhabricatorAuthRegisterController
               ->setAuthProvider($provider)));
     }
 
-    if ($can_edit_username && $is_default) {
+    if ($can_edit_username) {
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Username'))
