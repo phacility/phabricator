@@ -3,10 +3,12 @@
 
 import json
 import os
+import pathlib
 import re
 import subprocess
 
 from mercurial import (
+    error,
     registrar,
     templatekw,
 )
@@ -20,10 +22,22 @@ phabricator_uri = os.getenvb(b"PHABRICATOR_URI")
 
 def get_local_repo_callsign(repo) -> str:
     """Returns the callsign from the local repository's `.arcconfig` file."""
-    ctx = repo[b"tip"]
-    arcconfig = json.loads(repo.filectx(b".arcconfig", changeid=ctx.node()).data())
+    repo_path = pathlib.Path(repo.root)
+    repo_id = int(repo_path.name)
 
-    return arcconfig["repository.callsign"].encode("utf-8")
+    # Search Conduit for all repositories.
+    response = call_conduit("diffusion.repository.search", {})
+
+    # Retrieve the repo objects.
+    repo_objects = response["response"]["data"]
+
+    for repo_object in repo_objects:
+        # If the repo ID we parsed from the working directory matches the
+        # ID of the current object, return the callsign for this object.
+        if repo_id == repo_object["id"]:
+            return repo_object["fields"]["callsign"]
+
+    raise error.Abort(b"No repo found with ID %s" % repo_id)
 
 
 def call_conduit(method: str, params: dict) -> dict:
