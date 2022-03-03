@@ -176,17 +176,30 @@ final class DifferentialUpliftRequestCustomField
         return new PHUIRemarkupView($this->getViewer(), $this->getRemarkup());
     }
 
-    // How the field can be edited in the "Edit Revision" menu.
-    public function renderEditControl(array $handles) {
-        if (!$this->isUpliftTagSet()) {
-            return null; 
+    // Returns `true` if the field meets all conditions to be editable.
+    public function isFieldActive() {
+        return $this->isUpliftTagSet() && $this->objectHasBugNumber();
+    }
+
+    public function objectHasBugNumber(): bool {
+        // Similar idea to `BugStore::resolveBug`.
+        $bugzillaField = new DifferentialBugzillaBugIDField();
+        $bugzillaField->setObject($this->getObject());
+        (new PhabricatorCustomFieldStorageQuery())
+            ->addField($bugzillaField)
+            ->execute();
+        $bug = $bugzillaField->getValue();
+
+        if (!$bug) {
+            return false;
         }
 
-        return id(new PhabricatorRemarkupControl())
-            ->setLabel($this->getFieldName())
-            ->setCaption(pht('Please answer all questions.'))
-            ->setName($this->getFieldKey())
-            ->setValue($this->getRemarkup(), '');
+        return true;
+    }
+
+    // How the field can be edited in the "Edit Revision" menu.
+    public function renderEditControl(array $handles) {
+        return null;
     }
 
     // -- Comment action things
@@ -310,15 +323,7 @@ final class DifferentialUpliftRequestCustomField
 
         $errors = parent::validateApplicationTransactions($editor, $type, $xactions);
 
-        $field_is_empty = true;
         foreach($xactions as $xaction) {
-            // We can skip validation if the field is empty.
-            $new_value = $xaction->getNewValue();
-            if (!empty($new_value)) {
-                $field_is_empty = false;
-                continue;
-            }
-
             // Validate that the form is correctly filled out.
             // This should always be a string (think if the value came from the remarkup edit)
             $validation_errors = $this->validateUpliftForm(
@@ -335,28 +340,6 @@ final class DifferentialUpliftRequestCustomField
             }
         }
 
-        // No need to check for a bug if we haven't submitted the form, or are clearing it.
-        if ($field_is_empty) {
-            return $errors;
-        }
-
-        // Similar idea to `BugStore::resolveBug`.
-        $bugzillaField = new DifferentialBugzillaBugIDField();
-        $bugzillaField->setObject($this->getObject());
-        (new PhabricatorCustomFieldStorageQuery())
-            ->addField($bugzillaField)
-            ->execute();
-        $bug = $bugzillaField->getValue();
-
-        // Assert we have a bug attached to the revision.
-        if (!$bug) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                '',
-                pht("Can't submit an uplift request without a bug."),
-            );
-        }
-
         return $errors;
     }
 
@@ -365,6 +348,11 @@ final class DifferentialUpliftRequestCustomField
         PhabricatorApplicationTransaction $xaction
     ) {
         $ret = parent::applyApplicationTransactionExternalEffects($xaction);
+
+        // Don't update Bugzilla when the field is empty.
+        if (empty($this->getvalue())) {
+            return $ret;
+        }
 
         // Similar idea to `BugStore::resolveBug`.
         // We should have already checked for the bug during validation.
@@ -406,10 +394,15 @@ final class DifferentialUpliftRequestCustomField
     }
 
     public function setValue($value) {
-        if (!is_array($value)) {
-            parent::setValue(phutil_json_decode($value));
-        } else {
+        if (is_array($value)) {
             parent::setValue($value);
+            return;
+        }
+
+        try {
+            parent::setValue(phutil_json_decode($value));
+        } catch (Exception $e) {
+            parent::setValue(array());
         }
     }
 
