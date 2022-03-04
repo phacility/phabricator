@@ -9,16 +9,25 @@ final class DifferentialUpliftRequestCustomFieldTestCase
   public function testFormValidation() {
         $field = new DifferentialUpliftRequestCustomField();
         // Ensure the field can't be filled without answering all questions
-        $errors = $field->validateUpliftForm("=== junk ===");
+        $errors = $field->validateUpliftForm(array(
+            "User impact if declined" => "",
+            "Steps to reproduce for manual QE testing" => "",
+            "Risk associated with taking this patch" => "",
+            "Explanation of risk level" => "",
+            "String changes made/needed" => "",
+        ));
 
         $expected = array();
-        foreach(DifferentialUpliftRequestCustomField::BETA_UPLIFT_FIELDS as $err) {
-            $expected[] = "Missing the '$err' field";
+        foreach(DifferentialUpliftRequestCustomField::BETA_UPLIFT_FIELDS as $question => $answer) {
+            if (is_bool($answer)) {
+                continue;
+            }
+            $expected[] = "Need to answer '$question'";
         }
         $this->assertEqual($expected, $errors);
 
         // Ensure the field can be set as empty
-        $errors = $field->validateUpliftForm("");
+        $errors = $field->validateUpliftForm(array());
         $this->assertEqual(
             array(),
             $errors,
