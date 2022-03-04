@@ -4,290 +4,469 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 /**
- * Extends Differential with a 'Uplift Request' field.
- */
+* Extends Differential with a 'Uplift Request' field.
+*/
 final class DifferentialUpliftRequestCustomField
-  extends DifferentialStoredCustomField {
+    extends DifferentialStoredCustomField {
 
-  const BETA_UPLIFT_FIELDS = array(
-    "User impact if declined",
-    "Code covered by automated testing",
-    "Fix verified in Nightly",
-    "Needs manual QE test",
-    "Steps to reproduce for manual QE testing",
-    "Risk associated with taking this patch",
-    "Explanation of risk level",
-    "String changes made/needed",
-  );
+    // Questions for beta, with defaults.
+    const BETA_UPLIFT_FIELDS = array(
+        "User impact if declined" => "",
+        "Code covered by automated testing" => false,
+        "Fix verified in Nightly" => false,
+        "Needs manual QE test" => false,
+        "Steps to reproduce for manual QE testing" => "",
+        "Risk associated with taking this patch" => "",
+        "Explanation of risk level" => "",
+        "String changes made/needed" => "",
+    );
 
-  // How each field is formatted in ReMarkup.
-  const QUESTION_FORMATTING = "==== %s ====";
+    // How each field is formatted in ReMarkup:
+    // a bullet point with text in bold.
+    const QUESTION_FORMATTING = "- **%s** %s";
 
-  private $proxy;
+    private $proxy;
 
-/* -(  Core Properties and Field Identity  )--------------------------------- */
+    /* -(  Core Properties and Field Identity  )--------------------------------- */
 
-  public function readValueFromRequest(AphrontRequest $request) {
-    $uplift_data = $request->getStr($this->getFieldKey());
-    $this->setValue($uplift_data);
-  }
-
-  public function getFieldKey() {
-    return 'differential:uplift-request';
-  }
-
-  public function getFieldKeyForConduit() {
-    return 'uplift.request';
-  }
-
-  public function getFieldValue() {
-    return $this->getValue();
-  }
-
-  public function getFieldName() {
-    return pht('Uplift Request form');
-  }
-
-  public function getFieldDescription() {
-    // Rendered in 'Config > Differential > differential.fields'
-    return pht('Renders uplift request form.');
-  }
-
-  public function isFieldEnabled() {
-    return true;
-  }
-
-  public function canDisableField() {
-    // Field can't be switched off in configuration
-    return false;
-  }
-
-/* -(  ApplicationTransactions  )-------------------------------------------- */
-
-  public function shouldAppearInApplicationTransactions() {
-    // Required to be editable
-    return true;
-  }
-
-/* -(  Edit View  )---------------------------------------------------------- */
-
-  public function shouldAppearInEditView() {
-    // Should the field appear in Edit Revision feature
-    return true;
-  }
-
-  // How the uplift text is rendered in the "Details" section.
-  public function renderPropertyViewValue(array $handles) {
-    if (!strlen($this->getValue())) {
-      return null;
+    public function readValueFromRequest(AphrontRequest $request) {
+        $uplift_data = $request->getJSONMap($this->getFieldKey());
+        $this->setValue($uplift_data);
     }
 
-    return new PHUIRemarkupView($this->getViewer(), pht($this->getValue()));
-  }
-
-  // How the field can be edited in the "Edit Revision" menu.
-  public function renderEditControl(array $handles) {
-    if (!$this->isUpliftTagSet()) {
-        return null; 
+    public function getFieldKey() {
+        return 'differential:uplift-request';
     }
 
-    return id(new PhabricatorRemarkupControl())
-      ->setLabel($this->getFieldName())
-      ->setCaption(pht('Please answer all questions.'))
-      ->setName($this->getFieldKey())
-      ->setValue($this->getValue(), '');
-  }
+    public function getFieldKeyForConduit() {
+        return 'uplift.request';
+    }
 
-  // -- Comment action things
+    public function getFieldValue() {
+        return $this->getValue();
+    }
 
-  public function getCommentActionLabel() {
-    return pht('Request Uplift');
-  }
+    public function getFieldName() {
+        return pht('Uplift Request form');
+    }
 
-  // Return `true` if the `uplift` tag is set on the repository belonging to
-  // this revision.
-  private function isUpliftTagSet() {
-    $revision = $this->getObject();
-    $viewer = $this->getViewer();
+    public function getFieldDescription() {
+        // Rendered in 'Config > Differential > differential.fields'
+        return pht('Renders uplift request form.');
+    }
 
-    if ($revision == null || $viewer == null) {
+    public function isFieldEnabled() {
+        return true;
+    }
+
+    public function canDisableField() {
+        // Field can't be switched off in configuration
         return false;
     }
 
-    try {
-        $repository_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $revision->getFieldValuesForConduit()['repositoryPHID'],
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    } catch (Exception $e) {
-      return false;
+    /* -(  ApplicationTransactions  )-------------------------------------------- */
+
+    public function shouldAppearInApplicationTransactions() {
+        // Required to be editable
+        return true;
     }
 
-    if (!(bool)$repository_projects) {
-      return false;
+    /* Set QE required flag on the relevant Bugzilla bug. */
+    public function setManualQERequiredFlag(int $bug) {
+        // Construct request for setting `qe-verify` flag, see
+        // https://bmo.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug
+        $url = id(new PhutilURI(PhabricatorEnv::getEnvConfig('bugzilla.url')))
+            ->setPath('/rest/bug/'.$bug);
+        $api_key = PhabricatorEnv::getEnvConfig('bugzilla.automation_api_key');
+
+        // Encode here because `setData` below will fail due to nested arrays.
+        $data = phutil_json_encode(
+            array(
+                'flags' => array(
+                    array(
+                        'name' => 'qe-verify',
+                        'status' => '?',
+                    ),
+                ),
+            ),
+        );
+
+        $future = id(new HTTPSFuture($url))
+            ->addHeader('Accept', 'application/json')
+            ->addHeader('Content-Type', 'application/json')
+            ->addHeader('User-Agent', 'Phabricator')
+            ->addHeader('X-Bugzilla-API-Key', $api_key)
+            ->setData($data)
+            ->setMethod('PUT')
+            ->setTimeout(PhabricatorEnv::getEnvConfig('bugzilla.timeout'));
+
+        try {
+            list($status, $body) = $future->resolve();
+            $status_code = (int) $status->getStatusCode();
+
+            # Return an error string and invalidate transaction if Bugzilla can't be contacted.
+            $body = phutil_json_decode($body);
+            if (array_key_exists("error", $body) && $body["error"]) {
+                throw new Exception(
+                    'Could not set `qe-verify` on Bugzilla: status code: '.$status_code.'! Please file a bug.'
+                );
+            }
+
+        } catch (PhutilJSONParserException $ex) {
+            throw new Exception(
+                'Expected invalid JSON response from BMO while setting `qe-verify` flag.'
+            );
+        }
     }
 
-    $uplift_project = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->withNames(array('uplift'))
-      ->executeOne();
+    /* Comment the uplift request form on the relevant Bugzilla bug. */
+    public function commentUpliftOnBugzilla(int $bug) {
+        // Construct request for leaving a comment, see
+        // https://bmo.readthedocs.io/en/latest/api/core/v1/comment.html#create-comments
+        $url = id(new PhutilURI(PhabricatorEnv::getEnvConfig('bugzilla.url')))
+            ->setPath('/rest/bug/'.$bug.'/comment');
+        $api_key = PhabricatorEnv::getEnvConfig('bugzilla.automation_api_key');
 
-    // The `uplift` project isn't created or can't be found.
-    if (!(bool)$uplift_project) {
+        $data = array(
+            'comment' => $this->getRemarkup(),
+            'is_markdown' => true,
+            'is_private' => false,
+        );
+
+        $future = id(new HTTPSFuture($url))
+            ->addHeader('Accept', 'application/json')
+            ->addHeader('User-Agent', 'Phabricator')
+            ->addHeader('X-Bugzilla-API-Key', $api_key)
+            ->setData($data)
+            ->setMethod('POST')
+            ->setTimeout(PhabricatorEnv::getEnvConfig('bugzilla.timeout'));
+
+        try {
+            list($status, $body) = $future->resolve();
+            $status_code = (int) $status->getStatusCode();
+
+            # Return an error string and invalidate transaction if Bugzilla can't be contacted.
+            $body = phutil_json_decode($body);
+            if (array_key_exists("error", $body) && $body["error"]) {
+                throw new Exception(
+                    'Could not leave a comment on Bugzilla: status code '.$status_code.'! Please file a bug.',
+                );
+            }
+
+        } catch (PhutilJSONParserException $ex) {
+            throw new Exception(
+                'Received invalid JSON response from BMO while leaving a comment.'
+            );
+        }
+    }
+
+    /* -(  Edit View  )---------------------------------------------------------- */
+
+    public function shouldAppearInEditView() {
+        // Should the field appear in Edit Revision feature
+        return true;
+    }
+
+    // How the uplift text is rendered in the "Details" section.
+    public function renderPropertyViewValue(array $handles) {
+        if (empty($this->getValue())) {
+            return null;
+        }
+
+        return new PHUIRemarkupView($this->getViewer(), $this->getRemarkup());
+    }
+
+    // Returns `true` if the field meets all conditions to be editable.
+    public function isFieldActive() {
+        return $this->isUpliftTagSet() && $this->objectHasBugNumber();
+    }
+
+    public function objectHasBugNumber(): bool {
+        // Similar idea to `BugStore::resolveBug`.
+        $bugzillaField = new DifferentialBugzillaBugIDField();
+        $bugzillaField->setObject($this->getObject());
+        (new PhabricatorCustomFieldStorageQuery())
+            ->addField($bugzillaField)
+            ->execute();
+        $bug = $bugzillaField->getValue();
+
+        if (!$bug) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // How the field can be edited in the "Edit Revision" menu.
+    public function renderEditControl(array $handles) {
+        return null;
+    }
+
+    // -- Comment action things
+
+    public function getCommentActionLabel() {
+        return pht('Request Uplift');
+    }
+
+    // Return `true` if the `uplift` tag is set on the repository belonging to
+    // this revision.
+    private function isUpliftTagSet() {
+        $revision = $this->getObject();
+        $viewer = $this->getViewer();
+
+        if ($revision == null || $viewer == null) {
+            return false;
+        }
+
+        try {
+            $repository_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+                $revision->getFieldValuesForConduit()['repositoryPHID'],
+                PhabricatorProjectObjectHasProjectEdgeType::EDGECONST
+            );
+        } catch (Exception $e) {
+            return false;
+        }
+
+        if (!(bool)$repository_projects) {
+            return false;
+        }
+
+        $uplift_project = id(new PhabricatorProjectQuery())
+            ->setViewer($viewer)
+            ->withNames(array('uplift'))
+            ->executeOne();
+
+        // The `uplift` project isn't created or can't be found.
+        if (!(bool)$uplift_project) {
+            return false;
+        }
+
+        // If the `uplift` project PHID is in the set of all project PHIDs
+        // attached to the repo, return `true`.
+        if (in_array($uplift_project->getPHID(), $repository_projects)) {
+            return true;
+        }
+
         return false;
     }
 
-    // If the `uplift` project PHID is in the set of all project PHIDs
-    // attached to the repo, return `true`.
-    if (in_array($uplift_project->getPHID(), $repository_projects)) {
-      return true;
+    // Convert `bool` types to readable text, or return base text.
+    private function valueAsAnswer($value): string {
+        if ($value === true) {
+            return "yes";
+        } else if ($value === false) {
+            return "no";
+        } else {
+            return $value;
+        }
     }
 
-    return false;
-  }
-
-    private function getUpliftFormQuestions() {
+    private function getRemarkup(): string {
         $questions = array();
 
-        foreach (self::BETA_UPLIFT_FIELDS as $section) {
-            $questions[] = sprintf(self::QUESTION_FORMATTING, $section);
-            $questions[] = "\n";
+        $value = $this->getValue();
+        foreach ($value as $question => $answer) {
+            $answer_readable = $this->valueAsAnswer($answer);
+            $questions[] = sprintf(
+                self::QUESTION_FORMATTING, $question, $answer_readable
+            );
         }
 
         return implode("\n", $questions);
     }
 
-  public function newCommentAction() {
-    // Returning `null` causes no comment action to render, effectively
-    // "disabling" the field.
-    if (!$this->isUpliftTagSet()) {
-        return null;
+    public function newCommentAction() {
+        // Returning `null` causes no comment action to render, effectively
+        // "disabling" the field.
+        if (!$this->isUpliftTagSet()) {
+            return null;
+        }
+
+        $action = id(new PhabricatorUpdateUpliftCommentAction())
+            ->setConflictKey('revision.action')
+            ->setValue($this->getValue())
+            ->setInitialValue(self::BETA_UPLIFT_FIELDS)
+            ->setSubmitButtonText(pht('Request Uplift'));
+
+        return $action;
     }
 
-    $action = id(new PhabricatorUpdateUpliftCommentAction())
-      ->setConflictKey('revision.action')
-      ->setValue($this->getValue())
-      ->setInitialValue($this->getUpliftFormQuestions())
-      ->setSubmitButtonText(pht('Request Uplift'));
+    public function validateUpliftForm(array $form): array {
+        $validation_errors = array();
 
-    return $action;
-  }
+        # Allow clearing the form.
+        if (empty($form)) {
+            return $validation_errors;
+        }
 
-  public function validateUpliftForm($form) {
-    $validation_errors = array();
+        foreach($form as $question => $answer) {
+            // `empty(false)` is `true` so handle `bool` separately.
+            if (is_bool($answer)) {
+                continue;
+            }
 
-    # Allow clearing the form.
-    if (empty($form)) {
-      return $validation_errors;
+            if (empty($answer)) {
+                $validation_errors[] = "Need to answer '$question'";
+            }
+        }
+
+        return $validation_errors;
     }
 
-    # Check each question in the form is present as a header
-    # in the field.
-    foreach(self::BETA_UPLIFT_FIELDS as $section) {
-      if (strpos($form, sprintf(self::QUESTION_FORMATTING, $section)) === false) {
-        $validation_errors[] = "Missing the '$section' field";
-      }
+    public function qeRequired() {
+        return $this->getValue()['Needs manual QE test'];
     }
 
-    return $validation_errors;
-  }
+    public function validateApplicationTransactions(
+        PhabricatorApplicationTransactionEditor $editor,
+        $type, array $xactions) {
 
-  public function validateApplicationTransactions(
-    PhabricatorApplicationTransactionEditor $editor,
-    $type, array $xactions) {
+        $errors = parent::validateApplicationTransactions($editor, $type, $xactions);
 
-    $errors = parent::validateApplicationTransactions($editor, $type, $xactions);
+        foreach($xactions as $xaction) {
+            // Validate that the form is correctly filled out.
+            // This should always be a string (think if the value came from the remarkup edit)
+            $validation_errors = $this->validateUpliftForm(
+                phutil_json_decode($xaction->getNewValue()),
+            );
 
-    foreach($xactions as $xaction) {
-      // Validate that the form is correctly filled out
-      $validation_errors = $this->validateUpliftForm(
-        $xaction->getNewValue(),
-      );
+            // Push errors into the revision save stack
+            foreach($validation_errors as $validation_error) {
+                $errors[] = new PhabricatorApplicationTransactionValidationError(
+                    $type,
+                    '',
+                    pht($validation_error)
+                );
+            }
+        }
 
-      // Push errors into the revision save stack
-      foreach($validation_errors as $validation_error) {
-        $errors[] = new PhabricatorApplicationTransactionValidationError(
-          $type,
-          '',
-          pht($validation_error)
-        );
-      }
+        return $errors;
     }
 
-    return $errors;
-  }
+    // Update Bugzilla when applying effects.
+    public function applyApplicationTransactionExternalEffects(
+        PhabricatorApplicationTransaction $xaction
+    ) {
+        $ret = parent::applyApplicationTransactionExternalEffects($xaction);
 
-/* -(  Property View  )------------------------------------------------------ */
+        // Don't update Bugzilla when the field is empty.
+        if (empty($this->getvalue())) {
+            return $ret;
+        }
 
-  public function shouldAppearInPropertyView() {
-    return true;
-  }
+        // Similar idea to `BugStore::resolveBug`.
+        // We should have already checked for the bug during validation.
+        $bugzillaField = new DifferentialBugzillaBugIDField();
+        $bugzillaField->setObject($this->getObject());
+        (new PhabricatorCustomFieldStorageQuery())
+            ->addField($bugzillaField)
+            ->execute();
+        $bug = $bugzillaField->getValue();
 
-/* -(  List View  )---------------------------------------------------------- */
+        // Always comment the uplift form.
+        $this->commentUpliftOnBugzilla($bug);
 
-  // Switched of as renderOnListItem is undefined
-  // public function shouldAppearInListView() {
-  //   return true;
-  // }
+        // If QE is required, set the Bugzilla flag.
+        if ($this->qeRequired()) {
+            $this->setManualQERequiredFlag($bug);
+        }
 
-  // TODO Find out if/how to implement renderOnListItem
-  // It throws Incomplete if not overriden, but doesn't appear anywhere else
-  // except of it's definition in `PhabricatorCustomField`
-
-/* -(  Global Search  )------------------------------------------------------ */
-
-  public function shouldAppearInGlobalSearch() {
-    return true;
-  }
-
-/* -(  Conduit  )------------------------------------------------------------ */
-
-  public function shouldAppearInConduitDictionary() {
-    // Should the field appear in `differential.revision.search`
-    return true;
-  }
-
-  public function shouldAppearInConduitTransactions() {
-    // Required if needs to be saved via Conduit (i.e. from `arc diff`)
-    return true;
-  }
-
-  protected function newConduitSearchParameterType() {
-    return new ConduitStringParameterType();
-  }
-
-  protected function newConduitEditParameterType() {
-    // Define the type of the parameter for Conduit
-    return new ConduitStringParameterType();
-  }
-
-  public function readFieldValueFromConduit(string $value) {
-    return $value;
-  }
-
-  public function isFieldEditable() {
-    // Has to be editable to be written from `arc diff`
-    return true;
-  }
-
-  // TODO see what this controls and consider using it
-  public function shouldDisableByDefault() {
-    return false;
-  }
-
-  public function shouldOverwriteWhenCommitMessageIsEdited() {
-    return false;
-  }
-
-  public function getApplicationTransactionTitle(
-    PhabricatorApplicationTransaction $xaction) {
-
-    if($this->proxy) {
-      return $this->proxy->getApplicationTransactionTitle($xaction);
+        return $ret;
     }
 
-    $author_phid = $xaction->getAuthorPHID();
+    // When storing the value convert the question => answer mapping to a JSON string.
+    public function getValueForStorage(): string {
+        return phutil_json_encode($this->getValue());
+    }
 
-    return pht('%s updated the uplift request field.', $xaction->renderHandleLink($author_phid));
-  }
+    public function setValueFromStorage($value) {
+        try {
+            $this->setValue(phutil_json_decode($value));
+        } catch (PhutilJSONParserException $ex) {
+            $this->setValue(array());
+        }
+        return $this;
+    }
+
+    public function setValueFromApplicationTransactions($value) {
+        $this->setValue($value);
+        return $this;
+    }
+
+    public function setValue($value) {
+        if (is_array($value)) {
+            parent::setValue($value);
+            return;
+        }
+
+        try {
+            parent::setValue(phutil_json_decode($value));
+        } catch (Exception $e) {
+            parent::setValue(array());
+        }
+    }
+
+
+    /* -(  Property View  )------------------------------------------------------ */
+
+    public function shouldAppearInPropertyView() {
+        return true;
+    }
+
+    /* -(  Global Search  )------------------------------------------------------ */
+
+    public function shouldAppearInGlobalSearch() {
+        return true;
+    }
+
+    /* -(  Conduit  )------------------------------------------------------------ */
+
+    public function shouldAppearInConduitDictionary() {
+        // Should the field appear in `differential.revision.search`
+        return true;
+    }
+
+    public function shouldAppearInConduitTransactions() {
+        // Required if needs to be saved via Conduit (i.e. from `arc diff`)
+        return true;
+    }
+
+    protected function newConduitSearchParameterType() {
+        return new ConduitStringParameterType();
+    }
+
+    protected function newConduitEditParameterType() {
+        // Define the type of the parameter for Conduit
+        return new ConduitStringParameterType();
+    }
+
+    public function readFieldValueFromConduit(string $value) {
+        return $value;
+    }
+
+    public function isFieldEditable() {
+        // Has to be editable to be written from `arc diff`
+        return true;
+    }
+
+    public function shouldDisableByDefault() {
+        return false;
+    }
+
+    public function shouldOverwriteWhenCommitMessageIsEdited() {
+        return false;
+    }
+
+    public function getApplicationTransactionTitle(
+        PhabricatorApplicationTransaction $xaction) {
+
+        if($this->proxy) {
+            return $this->proxy->getApplicationTransactionTitle($xaction);
+        }
+
+        $author_phid = $xaction->getAuthorPHID();
+
+        return pht('%s updated the uplift request field.', $xaction->renderHandleLink($author_phid));
+    }
 }
 
