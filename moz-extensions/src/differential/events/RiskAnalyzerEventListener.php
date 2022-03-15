@@ -10,10 +10,10 @@
 final class RiskAnalyzerEventListener extends PhabricatorEventListener {
 
   public function register() {
-    //if (PhabricatorEnv::getEnvConfig('bugzilla.url') != "http://bmo.test") {
+    if (PhabricatorEnv::getEnvConfig('bugzilla.url') != "http://bmo.test") {
       // Only enable this event listener if we're not running in the local development environment
       $this->listen(PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES);
-    //}
+    }
   }
 
   public function handleEvent(PhutilEvent $event) {
