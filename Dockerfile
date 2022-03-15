@@ -2,6 +2,9 @@ FROM php:7.4.19-fpm-alpine AS base
 
 LABEL maintainer="dkl@mozilla.com"
 
+# From https://github.com/marco-c/risk-analysis-addon/releases
+ENV RISK_ANALYSIS_VERSION v0.6.0
+
 # These are unlikely to change from version to version of the container
 EXPOSE 9000
 EXPOSE 9003
@@ -124,6 +127,15 @@ COPY --chown=app nginx/ nginx/
 # Update version.json
 RUN chmod +x /app/update_version_json.py /app/entrypoint.sh /app/wait-for-mysql.php \
     && /app/update_version_json.py
+
+RUN { \
+        echo '/**'; \
+        echo '* @provides moz-risk-analysis-js'; \
+        echo '* @do-not-minify'; \
+        echo '*/'; \
+    } | tee /app/phabricator/webroot/rsrc/js/MozillaRiskAnalysis.js
+RUN curl -fsSL https://raw.githubusercontent.com/marco-c/risk-analysis-addon/${RISK_ANALYSIS_VERSION}/risk_analysis.js \
+    >> /app/phabricator/webroot/rsrc/js/MozillaRiskAnalysis.js
 
 FROM base AS production
 
