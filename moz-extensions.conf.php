@@ -7,5 +7,6 @@ return array(
   'events.listeners' => array(
     'LandoLinkEventListener',
     'NewChangesLinkEventListener',
+    'RiskAnalyzerEventListener',
   )
 );
