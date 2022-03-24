@@ -54,7 +54,7 @@ def call_conduit(method: str, params: dict) -> dict:
     Returns:
         Parsed JSON response of the result.
     """
-    params = json.dumps(params).encode("utf-8")
+    encoded_params = json.dumps(params).encode("utf-8")
     command = [
         "/app/phabricator/bin/conduit",
         "call",
@@ -64,7 +64,12 @@ def call_conduit(method: str, params: dict) -> dict:
         "-",
     ]
 
-    out = subprocess.run(command, input=params, capture_output=True).stdout
+    out = subprocess.run(
+        command,
+        capture_output=True,
+        input=encoded_params,
+    ).stdout
+
     result = json.loads(out)
     return result
 
@@ -84,7 +89,7 @@ def get_phab_server_callsign(differential_id: int) -> str:
     params = {"constraints": {"phids": [repositoryPHID]}}
     result = call_conduit("diffusion.repository.search", params)
     callsign = result["result"]["data"][0]["fields"]["callsign"]
-    return callsign.encode("utf-8")
+    return callsign
 
 
 def extsetup(ui):
@@ -123,7 +128,7 @@ def extsetup(ui):
         # number was chosen arbitrarily.
         if local_callsign != phabricator_callsign:
             replacement = b"\n".join([
-                b"Original commit seen on %s.\n" % phabricator_callsign,
+                b"Original commit seen on %s.\n" % phabricator_callsign.encode("utf-8"),
                 b"Differential Revision: %sD500000" % phabricator_uri,
             ])
             desc = differential_revision_re.sub(lambda _match: replacement, desc)
