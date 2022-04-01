@@ -5277,6 +5277,7 @@ phutil_register_library_map(array(
     'PhameDescriptionView' => 'applications/phame/view/PhameDescriptionView.php',
     'PhameDraftListView' => 'applications/phame/view/PhameDraftListView.php',
     'PhameHomeController' => 'applications/phame/controller/PhameHomeController.php',
+    'PhameInheritBlogPolicyRule' => 'applications/phame/policyrule/PhameInheritBlogPolicyRule.php',
     'PhameLiveController' => 'applications/phame/controller/PhameLiveController.php',
     'PhameNextPostView' => 'applications/phame/view/PhameNextPostView.php',
     'PhamePost' => 'applications/phame/storage/PhamePost.php',
@@ -12167,6 +12168,7 @@ phutil_register_library_map(array(
     'PhameDescriptionView' => 'AphrontTagView',
     'PhameDraftListView' => 'AphrontTagView',
     'PhameHomeController' => 'PhamePostController',
+    'PhameInheritBlogPolicyRule' => 'PhabricatorPolicyRule',
     'PhameLiveController' => 'PhameController',
     'PhameNextPostView' => 'AphrontTagView',
     'PhamePost' => array(
