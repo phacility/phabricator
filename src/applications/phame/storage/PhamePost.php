@@ -15,7 +15,6 @@ final class PhamePost extends PhameDAO
     PhabricatorFerretInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
-  const MARKUP_FIELD_SUMMARY = 'markup:summary';
 
   protected $bloggerPHID;
   protected $title;
@@ -255,8 +254,6 @@ final class PhamePost extends PhameDAO
     switch ($field) {
       case self::MARKUP_FIELD_BODY:
         return $this->getBody();
-      case self::MARKUP_FIELD_SUMMARY:
-        return PhabricatorMarkupEngine::summarize($this->getBody());
     }
   }
 
