@@ -1435,7 +1435,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $task = ManiphestTask::initializeNewTask($viewer);
 
-    if (!strlen($name)) {
+    if ($name === null || $name === '') {
       $name = pht('Test Task');
     }
 
