@@ -103,7 +103,8 @@ final class PhameBlogViewController extends PhameLiveController {
       ->setDescription($description)
       ->setImage($blog->getProfileImageURI());
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs = $this->buildApplicationCrumbs()
+      ->setBorder(false);
 
     $page = $this->newPage()
       ->setTitle($blog->getName())
