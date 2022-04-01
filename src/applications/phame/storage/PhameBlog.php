@@ -13,8 +13,6 @@ final class PhameBlog extends PhameDAO
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface {
 
-  const MARKUP_FIELD_DESCRIPTION = 'markup:description';
-
   protected $name;
   protected $subtitle;
   protected $description;
