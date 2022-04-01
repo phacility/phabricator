@@ -21,8 +21,10 @@ final class PhameBlogEditor
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
+
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_INTERACT_POLICY;
 
     return $types;
   }

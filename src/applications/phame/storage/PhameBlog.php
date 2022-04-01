@@ -24,6 +24,7 @@ final class PhameBlog extends PhameDAO
   protected $creatorPHID;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $interactPolicy;
   protected $status;
   protected $mailKey;
   protected $profileImagePHID;
@@ -56,6 +57,7 @@ final class PhameBlog extends PhameDAO
 
         'editPolicy' => 'policy',
         'viewPolicy' => 'policy',
+        'interactPolicy' => 'policy',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -88,7 +90,9 @@ final class PhameBlog extends PhameDAO
       ->setCreatorPHID($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
-      ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setInteractPolicy(PhabricatorPolicies::POLICY_USER);
+
     return $blog;
   }
 
@@ -229,6 +233,7 @@ final class PhameBlog extends PhameDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_INTERACT,
       PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
@@ -238,6 +243,8 @@ final class PhameBlog extends PhameDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_INTERACT:
+        return $this->getInteractPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }
