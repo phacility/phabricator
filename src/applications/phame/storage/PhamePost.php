@@ -11,6 +11,7 @@ final class PhamePost extends PhameDAO
     PhabricatorDestructibleInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorConduitResultInterface,
+    PhabricatorEditEngineLockableInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface {
 
@@ -391,6 +392,13 @@ final class PhamePost extends PhameDAO
 
   public function newFerretEngine() {
     return new PhamePostFerretEngine();
+  }
+
+
+/* -(  PhabricatorEditEngineLockableInterface  )----------------------------- */
+
+  public function newEditEngineLock() {
+    return new PhamePostEditEngineLock();
   }
 
 }
