@@ -56,10 +56,8 @@ final class PhameBlog extends PhameDAO
         'profileImagePHID' => 'phid?',
         'headerImagePHID' => 'phid?',
 
-        // T6203/NULLABILITY
-        // These policies should always be non-null.
-        'editPolicy' => 'policy?',
-        'viewPolicy' => 'policy?',
+        'editPolicy' => 'policy',
+        'viewPolicy' => 'policy',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
