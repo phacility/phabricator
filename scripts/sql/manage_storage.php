@@ -95,7 +95,7 @@ if (!$refs) {
 
 $host = $args->getArg('host');
 $ref_key = $args->getArg('ref');
-if (strlen($host) || strlen($ref_key)) {
+if (($host !== null) || ($ref_key !== null)) {
   if ($host && $ref_key) {
     throw new PhutilArgumentUsageException(
       pht(

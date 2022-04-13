@@ -24,8 +24,6 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorPolicyCodexInterface,
     PhabricatorUnlockableInterface {
 
-  const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
-
   protected $authorPHID;
   protected $ownerPHID;
 

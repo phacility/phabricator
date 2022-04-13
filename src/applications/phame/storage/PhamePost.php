@@ -11,11 +11,11 @@ final class PhamePost extends PhameDAO
     PhabricatorDestructibleInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorConduitResultInterface,
+    PhabricatorEditEngineLockableInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
-  const MARKUP_FIELD_SUMMARY = 'markup:summary';
 
   protected $bloggerPHID;
   protected $title;
@@ -28,6 +28,7 @@ final class PhamePost extends PhameDAO
   protected $blogPHID;
   protected $mailKey;
   protected $headerImagePHID;
+  protected $interactPolicy;
 
   private $blog = self::ATTACHABLE;
   private $headerImageFile = self::ATTACHABLE;
@@ -41,7 +42,10 @@ final class PhamePost extends PhameDAO
       ->setBlogPHID($blog->getPHID())
       ->attachBlog($blog)
       ->setDatePublished(PhabricatorTime::getNow())
-      ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+      ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+      ->setInteractPolicy(
+        id(new PhameInheritBlogPolicyRule())
+          ->getObjectPolicyFullKey());
 
     return $post;
   }
@@ -141,6 +145,8 @@ final class PhamePost extends PhameDAO
         // T6203/NULLABILITY
         // This one probably should be nullable?
         'datePublished' => 'epoch',
+
+        'interactPolicy' => 'policy',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -197,6 +203,7 @@ final class PhamePost extends PhameDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
+      PhabricatorPolicyCapability::CAN_INTERACT,
     );
   }
 
@@ -221,6 +228,8 @@ final class PhamePost extends PhameDAO
         } else {
           return PhabricatorPolicies::POLICY_NOONE;
         }
+      case PhabricatorPolicyCapability::CAN_INTERACT:
+        return $this->getInteractPolicy();
     }
   }
 
@@ -231,6 +240,8 @@ final class PhamePost extends PhameDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
       case PhabricatorPolicyCapability::CAN_EDIT:
         return ($user->getPHID() == $this->getBloggerPHID());
+      case PhabricatorPolicyCapability::CAN_INTERACT:
+        return false;
     }
   }
 
@@ -255,8 +266,6 @@ final class PhamePost extends PhameDAO
     switch ($field) {
       case self::MARKUP_FIELD_BODY:
         return $this->getBody();
-      case self::MARKUP_FIELD_SUMMARY:
-        return PhabricatorMarkupEngine::summarize($this->getBody());
     }
   }
 
@@ -383,6 +392,13 @@ final class PhamePost extends PhameDAO
 
   public function newFerretEngine() {
     return new PhamePostFerretEngine();
+  }
+
+
+/* -(  PhabricatorEditEngineLockableInterface  )----------------------------- */
+
+  public function newEditEngineLock() {
+    return new PhamePostEditEngineLock();
   }
 
 }

@@ -57,6 +57,13 @@ final class AphrontMySQLiDatabaseConnection
       }
     }
 
+    // See T13588. In PHP 8.1, the default "report mode" for MySQLi has
+    // changed, which causes MySQLi to raise exceptions. Disable exceptions
+    // to align behavior with older default behavior under MySQLi, which
+    // this code expects. Plausibly, this code could be updated to use
+    // MySQLi exceptions to handle errors under a wider range of PHP versions.
+    mysqli_report(MYSQLI_REPORT_OFF);
+
     $conn = mysqli_init();
 
     $timeout = $this->getConfiguration('timeout');

@@ -13,6 +13,20 @@ final class DiffusionGitCommandEngine
     return array($pattern, $argv);
   }
 
+  protected function shouldAlwaysSudo() {
+
+    // See T13673. In Git, always try to use "sudo" to execute commands as the
+    // daemon user (if such a user is configured), because Git 2.35.2 and newer
+    // (and some older versions of Git with backported security patches) refuse
+    // to execute if the top level repository directory is not owned by the
+    // current user.
+
+    // Previously, we used "sudo" only when performing writes to the
+    // repository directory.
+
+    return true;
+  }
+
   protected function newCustomEnvironment() {
     $env = array();
 

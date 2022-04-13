@@ -322,6 +322,7 @@ final class PhabricatorDatabaseRef
     $default_user = PhabricatorEnv::getEnvConfig('mysql.user');
 
     $default_pass = PhabricatorEnv::getEnvConfig('mysql.pass');
+    $default_pass = phutil_string_cast($default_pass);
     $default_pass = new PhutilOpaqueEnvelope($default_pass);
 
     $config = PhabricatorEnv::getEnvConfig('cluster.databases');

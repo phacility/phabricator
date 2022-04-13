@@ -143,11 +143,6 @@ final class PhameBlogManageController extends PhameBlogController {
         ),
         $feed_uri));
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer)
-      ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
-      ->process();
-
     $description = $blog->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);

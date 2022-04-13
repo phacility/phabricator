@@ -193,6 +193,8 @@ abstract class LiskDAO extends Phobject
 
   private static $connections       = array();
 
+  private static $liskMetadata = array();
+
   protected $id;
   protected $phid;
   protected $dateCreated;
@@ -403,10 +405,11 @@ abstract class LiskDAO extends Phobject
    *  @task   config
    */
   public function getConfigOption($option_name) {
-    static $options = null;
+    $options = $this->getLiskMetadata('config');
 
-    if (!isset($options)) {
+    if ($options === null) {
       $options = $this->getConfiguration();
+      $this->setLiskMetadata('config', $options);
     }
 
     return idx($options, $option_name);
@@ -439,7 +442,7 @@ abstract class LiskDAO extends Phobject
 
     return $this->loadOneWhere(
       '%C = %d',
-      $this->getIDKeyForUse(),
+      $this->getIDKey(),
       $id);
   }
 
@@ -554,7 +557,7 @@ abstract class LiskDAO extends Phobject
 
     $result = $this->loadOneWhere(
       '%C = %d',
-      $this->getIDKeyForUse(),
+      $this->getIDKey(),
       $this->getID());
 
     if (!$result) {
@@ -579,9 +582,10 @@ abstract class LiskDAO extends Phobject
    * @task   load
    */
   public function loadFromArray(array $row) {
-    static $valid_properties = array();
+    $valid_map = $this->getLiskMetadata('validMap', array());
 
     $map = array();
+    $updated = false;
     foreach ($row as $k => $v) {
       // We permit (but ignore) extra properties in the array because a
       // common approach to building the array is to issue a raw SELECT query
@@ -594,19 +598,24 @@ abstract class LiskDAO extends Phobject
       // path (assigning an invalid property which we've already seen) costs
       // an empty() plus an isset().
 
-      if (empty($valid_properties[$k])) {
-        if (isset($valid_properties[$k])) {
+      if (empty($valid_map[$k])) {
+        if (isset($valid_map[$k])) {
           // The value is set but empty, which means it's false, so we've
           // already determined it's not valid. We don't need to check again.
           continue;
         }
-        $valid_properties[$k] = $this->hasProperty($k);
-        if (!$valid_properties[$k]) {
+        $valid_map[$k] = $this->hasProperty($k);
+        $updated = true;
+        if (!$valid_map[$k]) {
           continue;
         }
       }
 
       $map[$k] = $v;
+    }
+
+    if ($updated) {
+      $this->setLiskMetadata('validMap', $valid_map);
     }
 
     $this->willReadData($map);
@@ -686,10 +695,7 @@ abstract class LiskDAO extends Phobject
    * @task   save
    */
   public function setID($id) {
-    static $id_key = null;
-    if ($id_key === null) {
-      $id_key = $this->getIDKeyForUse();
-    }
+    $id_key = $this->getIDKey();
     $this->$id_key = $id;
     return $this;
   }
@@ -704,10 +710,7 @@ abstract class LiskDAO extends Phobject
    * @task   info
    */
   public function getID() {
-    static $id_key = null;
-    if ($id_key === null) {
-      $id_key = $this->getIDKeyForUse();
-    }
+    $id_key = $this->getIDKey();
     return $this->$id_key;
   }
 
@@ -742,9 +745,10 @@ abstract class LiskDAO extends Phobject
    * @task   info
    */
   protected function getAllLiskProperties() {
-    static $properties = null;
-    if (!isset($properties)) {
-      $class = new ReflectionClass(get_class($this));
+    $properties = $this->getLiskMetadata('properties');
+
+    if ($properties === null) {
+      $class = new ReflectionClass(static::class);
       $properties = array();
       foreach ($class->getProperties(ReflectionProperty::IS_PROTECTED) as $p) {
         $properties[strtolower($p->getName())] = $p->getName();
@@ -763,7 +767,10 @@ abstract class LiskDAO extends Phobject
       if ($id_key != 'phid' && !$this->getConfigOption(self::CONFIG_AUX_PHID)) {
         unset($properties['phid']);
       }
+
+      $this->setLiskMetadata('properties', $properties);
     }
+
     return $properties;
   }
 
@@ -777,10 +784,7 @@ abstract class LiskDAO extends Phobject
    * @task   info
    */
   protected function checkProperty($property) {
-    static $properties = null;
-    if ($properties === null) {
-      $properties = $this->getAllLiskProperties();
-    }
+    $properties = $this->getAllLiskProperties();
 
     $property = strtolower($property);
     if (empty($properties[$property])) {
@@ -996,7 +1000,7 @@ abstract class LiskDAO extends Phobject
       'UPDATE %R SET %LQ WHERE %C = '.(is_int($id) ? '%d' : '%s'),
       $this,
       $map,
-      $this->getIDKeyForUse(),
+      $this->getIDKey(),
       $id);
     // We can't detect a missing object because updating an object without
     // changing any values doesn't affect rows. We could jiggle timestamps
@@ -1023,7 +1027,7 @@ abstract class LiskDAO extends Phobject
     $conn->query(
       'DELETE FROM %R WHERE %C = %d',
       $this,
-      $this->getIDKeyForUse(),
+      $this->getIDKey(),
       $this->getID());
 
     $this->didDelete();
@@ -1051,7 +1055,7 @@ abstract class LiskDAO extends Phobject
         // If we are using autoincrement IDs, let MySQL assign the value for the
         // ID column, if it is empty. If the caller has explicitly provided a
         // value, use it.
-        $id_key = $this->getIDKeyForUse();
+        $id_key = $this->getIDKey();
         if (empty($data[$id_key])) {
           unset($data[$id_key]);
         }
@@ -1059,7 +1063,7 @@ abstract class LiskDAO extends Phobject
       case self::IDS_COUNTER:
         // If we are using counter IDs, assign a new ID if we don't already have
         // one.
-        $id_key = $this->getIDKeyForUse();
+        $id_key = $this->getIDKey();
         if (empty($data[$id_key])) {
           $counter_name = $this->getTableName();
           $id = self::loadNextCounterValue($conn, $counter_name);
@@ -1174,19 +1178,6 @@ abstract class LiskDAO extends Phobject
   public function getIDKey() {
     return 'id';
   }
-
-
-  protected function getIDKeyForUse() {
-    $id_key = $this->getIDKey();
-    if (!$id_key) {
-      throw new Exception(
-        pht(
-          'This DAO does not have a single-part primary key. The method you '.
-          'called requires a single-part primary key.'));
-    }
-    return $id_key;
-  }
-
 
   /**
    * Generate a new PHID, used by CONFIG_AUX_PHID.
@@ -1592,21 +1583,11 @@ abstract class LiskDAO extends Phobject
    * @task   util
    */
   public function __call($method, $args) {
-    // NOTE: PHP has a bug that static variables defined in __call() are shared
-    // across all children classes. Call a different method to work around this
-    // bug.
-    return $this->call($method, $args);
-  }
+    $dispatch_map = $this->getLiskMetadata('dispatchMap', array());
 
-  /**
-   * @task   util
-   */
-  final protected function call($method, $args) {
     // NOTE: This method is very performance-sensitive (many thousands of calls
     // per page on some pages), and thus has some silliness in the name of
     // optimizations.
-
-    static $dispatch_map = array();
 
     if ($method[0] === 'g') {
       if (isset($dispatch_map[$method])) {
@@ -1620,6 +1601,7 @@ abstract class LiskDAO extends Phobject
           throw new Exception(pht('Bad getter call: %s', $method));
         }
         $dispatch_map[$method] = $property;
+        $this->setLiskMetadata('dispatchMap', $dispatch_map);
       }
 
       return $this->readField($property);
@@ -1632,12 +1614,14 @@ abstract class LiskDAO extends Phobject
         if (substr($method, 0, 3) !== 'set') {
           throw new Exception(pht("Unable to resolve method '%s'!", $method));
         }
+
         $property = substr($method, 3);
         $property = $this->checkProperty($property);
         if (!$property) {
           throw new Exception(pht('Bad setter call: %s', $method));
         }
         $dispatch_map[$method] = $property;
+        $this->setLiskMetadata('dispatchMap', $dispatch_map);
       }
 
       $this->writeField($property, $args[0]);
@@ -1908,5 +1892,21 @@ abstract class LiskDAO extends Phobject
     return $this->getTableName();
   }
 
+
+  private function getLiskMetadata($key, $default = null) {
+    if (isset(self::$liskMetadata[static::class][$key])) {
+      return self::$liskMetadata[static::class][$key];
+    }
+
+    if (!isset(self::$liskMetadata[static::class])) {
+      self::$liskMetadata[static::class] = array();
+    }
+
+    return idx(self::$liskMetadata[static::class], $key, $default);
+  }
+
+  private function setLiskMetadata($key, $value) {
+    self::$liskMetadata[static::class][$key] = $value;
+  }
 
 }

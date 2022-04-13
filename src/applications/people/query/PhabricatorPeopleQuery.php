@@ -341,7 +341,7 @@ final class PhabricatorPeopleQuery
         (int)$this->isMailingList);
     }
 
-    if (strlen($this->nameLike)) {
+    if ($this->nameLike !== null) {
       $where[] = qsprintf(
         $conn,
         'user.username LIKE %~ OR user.realname LIKE %~',

@@ -21,6 +21,8 @@ final class PhamePostEditor
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
+
+    $types[] = PhabricatorTransactions::TYPE_INTERACT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;

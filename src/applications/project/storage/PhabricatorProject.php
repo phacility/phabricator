@@ -407,11 +407,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
 
-    if (!strlen($this->getPHID())) {
+    $phid = $this->getPHID();
+    if ($phid === null || $phid === '') {
       $this->setPHID($this->generatePHID());
     }
 
-    if (!strlen($this->getProjectPathKey())) {
+    $path_key = $this->getProjectPathKey();
+    if ($path_key === null || $path_key === '') {
       $hash = PhabricatorHash::digestForIndex($this->getPHID());
       $hash = substr($hash, 0, 4);
       $this->setProjectPathKey($hash);
