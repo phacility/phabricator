@@ -226,7 +226,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getHeraldRuleMonograms() {
     // Convert the stored "<123>, <456>" string into a list: "H123", "H456".
-    $list = $this->heraldHeader;
+    $list = phutil_string_cast($this->heraldHeader);
     $list = preg_split('/[, ]+/', $list);
 
     foreach ($list as $key => $item) {
@@ -2920,7 +2920,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @return bool True if the field will be an empty text field after edits.
    */
   protected function validateIsEmptyTextField($field_value, array $xactions) {
-    if (strlen($field_value) && empty($xactions)) {
+    if (($field_value !== null && strlen($field_value)) && empty($xactions)) {
       return false;
     }
 
