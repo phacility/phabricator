@@ -75,7 +75,6 @@ class ResolveCodeChange {
           }
         }
       }
-      return false;
     }
     return false;
   }
