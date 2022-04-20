@@ -583,6 +583,14 @@ final class PhabricatorMarkupEngine extends Phobject {
     $engine->setConfig('viewer', $viewer);
 
     foreach ($content_blocks as $content_block) {
+      if ($content_block === null) {
+        continue;
+      }
+
+      if (!strlen($content_block)) {
+        continue;
+      }
+
       $engine->markupText($content_block);
       $phids = $engine->getTextMetadata(
         PhabricatorMentionRemarkupRule::KEY_MENTIONED,

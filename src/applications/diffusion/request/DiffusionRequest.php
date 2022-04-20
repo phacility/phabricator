@@ -207,7 +207,7 @@ abstract class DiffusionRequest extends Phobject {
    */
   private function initializeFromDictionary(array $data) {
     $blob = idx($data, 'blob');
-    if (strlen($blob)) {
+    if (phutil_nonempty_string($blob)) {
       $blob = self::parseRequestBlob($blob, $this->supportsBranches());
       $data = $blob + $data;
     }
@@ -518,12 +518,14 @@ abstract class DiffusionRequest extends Phobject {
       $result['path'] = $blob;
     }
 
-    $parts = explode('/', $result['path']);
-    foreach ($parts as $part) {
-      // Prevent any hyjinx since we're ultimately shipping this to the
-      // filesystem under a lot of workflows.
-      if ($part == '..') {
-        throw new Exception(pht('Invalid path URI.'));
+    if ($result['path'] !== null) {
+      $parts = explode('/', $result['path']);
+      foreach ($parts as $part) {
+        // Prevent any hyjinx since we're ultimately shipping this to the
+        // filesystem under a lot of workflows.
+        if ($part == '..') {
+          throw new Exception(pht('Invalid path URI.'));
+        }
       }
     }
 
