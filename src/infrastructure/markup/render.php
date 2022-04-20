@@ -105,6 +105,10 @@ function phutil_tag_div($class, $content = null) {
 }
 
 function phutil_escape_html($string) {
+  if ($string === null) {
+    return '';
+  }
+
   if ($string instanceof PhutilSafeHTML) {
     return $string;
   } else if ($string instanceof PhutilSafeHTMLProducerInterface) {

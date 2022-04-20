@@ -128,7 +128,7 @@ final class PhabricatorMacroQuery
         $this->authorPHIDs);
     }
 
-    if (strlen($this->nameLike)) {
+    if (($this->nameLike !== null) && strlen($this->nameLike)) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %~',
@@ -142,7 +142,7 @@ final class PhabricatorMacroQuery
         $this->names);
     }
 
-    if (strlen($this->namePrefix)) {
+    if (($this->namePrefix !== null) && strlen($this->namePrefix)) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %>',

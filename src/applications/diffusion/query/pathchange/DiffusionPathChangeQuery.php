@@ -88,7 +88,12 @@ final class DiffusionPathChangeQuery extends Phobject {
       $change->setFileType($raw_change['fileType']);
       $change->setCommitIdentifier($commit->getCommitIdentifier());
 
-      $change->setTargetPath(ltrim($raw_change['targetPathName'], '/'));
+      $target_path = $raw_change['targetPathName'];
+      if ($target_path !== null) {
+        $target_path = ltrim($target_path, '/');
+      }
+      $change->setTargetPath($target_path);
+
       $change->setTargetCommitIdentifier($raw_change['targetCommitIdentifier']);
 
       $id = $raw_change['pathID'];

@@ -148,7 +148,7 @@ final class PassphraseCredentialQuery
         (int)$this->allowConduit);
     }
 
-    if (strlen($this->nameContains)) {
+    if (phutil_nonempty_string($this->nameContains)) {
       $where[] = qsprintf(
         $conn,
         'LOWER(c.name) LIKE %~',
