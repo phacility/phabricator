@@ -226,7 +226,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getHeraldRuleMonograms() {
     // Convert the stored "<123>, <456>" string into a list: "H123", "H456".
-    $list = $this->heraldHeader;
+    $list = phutil_string_cast($this->heraldHeader);
     $list = preg_split('/[, ]+/', $list);
 
     foreach ($list as $key => $item) {
@@ -428,6 +428,11 @@ abstract class PhabricatorApplicationTransactionEditor
           return null;
         }
         return $object->getJoinPolicy();
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getInteractPolicy();
       case PhabricatorTransactions::TYPE_SPACE:
         if ($this->getIsNewObject()) {
           return null;
@@ -502,6 +507,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
@@ -658,6 +664,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_EDGE:
@@ -722,6 +729,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
@@ -775,6 +783,9 @@ abstract class PhabricatorApplicationTransactionEditor
         break;
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $object->setJoinPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
+        $object->setInteractPolicy($xaction->getNewValue());
         break;
       case PhabricatorTransactions::TYPE_SPACE:
         $object->setSpacePHID($xaction->getNewValue());
@@ -2909,7 +2920,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @return bool True if the field will be an empty text field after edits.
    */
   protected function validateIsEmptyTextField($field_value, array $xactions) {
-    if (strlen($field_value) && empty($xactions)) {
+    if (($field_value !== null && strlen($field_value)) && empty($xactions)) {
       return false;
     }
 

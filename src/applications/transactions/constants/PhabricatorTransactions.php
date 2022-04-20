@@ -7,6 +7,7 @@ final class PhabricatorTransactions extends Phobject {
   const TYPE_VIEW_POLICY  = 'core:view-policy';
   const TYPE_EDIT_POLICY  = 'core:edit-policy';
   const TYPE_JOIN_POLICY  = 'core:join-policy';
+  const TYPE_INTERACT_POLICY = 'core:interact-policy';
   const TYPE_EDGE         = 'core:edge';
   const TYPE_CUSTOMFIELD  = 'core:customfield';
   const TYPE_TOKEN        = 'token:give';

@@ -350,6 +350,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
         if (!PhabricatorPolicyQuery::isSpecialPolicy($old)) {
           $phids[] = array($old);
         }
@@ -479,6 +480,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
         return 'fa-lock';
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
@@ -590,6 +592,7 @@ abstract class PhabricatorApplicationTransaction
         case PhabricatorTransactions::TYPE_VIEW_POLICY:
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
         case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        case PhabricatorTransactions::TYPE_INTERACT_POLICY:
         case PhabricatorTransactions::TYPE_SPACE:
           break;
         case PhabricatorTransactions::TYPE_SUBTYPE:
@@ -634,6 +637,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
         if ($this->getIsCreateTransaction()) {
           break;
@@ -887,6 +891,10 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           'This %s already has that join policy.',
           $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
+        return pht(
+          'This %s already has that interact policy.',
+          $this->getApplicationObjectTypeName());
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht(
           'All users are already subscribed to this %s.',
@@ -960,6 +968,19 @@ abstract class PhabricatorApplicationTransaction
         } else {
           return pht(
             '%s changed the join policy from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($old, 'old'),
+            $this->renderPolicyName($new, 'new'));
+        }
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created this object with interact policy "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($new, 'new'));
+        } else {
+          return pht(
+            '%s changed the interact policy from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
             $this->renderPolicyName($old, 'old'),
             $this->renderPolicyName($new, 'new'));
@@ -1204,6 +1225,11 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the join policy for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
+        return pht(
+          '%s changed the interact policy for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht(
           '%s updated subscribers of %s.',
@@ -1426,6 +1452,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INTERACT_POLICY:
         return pht('Changed Policy');
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht('Changed Subscribers');
