@@ -557,6 +557,32 @@ properly, and submit values. */
   margin-left: 4px;
 }
 
+.phuix-form-form-row {
+  margin: 2px;
+  display: table-row;
+}
+
+.phuix-form-form-label {
+  margin: 2px;
+  display: table-cell;
+}
+
+.phuix-form-form-textarea {
+  width: auto;
+  margin-left: 4px;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.phuix-form-form-select {
+  margin: 2px;
+  display: table-cell;
+}
+
+.phuix-form-form-table {
+  display: table;
+}
+
 .phui-form-timer-icon {
   width: 28px;
   height: 28px;

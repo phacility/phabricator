@@ -347,12 +347,24 @@ JX.install('PHUIXFormControl', {
       };
     },
 
+    // Convert "true" and "false" strings to bool.
+    _boolValue: function(string_value) {
+        switch (string_value) {
+            case 'true':
+                return true;
+            case 'false':
+                return false;
+        }
+
+        return null;
+    },
+
     // Render a sub-form within the form control space.
     // Takes a spec of fields and their answer formats and returns
     // a mapping of fields to values.
     _newForm: function(spec) {
-        //var questions_parsed = JX.JSON.parse(spec.questions);
         var questions_parsed = spec.questions;
+        var initial = spec.initial;
 
         var questions = [];
         var question_list = [];
@@ -362,42 +374,62 @@ JX.install('PHUIXFormControl', {
 
             // Determine input format, either a bool or a text value.
             var value_type = typeof (value);
-            var input_type;
-            if (value_type == "string") {
-                input_type = "textarea";
-            } else if (value_type == "boolean") {
-                input_type = "checkbox";
-            }
 
-            var question_obj = JX.$N(
-              'input',
-              {
-                type: input_type,
-                value: value,
-                id: question_id,
-                question: question,
+            var question_obj;
+            if (value_type == "string") {
+              question_obj = JX.$N(
+                'input',
+                {
+                  className: 'aphront-form-control phuix-form-form-textarea',
+                  type: 'textarea',
+                  value: value,
+                  id: question_id,
+                  question: question,
               });
+            } else if (value_type == "boolean") {
+                // Set "Select One" as the default.
+                if (initial) {
+                    value = null;
+                }
+                question_obj = JX.Prefab.renderSelect(
+                    {
+                        null: 'Select One',
+                        true: 'Yes',
+                        false: 'No',
+                    },
+                    value,
+                    {
+                        className: 'phuix-form-form-select',
+                        id: question_id,
+                        question: question,
+                        value: value,
+                    },
+                    [null, true, false]
+                );
+            }
 
             questions.push(question_obj);
 
             var label = JX.$N(
               'label',
               {
-                className: 'phuix-form-checkbox-label',
+                className: 'phuix-form-form-label',
                 htmlFor: question_id,
               },
               JX.$H(question || ''));
 
             var display = JX.$N(
               'div', {
-                className: 'phuix-form-checkbox-item'
+                className: 'phuix-form-form-row',
               },
-              [question_obj, label]);
+              [label, question_obj]);
 
             question_list.push(display);
         }
 
-        var node = JX.$N('div', {}, question_list);
+        var node = JX.$N('div', {
+            className: 'phui-form-view phui-form-form-table'
+        }, question_list);
 
         return {
             node: node,
@@ -406,8 +438,10 @@ JX.install('PHUIXFormControl', {
                 for (var ii = 0; ii < questions.length; ii++) {
                     var question_obj = questions[ii];
 
-                    if (question_obj.type == "checkbox") {
-                        map[question_obj.question] = question_obj.checked;
+                    if (question_obj.type == "select-one") {
+                        // Convert "true" and "false" string values to boolean.
+                        var bool_val = this._boolValue(question_obj.value);
+                        map[question_obj.question] = bool_val;
                     } else {
                         map[question_obj.question] = question_obj.value;
                     }
