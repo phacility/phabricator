@@ -66,6 +66,16 @@ final class PhabricatorPolicyEditEngineExtension
         'description.conduit' => pht('Change the join policy of the object.'),
         'edit' => 'join',
       ),
+      PhabricatorTransactions::TYPE_INTERACT_POLICY => array(
+        'key' => 'policy.interact',
+        'aliases' => array('interact'),
+        'capability' => PhabricatorPolicyCapability::CAN_INTERACT,
+        'label' => pht('Interact Policy'),
+        'description' => pht('Controls who can interact with the object.'),
+        'description.conduit'
+          => pht('Change the interaction policy of the object.'),
+        'edit' => 'interact',
+      ),
     );
 
     if ($object instanceof PhabricatorPolicyCodexInterface) {

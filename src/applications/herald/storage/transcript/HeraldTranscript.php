@@ -66,6 +66,10 @@ final class HeraldTranscript extends HeraldDAO
   }
 
   private static function combineXHeraldRulesHeaders($u, $v) {
+    if ($u === null) {
+      return $v;
+    }
+
     $u = preg_split('/[, ]+/', $u);
     $v = preg_split('/[, ]+/', $v);
 

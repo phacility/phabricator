@@ -185,7 +185,7 @@ final class PhabricatorEditEngineConfiguration
     $fields = $this->reorderFields($fields);
 
     $preamble = $this->getPreamble();
-    if (strlen($preamble)) {
+    if ($preamble !== null && strlen($preamble)) {
       $fields = array(
         'config.preamble' => id(new PhabricatorInstructionsEditField())
           ->setKey('config.preamble')

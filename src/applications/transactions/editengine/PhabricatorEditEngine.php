@@ -474,7 +474,9 @@ abstract class PhabricatorEditEngine
           ->setIsDefault(true)
           ->setIsEdit(true);
 
-        if (!strlen($first->getName())) {
+        $first_name = $first->getName();
+
+        if ($first_name === null || $first_name === '') {
           $first->setName($this->getObjectCreateShortText());
         }
     } else {
