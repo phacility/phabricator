@@ -13,7 +13,7 @@ final class DiffusionLookSoonConduitAPIMethod
 
   public function getMethodDescription() {
     return pht(
-      'Advises Phabricator to look for new commits in a repository as soon '.
+      'Advises this server to look for new commits in a repository as soon '.
       'as possible. This advice is most useful if you have just pushed new '.
       'commits to that repository.');
   }
