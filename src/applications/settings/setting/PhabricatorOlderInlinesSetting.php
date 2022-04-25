@@ -22,7 +22,7 @@ final class PhabricatorOlderInlinesSetting
 
   protected function getControlInstructions() {
     return pht(
-      'When a revision is updated, Phabricator attempts to bring inline '.
+      'When a revision is updated, this software attempts to bring inline '.
       'comments on the older version forward to the new changes. You can '.
       'disable this behavior if you prefer comments stay anchored in one '.
       'place.');

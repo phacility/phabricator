@@ -138,7 +138,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     throw new PhabricatorClusterImproperWriteException(
       pht(
         'Unable to establish a write-mode connection (to application '.
-        'database "%s") because Phabricator is in read-only mode. Whatever '.
+        'database "%s") because this server is in read-only mode. Whatever '.
         'you are trying to do does not function correctly in read-only mode.',
         $database));
   }

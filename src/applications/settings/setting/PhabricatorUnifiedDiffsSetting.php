@@ -22,8 +22,8 @@ final class PhabricatorUnifiedDiffsSetting
 
   protected function getControlInstructions() {
     return pht(
-      'Phabricator normally shows diffs in a side-by-side layout on large '.
-      'screens and automatically switches to a unified view on small '.
+      'Diffs are normally shown in a side-by-side layout on large '.
+      'screens and automatically switched to a unified view on small '.
       'screens (like mobile phones). If you prefer unified diffs even on '.
       'large screens, you can select them for use on all displays.');
   }

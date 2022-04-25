@@ -109,9 +109,8 @@ EOBANNER;
           'projects and users.'.
           "\n\n".
           'These tattered edges are an expected consequence of destroying '.
-          'objects, and the Phabricator upstream will not help you fix '.
-          'them. We strongly recommend disabling or archiving objects '.
-          'instead.')));
+          'objects, and the upstream will not help you fix them. We '.
+          'strongly recommend disabling or archiving objects instead.')));
 
     $phids = mpull($named_objects, 'getPHID');
     $handles = PhabricatorUser::getOmnipotentUser()->loadHandles($phids);
