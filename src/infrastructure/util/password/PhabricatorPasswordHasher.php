@@ -307,7 +307,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     throw new PhabricatorPasswordHasherUnavailableException(
       pht(
         'Attempting to compare a password saved with the "%s" hash. No such '.
-        'hasher is known to Phabricator.',
+        'hasher is known.',
         $name));
   }
 

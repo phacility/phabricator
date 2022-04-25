@@ -161,7 +161,7 @@ final class PhabricatorStorageManagementDumpWorkflow
           throw new PhutilArgumentUsageException(
             pht(
               'Database "%s" is unknown. This script can only dump '.
-              'databases known to the current version of Phabricator. '.
+              'databases known to the current version of this software. '.
               'Valid databases are: %s.',
               $filter,
               implode(', ', array_keys($internal_names))));
