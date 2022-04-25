@@ -42,7 +42,7 @@ abstract class PhabricatorContentSource extends Phobject {
       } else {
         throw new Exception(
           pht(
-            'Content source type "%s" is not known to Phabricator!',
+            'Content source type "%s" is unknown.',
             $source));
       }
     }

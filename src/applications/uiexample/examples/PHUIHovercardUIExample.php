@@ -39,7 +39,7 @@ final class PHUIHovercardUIExample extends PhabricatorUIExample {
     $task_handle = $this->createBasicDummyHandle(
       'T123',
       ManiphestTaskPHIDType::TYPECONST,
-      pht('Improve Mobile Experience for Phabricator'));
+      pht('Improve Mobile Experience'));
 
     $tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)

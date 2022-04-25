@@ -67,7 +67,7 @@ browser's address bar. It will usually look something like this:
 %s
 ```
 
-However, `your.install.com` will be the domain where your copy of Phabricator
+However, `your.install.com` will be the domain where your copy of this software
 is installed, and `application/` will be the URI for an application. Some
 applications have multiple forms for creating objects or URIs that look a little
 different than this example, so the URI may not look exactly like this.
