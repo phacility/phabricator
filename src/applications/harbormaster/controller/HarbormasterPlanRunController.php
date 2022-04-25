@@ -84,7 +84,7 @@ final class HarbormasterPlanRunController extends HarbormasterPlanController {
           "example, `rX123456` or `D123`).\n\n".
           "For more detailed output, you can also run manual builds from ".
           "the command line:\n\n".
-          "  phabricator/ $ ./bin/harbormaster build <object> --plan %s",
+          "  $ ./bin/harbormaster build <object> --plan %s",
           $plan->getID()))
       ->appendChild(
         id(new AphrontFormTextControl())

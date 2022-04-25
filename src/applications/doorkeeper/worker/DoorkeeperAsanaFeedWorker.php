@@ -512,9 +512,10 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
   private function getSynchronizationWarning() {
     return pht(
       "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
-      "\xE2\x98\xA0 Your changes will not be reflected in Phabricator.\n".
+      "\xE2\x98\xA0 Your changes will not be reflected in %s.\n".
       "\xE2\x98\xA0 Your changes will be destroyed the next time state ".
-      "is synchronized.");
+      "is synchronized.",
+      PlatformSymbols::getPlatformServerName());
   }
 
   private function lookupAsanaUserIDs($all_phids) {
