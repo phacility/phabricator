@@ -15,8 +15,11 @@ final class PhabricatorRemarkupDocumentEngine
 
   protected function getContentScore(PhabricatorDocumentRef $ref) {
     $name = $ref->getName();
-    if (preg_match('/\\.remarkup\z/i', $name)) {
-      return 2000;
+
+    if ($name !== null) {
+      if (preg_match('/\\.remarkup\z/i', $name)) {
+        return 2000;
+      }
     }
 
     return 500;

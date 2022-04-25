@@ -14,8 +14,12 @@ final class PhabricatorJSONDocumentEngine
   }
 
   protected function getContentScore(PhabricatorDocumentRef $ref) {
-    if (preg_match('/\.json\z/', $ref->getName())) {
-      return 2000;
+
+    $name = $ref->getName();
+    if ($name !== null) {
+      if (preg_match('/\.json\z/', $name)) {
+        return 2000;
+      }
     }
 
     if ($ref->isProbablyJSON()) {

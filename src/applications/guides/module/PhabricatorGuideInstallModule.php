@@ -7,7 +7,7 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
   }
 
   public function getModuleName() {
-    return pht('Install Phabricator');
+    return pht('Install');
   }
 
   public function getModulePosition() {
@@ -66,7 +66,7 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       $icon_bg = 'bg-sky';
       $description = pht(
         'Authentication providers allow users to register accounts and '.
-        'log in to Phabricator.');
+        'log in.');
     }
 
     $item = id(new PhabricatorGuideItemView())
@@ -78,7 +78,7 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     $guide_items->addItem($item);
 
 
-    $title = pht('Configure Phabricator');
+    $title = pht('Configure');
     $href = PhabricatorEnv::getURI('/config/');
 
     // Just load any config value at all; if one exists the install has figured
@@ -95,7 +95,7 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       $icon = 'fa-sliders';
       $icon_bg = 'bg-sky';
       $description = pht(
-        'Learn how to configure mail and other options in Phabricator.');
+        'Learn how to configure mail and other options.');
     }
 
     $item = id(new PhabricatorGuideItemView())
@@ -148,7 +148,7 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       $icon = 'fa-bell';
       $icon_bg = 'bg-sky';
       $description = pht(
-        'Phabricator can deliver notifications in real-time with WebSockets.');
+        'Real-time notifications can be delivered with WebSockets.');
     }
 
     $item = id(new PhabricatorGuideItemView())
@@ -161,11 +161,12 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     $guide_items->addItem($item);
 
     $intro = pht(
-      'Phabricator has been successfully installed. These next guides will '.
+      '%s has been successfully installed. These next guides will '.
       'take you through configuration and new user orientation. '.
       'These steps are optional, and you can go through them in any order. '.
       'If you want to get back to this guide later on, you can find it in '.
-      '{icon globe} **Applications** under {icon map-o} **Guides**.');
+      '{icon globe} **Applications** under {icon map-o} **Guides**.',
+      PlatformSymbols::getPlatformServerName());
 
     $intro = new PHUIRemarkupView($viewer, $intro);
 

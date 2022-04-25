@@ -1816,7 +1816,7 @@ final class DifferentialChangesetParser extends Phobject {
     $viewstate = $this->getViewState();
 
     $engine_key = $viewstate->getDocumentEngineKey();
-    if (strlen($engine_key)) {
+    if (phutil_nonempty_string($engine_key)) {
       if (isset($shared_engines[$engine_key])) {
         $document_engine = $shared_engines[$engine_key];
       } else {
