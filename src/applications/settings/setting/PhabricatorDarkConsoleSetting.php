@@ -27,7 +27,7 @@ final class PhabricatorDarkConsoleSetting
   protected function getControlInstructions() {
     return pht(
       'DarkConsole is a debugging console for developing and troubleshooting '.
-      'Phabricator applications. After enabling DarkConsole, press the '.
+      'applications. After enabling DarkConsole, press the '.
       '{nav `} key on your keyboard to toggle it on or off.');
   }
 

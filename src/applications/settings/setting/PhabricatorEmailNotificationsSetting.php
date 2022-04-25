@@ -22,7 +22,7 @@ final class PhabricatorEmailNotificationsSetting
 
   protected function getControlInstructions() {
     return pht(
-      'If you disable **Email Notifications**, Phabricator will never '.
+      'If you disable **Email Notifications**, this server will never '.
       'send email to notify you about events. This preference overrides '.
       'all your other settings.'.
       "\n\n".
