@@ -22,14 +22,16 @@ final class PhabricatorUserApproveTransaction
 
     $actor = $this->getActor();
     $title = pht(
-      'Phabricator Account "%s" Approved',
+      '%s Account "%s" Approved',
+      PlatformSymbols::getPlatformServerName(),
       $user->getUsername());
 
     $body = sprintf(
       "%s\n\n  %s\n\n",
       pht(
-        'Your Phabricator account (%s) has been approved by %s. You can '.
+        'Your %s account (%s) has been approved by %s. You can '.
         'login here:',
+        PlatformSymbols::getPlatformServerName(),
         $user->getUsername(),
         $actor->getUsername()),
       PhabricatorEnv::getProductionURI('/'));
@@ -37,7 +39,11 @@ final class PhabricatorUserApproveTransaction
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($user->getPHID()))
       ->addCCs(array($actor->getPHID()))
-      ->setSubject('[Phabricator] '.$title)
+      ->setSubject(
+        pht(
+          '[%s] %s',
+          PlatformSymbols::getPlatformServerName(),
+          $title))
       ->setForceDelivery(true)
       ->setBody($body)
       ->saveAndSend();

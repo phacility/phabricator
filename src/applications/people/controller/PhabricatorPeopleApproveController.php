@@ -52,7 +52,7 @@ final class PhabricatorPeopleApproveController
       ->setTitle(pht('Confirm Approval'))
       ->appendChild(
         pht(
-          'Allow %s to access this Phabricator install?',
+          'Allow %s to access this server?',
           phutil_tag('strong', array(), $user->getUsername())))
       ->addCancelButton($done_uri)
       ->addSubmitButton(pht('Approve Account'));

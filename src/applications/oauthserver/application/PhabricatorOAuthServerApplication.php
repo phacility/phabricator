@@ -23,7 +23,9 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
   }
 
   public function getFlavorText() {
-    return pht('Log In with Phabricator');
+    return pht(
+      'Log In with %s',
+      PlatformSymbols::getPlatformServerName());
   }
 
   public function getApplicationGroup() {
