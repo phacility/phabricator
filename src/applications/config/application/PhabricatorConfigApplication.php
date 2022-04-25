@@ -31,7 +31,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Configure Phabricator');
+    return pht('Configure %s', PlatformSymbols::getPlatformServerName());
   }
 
   public function getRoutes() {

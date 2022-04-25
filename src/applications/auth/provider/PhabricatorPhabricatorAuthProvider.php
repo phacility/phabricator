@@ -7,17 +7,16 @@ final class PhabricatorPhabricatorAuthProvider
   const PROPERTY_PHABRICATOR_URI  = 'oauth2:phabricator:uri';
 
   public function getProviderName() {
-    return pht('Phabricator');
+    return PlatformSymbols::getPlatformServerName();
   }
 
   public function getConfigurationHelp() {
     if ($this->isCreate()) {
       return pht(
-        "**Step 1 of 2 - Name Phabricator OAuth Instance**\n\n".
-        'Choose a permanent name for the OAuth server instance of '.
-        'Phabricator. //This// instance of Phabricator uses this name '.
-        'internally to keep track of the OAuth server instance of '.
-        'Phabricator, in case the URL changes later.');
+        "**Step 1 of 2 - Name Remote Server**\n\n".
+        'Choose a permanent name for the remote server you want to connect '.
+        'to. This name is used internally to keep track of the remote '.
+        'server, in case the URL changes later.');
     }
 
     return parent::getConfigurationHelp();
@@ -29,8 +28,8 @@ final class PhabricatorPhabricatorAuthProvider
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
-      "**Step 2 of 2 - Configure Phabricator OAuth Instance**\n\n".
-      "To configure Phabricator OAuth, create a new application here:".
+      "**Step 2 of 2 - Configure OAuth Server**\n\n".
+      "To configure OAuth, create a new application here:".
       "\n\n".
       "%s/oauthserver/client/create/".
       "\n\n".
@@ -54,7 +53,7 @@ final class PhabricatorPhabricatorAuthProvider
   }
 
   protected function getLoginIcon() {
-    return 'Phabricator';
+    return PlatformSymbols::getPlatformServerName();
   }
 
   private function isCreate() {
@@ -106,23 +105,23 @@ final class PhabricatorPhabricatorAuthProvider
     $key_uri = self::PROPERTY_PHABRICATOR_URI;
 
     if (!strlen($values[$key_name])) {
-      $errors[] = pht('Phabricator instance name is required.');
+      $errors[] = pht('Server name is required.');
       $issues[$key_name] = pht('Required');
     } else if (!preg_match('/^[a-z0-9.]+\z/', $values[$key_name])) {
       $errors[] = pht(
-        'Phabricator instance name must contain only lowercase letters, '.
+        'Server name must contain only lowercase letters, '.
         'digits, and periods.');
       $issues[$key_name] = pht('Invalid');
     }
 
     if (!strlen($values[$key_uri])) {
-      $errors[] = pht('Phabricator base URI is required.');
+      $errors[] = pht('Base URI is required.');
       $issues[$key_uri] = pht('Required');
     } else {
       $uri = new PhutilURI($values[$key_uri]);
       if (!$uri->getProtocol()) {
         $errors[] = pht(
-          'Phabricator base URI should include protocol (like "%s").',
+          'Base URI should include protocol (like "%s").',
           'https://');
         $issues[$key_uri] = pht('Invalid');
       }
@@ -161,7 +160,7 @@ final class PhabricatorPhabricatorAuthProvider
       $form
        ->appendChild(
           id(new AphrontFormTextControl())
-            ->setLabel(pht('Phabricator Instance Name'))
+            ->setLabel(pht('Server Name'))
             ->setValue($v_name)
             ->setName(self::PROPERTY_PHABRICATOR_NAME)
             ->setError($e_name)
@@ -170,26 +169,25 @@ final class PhabricatorPhabricatorAuthProvider
             phutil_tag(
               'tt',
               array(),
-              '`phabricator.oauthserver`'))));
+              '`example.oauthserver`'))));
     } else {
       $form
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel(pht('Phabricator Instance Name'))
+            ->setLabel(pht('Server Name'))
             ->setValue($v_name));
     }
 
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('Phabricator Base URI'))
+          ->setLabel(pht('Base URI'))
           ->setValue($v_uri)
           ->setName(self::PROPERTY_PHABRICATOR_URI)
           ->setCaption(
             pht(
-              'The URI where the OAuth server instance of Phabricator is '.
-              'installed. For example: %s',
-              phutil_tag('tt', array(), 'https://phabricator.mycompany.com/')))
+              'The URI where the OAuth server is installed. For example: %s',
+              phutil_tag('tt', array(), 'https://devtools.example.com/')))
           ->setError($e_uri));
 
     if (!$is_setup) {

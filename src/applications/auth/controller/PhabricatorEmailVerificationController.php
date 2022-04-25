@@ -44,7 +44,7 @@ final class PhabricatorEmailVerificationController
       $title = pht('Address Already Verified');
       $content = pht(
         'This email address has already been verified.');
-      $continue = pht('Continue to Phabricator');
+      $continue = pht('Continue');
     } else if ($request->isFormPost()) {
 
       id(new PhabricatorUserEditor())
@@ -55,7 +55,7 @@ final class PhabricatorEmailVerificationController
       $content = pht(
         'The email address %s is now verified.',
         phutil_tag('strong', array(), $email->getAddress()));
-      $continue = pht('Continue to Phabricator');
+      $continue = pht('Continue');
     } else {
       $title = pht('Verify Email Address');
       $content = pht(
