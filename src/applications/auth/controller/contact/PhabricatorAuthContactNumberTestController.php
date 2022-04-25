@@ -39,7 +39,7 @@ final class PhabricatorAuthContactNumberTestController
         ->setSensitiveContent(false)
         ->setBody(
           pht(
-            'This is a terse test text message from Phabricator (%s).',
+            'This is a terse test text message (from "%s").',
             $uri->getDomain()))
         ->save();
 

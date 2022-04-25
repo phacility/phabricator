@@ -51,8 +51,10 @@ final class PhabricatorAuthInviteWorker
       ->setForceDelivery(true)
       ->setSubject(
         pht(
-          '[Phabricator] %s has invited you to join Phabricator',
-          $author->getFullName()))
+          '[%s] %s has invited you to join %s',
+          PlatformSymbols::getPlatformServerName(),
+          $author->getFullName(),
+          PlatformSymbols::getPlatformServerName()))
       ->setBody($template)
       ->saveAndSend();
   }

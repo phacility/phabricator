@@ -9,9 +9,9 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
       ->setExamples('**trust-oauth-client** [--id client_id]')
       ->setSynopsis(
         pht(
-          'Set Phabricator to trust an OAuth client. Phabricator '.
-          'redirects to trusted OAuth clients that users have authorized '.
-          'without user intervention.'))
+          'Mark an OAuth client as trusted. Trusted OAuth clients may be '.
+          'reauthorized without requiring users to manually confirm the '.
+          'action.'))
       ->setArguments(
         array(
           array(
@@ -28,8 +28,7 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
     if (!$id) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify an OAuth client id with %s.',
-          '--id'));
+          'Specify an OAuth client id with "--id".'));
     }
 
     $client = id(new PhabricatorOAuthServerClientQuery())
@@ -46,7 +45,7 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
     if ($client->getIsTrusted()) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Phabricator already trusts OAuth client "%s".',
+          'OAuth client "%s" is already trusted.',
           $client->getName()));
     }
 
@@ -57,7 +56,7 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
     $console->writeOut(
       "%s\n",
       pht(
-        'Updated; Phabricator trusts OAuth client %s.',
+        'OAuth client "%s" is now trusted.',
         $client->getName()));
   }
 

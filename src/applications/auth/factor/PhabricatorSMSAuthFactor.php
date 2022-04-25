@@ -388,7 +388,8 @@ final class PhabricatorSMSAuthFactor
       ->setSensitiveContent(true)
       ->setBody(
         pht(
-          'Phabricator (%s) MFA Code: %s',
+          '%s (%s) MFA Code: %s',
+          PlatformSymbols::getPlatformServerName(),
           $this->getInstallDisplayName(),
           $envelope->openEnvelope()))
       ->save();

@@ -133,7 +133,9 @@ final class PhabricatorDuoAuthFactor
         ->setTransactionType($xaction_usernames)
         ->setOptions(
           array(
-            'username' => pht('Use Phabricator Username'),
+            'username' => pht(
+              'Use %s Username',
+              PlatformSymbols::getPlatformServerName()),
             'email' => pht('Use Primary Email Address'),
           )),
       id(new PhabricatorSelectEditField())
@@ -510,7 +512,7 @@ final class PhabricatorDuoAuthFactor
         ->setIsError(true)
         ->setErrorMessage(
           pht(
-            'This factor has been removed from your device, so Phabricator '.
+            'This factor has been removed from your device, so this server '.
             'can not send you a challenge. To continue, an administrator '.
             'must strip this factor from your account.'));
     }
@@ -547,7 +549,7 @@ final class PhabricatorDuoAuthFactor
     // The Duo push timeout is 60 seconds. Set our challenge to expire slightly
     // more quickly so that we'll re-issue a new challenge before Duo times out.
     // This should keep users away from a dead-end where they can't respond to
-    // Duo but Phabricator won't issue a new challenge yet.
+    // Duo but we won't issue a new challenge yet.
     $ttl_seconds = 55;
 
     return array(
