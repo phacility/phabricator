@@ -93,7 +93,6 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.conpherence' => array(),
       'db.config' => array(),
       'db.token' => array(),
-      'db.releeph' => array(),
       'db.phlux' => array(),
       'db.phortune' => array(),
       'db.phrequent' => array(),

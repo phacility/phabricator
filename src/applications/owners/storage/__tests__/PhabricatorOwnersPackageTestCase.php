@@ -14,34 +14,34 @@ final class PhabricatorOwnersPackageTestCase extends PhabricatorTestCase {
         'id' => 1,
         'excluded' => 1,
         'dominion' => PhabricatorOwnersPackage::DOMINION_STRONG,
-        'path' => 'src/releeph/',
+        'path' => 'src/example/',
       ),
       array(
         'id' => 2,
         'excluded' => 0,
         'dominion' => PhabricatorOwnersPackage::DOMINION_STRONG,
-        'path' => 'src/releeph/',
+        'path' => 'src/example/',
       ),
     );
 
     $paths = array(
-      'src/' => array('src/a.php' => true, 'src/releeph/b.php' => true),
-      'src/releeph/' => array('src/releeph/b.php' => true),
+      'src/' => array('src/a.php' => true, 'src/example/b.php' => true),
+      'src/example/' => array('src/example/b.php' => true),
     );
     $this->assertEqual(
       array(
         1 => strlen('src/'),
-        2 => strlen('src/releeph/'),
+        2 => strlen('src/example/'),
       ),
       PhabricatorOwnersPackage::findLongestPathsPerPackage($rows, $paths));
 
     $paths = array(
-      'src/' => array('src/releeph/b.php' => true),
-      'src/releeph/' => array('src/releeph/b.php' => true),
+      'src/' => array('src/example/b.php' => true),
+      'src/example/' => array('src/example/b.php' => true),
     );
     $this->assertEqual(
       array(
-        2 => strlen('src/releeph/'),
+        2 => strlen('src/example/'),
       ),
       PhabricatorOwnersPackage::findLongestPathsPerPackage($rows, $paths));
 
