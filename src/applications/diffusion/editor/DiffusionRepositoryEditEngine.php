@@ -217,7 +217,7 @@ final class DiffusionRepositoryEditEngine
     $permanent_value = $object->getPermanentRefRules();
 
     $automation_instructions = pht(
-      "Configure **Repository Automation** to allow Phabricator to ".
+      "Configure **Repository Automation** to allow this server to ".
       "write to this repository.".
       "\n\n".
       "IMPORTANT: This feature is new, experimental, and not supported. ".
@@ -234,7 +234,7 @@ final class DiffusionRepositoryEditEngine
 
     $subpath_instructions = pht(
       'If you want to import only part of a repository, like `trunk/`, '.
-      'you can set a path in **Import Only**. Phabricator will ignore '.
+      'you can set a path in **Import Only**. The import process will ignore '.
       'commits which do not affect this path.');
 
     $filesize_warning = null;
@@ -256,7 +256,7 @@ final class DiffusionRepositoryEditEngine
     $track_instructions = pht(
       'WARNING: The "Track Only" feature is deprecated. Use "Fetch Refs" '.
       'and "Permanent Refs" instead. This feature will be removed in a '.
-      'future version of Phabricator.');
+      'future version of this software.');
 
     return array(
       id(new PhabricatorSelectEditField())

@@ -45,7 +45,7 @@ final class DiffusionRepositoryEditUpdateController
       ->setTitle(pht('Update Repository Now'))
       ->appendParagraph(
         pht(
-          'Normally, Phabricator automatically updates repositories '.
+          'Normally, repositories are automatically updated '.
           'based on how much time has elapsed since the last commit. '.
           'This helps reduce load if you have a large number of mostly '.
           'inactive repositories, which is common.'))
@@ -57,7 +57,7 @@ final class DiffusionRepositoryEditUpdateController
           'repository.'))
       ->appendParagraph(
         pht(
-          'To learn more about how Phabricator updates repositories, '.
+          'To learn more about how repositories are updated, '.
           'read %s in the documentation.',
           $doc_link))
       ->addCancelButton($panel_uri)

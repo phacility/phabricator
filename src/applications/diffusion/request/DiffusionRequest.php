@@ -563,7 +563,7 @@ abstract class DiffusionRequest extends Phobject {
     throw new DiffusionSetupException(
       pht(
         'The working copy for this repository ("%s") has not been cloned yet '.
-        'on this machine ("%s"). Make sure you havestarted the Phabricator '.
+        'on this machine ("%s"). Make sure you have started the '.
         'daemons. If this problem persists for longer than a clone should '.
         'take, check the daemon logs (in the Daemon Console) to see if there '.
         'were errors cloning the repository. Consult the "Diffusion User '.

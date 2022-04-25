@@ -114,7 +114,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
       ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
-          'To access repositories hosted by Phabricator over HTTP, you must '.
+          'To access repositories hosted on this server over HTTP, you must '.
           'set a version control password. This password should be unique.'.
           "\n\n".
           "This password applies to all repositories available over ".
