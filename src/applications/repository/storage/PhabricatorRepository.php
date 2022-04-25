@@ -203,7 +203,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getDisplayName() {
     $slug = $this->getRepositorySlug();
-    if (strlen($slug)) {
+
+    if (phutil_nonempty_string($slug)) {
       return $slug;
     }
 

@@ -11,7 +11,7 @@ final class RemarkupProcessConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return pht('Process text through remarkup in Phabricator context.');
+    return pht('Process text through remarkup.');
   }
 
   protected function defineReturnType() {
