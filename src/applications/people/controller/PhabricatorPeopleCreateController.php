@@ -24,7 +24,7 @@ final class PhabricatorPeopleCreateController
     $title = pht('Create New User');
 
     $standard_caption = pht(
-      'Create a standard user account. These users can log in to Phabricator, '.
+      'Create a standard user account. These users can log in, '.
       'use the web interface and API, and receive email.');
 
     $standard_admin = pht(
