@@ -60,7 +60,9 @@ final class PhabricatorPeopleWelcomeMailEngine
 
     $message = array();
 
-    $message[] = pht('Welcome to Phabricator!');
+    $message[] = pht(
+      'Welcome to %s!',
+      PlatformSymbols::getPlatformServerName());
 
     $message[] = pht(
       '%s (%s) has created an account for you.',
@@ -129,7 +131,9 @@ final class PhabricatorPeopleWelcomeMailEngine
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     if (!$is_serious) {
-      return pht("Love,\nPhabricator");
+      return pht(
+        "Love,\n%s",
+        PlatformSymbols::getPlatformServerName());
     }
 
     return null;

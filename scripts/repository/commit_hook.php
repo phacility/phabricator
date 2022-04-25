@@ -122,9 +122,9 @@ if ($is_svnrevprop) {
   if (!strlen($username)) {
     throw new Exception(
       pht(
-        'No Direct Pushes: You are pushing directly to a repository hosted '.
-        'by Phabricator. This will not work. See "No Direct Pushes" in the '.
-        'documentation for more information.'));
+        'No Direct Pushes: You are pushing directly to a hosted repository. '.
+        'This will not work. See "No Direct Pushes" in the documentation '.
+        'for more information.'));
   }
 
   if ($repository->isHg()) {

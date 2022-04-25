@@ -54,8 +54,9 @@ final class PhabricatorAuthConfirmLinkController
           ),
           pht(
             'Confirm the link with this %s account. This account will be '.
-            'able to log in to your Phabricator account.',
-            $provider->getProviderName())))
+            'able to log in to your %s account.',
+            $provider->getProviderName(),
+            PlatformSymbols::getPlatformServerName())))
       ->appendChild(
         id(new PhabricatorAuthAccountView())
           ->setUser($viewer)
