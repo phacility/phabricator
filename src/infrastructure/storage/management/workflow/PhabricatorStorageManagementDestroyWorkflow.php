@@ -47,9 +47,10 @@ final class PhabricatorStorageManagementDestroyWorkflow
       } else {
         $warning = pht(
           'Are you completely sure you really want to permanently destroy '.
-          'all storage for Phabricator data on host "%s"? This operation '.
+          'all storage for %s data on host "%s"? This operation '.
           'can not be undone and your data will not be recoverable if '.
           'you proceed.',
+          PlatformSymbols::getPlatformServerName(),
           $host_display);
 
         echo tsprintf(

@@ -10,7 +10,7 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       ->setSynopsis(
         pht(
           'Generate a new quickstart database dump. This command is mostly '.
-          'useful when developing Phabricator.'))
+          'useful for internal development.'))
       ->setArguments(
         array(
           array(
