@@ -8,7 +8,7 @@ final class PhabricatorClusterConfigOptions
   }
 
   public function getDescription() {
-    return pht('Configure Phabricator to run on a cluster of hosts.');
+    return pht('Configure services to run on a cluster of hosts.');
   }
 
   public function getIcon() {
@@ -25,7 +25,7 @@ final class PhabricatorClusterConfigOptions
 WARNING: This is a prototype option and the description below is currently pure
 fantasy.
 
-This option allows you to make Phabricator aware of database read replicas so
+This option allows you to make this service aware of database read replicas so
 it can monitor database health, spread load, and degrade gracefully to
 read-only mode in the event of a failure on the primary host. For help with
 configuring cluster databases, see **[[ %s | %s ]]** in the documentation.
@@ -55,7 +55,7 @@ EOTEXT
         ->setSummary(pht('Address ranges of cluster hosts.'))
         ->setDescription(
           pht(
-            'Define a Phabricator cluster by providing a whitelist of host '.
+            'Define a cluster by providing a whitelist of host '.
             'addresses that are part of the cluster.'.
             "\n\n".
             'Hosts on this whitelist have special powers. These hosts are '.
@@ -67,7 +67,7 @@ EOTEXT
             'cluster and no additional hosts. See the examples below for '.
             'details.'.
             "\n\n".
-            'When cluster addresses are defined, Phabricator hosts will also '.
+            'When cluster addresses are defined, hosts will also '.
             'reject requests to interfaces which are not whitelisted.',
             $intro_href,
             $intro_name))
@@ -101,7 +101,7 @@ EOTEXT
             'hosting providers running multi-tenant clusters.'.
             "\n\n".
             'If you provide an instance identifier here (normally by '.
-            'injecting it with a `%s`), Phabricator will pass it to '.
+            'injecting it with a `%s`), the server will pass it to '.
             'subprocesses and commit hooks in the `%s` environmental variable.',
             'PhabricatorConfigSiteSource',
             'PHABRICATOR_INSTANCE')),
@@ -115,7 +115,7 @@ EOTEXT
             'WARNING: This is a prototype option and the description below '.
             'is currently pure fantasy.'.
             "\n\n".
-            'Switch Phabricator to read-only mode. In this mode, users will '.
+            'Switch the service to read-only mode. In this mode, users will '.
             'be unable to write new data. Normally, the cluster degrades '.
             'into this mode automatically when it detects that the database '.
             'master is unreachable, but you can activate it manually in '.

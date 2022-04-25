@@ -26,14 +26,13 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
       $doc_href = PhabricatorEnv::getDoclink('Managing Daemons with phd');
 
       $summary = pht(
-        'You must start the Phabricator daemons to send email, rebuild '.
-        'search indexes, and do other background processing.');
+        'You must start the daemons to send email, rebuild search indexes, '.
+        'and do other background processing.');
 
       $message = pht(
-        'The Phabricator daemons are not running, so Phabricator will not '.
-        'be able to perform background processing (including sending email, '.
-        'rebuilding search indexes, importing commits, cleaning up old data, '.
-        'and running builds).'.
+        'The daemons are not running, background processing (including '.
+        'sending email, rebuilding search indexes, importing commits, '.
+        'cleaning up old data, and running builds) can not be performed.'.
         "\n\n".
         'Use %s to start daemons. See %s for more information.',
         phutil_tag('tt', array(), 'bin/phd start'),
@@ -47,10 +46,10 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
       $this->newIssue('daemons.not-running')
         ->setShortName(pht('Daemons Not Running'))
-        ->setName(pht('Phabricator Daemons Are Not Running'))
+        ->setName(pht('Daemons Are Not Running'))
         ->setSummary($summary)
         ->setMessage($message)
-        ->addCommand('phabricator/ $ ./bin/phd start');
+        ->addCommand('$ ./bin/phd start');
     }
 
     $expect_user = PhabricatorEnv::getEnvConfig('phd.user');
@@ -91,7 +90,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
           ->setSummary($summary)
           ->setMessage($message)
           ->addPhabricatorConfig('phd.user')
-          ->addCommand('phabricator/ $ ./bin/phd restart');
+          ->addCommand('$ ./bin/phd restart');
 
         break;
       }

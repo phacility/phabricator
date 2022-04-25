@@ -42,7 +42,7 @@ final class PhabricatorManualActivitySetupCheck
       'function correctly.');
 
     $message[] = pht(
-      'You can rebuild the search index while Phabricator is running.');
+      'You can rebuild the search index while the server is running.');
 
     $message[] = pht(
       'To rebuild the index, run this command:');
@@ -51,7 +51,7 @@ final class PhabricatorManualActivitySetupCheck
       'pre',
       array(),
       (string)csprintf(
-        'phabricator/ $ ./bin/search index --all --force --background'));
+        '$ ./bin/search index --all --force --background'));
 
     $message[] = pht(
       'You can find more information about rebuilding the search '.
@@ -71,7 +71,7 @@ final class PhabricatorManualActivitySetupCheck
     $message[] = phutil_tag(
       'pre',
       array(),
-      'phabricator/ $ ./bin/config done reindex');
+      '$ ./bin/config done reindex');
 
     $activity_message = phutil_implode_html("\n\n", $message);
 
@@ -84,27 +84,34 @@ final class PhabricatorManualActivitySetupCheck
   private function raiseRebuildIdentitiesIssue() {
     $activity_name = pht('Rebuild Repository Identities');
     $activity_summary = pht(
-      'The mapping from VCS users to Phabricator users has changed '.
-      'and must be rebuilt.');
+      'The mapping from VCS users to %s users has changed '.
+      'and must be rebuilt.',
+      PlatformSymbols::getPlatformServerName());
 
     $message = array();
 
     $message[] = pht(
-      'The way Phabricator attributes VCS activity to Phabricator users '.
-      'has changed. There is a new indirection layer between the strings '.
-      'that appear as VCS authors and committers (such as "John Developer '.
-      '<johnd@bigcorp.com>") and the Phabricator user that gets associated '.
-      'with VCS commits. This is to support situations where users '.
-      'are incorrectly associated with commits by Phabricator making bad '.
-      'guesses about the identity of the corresponding Phabricator user. '.
+      'The way VCS activity is attributed %s user accounts has changed.',
+      PlatformSymbols::getPlatformServerName());
+
+    $message[] = pht(
+      'There is a new indirection layer between the strings that appear as '.
+      'VCS authors and committers (such as "John Developer '.
+      '<johnd@bigcorp.com>") and the user account that gets associated '.
+      'with VCS commits.');
+
+    $message[] = pht(
+      'This change supports situations where users are incorrectly '.
+      'associated with commits because the software makes a bad guess '.
+      'about how the VCS string maps to a user account. '.
       'This also helps with situations where existing repositories are '.
       'imported without having created accounts for all the committers to '.
       'that repository. Until you rebuild these repository identities, you '.
-      'are likely to encounter problems with future Phabricator features '.
-      'which will rely on the existence of these identities.');
+      'are likely to encounter problems with features which rely on the '.
+      'existence of these identities.');
 
     $message[] = pht(
-      'You can rebuild repository identities while Phabricator is running.');
+      'You can rebuild repository identities while the server is running.');
 
     $message[] = pht(
       'To rebuild identities, run this command:');
@@ -113,8 +120,7 @@ final class PhabricatorManualActivitySetupCheck
       'pre',
       array(),
       (string)csprintf(
-        'phabricator/ $ '.
-        './bin/repository rebuild-identities --all-repositories'));
+        '$ ./bin/repository rebuild-identities --all-repositories'));
 
     $message[] = pht(
       'You can find more information about this new identity mapping '.
@@ -134,7 +140,7 @@ final class PhabricatorManualActivitySetupCheck
     $message[] = phutil_tag(
       'pre',
       array(),
-      'phabricator/ $ ./bin/config done identities');
+      '$ ./bin/config done identities');
 
     $activity_message = phutil_implode_html("\n\n", $message);
 

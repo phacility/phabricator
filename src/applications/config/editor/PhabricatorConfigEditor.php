@@ -8,7 +8,7 @@ final class PhabricatorConfigEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Phabricator Configuration');
+    return pht('Configuration');
   }
 
   public function getTransactionTypes() {
