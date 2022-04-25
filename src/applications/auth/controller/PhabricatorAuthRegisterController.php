@@ -83,8 +83,8 @@ final class PhabricatorAuthRegisterController
       if (!PhabricatorUserEmail::isValidAddress($default_email)) {
         $errors[] = pht(
           'The email address associated with this external account ("%s") is '.
-          'not a valid email address and can not be used to register a '.
-          'Phabricator account. Choose a different, valid address.',
+          'not a valid email address and can not be used to register an '.
+          'account. Choose a different, valid address.',
           phutil_tag('strong', array(), $default_email));
         $default_email = null;
       }
@@ -102,8 +102,7 @@ final class PhabricatorAuthRegisterController
         $errors[] = pht(
           'The email address associated with this account ("%s") is '.
           'already in use by an application and can not be used to '.
-          'register a new Phabricator account. Choose a different, valid '.
-          'address.',
+          'register a new account. Choose a different, valid address.',
           phutil_tag('strong', array(), $default_email));
         $default_email = null;
       }
@@ -122,8 +121,8 @@ final class PhabricatorAuthRegisterController
           array(
             pht(
               'The account you are attempting to register with has an invalid '.
-              'email address (%s). This Phabricator install only allows '.
-              'registration with specific email addresses:',
+              'email address (%s). This server only allows registration with '.
+              'specific email addresses:',
               $debug_email),
             phutil_tag('br'),
             phutil_tag('br'),
@@ -157,16 +156,17 @@ final class PhabricatorAuthRegisterController
           ->addHiddenInput('phase', 1)
           ->appendParagraph(
             pht(
-              'You are creating a new Phabricator account linked to an '.
-              'existing external account from outside Phabricator.'))
+              'You are creating a new account linked to an existing '.
+              'external account.'))
           ->appendParagraph(
             pht(
               'The email address ("%s") associated with the external account '.
-              'is already in use by an existing Phabricator account. Multiple '.
-              'Phabricator accounts may not have the same email address, so '.
-              'you can not use this email address to register a new '.
-              'Phabricator account.',
-              phutil_tag('strong', array(), $show_existing)))
+              'is already in use by an existing %s account. Multiple '.
+              '%s accounts may not have the same email address, so '.
+              'you can not use this email address to register a new account.',
+              phutil_tag('strong', array(), $show_existing),
+              PlatformSymbols::getPlatformServerName(),
+              PlatformSymbols::getPlatformServerName()))
           ->appendParagraph(
             pht(
               'If you want to register a new account, continue with this '.
@@ -174,10 +174,11 @@ final class PhabricatorAuthRegisterController
               'for the new account.'))
           ->appendParagraph(
             pht(
-              'If you want to link an existing Phabricator account to this '.
+              'If you want to link an existing %s account to this '.
               'external account, do not continue. Instead: log in to your '.
               'existing account, then go to "Settings" and link the account '.
-              'in the "External Accounts" panel.'))
+              'in the "External Accounts" panel.',
+              PlatformSymbols::getPlatformServerName()))
           ->appendParagraph(
             pht(
               'If you continue, you will create a new account. You will not '.
@@ -187,10 +188,10 @@ final class PhabricatorAuthRegisterController
       } else {
         $errors[] = pht(
           'The external account you are registering with has an email address '.
-          'that is already in use ("%s") by an existing Phabricator account. '.
-          'Choose a new, valid email address to register a new Phabricator '.
-          'account.',
-          phutil_tag('strong', array(), $show_existing));
+          'that is already in use ("%s") by an existing %s account. '.
+          'Choose a new, valid email address to register a new account.',
+          phutil_tag('strong', array(), $show_existing),
+          PlatformSymbols::getPlatformServerName());
       }
     }
 
@@ -595,7 +596,9 @@ final class PhabricatorAuthRegisterController
 
     if ($is_setup) {
       $crumbs->addTextCrumb(pht('Setup Admin Account'));
-        $title = pht('Welcome to Phabricator');
+        $title = pht(
+          'Welcome to %s',
+          PlatformSymbols::getPlatformServerName());
     } else {
       $crumbs->addTextCrumb(pht('Register'));
       $crumbs->addTextCrumb($provider->getProviderName());
@@ -607,7 +610,10 @@ final class PhabricatorAuthRegisterController
     if ($is_setup) {
       $welcome_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->setTitle(pht('Welcome to Phabricator'))
+        ->setTitle(
+          pht(
+            'Welcome to %s',
+            PlatformSymbols::getPlatformServerName()))
         ->appendChild(
           pht(
             'Installation is complete. Register your administrator account '.
@@ -710,8 +716,9 @@ final class PhabricatorAuthRegisterController
   }
 
   private function sendWaitingForApprovalEmail(PhabricatorUser $user) {
-    $title = '[Phabricator] '.pht(
-      'New User "%s" Awaiting Approval',
+    $title = pht(
+      '[%s] New User "%s" Awaiting Approval',
+      PlatformSymbols::getPlatformServerName(),
       $user->getUsername());
 
     $body = new PhabricatorMetaMTAMailBody();

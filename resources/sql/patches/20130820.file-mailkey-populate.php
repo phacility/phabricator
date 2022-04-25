@@ -1,6 +1,6 @@
 <?php
 
-echo pht('Populating Phabricator files with mail keys xactions...')."\n";
+echo pht('Populating files with mail keys...')."\n";
 
 $table = new PhabricatorFile();
 $table_name = $table->getTableName();

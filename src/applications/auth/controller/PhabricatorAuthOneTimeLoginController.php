@@ -151,7 +151,9 @@ final class PhabricatorAuthOneTimeLoginController
 
     switch ($link_type) {
       case PhabricatorAuthSessionEngine::ONETIME_WELCOME:
-        $title = pht('Welcome to Phabricator');
+        $title = pht(
+          'Welcome to %s',
+          PlatformSymbols::getPlatformServerName());
         break;
       case PhabricatorAuthSessionEngine::ONETIME_RECOVER:
         $title = pht('Account Recovery');
@@ -159,7 +161,9 @@ final class PhabricatorAuthOneTimeLoginController
       case PhabricatorAuthSessionEngine::ONETIME_USERNAME:
       case PhabricatorAuthSessionEngine::ONETIME_RESET:
       default:
-        $title = pht('Log in to Phabricator');
+        $title = pht(
+          'Log in to %s',
+          PlatformSymbols::getPlatformServerName());
         break;
     }
 

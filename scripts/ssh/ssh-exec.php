@@ -130,9 +130,9 @@ try {
     if (!PhabricatorEnv::isClusterAddress($remote_address)) {
       throw new Exception(
         pht(
-          'This request originates from outside of the Phabricator cluster '.
-          'address range. Requests signed with a trusted device key must '.
-          'originate from trusted hosts.'));
+          'This request originates from outside of the cluster address range. '.
+          'Requests signed with a trusted device key must originate from '.
+          'trusted hosts.'));
     }
 
     $device = id(new AlmanacDeviceQuery())
@@ -228,7 +228,9 @@ try {
   $command_list = implode(', ', $command_list);
 
   $error_lines = array();
-  $error_lines[] = pht('Welcome to Phabricator.');
+  $error_lines[] = pht(
+    'Welcome to %s.',
+    PlatformSymbols::getPlatformServerName());
   $error_lines[] = pht(
     'You are logged in as %s.',
     $user_name);
@@ -236,7 +238,7 @@ try {
   if (!$original_argv) {
     $error_lines[] = pht(
       'You have not specified a command to run. This means you are requesting '.
-      'an interactive shell, but Phabricator does not provide interactive '.
+      'an interactive shell, but this server does not provide interactive '.
       'shells over SSH.');
     $error_lines[] = pht(
       '(Usually, you should run a command like "git clone" or "hg push" '.
@@ -270,7 +272,7 @@ try {
   if (empty($workflows[$command])) {
     $error_lines[] = pht(
       'You have specified the command "%s", but that command is not '.
-      'supported by Phabricator. As received by Phabricator, your entire '.
+      'supported by this server. As received by this server, your entire '.
       'argument list was:',
       $command);
 
