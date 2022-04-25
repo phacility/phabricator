@@ -80,7 +80,7 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
             $ex->setErrorDescription(
               pht(
                 "Your '%s' client version is '%d', which is newer than the ".
-                "server version, '%d'. Upgrade your Phabricator install.",
+                "server version, '%d'. Upgrade your server.",
                 'arc',
                 $client_version,
                 $server_version));

@@ -17,7 +17,7 @@ final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
         $message = pht(
           'This request did not include a "Host" header. This may mean that '.
           'your webserver (like nginx or apache) is misconfigured so the '.
-          '"Host" header is not making it to Phabricator, or that you are '.
+          '"Host" header is not making it to this software, or that you are '.
           'making a raw request without a "Host" header using a tool or '.
           'library.'.
           "\n\n".
@@ -38,9 +38,9 @@ final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
           'is required for some browsers to be able to set cookies.'.
           "\n\n".
           'This may mean the base URI is configured incorrectly. You must '.
-          'serve Phabricator from a base URI with a dot (like '.
-          '"https://phabricator.mycompany.com"), not a bare domain '.
-          '(like "https://phabricator/"). If you are trying to use a bare '.
+          'serve this software from a base URI with a dot (like '.
+          '"https://devtools.example.com"), not a bare domain '.
+          '(like "https://devtools/"). If you are trying to use a bare '.
           'domain, change your configuration to use a full domain with a dot '.
           'in it instead.'.
           "\n\n".
@@ -76,7 +76,7 @@ final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
       'will not work properly until you configure it.'.
       "\n\n".
       'You should set the base URI to the URI you will use to access '.
-      'Phabricator, like "http://phabricator.example.com/".'.
+      'this server, like "http://devtools.example.com/".'.
       "\n\n".
       'Include the protocol (http or https), domain name, and port number if '.
       'you are using a port other than 80 (http) or 443 (https).'.
@@ -96,7 +96,7 @@ final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
       ->setMessage($message)
       ->addCommand(
         hsprintf(
-          '<tt>phabricator/ $</tt> %s',
+          '<tt>$</tt> %s',
           csprintf(
             './bin/config set phabricator.base-uri %s',
             $base_uri_guess)));

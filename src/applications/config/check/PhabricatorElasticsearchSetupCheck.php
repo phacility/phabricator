@@ -34,8 +34,8 @@ final class PhabricatorElasticsearchSetupCheck extends PhabricatorSetupCheck {
         } catch (Exception $ex) {
           $summary = pht('Elasticsearch is not reachable as configured.');
           $message = pht(
-            'Elasticsearch is configured (with the %s setting) but Phabricator'.
-            ' encountered an exception when trying to test the index.'.
+            'Elasticsearch is configured (with the %s setting) but an '.
+            'exception was encountered when trying to test the index.'.
             "\n\n".
             '%s',
             phutil_tag('tt', array(), 'cluster.search'),
@@ -69,7 +69,7 @@ final class PhabricatorElasticsearchSetupCheck extends PhabricatorSetupCheck {
             'Elasticsearch index exists but needs correction.');
 
           $message = pht(
-            'Either the Phabricator schema for Elasticsearch has changed '.
+            'Either the schema for Elasticsearch has changed '.
             'or Elasticsearch created the index automatically. '.
             'Use the following command to rebuild the index.');
 

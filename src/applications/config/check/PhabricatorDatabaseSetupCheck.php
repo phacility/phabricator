@@ -35,11 +35,11 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         ->addPhabricatorConfig('mysql.port')
         ->addCommand(
           hsprintf(
-            '<tt>phabricator/ $</tt> ./bin/config set mysql.host %s',
+            '<tt>$</tt> ./bin/config set mysql.host %s',
             $host))
         ->addCommand(
           hsprintf(
-            '<tt>phabricator/ $</tt> ./bin/config set mysql.port %s',
+            '<tt>$</tt> ./bin/config set mysql.port %s',
             $port));
     }
 
@@ -134,7 +134,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('Setup MySQL Schema'))
         ->setMessage($message)
         ->setIsFatal(true)
-        ->addCommand(hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+        ->addCommand(hsprintf('<tt>$</tt> ./bin/storage upgrade'));
 
       return true;
     }
@@ -160,7 +160,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         ->setIsFatal(true)
         ->setMessage($message)
         ->addCommand(
-          hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+          hsprintf('<tt>$</tt> ./bin/storage upgrade'));
 
       return true;
     }
@@ -177,7 +177,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
           'Database host "%s" is configured as a master, but is replicating '.
           'another host. This is dangerous and can mangle or destroy data. '.
           'Only replicas should be replicating. Stop replication on the '.
-          'host or reconfigure Phabricator.',
+          'host or adjust configuration.',
           $ref->getRefKey());
 
         $this->newIssue('db.master.replicating')
