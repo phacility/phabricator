@@ -124,8 +124,7 @@ final class PassphraseCredentialSearchEngine
       ->setIcon($icon)
       ->setTitle(pht('Welcome to %s', $app_name))
       ->setDescription(
-        pht('Credential management for re-use in other areas of Phabricator '.
-            'or general storage of shared secrets.'))
+        pht('Credential management and general storage of shared secrets.'))
       ->addAction($create_button);
 
       return $view;
