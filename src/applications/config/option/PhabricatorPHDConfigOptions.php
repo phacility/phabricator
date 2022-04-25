@@ -50,7 +50,7 @@ final class PhabricatorPHDConfigOptions
           pht(
             'Specify a system user to run the daemons as. Primarily, this '.
             'user will own the working copies of any repositories that '.
-            'Phabricator imports or manages. This option is new and '.
+            'this software imports or manages. This option is new and '.
             'experimental.')),
       $this->newOption('phd.garbage-collection', 'wild', array())
         ->setLocked(true)

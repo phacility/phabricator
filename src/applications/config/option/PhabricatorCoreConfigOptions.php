@@ -251,7 +251,7 @@ EOREMARKUP
       $this->newOption('phabricator.application-settings', 'wild', array())
         ->setLocked(true)
         ->setDescription(
-          pht('Customized settings for Phabricator applications.')),
+          pht('Customized settings for applications.')),
       $this->newOption('phabricator.cache-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),
