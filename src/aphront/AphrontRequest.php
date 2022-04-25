@@ -354,9 +354,9 @@ final class AphrontRequest extends Phobject {
       $info = array();
 
       $info[] = pht(
-        'You are trying to save some data to Phabricator, but the request '.
-        'your browser made included an incorrect token. Reload the page '.
-        'and try again. You may need to clear your cookies.');
+        'You are trying to save some data to permanent storage, but the '.
+        'request your browser made included an incorrect token. Reload the '.
+        'page and try again. You may need to clear your cookies.');
 
       if ($this->isAjax()) {
         $info[] = pht('This was an Ajax request.');
@@ -587,11 +587,11 @@ final class AphrontRequest extends Phobject {
       throw new AphrontMalformedRequestException(
         pht('Bad Host Header'),
         pht(
-          'This Phabricator install is configured as "%s", but you are '.
-          'using the domain name "%s" to access a page which is trying to '.
-          'set a cookie. Access Phabricator on the configured primary '.
-          'domain or a configured alternate domain. Phabricator will not '.
-          'set cookies on other domains for security reasons.',
+          'This server is configured as "%s", but you are using the domain '.
+          'name "%s" to access a page which is trying to set a cookie. '.
+          'Access this service on the configured primary domain or a '.
+          'configured alternate domain. Cookies will not be set on other '.
+          'domains for security reasons.',
           $configured_as,
           $accessed_as),
         true);

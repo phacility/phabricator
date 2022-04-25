@@ -56,8 +56,8 @@ final class PhabricatorAuthLinkController
             pht('Account Already Linked'),
             array(
               pht(
-                'Your Phabricator account is already linked to an external '.
-                'account for this provider.'),
+                'Your account is already linked to an external account for '.
+                'this provider.'),
             ));
         }
         break;
