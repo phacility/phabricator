@@ -103,7 +103,6 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.policy' => array(),
       'db.nuance' => array(),
       'db.passphrase' => array(),
-      'db.phragment' => array(),
       'db.dashboard' => array(),
       'db.system' => array(),
       'db.fund' => array(),
