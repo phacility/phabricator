@@ -757,6 +757,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $commit = ';'.phutil_escape_uri($commit);
     }
 
+    $line = phutil_string_cast($line);
     if (phutil_nonempty_string($line)) {
       $line = '$'.phutil_escape_uri($line);
     }
