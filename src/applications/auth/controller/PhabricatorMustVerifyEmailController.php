@@ -34,8 +34,7 @@ final class PhabricatorMustVerifyEmailController
 
     $must_verify = pht(
       'You must verify your email address to log in. You should have a '.
-      'new email message from Phabricator with verification instructions '.
-      'in your inbox (%s).',
+      'new email message with verification instructions in your inbox (%s).',
       phutil_tag('strong', array(), $email_address));
 
     $send_again = pht(

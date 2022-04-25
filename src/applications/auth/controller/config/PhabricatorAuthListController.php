@@ -53,8 +53,7 @@ final class PhabricatorAuthListController
     $list->setNoDataString(
       pht(
         '%s You have not added authentication providers yet. Use "%s" to add '.
-        'a provider, which will let users register new Phabricator accounts '.
-        'and log in.',
+        'a provider, which will let users register new accounts and log in.',
         phutil_tag(
           'strong',
           array(),
