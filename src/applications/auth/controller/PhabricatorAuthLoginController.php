@@ -80,9 +80,9 @@ final class PhabricatorAuthLoginController
         } else {
           return $this->renderError(
             pht(
-              'The external account ("%s") you just authenticated with is '.
-              'not configured to allow logins on this Phabricator install. '.
-              'An administrator may have recently disabled it.',
+              'The external service ("%s") you just authenticated with is '.
+              'not configured to allow logins on this server. An '.
+              'administrator may have recently disabled it.',
               $provider->getProviderName()));
         }
       } else if ($viewer->getPHID() == $account->getUserPHID()) {
@@ -94,11 +94,14 @@ final class PhabricatorAuthLoginController
       } else {
         return $this->renderError(
           pht(
-            'The external account ("%s") you just used to log in is already '.
-            'associated with another Phabricator user account. Log in to the '.
-            'other Phabricator account and unlink the external account before '.
-            'linking it to a new Phabricator account.',
-            $provider->getProviderName()));
+            'The external service ("%s") you just used to log in is already '.
+            'associated with another %s user account. Log in to the '.
+            'other %s account and unlink the external account before '.
+            'linking it to a new %s account.',
+            $provider->getProviderName(),
+            PlatformSymbols::getPlatformServerName(),
+            PlatformSymbols::getPlatformServerName(),
+            PlatformSymbols::getPlatformServerName()));
       }
     } else {
       // The account is not yet attached to a Phabricator user, so this is
@@ -109,9 +112,9 @@ final class PhabricatorAuthLoginController
         } else {
           return $this->renderError(
             pht(
-              'The external account ("%s") you just authenticated with is '.
-              'not configured to allow registration on this Phabricator '.
-              'install. An administrator may have recently disabled it.',
+              'The external service ("%s") you just authenticated with is '.
+              'not configured to allow registration on this server. An '.
+              'administrator may have recently disabled it.',
               $provider->getProviderName()));
         }
       } else {
@@ -135,11 +138,12 @@ final class PhabricatorAuthLoginController
         if ($existing_accounts) {
           return $this->renderError(
             pht(
-              'Your Phabricator account is already connected to an external '.
-              'account on this provider ("%s"), but you are currently logged '.
-              'in to the provider with a different account. Log out of the '.
+              'Your %s account is already connected to an external '.
+              'account on this service ("%s"), but you are currently logged '.
+              'in to the service with a different account. Log out of the '.
               'external service, then log back in with the correct account '.
               'before refreshing the account link.',
+              PlatformSymbols::getPlatformServerName(),
               $provider->getProviderName()));
         }
 
@@ -148,9 +152,9 @@ final class PhabricatorAuthLoginController
         } else {
           return $this->renderError(
             pht(
-              'The external account ("%s") you just authenticated with is '.
-              'not configured to allow account linking on this Phabricator '.
-              'install. An administrator may have recently disabled it.',
+              'The external service ("%s") you just authenticated with is '.
+              'not configured to allow account linking on this server. An '.
+              'administrator may have recently disabled it.',
               $provider->getProviderName()));
         }
       }
@@ -169,7 +173,8 @@ final class PhabricatorAuthLoginController
       return $this->renderError(
         pht(
           'The external account you just logged in with is not associated '.
-          'with a valid Phabricator user.'));
+          'with a valid %s user account.',
+          PlatformSymbols::getPlatformServerName()));
     }
 
     return $this->loginUser($user);

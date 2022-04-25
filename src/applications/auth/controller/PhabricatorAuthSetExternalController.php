@@ -42,10 +42,11 @@ final class PhabricatorAuthSetExternalController
       PhabricatorAuthLinkMessageType::MESSAGEKEY);
     if (!strlen($text)) {
       $text = pht(
-        'You can link your Phabricator account to an external account to '.
+        'You can link your %s account to an external account to '.
         'allow you to log in more easily in the future. To continue, choose '.
         'an account to link below. If you prefer not to link your account, '.
-        'you can skip this step.');
+        'you can skip this step.',
+        PlatformSymbols::getPlatformServerName());
     }
 
     $remarkup_view = new PHUIRemarkupView($viewer, $text);

@@ -220,7 +220,7 @@ final class PhabricatorAuthEditController
     } else {
       $registration_warning = pht(
         "NOTE: Any user who can browse to this install's login page will be ".
-        "able to register a Phabricator account. To restrict who can register ".
+        "able to register an account. To restrict who can register ".
         "an account, configure [[ %s | %s ]].",
         $config_href,
         $config_name);
@@ -238,10 +238,9 @@ final class PhabricatorAuthEditController
       phutil_tag('strong', array(), pht('Allow Registration:')),
       ' ',
       pht(
-        'Allow users to register new Phabricator accounts using this '.
-        'provider. If you disable registration, users can still use this '.
-        'provider to log in to existing accounts, but will not be able to '.
-        'create new accounts.'),
+        'Allow users to register new accounts using this provider. If you '.
+        'disable registration, users can still use this provider to log in '.
+        'to existing accounts, but will not be able to create new accounts.'),
     );
 
     $str_link = hsprintf(
@@ -249,29 +248,29 @@ final class PhabricatorAuthEditController
       pht('Allow Linking Accounts'),
       pht(
         'Allow users to link account credentials for this provider to '.
-        'existing Phabricator accounts. There is normally no reason to '.
-        'disable this unless you are trying to move away from a provider '.
-        'and want to stop users from creating new account links.'));
+        'existing accounts. There is normally no reason to disable this '.
+        'unless you are trying to move away from a provider and want to '.
+        'stop users from creating new account links.'));
 
     $str_unlink = hsprintf(
       '<strong>%s:</strong> %s',
       pht('Allow Unlinking Accounts'),
       pht(
         'Allow users to unlink account credentials for this provider from '.
-        'existing Phabricator accounts. If you disable this, Phabricator '.
-        'accounts will be permanently bound to provider accounts.'));
+        'existing accounts. If you disable this, accounts will be '.
+        'permanently bound to provider accounts.'));
 
     $str_trusted_email = hsprintf(
       '<strong>%s:</strong> %s',
       pht('Trust Email Addresses'),
       pht(
-        'Phabricator will skip email verification for accounts registered '.
+        'Skip email verification for accounts registered '.
         'through this provider.'));
     $str_auto_login = hsprintf(
       '<strong>%s:</strong> %s',
       pht('Allow Auto Login'),
       pht(
-        'Phabricator will automatically login with this provider if it is '.
+        'Automatically log in with this provider if it is '.
         'the only available provider.'));
 
     $form = id(new AphrontFormView())

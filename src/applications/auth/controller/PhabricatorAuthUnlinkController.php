@@ -86,7 +86,7 @@ final class PhabricatorAuthUnlinkController
       ->appendChild(
         pht(
           'You can not unlink this account because the administrator has '.
-          'configured Phabricator to make links to "%s" accounts permanent.',
+          'configured this server to make links to "%s" accounts permanent.',
           $provider->getProviderName()))
       ->addCancelButton($done_uri);
   }
@@ -123,7 +123,7 @@ final class PhabricatorAuthUnlinkController
     $title = pht('Unlink "%s" Account?', $provider->getProviderName());
     $body = pht(
       'You will no longer be able to use your %s account to '.
-      'log in to Phabricator.',
+      'log in.',
       $provider->getProviderName());
 
     return $this->newDialog()

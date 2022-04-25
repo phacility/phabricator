@@ -42,7 +42,7 @@ final class PhabricatorAuthProvidersGuidanceEngineExtension
 
     if ($domains_value) {
       $message = pht(
-        'Phabricator is configured with an email domain whitelist (in %s), so '.
+        'This server is configured with an email domain whitelist (in %s), so '.
         'only users with a verified email address at one of these %s '.
         'allowed domain(s) will be able to register an account: %s',
         $domains_link,
@@ -53,7 +53,7 @@ final class PhabricatorAuthProvidersGuidanceEngineExtension
         ->setMessage($message);
     } else {
       $message = pht(
-        'Anyone who can browse to this Phabricator install will be able to '.
+        'Anyone who can browse to this this server will be able to '.
         'register an account. To add email domain restrictions, configure '.
         '%s.',
         $domains_link);
