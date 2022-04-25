@@ -263,19 +263,16 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
             MetaMTAReceivedMailStatus::STATUS_UNKNOWN_SENDER,
             pht(
               'This email was sent from an email address ("%s") that is not '.
-              'associated with a Phabricator account. To interact with '.
-              'Phabricator via email, add this address to your account.',
+              'associated with a registered user account. To interact via '.
+              'email, add this address to your account.',
               (string)$this->newFromAddress()));
         } else {
           throw new PhabricatorMetaMTAReceivedMailProcessingException(
             MetaMTAReceivedMailStatus::STATUS_NO_RECEIVERS,
             pht(
-              'Phabricator can not process this mail because no application '.
+              'This mail can not be processed because no application '.
               'knows how to handle it. Check that the address you sent it to '.
-              'is correct.'.
-              "\n\n".
-              '(No concrete, enabled subclass of PhabricatorMailReceiver can '.
-              'accept this mail.)'));
+              'is correct.'));
         }
       }
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
@@ -348,9 +345,13 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   private function getRawEmailAddresses($addresses) {
     $raw_addresses = array();
-    foreach (explode(',', $addresses) as $address) {
-      $raw_addresses[] = $this->getRawEmailAddress($address);
+
+    if (phutil_nonempty_string($addresses)) {
+      foreach (explode(',', $addresses) as $address) {
+        $raw_addresses[] = $this->getRawEmailAddress($address);
+      }
     }
+
     return array_filter($raw_addresses);
   }
 
@@ -436,7 +437,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $status_code,
       pht(
         'Your message does not contain any body text or attachments, so '.
-        'Phabricator can not do anything useful with it. Make sure comment '.
+        'this server can not do anything useful with it. Make sure comment '.
         'text appears at the top of your message: quoted replies, inline '.
         'text, and signatures are discarded and ignored.'));
   }
@@ -484,7 +485,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $headers = implode("\n", $headers);
 
     $body = pht(<<<EOBODY
-Your email to Phabricator was not processed, because an error occurred while
+Your email to %s was not processed, because an error occurred while
 trying to handle it:
 
 %s
@@ -499,6 +500,7 @@ trying to handle it:
 
 EOBODY
 ,
+      PlatformSymbols::getPlatformServerName(),
       wordwrap($description, 78),
       $this->getRawTextBody(),
       $headers);
@@ -563,21 +565,20 @@ EOBODY
     if ($sender->getIsDisabled()) {
       $failure_reason = pht(
         'Your account ("%s") is disabled, so you can not interact with '.
-        'Phabricator over email.',
+        'over email.',
         $sender->getUsername());
     } else if ($sender->getIsStandardUser()) {
       if (!$sender->getIsApproved()) {
         $failure_reason = pht(
           'Your account ("%s") has not been approved yet. You can not '.
-          'interact with Phabricator over email until your account is '.
-          'approved.',
+          'interact over email until your account is approved.',
           $sender->getUsername());
       } else if (PhabricatorUserEmail::isEmailVerificationRequired() &&
                !$sender->getIsEmailVerified()) {
         $failure_reason = pht(
           'You have not verified the email address for your account ("%s"). '.
-          'You must verify your email address before you can interact '.
-          'with Phabricator over email.',
+          'You must verify your email address before you can interact over '.
+          'email.',
           $sender->getUsername());
       }
     }

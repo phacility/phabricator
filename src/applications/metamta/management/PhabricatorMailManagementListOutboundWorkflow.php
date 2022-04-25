@@ -6,7 +6,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('list-outbound')
-      ->setSynopsis(pht('List outbound messages sent by Phabricator.'))
+      ->setSynopsis(pht('List outbound messages.'))
       ->setExamples('**list-outbound**')
       ->setArguments(
         array(

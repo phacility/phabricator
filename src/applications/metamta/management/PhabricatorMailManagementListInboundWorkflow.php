@@ -6,7 +6,7 @@ final class PhabricatorMailManagementListInboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('list-inbound')
-      ->setSynopsis(pht('List inbound messages received by Phabricator.'))
+      ->setSynopsis(pht('List inbound messages.'))
       ->setExamples(
         '**list-inbound**')
       ->setArguments(

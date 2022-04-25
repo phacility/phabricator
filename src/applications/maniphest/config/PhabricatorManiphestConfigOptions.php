@@ -218,7 +218,7 @@ The keys you can provide in a specification are:
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI
-elements, and that any status marked `silly` does not appear if Phabricator
+elements, and that any status marked `silly` does not appear if the software
 is configured with `phabricator.serious-business` set to true.
 
 Examining the default configuration and examples below will probably be helpful

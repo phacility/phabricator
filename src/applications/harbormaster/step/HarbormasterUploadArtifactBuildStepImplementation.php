@@ -8,7 +8,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
   }
 
   public function getGenericDescription() {
-    return pht('Upload a file from a host to Phabricator.');
+    return pht('Upload a file.');
   }
 
   public function getBuildStepGroupKey() {

@@ -47,6 +47,7 @@ abstract class PhabricatorSelectSetting
   }
 
   final public function validateTransactionValue($value) {
+    $value = phutil_string_cast($value);
     if (!strlen($value)) {
       return;
     }
@@ -66,11 +67,13 @@ abstract class PhabricatorSelectSetting
   }
 
   public function getTransactionNewValue($value) {
+    $value = phutil_string_cast($value);
+
     if (!strlen($value)) {
       return null;
     }
 
-    return (string)$value;
+    return $value;
   }
 
 }

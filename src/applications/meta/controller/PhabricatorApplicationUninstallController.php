@@ -38,7 +38,7 @@ final class PhabricatorApplicationUninstallController
         ->appendChild(
           pht(
             'To manage prototypes, enable them by setting %s in your '.
-            'Phabricator configuration.',
+            'configuration.',
             phutil_tag('tt', array(), 'phabricator.show-prototypes')));
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -98,9 +98,9 @@ final class PhabricatorApplicationUninstallController
             ->appendParagraph(
               pht(
                 'This is very unusual and will leave you without any '.
-                'content on the Phabricator home page. You should only '.
-                'do this if you are certain you know what you are doing.'))
-            ->addSubmitButton(pht('Completely Break Phabricator'));
+                'content on the home page. You should only do this if you '.
+                'are certain you know what you are doing.'))
+            ->addSubmitButton(pht('Completely Break Everything'));
         } else {
           $dialog
             ->appendParagraph(
@@ -114,8 +114,7 @@ final class PhabricatorApplicationUninstallController
           ->setTitle(pht('Information'))
           ->appendChild(
             pht(
-              'This application cannot be uninstalled, '.
-              'because it is required for Phabricator to work.'));
+              'This application is required and cannot be uninstalled.'));
       }
     }
     return id(new AphrontDialogResponse())->setDialog($dialog);

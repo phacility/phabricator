@@ -126,12 +126,12 @@ final class PhabricatorMailTestAdapter
     $guts['headers'] = $header_list;
 
     $text_body = $message->getTextBody();
-    if (strlen($text_body)) {
+    if (phutil_nonempty_string($text_body)) {
       $guts['body'] = $text_body;
     }
 
     $html_body = $message->getHTMLBody();
-    if (strlen($html_body)) {
+    if (phutil_nonempty_string($html_body)) {
       $guts['html-body'] = $html_body;
     }
 

@@ -21,11 +21,10 @@ final class PhabricatorMailUtil
     // If a mailbox prefix is configured and present, strip it off.
     $prefix_key = 'metamta.single-reply-handler-prefix';
     $prefix = PhabricatorEnv::getEnvConfig($prefix_key);
-    $len = strlen($prefix);
 
-    if ($len) {
+    if (phutil_nonempty_string($prefix)) {
       $prefix = $prefix.'+';
-      $len = $len + 1;
+      $len = strlen($prefix);
 
       if (!strncasecmp($raw_address, $prefix, $len)) {
         $raw_address = substr($raw_address, $len);
