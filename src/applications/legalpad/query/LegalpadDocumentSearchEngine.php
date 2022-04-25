@@ -185,8 +185,7 @@ final class LegalpadDocumentSearchEngine
       ->setIcon($icon)
       ->setTitle(pht('Welcome to %s', $app_name))
       ->setDescription(
-        pht('Create documents and track signatures. Can also be re-used in '.
-            'other areas of Phabricator, like CLAs.'))
+        pht('Create documents and track signatures.'))
       ->addAction($create_button);
 
       return $view;

@@ -35,12 +35,12 @@ final class PhabricatorApplicationEmailCommandsController
 
     $content[] = '= '.pht('Mail Commands Overview');
     $content[] = pht(
-      'After configuring Phabricator to process inbound mail, you can '.
+      'After configuring processing for inbound mail, you can '.
       'interact with objects (like tasks and revisions) over email. For '.
-      'information on configuring Phabricator, see '.
+      'information on configuring inbound mail, see '.
       '**[[ %s | Configuring Inbound Email ]]**.'.
       "\n\n".
-      'In most cases, you can reply to email you receive from Phabricator '.
+      'In most cases, you can reply to email you receive from this server '.
       'to leave comments. You can also use **mail commands** to take a '.
       'greater range of actions (like claiming a task or requesting changes '.
       'to a revision) without needing to log in to the web UI.'.
@@ -52,12 +52,13 @@ final class PhabricatorApplicationEmailCommandsController
       'or end of your mail message. For example, you could write this in a '.
       'reply to task email to claim the task:'.
       "\n\n```\n!claim\n\nI'll take care of this.\n```\n\n\n".
-      "When Phabricator receives your mail, it will process any commands ".
+      "When %s receives your mail, it will process any commands ".
       "first, then post the remaining message body as a comment. You can ".
       "execute multiple commands at once:".
       "\n\n```\n!assign alincoln\n!close\n\nI just talked to @alincoln, ".
       "and he showed me that he fixed this.\n```\n",
-      PhabricatorEnv::getDoclink('Configuring Inbound Email'));
+      PhabricatorEnv::getDoclink('Configuring Inbound Email'),
+      PlatformSymbols::getPlatformServerName());
 
     $content[] = '= '.$spec['header'];
     $content[] = $spec['summary'];
@@ -122,7 +123,7 @@ final class PhabricatorApplicationEmailCommandsController
     $info_view = null;
     if (!PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain')) {
       $error = pht(
-        "Phabricator is not currently configured to accept inbound mail. ".
+        "This server is not currently configured to accept inbound mail. ".
         "You won't be able to interact with objects over email until ".
         "inbound mail is set up.");
       $info_view = id(new PHUIInfoView())

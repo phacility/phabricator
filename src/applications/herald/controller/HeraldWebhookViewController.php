@@ -53,7 +53,7 @@ final class HeraldWebhookViewController
     $warnings = array();
     if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
       $message = pht(
-        'Phabricator is currently configured in silent mode, so it will not '.
+        'This server is running in silent mode, so it will not '.
         'publish webhooks. To adjust this setting, see '.
         '@{config:phabricator.silent} in Config.');
 
