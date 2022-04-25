@@ -83,7 +83,7 @@ final class AphrontApplicationConfiguration
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function runHTTPRequest(AphrontHTTPSink $sink) {
-    if (isset($_SERVER['HTTP_X_PHABRICATOR_SELFCHECK'])) {
+    if (isset($_SERVER['HTTP_X_SETUP_SELFCHECK'])) {
       $response = self::newSelfCheckResponse();
       return self::writeResponse($sink, $response);
     }

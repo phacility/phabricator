@@ -108,7 +108,7 @@ final class PhabricatorCustomLogoConfigType
     $controls[] = id(new AphrontFormTextControl())
       ->setName('wordmarkText')
       ->setLabel(pht('Wordmark'))
-      ->setPlaceholder(pht('Phabricator'))
+      ->setPlaceholder(PlatformSymbols::getPlatformServerName())
       ->setValue($wordmark_text);
 
     return $controls;
