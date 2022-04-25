@@ -556,7 +556,7 @@ abstract class PhabricatorApplication
       case PhabricatorPolicyCapability::CAN_VIEW:
         if (!$this->canUninstall()) {
           return pht(
-            'This application is required for Phabricator to operate, so all '.
+            'This application is required, so all '.
             'users must have access to it.');
         } else {
           return null;

@@ -19,7 +19,7 @@ final class PhabricatorWordPressAuthProvider
       "You should use these settings in your application:".
       "\n\n".
       "  - **URL:** Set this to your full domain with protocol. For this ".
-      "    Phabricator install, the correct value is: `%s`\n".
+      "    server, the correct value is: `%s`\n".
       "  - **Redirect URL**: Set this to: `%s`\n".
       "\n\n".
       "Once you've created an application, copy the **Client ID** and ".

@@ -70,7 +70,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
     if (version_compare(phpversion(), '5.5', '>=')) {
       $message = pht(
         'Installing the "APCu" PHP extension will improve performance. '.
-        'This extension is strongly recommended. Without it, Phabricator '.
+        'This extension is strongly recommended. Without it, this software '.
         'must rely on a very inefficient disk-based cache.');
 
       $this
