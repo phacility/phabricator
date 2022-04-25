@@ -10,7 +10,7 @@ final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
     if (!extension_loaded('gd')) {
       $message = pht(
         "The '%s' extension is not installed. Without '%s', support, ".
-        "Phabricator will not be able to process or resize images ".
+        "this server will not be able to process or resize images ".
         "(for example, to generate thumbnails). Install or enable '%s'.",
         'gd',
         'gd',
@@ -41,7 +41,7 @@ final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
 
         $message = pht(
           "The '%s' extension has support for only some image types. ".
-          "Phabricator will be unable to process images of the missing ".
+          "This server will be unable to process images of the missing ".
           "types until you build '%s' with support for them. ".
           "Supported types: %s. Missing types: %s.",
           'gd',
