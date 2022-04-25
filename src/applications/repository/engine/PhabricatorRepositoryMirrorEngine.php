@@ -16,7 +16,7 @@ final class PhabricatorRepositoryMirrorEngine
 
     if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
       $this->log(
-        pht('Phabricator is running in silent mode; declining to mirror.'));
+        pht('This software is running in silent mode; declining to mirror.'));
       return;
     }
 

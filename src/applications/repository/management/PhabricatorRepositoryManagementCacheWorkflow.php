@@ -47,7 +47,7 @@ final class PhabricatorRepositoryManagementCacheWorkflow
       ->loadPathIDs();
     if (empty($path_map[$path_name])) {
       throw new PhutilArgumentUsageException(
-        pht('Path "%s" is not known to Phabricator.', $path_name));
+        pht('Path "%s" is not unknown.', $path_name));
     }
     $path_id = $path_map[$path_name];
 

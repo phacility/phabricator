@@ -22,7 +22,7 @@ final class PhabricatorEmailStampsSetting
 
   protected function getControlInstructions() {
     return pht(<<<EOREMARKUP
-Phabricator stamps mail with labels like `actor(alice)` which can be used to
+Outgoing mail is stamped with labels like `actor(alice)` which can be used to
 write client mail rules to organize mail. By default, these stamps are sent
 in an `X-Phabricator-Stamps` header.
 
