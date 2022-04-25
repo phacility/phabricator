@@ -21,7 +21,7 @@ final class PhabricatorConfigResponse extends AphrontStandaloneHTMLResponse {
   }
 
   protected function getResponseTitle() {
-    return pht('Phabricator Setup Error');
+    return pht('Setup Error');
   }
 
   protected function getResponseBodyClass() {

@@ -8,7 +8,7 @@ final class PhabricatorDeveloperConfigOptions
   }
 
   public function getDescription() {
-    return pht('Options for Phabricator developers, including debugging.');
+    return pht('Options for platform developers, including debugging.');
   }
 
   public function getIcon() {
@@ -27,18 +27,19 @@ final class PhabricatorDeveloperConfigOptions
             pht('Enable DarkConsole'),
             pht('Disable DarkConsole'),
           ))
-        ->setSummary(pht("Enable Phabricator's debugging console."))
+        ->setSummary(pht('Enable the debugging console.'))
         ->setDescription(
           pht(
             "DarkConsole is a development and profiling tool built into ".
-            "Phabricator's web interface. You should leave it disabled unless ".
-            "you are developing or debugging Phabricator.\n\n".
+            "the web interface. You should leave it disabled unless ".
+            "you are developing or debugging %s.\n\n".
             "Once you activate DarkConsole for the install, **you need to ".
             "enable it for your account before it will actually appear on ".
             "pages.** You can do this in Settings > Developer Settings.\n\n".
             "DarkConsole exposes potentially sensitive data (like queries, ".
             "stack traces, and configuration) so you generally should not ".
-            "turn it on in production.")),
+            "turn it on in production.",
+            PlatformSymbols::getPlatformServerName())),
       $this->newOption('darkconsole.always-on', 'bool', false)
         ->setBoolOptions(
           array(
@@ -91,11 +92,11 @@ final class PhabricatorDeveloperConfigOptions
             'Confirm before redirecting so DarkConsole can be examined.'))
         ->setDescription(
           pht(
-            'Normally, Phabricator issues HTTP redirects after a successful '.
+            'Normally, this software issues HTTP redirects after a successful '.
             'POST. This can make it difficult to debug things which happen '.
             'while processing the POST, because service and profiling '.
             'information are lost. By setting this configuration option, '.
-            'Phabricator will show a page instead of automatically '.
+            'an interstitial page will be shown instead of automatically '.
             'redirecting, allowing you to examine service and profiling '.
             'information. It also makes the UX awful, so you should only '.
             'enable it when debugging.')),
@@ -106,7 +107,7 @@ final class PhabricatorDeveloperConfigOptions
         ->setSummary(pht('Automatically profile some percentage of pages.'))
         ->setDescription(
           pht(
-            "Normally, Phabricator profiles pages only when explicitly ".
+            "Normally, pages are profiled only when explicitly ".
             "requested via DarkConsole. However, it may be useful to profile ".
             "some pages automatically.\n\n".
             "Set this option to a positive integer N to profile 1 / N pages ".
@@ -128,7 +129,7 @@ final class PhabricatorDeveloperConfigOptions
         ->setDescription(
           pht(
             "The Multimeter application collects performance samples. You ".
-            "can use this data to help you understand what Phabricator is ".
+            "can use this data to help you understand what the software is ".
             "spending time and resources doing, and to identify problematic ".
             "access patterns.".
             "\n\n".

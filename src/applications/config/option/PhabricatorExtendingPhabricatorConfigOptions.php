@@ -4,11 +4,11 @@ final class PhabricatorExtendingPhabricatorConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht('Extending Phabricator');
+    return pht('Extensions');
   }
 
   public function getDescription() {
-    return pht('Make Phabricator even cooler!');
+    return pht('Manage extensions.');
   }
 
   public function getIcon() {
