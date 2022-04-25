@@ -10,12 +10,12 @@ final class AlmanacClusterDatabaseServiceType
   }
 
   public function getServiceTypeName() {
-    return pht('Phabricator Cluster: Database');
+    return pht('Cluster: Database');
   }
 
   public function getServiceTypeDescription() {
     return pht(
-      'Defines a database service for use in a Phabricator cluster.');
+      'Defines a database service for use in a cluster.');
   }
 
 }
