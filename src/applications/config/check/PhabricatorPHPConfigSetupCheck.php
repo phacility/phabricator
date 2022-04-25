@@ -21,8 +21,8 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         'REMOTE_ADDR is no longer empty.');
 
       $message = pht(
-        'No REMOTE_ADDR is available, so Phabricator cannot determine the '.
-        'origin address for requests. This will prevent Phabricator from '.
+        'No REMOTE_ADDR is available, so this server cannot determine the '.
+        'origin address for requests. This will prevent the software from '.
         'performing important security checks. This most often means you '.
         'have a mistake in your preamble script. Consult the documentation '.
         '(%s) and double-check that the script is written correctly.',
@@ -76,8 +76,8 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         'with the database. You should install the newer "mysqli" extension '.
         'to improve behaviors (like error handling and query timeouts).'.
         "\n\n".
-        'Phabricator will work with the older extension, but upgrading to the '.
-        'newer extension is recommended.'.
+        'This software will work with the older extension, but upgrading to '.
+        'the newer extension is recommended.'.
         "\n\n".
         'You may be able to install the extension with a command like: %s',
 
@@ -96,10 +96,10 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
       $message = pht(
         'PHP is currently using the older MySQL external driver instead of '.
         'the newer MySQL native driver. The older driver lacks options and '.
-        'features (like support for query timeouts) which allow Phabricator '.
+        'features (like support for query timeouts) which allow this server '.
         'to interact better with the database.'.
         "\n\n".
-        'Phabricator will work with the older driver, but upgrading to the '.
+        'This software will work with the older driver, but upgrading to the '.
         'native driver is recommended.'.
         "\n\n".
         'You may be able to install the native driver with a command like: %s',
@@ -134,7 +134,7 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         'and the client will comply.'.
         "\n\n".
         'Although it is normally difficult for an attacker to convince '.
-        'Phabricator to connect to a malicious MySQL server, you should '.
+        'this software to connect to a malicious MySQL server, you should '.
         'disable this option: this capability is unnecessary and inherently '.
         'dangerous.'.
         "\n\n".
