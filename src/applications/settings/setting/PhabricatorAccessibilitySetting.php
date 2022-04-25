@@ -19,8 +19,8 @@ final class PhabricatorAccessibilitySetting
 
   protected function getControlInstructions() {
     return pht(
-      'If you have difficulty reading the Phabricator UI, this setting '.
-      'may make Phabricator more accessible.');
+      'If you have difficulty reading the UI, this setting '.
+      'may help.');
   }
 
   public function getSettingDefaultValue() {

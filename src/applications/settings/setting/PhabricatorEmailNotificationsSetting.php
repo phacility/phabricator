@@ -30,7 +30,7 @@ final class PhabricatorEmailNotificationsSetting
       ' - To continue to receive regular Phabricator emails, including Herald '.
       'mail, choose **Legacy Phabricator Notifications**.'.
       "\n".
-      ' - If you select **Disable Email Notifications**, Phabricator will never '.
+      ' - If you select **Disable Email Notifications**, this server will never '.
       'send email to notify you about events. This preference overrides '.
       'all your other settings.'.
       "\n\n".

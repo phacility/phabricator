@@ -398,8 +398,9 @@ final class PhabricatorEmailAddressesSettingsPanel
       ->setTitle(pht('Change primary email address?'))
       ->appendParagraph(
         pht(
-          'If you change your primary address, Phabricator will send all '.
+          'If you change your primary address, %s will send all '.
           'email to %s.',
+          PlatformSymbols::getPlatformServerName(),
           $address))
       ->appendParagraph(
         pht(
