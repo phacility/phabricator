@@ -37,7 +37,7 @@ final class PhabricatorPolicyConfigOptions
         ->setSummary(pht('Allow users to set object visibility to public.'))
         ->setDescription(
           pht(
-            "Phabricator allows you to set the visibility of objects (like ".
+            "This software allows you to set the visibility of objects (like ".
             "repositories and tasks) to 'Public', which means **anyone ".
             "on the internet can see them, without needing to log in or ".
             "have an account**.".
@@ -59,7 +59,7 @@ final class PhabricatorPolicyConfigOptions
         ->setSummary(pht(
           'Lock specific application policies so they can not be edited.'))
         ->setDescription(pht(
-          'Phabricator has application policies which can dictate whether '.
+          'This software has application policies which can dictate whether '.
           'users can take certain actions, such as creating new users. '."\n\n".
           'This setting allows for "locking" these policies such that no '.
           'further edits can be made on a per-policy basis.'))

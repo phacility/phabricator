@@ -248,7 +248,7 @@ final class PhabricatorPolicy
       case PhabricatorPolicies::POLICY_PUBLIC:
         return pht(
           'This object is public and can be viewed by anyone, even if they '.
-          'do not have a Phabricator account.');
+          'do not have an account on this server.');
       case PhabricatorPolicies::POLICY_USER:
         return pht('Logged in users can take this action.');
       case PhabricatorPolicies::POLICY_ADMIN:
