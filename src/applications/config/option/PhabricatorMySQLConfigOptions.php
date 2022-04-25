@@ -38,14 +38,14 @@ final class PhabricatorMySQLConfigOptions
       $this->newOption('storage.default-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setSummary(
-          pht('The namespace that Phabricator databases should use.'))
+          pht('The namespace that databases should use.'))
         ->setDescription(
           pht(
-            "Phabricator puts databases in a namespace, which defaults to ".
+            "Databases are created in a namespace, which defaults to ".
             "'phabricator' -- for instance, the Differential database is ".
             "named 'phabricator_differential' by default. You can change ".
             "this namespace if you want. Normally, you should not do this ".
-            "unless you are developing Phabricator and using namespaces to ".
+            "unless you are developing extensions and using namespaces to ".
             "separate multiple sandbox datasets.")),
         $this->newOption('mysql.port', 'string', null)
         ->setLocked(true)

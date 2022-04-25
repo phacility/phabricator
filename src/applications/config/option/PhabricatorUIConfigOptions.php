@@ -8,7 +8,7 @@ final class PhabricatorUIConfigOptions
   }
 
   public function getDescription() {
-    return pht('Configure the Phabricator UI, including colors.');
+    return pht('Configure the UI, including colors.');
   }
 
   public function getIcon() {
@@ -51,7 +51,7 @@ EOJSON;
     return array(
       $this->newOption('ui.header-color', 'enum', 'blindigo')
         ->setDescription(
-          pht('Sets the default color scheme of Phabricator.'))
+          pht('Sets the default color scheme.'))
         ->setEnumOptions($options),
       $this->newOption('ui.logo', $logo_type, array())
         ->setSummary(
@@ -61,9 +61,10 @@ EOJSON;
             "Customize the logo image and text which appears in the main ".
             "site header:\n\n".
             "  - **Logo Image**: Upload a new 80 x 80px image to replace the ".
-            "Phabricator logo in the site header.\n\n".
+            "logo in the site header.\n\n".
             "  - **Wordmark**: Choose new text to display next to the logo. ".
-            "By default, the header displays //Phabricator//.\n\n")),
+            "By default, the header displays //%s//.\n\n",
+            PlatformSymbols::getPlatformServerName())),
       $this->newOption('ui.favicons', 'wild', array())
         ->setSummary(pht('Customize favicons.'))
         ->setDescription(pht('Customize favicons.'))

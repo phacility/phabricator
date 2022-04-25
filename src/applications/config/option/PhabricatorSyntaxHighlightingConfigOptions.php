@@ -31,13 +31,12 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         ->setSummary(pht('Default non-pygments syntax highlighter engine.'))
         ->setDescription(
           pht(
-            'Phabricator can highlight PHP by default and use Pygments for '.
-            'other languages if enabled. You can provide a custom '.
-            'highlighter engine by extending class %s.',
+            'You can provide a custom highlighter engine by extending '.
+            'class %s.',
             'PhutilSyntaxHighlighterEngine')),
       $this->newOption('pygments.enabled', 'bool', false)
         ->setSummary(
-          pht('Should Phabricator use Pygments to highlight code?'))
+          pht('Use Pygments to highlight code?'))
         ->setBoolOptions(
           array(
             pht('Use Pygments'),
@@ -45,7 +44,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           ))
         ->setDescription(
           pht(
-            'Phabricator supports syntax highlighting a few languages by '.
+            'Syntax highlighting a supported for a few languages by '.
             'default, but you can install Pygments (a third-party syntax '.
             'highlighting tool) to provide support for many more languages.'.
             "\n\n".
@@ -54,12 +53,12 @@ final class PhabricatorSyntaxHighlightingConfigOptions
             'download and install instructions.'.
             "\n\n".
             'Once Pygments is installed, enable this option '.
-            '(`pygments.enabled`) to make Phabricator use Pygments when '.
+            '(`pygments.enabled`) to make use of Pygments when '.
             'highlighting source code.'.
             "\n\n".
             'After you install and enable Pygments, newly created source '.
             'code (like diffs and pastes) should highlight correctly. '.
-            'You may need to clear Phabricator\'s caches to get previously '.
+            'You may need to clear caches to get previously '.
             'existing source code to highlight. For instructions on '.
             'managing caches, see [[ %s | Managing Caches ]].',
             $caches_href)),
