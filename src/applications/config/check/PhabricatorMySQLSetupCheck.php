@@ -66,7 +66,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         'fit into the column), or security concerns (for example, by '.
         'truncating keys or credentials).'.
         "\n\n".
-        'Phabricator is developed and tested in "STRICT_ALL_TABLES" mode so '.
+        'This software is developed and tested in "STRICT_ALL_TABLES" mode so '.
         'you should normally never encounter these situations, but may run '.
         'into them if you interact with the database directly, run '.
         'third-party code, develop extensions, or just encounter a bug in '.
@@ -88,7 +88,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         'they may not work in strict mode.'.
         "\n\n".
         'If you can not or do not want to enable "STRICT_ALL_TABLES", you '.
-        'can safely ignore this warning. Phabricator will work correctly '.
+        'can safely ignore this warning. This software will work correctly '.
         'with this mode enabled or disabled.',
         $host_name,
         phutil_tag('pre', array(), 'sql_mode=STRICT_ALL_TABLES'));
@@ -151,7 +151,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
         $message = pht(
           "Database host \"%s\" is using the builtin stopword file for ".
-          "building search indexes. This can make Phabricator's search ".
+          "building search indexes. This can make the search ".
           "feature less useful.\n\n".
           "Stopwords are common words which are not indexed and thus can not ".
           "be searched for. The default stopword file has about 500 words, ".
@@ -273,11 +273,11 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         "There are no hard-and-fast rules to setting an appropriate value, ".
         "but a reasonable starting point for a standard install is something ".
         "like 40%% of the total memory on the machine. For example, if you ".
-        "have 4GB of RAM on the machine you have installed Phabricator on, ".
+        "have 4GB of RAM on the machine you have installed this software on, ".
         "you might set this value to %s.\n\n".
         "You can read more about this option in the MySQL documentation to ".
         "help you make a decision about how to configure it for your use ".
-        "case. There are no concerns specific to Phabricator which make it ".
+        "case. There are no concerns specific to this software which make it ".
         "different from normal workloads with respect to this setting.\n\n".
         "To adjust the setting, add something like this to your %s file (in ".
         "the %s section), replacing %s with an appropriate value for your ".

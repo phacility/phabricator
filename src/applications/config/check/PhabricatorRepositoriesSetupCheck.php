@@ -45,9 +45,9 @@ final class PhabricatorRepositoriesSetupCheck extends PhabricatorSetupCheck {
         'readable by the webserver.');
       $message = pht(
         "The directory for local repositories (%s) does not exist, or is not ".
-        "readable by the webserver. Phabricator uses this directory to store ".
-        "information about repositories. If this directory does not exist, ".
-        "create it:\n\n".
+        "readable by the webserver. This software uses this directory to ".
+        "store information about repositories. If this directory does not ".
+        "exist, create it:\n\n".
         "%s\n".
         "If this directory exists, make it readable to the webserver. You ".
         "can also edit the configuration below to use some other directory.",
