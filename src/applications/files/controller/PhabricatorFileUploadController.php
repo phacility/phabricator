@@ -46,7 +46,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
         pht('Drag and Drop:'),
         pht(
           'You can also upload files by dragging and dropping them from your '.
-          'desktop onto this page or the Phabricator home page.')));
+          'desktop onto this page or the home page.')));
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)

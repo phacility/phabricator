@@ -181,7 +181,7 @@ final class PhabricatorFilesConfigOptions
         ->setSummary(pht('Local storage disk path.'))
         ->setDescription(
           pht(
-            "Phabricator provides a local disk storage engine, which just ".
+            "This software provides a local disk storage engine, which just ".
             "writes files to some directory on local disk. The webserver ".
             "must have read/write permissions on this directory. This is ".
             "straightforward and suitable for most installs, but will not ".

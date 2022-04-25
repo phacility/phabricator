@@ -30,8 +30,8 @@ final class HarbormasterBuildStepCoreCustomField
           'After completing this build step Harbormaster can continue the '.
           'build normally, or it can pause the build and wait for a message. '.
           'If you are using this build step to trigger some work in an '.
-          'external system, you may want to have Phabricator wait for that '.
-          'system to perform the work and report results back.'.
+          'external system, you may want wait for that system to perform '.
+          'the work and report results back.'.
           "\n\n".
           'If you select **Continue Build Normally**, the build plan will '.
           'proceed once this step finishes.'.
