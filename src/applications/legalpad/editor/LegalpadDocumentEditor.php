@@ -101,7 +101,7 @@ final class LegalpadDocumentEditor
         LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE,
         pht('Invalid'),
         pht('Only documents with signature type "individual" may '.
-            'require signing to use Phabricator.'),
+            'require signing to log in.'),
         null);
     }
 

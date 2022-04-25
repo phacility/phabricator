@@ -112,7 +112,8 @@ final class ManiphestTaskOwnerTransaction
     foreach ($xactions as $xaction) {
       $old = $xaction->getOldValue();
       $new = $xaction->getNewValue();
-      if (!strlen($new)) {
+
+      if (!phutil_nonempty_string($new)) {
         continue;
       }
 

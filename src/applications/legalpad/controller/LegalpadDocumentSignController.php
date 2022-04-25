@@ -681,7 +681,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $body = pht(
       "%s:\n\n".
       "This email address was used to sign a Legalpad document ".
-      "in Phabricator:\n\n".
+      "in %s:\n\n".
       "  %s\n\n".
       "Please verify you own this email address and accept the ".
       "agreement by clicking this link:\n\n".
@@ -690,6 +690,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
       "verification step.\n\nYou can review the document here:\n\n".
       "  %s\n",
       $name,
+      PlatformSymbols::getPlatformServerName(),
       $doc_name,
       $link,
       $doc_link);

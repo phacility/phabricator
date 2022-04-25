@@ -72,10 +72,10 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
           MetaMTAReceivedMailStatus::STATUS_NO_PUBLIC_MAIL,
           pht(
             'This mail is addressed to the public email address of an object '.
-            '("%s"), but public replies are not enabled on this Phabricator '.
-            'install. An administrator may have recently disabled this '.
-            'setting, or you may have replied to an old message. Try '.
-            'replying to a more recent message instead.',
+            '("%s"), but public replies are not enabled on this server. An '.
+            'administrator may have recently disabled this setting, or you '.
+            'may have replied to an old message. Try replying to a more '.
+            'recent message instead.',
             $pattern));
       }
       $check_phid = $object->getPHID();

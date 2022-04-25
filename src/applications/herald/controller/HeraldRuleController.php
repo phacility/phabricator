@@ -108,8 +108,7 @@ final class HeraldRuleController extends HeraldController {
       throw new Exception(
         pht(
           'This rule was created with a newer version of Herald. You can not '.
-          'view or edit it in this older version. Upgrade your Phabricator '.
-          'deployment.'));
+          'view or edit it in this older version. Upgrade your software.'));
     }
 
     // Upgrade rule version to our version, since we might add newly-defined
