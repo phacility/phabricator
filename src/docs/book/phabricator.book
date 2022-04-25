@@ -272,10 +272,6 @@
       "name": "Projects",
       "include": "(^src/applications/project/)"
     },
-    "releeph": {
-      "name": "Releeph",
-      "include": "(^src/applications/releeph/)"
-    },
     "remarkup": {
       "name": "Remarkup",
       "include": [
