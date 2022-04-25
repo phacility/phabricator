@@ -56,7 +56,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     $badges2 = array();
     $badges2[] = id(new PHUIBadgeView())
       ->setIcon('fa-user')
-      ->setHeader(pht('Phabricator User'))
+      ->setHeader(pht('User'))
       ->setSubhead(pht('Confirmed your account.'))
       ->setQuality(PhabricatorBadgesQuality::POOR)
       ->setSource(pht('People (automatic)'))
@@ -111,7 +111,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     $badges2[] = id(new PHUIBadgeView())
       ->setIcon('fa-compass')
       ->setHeader(pht('Lead Developer'))
-      ->setSubhead(pht('Lead Developer of Phabricator'))
+      ->setSubhead(pht('Lead Developer of Software'))
       ->setQuality(PhabricatorBadgesQuality::HEIRLOOM)
       ->setSource(pht('Direct Award'))
       ->addByline(pht('Dec 31, 1969'))

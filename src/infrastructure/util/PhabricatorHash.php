@@ -22,7 +22,7 @@ final class PhabricatorHash extends Phobject {
     if (!$key) {
       throw new Exception(
         pht(
-          "Set a '%s' in your Phabricator configuration!",
+          "Set a '%s' in your configuration!",
           'security.hmac-key'));
     }
 

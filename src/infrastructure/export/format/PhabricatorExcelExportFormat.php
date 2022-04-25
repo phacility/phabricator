@@ -33,8 +33,7 @@ EOHELP
 
     return pht(<<<EOHELP
 Data can not be exported to Excel because the PHPExcel library is not
-installed. This software component is required for Phabricator to create
-Excel files.
+installed. This software component is required to create Excel files.
 
 You can install PHPExcel from GitHub:
 

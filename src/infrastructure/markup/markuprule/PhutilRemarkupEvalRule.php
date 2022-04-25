@@ -67,11 +67,11 @@ final class PhutilRemarkupEvalRule extends PhutilRemarkupRule {
         'strings' => array(
           'platform' => array(
             'server' => array(
-              'name' => pht('Phabricator'),
+              'name' => PlatformSymbols::getPlatformServerName(),
               'path' => pht('phabricator/'),
             ),
             'client' => array(
-              'name' => pht('Arcanist'),
+              'name' => PlatformSymbols::getPlatformClientName(),
               'path' => pht('arcanist/'),
             ),
           ),

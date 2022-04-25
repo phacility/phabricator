@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementDatabasesWorkflow
     $this
       ->setName('databases')
       ->setExamples('**databases** [__options__]')
-      ->setSynopsis(pht('List Phabricator databases.'));
+      ->setSynopsis(pht('List databases.'));
   }
 
   protected function isReadOnlyWorkflow() {
