@@ -73,8 +73,8 @@ final class PhabricatorAccessLogConfigOptions
         ->setSummary(pht('Access log location.'))
         ->setDescription(
           pht(
-            "To enable the Phabricator access log, specify a path. The ".
-            "Phabricator access than normal HTTP access logs (for instance, ".
+            "To enable the HTTP access log, specify a path. This log is ".
+            "more detailed than normal HTTP access logs (for instance, ".
             "it can show logged-in users, controllers, and other application ".
             "data).\n\n".
             "If not set, no log will be written."))
@@ -82,7 +82,7 @@ final class PhabricatorAccessLogConfigOptions
           null,
           pht('Disable access log.'))
         ->addExample(
-          '/var/log/phabricator/access.log',
+          '/var/log/devtools/access.log',
           pht('Write access log here.')),
       $this->newOption(
         'log.access.format',
@@ -98,16 +98,16 @@ final class PhabricatorAccessLogConfigOptions
         ->setSummary(pht('SSH log location.'))
         ->setDescription(
           pht(
-            "To enable the Phabricator SSH log, specify a path. The ".
-            "access log can provide more detailed information about SSH ".
-            "access than a normal SSH log (for instance, it can show ".
-            "logged-in users, commands, and other application data).\n\n".
+            "To enable the SSH log, specify a path. This log can provide ".
+            "more detailed information about SSH access than a normal SSH ".
+            "log (for instance, it can show logged-in users, commands, and ".
+            "other application data).\n\n".
             "If not set, no log will be written."))
         ->addExample(
           null,
           pht('Disable SSH log.'))
         ->addExample(
-          '/var/log/phabricator/ssh.log',
+          '/var/log/devtools/ssh.log',
           pht('Write SSH log here.')),
       $this->newOption(
         'log.ssh.format',
@@ -121,14 +121,14 @@ final class PhabricatorAccessLogConfigOptions
         ->setSummary(pht('SSH error log location.'))
         ->setDescription(
           pht(
-            'To enable the Phabricator SSH error log, specify a path. Errors '.
-            'occurring in contexts where Phabricator is serving SSH requests '.
+            'To enable the SSH error log, specify a path. Errors occurring '.
+            'in contexts where this software is serving SSH requests '.
             'will be written to this log.'.
             "\n\n".
             'If not set, no log will be written.'))
         ->addExample(null, pht('Disable SSH error log.'))
         ->addExample(
-          '/var/log/phabricator/ssh-error.log',
+          '/var/log/devtools/ssh-error.log',
           pht('Write SSH error log here.')),
     );
   }

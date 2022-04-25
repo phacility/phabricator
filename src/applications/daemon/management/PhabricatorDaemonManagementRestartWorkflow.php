@@ -24,7 +24,7 @@ final class PhabricatorDaemonManagementRestartWorkflow
             'name' => 'force',
             'help' => pht(
               'Stop all daemon processes on this host, even if they belong '.
-              'to another Phabricator instance.'),
+              'to another instance.'),
           ),
           array(
             'name' => 'gently',

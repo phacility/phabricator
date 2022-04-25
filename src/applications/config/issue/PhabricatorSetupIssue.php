@@ -28,7 +28,8 @@ final class PhabricatorSetupIssue extends Phobject {
     $message = pht(
       "Unable to connect to MySQL!\n\n".
       "%s\n\n".
-      "Make sure Phabricator and MySQL are correctly configured.",
+      "Make sure databases connection information and MySQL are ".
+      "correctly configured.",
       $ex->getMessage());
 
     $issue = id(new self())
