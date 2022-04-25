@@ -28,9 +28,13 @@ final class PhabricatorPeopleEmailLoginMailEngine
     $is_set_password = $this->isSetPasswordWorkflow();
 
     if ($is_set_password) {
-      $subject = pht('[Phabricator] Account Password Link');
+      $subject = pht(
+        '[%s] Account Password Link',
+        PlatformSymbols::getPlatformServerName());
     } else {
-      $subject = pht('[Phabricator] Account Login Link');
+      $subject = pht(
+        '[%s] Account Login Link',
+        PlatformSymbols::getPlatformServerName());
     }
 
     $recipient = $this->getRecipient();
@@ -72,7 +76,7 @@ final class PhabricatorPeopleEmailLoginMailEngine
           $login_uri);
       } else if ($is_serious) {
         $body[] = pht(
-          "You can use this link to reset your Phabricator password:".
+          "You can use this link to reset your password:".
           "\n\n  %s\n",
           $login_uri);
       } else {
@@ -90,8 +94,7 @@ final class PhabricatorPeopleEmailLoginMailEngine
       }
     } else {
       $body[] = pht(
-        "You can use this login link to regain access to your Phabricator ".
-        "account:".
+        "You can use this login link to regain access to your account:".
         "\n\n".
         "  %s\n",
         $login_uri);

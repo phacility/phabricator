@@ -4,7 +4,7 @@ final class NuancePhabricatorFormSourceDefinition
   extends NuanceSourceDefinition {
 
   public function getName() {
-    return pht('Phabricator Form');
+    return pht('Web Form');
   }
 
   public function getSourceDescription() {

@@ -77,8 +77,9 @@ final class PhabricatorPeopleInviteSendController
 
           $template = array();
           $template[] = pht(
-            '%s has invited you to join Phabricator.',
-            $viewer->getFullName());
+            '%s has invited you to join %s.',
+            $viewer->getFullName(),
+            PlatformSymbols::getPlatformServerName());
 
           if (strlen(trim($message))) {
             $template[] = $message;
@@ -174,7 +175,7 @@ final class PhabricatorPeopleInviteSendController
       ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
-          'To invite users to Phabricator, enter their email addresses below. '.
+          'To invite users, enter their email addresses below. '.
           'Separate addresses with commas or newlines.'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
