@@ -112,6 +112,11 @@ final class PhabricatorDocumentRef
 
   public function hasAnyMimeType(array $candidate_types) {
     $mime_full = $this->getMimeType();
+
+    if (!phutil_nonempty_string($mime_full)) {
+      return false;
+    }
+
     $mime_parts = explode(';', $mime_full);
 
     $mime_type = head($mime_parts);

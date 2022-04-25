@@ -194,7 +194,7 @@ final class PhabricatorDashboardQueryPanelType
     if (!$engine) {
       throw new Exception(
         pht(
-          'The application search engine "%s" is not known to Phabricator!',
+          'The application search engine "%s" is unknown.',
           $class));
     }
 

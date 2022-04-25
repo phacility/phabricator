@@ -76,7 +76,7 @@ abstract class DifferentialChangesetTestRenderer
             $any_new = true;
           }
           $num = nonempty($p['line'], '-');
-          $render = $p['render'];
+          $render = (string)$p['render'];
           $htype = nonempty($p['htype'], '.');
 
           // TODO: This should probably happen earlier, whenever we deal with

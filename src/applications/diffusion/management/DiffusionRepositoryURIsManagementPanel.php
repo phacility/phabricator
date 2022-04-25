@@ -130,19 +130,19 @@ final class DiffusionRepositoryURIsManagementPanel
     $messages = array();
     if ($repository->isHosted()) {
       if ($is_new) {
-        $host_message = pht('Phabricator will host this repository.');
+        $host_message = pht('This repository will be hosted.');
       } else {
-        $host_message = pht('Phabricator is hosting this repository.');
+        $host_message = pht('This repository is observed.');
       }
 
       $messages[] = $host_message;
     } else {
       if ($is_new) {
         $observe_message = pht(
-          'Phabricator will observe a remote repository.');
+          'This repository will be observed.');
       } else {
         $observe_message = pht(
-          'This repository is hosted remotely. Phabricator is observing it.');
+          'This remote repository is being observed.');
       }
 
       $messages[] = $observe_message;

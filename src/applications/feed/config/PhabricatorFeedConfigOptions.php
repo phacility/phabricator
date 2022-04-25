@@ -24,7 +24,7 @@ final class PhabricatorFeedConfigOptions
 IMPORTANT: Feed hooks are deprecated and have been replaced by Webhooks.
 
 You can configure Webhooks in Herald. This configuration option will be removed
-in a future version of Phabricator.
+in a future version of the software.
 
 (This legacy option may be configured with a list of URIs; feed stories will
 send to these URIs.)
