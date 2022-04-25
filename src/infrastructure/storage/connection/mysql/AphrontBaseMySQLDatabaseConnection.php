@@ -77,6 +77,7 @@ abstract class AphrontBaseMySQLDatabaseConnection
   }
 
   public function escapeStringForLikeClause($value) {
+    $value = phutil_string_cast($value);
     $value = addcslashes($value, '\%_');
     $value = $this->escapeUTF8String($value);
     return $value;

@@ -131,7 +131,7 @@ final class LegalpadDocumentEditEngine
           ->setKey('requireSignature')
           ->setOptions(
             pht('No Signature Required'),
-            pht('Signature Required to use Phabricator'))
+            pht('Signature Required to Log In'))
           ->setAsCheckbox(true)
           ->setTransactionType(
             LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE)

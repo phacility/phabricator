@@ -42,7 +42,7 @@ final class PhabricatorEditorSetting
   }
 
   public function validateTransactionValue($value) {
-    if (!strlen($value)) {
+    if (!phutil_nonempty_string($value)) {
       return;
     }
 
