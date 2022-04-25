@@ -85,9 +85,9 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
 
         $message = pht(
           'The "%s" setting is currently disabled in your PHP configuration, '.
-          'but Phabricator is running in development mode. This option should '.
-          'normally be enabled in development so you do not need to restart '.
-          'anything after making changes to the code.',
+          'but this software is running in development mode. This option '.
+          'should normally be enabled in development so you do not need to '.
+          'restart anything after making changes to the code.',
           'apc.stat');
 
         $this
@@ -174,8 +174,7 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $message = pht(
         'The PHP "Zend OPcache" extension is installed, but not enabled in '.
         'your PHP configuration. Enabling it will dramatically improve '.
-        'Phabricator performance. Edit the "%s" setting to '.
-        'enable the extension.',
+        'performance. Edit the "%s" setting to enable the extension.',
         'opcache.enable');
 
       $this->newIssue('extension.opcache.enable')

@@ -9,8 +9,7 @@ final class PhabricatorAuthManagementRecoverWorkflow
       ->setExamples('**recover** __username__')
       ->setSynopsis(
         pht(
-          'Recover access to an account if you have locked yourself out '.
-          'of Phabricator.'))
+          'Recover access to an account if you have locked yourself out.'))
       ->setArguments(
         array(
           array(

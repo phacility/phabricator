@@ -31,7 +31,7 @@ final class PhabricatorJIRAAuthProvider
         "settings to create an application:\n\n".
         "  - **Server URL**: `%s`\n".
         "  - Then, click **Next**. On the second page:\n".
-        "  - **Application Name**: `Phabricator`\n".
+        "  - **Application Name**: `%s`\n".
         "  - **Application Type**: `Generic Application`\n".
         "  - Then, click **Create**.\n\n".
         "**Configure Your Application**: Find the application you just ".
@@ -41,13 +41,15 @@ final class PhabricatorJIRAAuthProvider
         "settings:\n\n".
         "  - **Consumer Key**: Set this to the \"Consumer Key\" value in the ".
         "form above.\n".
-        "  - **Consumer Name**: `Phabricator`\n".
+        "  - **Consumer Name**: `%s`\n".
         "  - **Public Key**: Set this to the \"Public Key\" value in the ".
         "form above.\n".
         "  - **Consumer Callback URL**: `%s`\n".
         "Click **Save** in JIRA. Authentication should now be configured, ".
         "and this provider should work correctly.",
         PhabricatorEnv::getProductionURI('/'),
+        PlatformSymbols::getPlatformServerName(),
+        PlatformSymbols::getPlatformServerName(),
         $login_uri);
     }
   }
@@ -169,7 +171,7 @@ final class PhabricatorJIRAAuthProvider
           "The PHP 'openssl' extension is not installed. You must install ".
           "this extension in order to add a JIRA authentication provider, ".
           "because JIRA OAuth requests use the RSA-SHA1 signing algorithm. ".
-          "Install the 'openssl' extension, restart Phabricator, and try ".
+          "Install the 'openssl' extension, restart everything, and try ".
           "again."));
     }
 
@@ -198,8 +200,8 @@ final class PhabricatorJIRAAuthProvider
         ->appendRemarkupInstructions(
           pht(
             "**JIRA Instance Name**\n\n".
-            "Choose a permanent name for this instance of JIRA. Phabricator ".
-            "uses this name internally to keep track of this instance of ".
+            "Choose a permanent name for this instance of JIRA. This name is ".
+            "used internally to keep track of this particular instance of ".
             "JIRA, in case the URL changes later.\n\n".
             "Use lowercase letters, digits, and period. For example, ".
             "`jira`, `jira.mycompany` or `jira.engineering` are reasonable ".
@@ -281,8 +283,7 @@ final class PhabricatorJIRAAuthProvider
               new PHUIRemarkupView(
                 $viewer,
                 pht(
-                  '**Post a comment** in the JIRA task, similar to the '.
-                  'emails Phabricator sends.')),
+                  '**Post a comment** in the JIRA task.')),
               $this->shouldCreateJIRAComment()));
     }
 
