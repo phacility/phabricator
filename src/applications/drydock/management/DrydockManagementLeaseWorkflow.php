@@ -32,6 +32,12 @@ final class DrydockManagementLeaseWorkflow
             'default' => 1,
             'help' => pht('Lease a given number of identical resources.'),
           ),
+          array(
+            'name' => 'blueprint',
+            'param' => 'identifier',
+            'repeat' => true,
+            'help' => pht('Lease resources from a specific blueprint.'),
+          ),
         ));
   }
 
@@ -79,6 +85,13 @@ final class DrydockManagementLeaseWorkflow
       $attributes = array();
     }
 
+    $filter_identifiers = $args->getArg('blueprint');
+    if ($filter_identifiers) {
+      $filter_blueprints = $this->getBlueprintFilterMap($filter_identifiers);
+    } else {
+      $filter_blueprints = array();
+    }
+
     $blueprint_phids = null;
 
     $leases = array();
@@ -94,7 +107,9 @@ final class DrydockManagementLeaseWorkflow
       }
 
       if ($blueprint_phids === null) {
-        $blueprint_phids = $this->newAllowedBlueprintPHIDs($lease);
+        $blueprint_phids = $this->newAllowedBlueprintPHIDs(
+          $lease,
+          $filter_blueprints);
       }
 
       $lease->setAllowedBlueprintPHIDs($blueprint_phids);
@@ -253,7 +268,51 @@ final class DrydockManagementLeaseWorkflow
     }
   }
 
-  private function newAllowedBlueprintPHIDs(DrydockLease $lease) {
+  private function getBlueprintFilterMap(array $identifiers) {
+    $viewer = $this->getViewer();
+
+    $query = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withIdentifiers($identifiers);
+
+    $blueprints = $query->execute();
+    $blueprints = mpull($blueprints, null, 'getPHID');
+
+    $map = $query->getIdentifierMap();
+
+    $seen = array();
+    foreach ($identifiers as $identifier) {
+      if (!isset($map[$identifier])) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Blueprint "%s" could not be loaded. Try a blueprint ID or '.
+            'PHID.',
+            $identifier));
+      }
+
+      $blueprint = $map[$identifier];
+
+      $blueprint_phid = $blueprint->getPHID();
+      if (isset($seen[$blueprint_phid])) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Blueprint "%s" is specified more than once (as "%s" and "%s").',
+            $blueprint->getBlueprintName(),
+            $seen[$blueprint_phid],
+            $identifier));
+      }
+
+      $seen[$blueprint_phid] = true;
+    }
+
+    return mpull($map, null, 'getPHID');
+  }
+
+  private function newAllowedBlueprintPHIDs(
+    DrydockLease $lease,
+    array $filter_blueprints) {
+    assert_instances_of($filter_blueprints, 'DrydockBlueprint');
+
     $viewer = $this->getViewer();
 
     $impls = DrydockBlueprintImplementation::getAllForAllocatingLease($lease);
@@ -281,6 +340,23 @@ final class DrydockManagementLeaseWorkflow
     }
 
     $phids = mpull($blueprints, 'getPHID');
+
+    if ($filter_blueprints) {
+      $allowed_map = array_fuse($phids);
+      $filter_map = mpull($filter_blueprints, null, 'getPHID');
+
+      foreach ($filter_map as $filter_phid => $blueprint) {
+        if (!isset($allowed_map[$filter_phid])) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Specified blueprint "%s" is not capable of satisfying the '.
+              'configured lease.',
+              $blueprint->getBlueprintName()));
+        }
+      }
+
+      $phids = mpull($filter_blueprints, 'getPHID');
+    }
 
     return $phids;
   }
