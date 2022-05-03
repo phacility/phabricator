@@ -111,6 +111,9 @@ final class DrydockLease extends DrydockDAO
         'key_owner' => array(
           'columns' => array('ownerPHID'),
         ),
+        'key_recent' => array(
+          'columns' => array('resourcePHID', 'dateModified'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

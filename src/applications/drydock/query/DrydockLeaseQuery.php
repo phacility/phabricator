@@ -9,6 +9,8 @@ final class DrydockLeaseQuery extends DrydockQuery {
   private $statuses;
   private $datasourceQuery;
   private $needUnconsumedCommands;
+  private $minModified;
+  private $maxModified;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -37,6 +39,12 @@ final class DrydockLeaseQuery extends DrydockQuery {
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withDateModifiedBetween($min_epoch, $max_epoch) {
+    $this->minModified = $min_epoch;
+    $this->maxModified = $max_epoch;
     return $this;
   }
 
@@ -144,6 +152,20 @@ final class DrydockLeaseQuery extends DrydockQuery {
         $conn,
         'id = %d',
         (int)$this->datasourceQuery);
+    }
+
+    if ($this->minModified !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateModified >= %d',
+        $this->minModified);
+    }
+
+    if ($this->maxModified !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateModified <= %d',
+        $this->maxModified);
     }
 
     return $where;
