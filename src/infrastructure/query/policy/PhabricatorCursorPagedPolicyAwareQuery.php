@@ -369,7 +369,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $this->setLimit($limit + 1);
 
-    if (strlen($pager->getAfterID())) {
+    if (phutil_nonempty_string($pager->getAfterID())) {
       $this->setExternalCursorString($pager->getAfterID());
     } else if ($pager->getBeforeID()) {
       $this->setExternalCursorString($pager->getBeforeID());

@@ -27,11 +27,11 @@ final class PhabricatorCacheManagementPurgeWorkflow
     $is_all = $args->getArg('all');
     $key_list = $args->getArg('caches');
 
-    if ($is_all && strlen($key_list)) {
+    if ($is_all && phutil_nonempty_string($key_list)) {
       throw new PhutilArgumentUsageException(
         pht(
           'Specify either "--all" or "--caches", not both.'));
-    } else if (!$is_all && !strlen($key_list)) {
+    } else if (!$is_all && !phutil_nonempty_string($key_list)) {
       throw new PhutilArgumentUsageException(
         pht(
           'Select caches to purge with "--all" or "--caches". Available '.

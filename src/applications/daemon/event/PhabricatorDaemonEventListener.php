@@ -63,9 +63,12 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
     // TODO: This is a bit awkward for historical reasons, clean it up after
     // removing Conduit.
     $message = $event->getValue('message');
+
     $context = $event->getValue('context');
-    if (strlen($context) && $context !== $message) {
-      $message = "({$context}) {$message}";
+    if (phutil_nonempty_scalar($context)) {
+      if ($context !== $message) {
+        $message = "({$context}) {$message}";
+      }
     }
 
     $type = $event->getValue('type');

@@ -605,7 +605,7 @@ abstract class PhabricatorApplicationTransaction
           }
 
           if (!is_array($old)) {
-            if (!strlen($old)) {
+            if ($old === '' || $old === null) {
               return true;
             }
 
