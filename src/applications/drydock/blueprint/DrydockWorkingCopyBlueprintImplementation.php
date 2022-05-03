@@ -135,14 +135,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       ->setAllowedBlueprintPHIDs($blueprint_phids);
     $resource->setAttribute('host.leasePHID', $host_lease->getPHID());
 
-    $map = $lease->getAttribute('repositories.map');
-    foreach ($map as $key => $value) {
-      $map[$key] = array_select_keys(
-        $value,
-        array(
-          'phid',
-        ));
-    }
+    $map = $this->getWorkingCopyRepositoryMap($lease);
     $resource->setAttribute('repositories.map', $map);
 
     $slot_lock = $this->getConcurrentResourceLimitSlotLock($blueprint);
@@ -155,6 +148,44 @@ final class DrydockWorkingCopyBlueprintImplementation
     $host_lease->queueForActivation();
 
     return $resource;
+  }
+
+  private function getWorkingCopyRepositoryMap(DrydockLease $lease) {
+    $attribute = 'repositories.map';
+    $map = $lease->getAttribute($attribute);
+
+    // TODO: Leases should validate their attributes more formally.
+
+    if (!is_array($map) || !$map) {
+      $message = array();
+      if ($map === null) {
+        $message[] = pht(
+          'Working copy lease is missing required attribute "%s".',
+          $attribute);
+      } else {
+        $message[] = pht(
+          'Working copy lease has invalid attribute "%s".',
+          $attribute);
+      }
+
+      $message[] = pht(
+        'Attribute "repositories.map" should be a map of repository '.
+        'specifications.');
+
+      $message = implode("\n\n", $message);
+
+      throw new Exception($message);
+    }
+
+    foreach ($map as $key => $value) {
+      $map[$key] = array_select_keys(
+        $value,
+        array(
+          'phid',
+        ));
+    }
+
+    return $map;
   }
 
   public function activateResource(
