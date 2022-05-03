@@ -79,6 +79,8 @@ final class DrydockManagementLeaseWorkflow
       $attributes = array();
     }
 
+    $blueprint_phids = null;
+
     $leases = array();
     for ($idx = 0; $idx < $count; $idx++) {
       $lease = id(new DrydockLease())
@@ -91,20 +93,11 @@ final class DrydockManagementLeaseWorkflow
         $lease->setAttributes($attributes);
       }
 
-      // TODO: This is not hugely scalable, although this is a debugging
-      // workflow so maybe it's fine. Do we even need `bin/drydock lease` in
-      // the long run?
-      $all_blueprints = id(new DrydockBlueprintQuery())
-        ->setViewer($viewer)
-        ->execute();
-      $allowed_phids = mpull($all_blueprints, 'getPHID');
-      if (!$allowed_phids) {
-        throw new Exception(
-          pht(
-            'No blueprints exist which can plausibly allocate resources to '.
-            'satisfy the requested lease.'));
+      if ($blueprint_phids === null) {
+        $blueprint_phids = $this->newAllowedBlueprintPHIDs($lease);
       }
-      $lease->setAllowedBlueprintPHIDs($allowed_phids);
+
+      $lease->setAllowedBlueprintPHIDs($blueprint_phids);
 
       if ($until) {
         $lease->setUntil($until);
@@ -258,6 +251,38 @@ final class DrydockManagementLeaseWorkflow
         sleep(1);
       }
     }
+  }
+
+  private function newAllowedBlueprintPHIDs(DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    $impls = DrydockBlueprintImplementation::getAllForAllocatingLease($lease);
+
+    if (!$impls) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'No known blueprint class can ever allocate the specified '.
+          'lease. Check that the resource type is spelled correctly.'));
+    }
+
+    $classes = array_keys($impls);
+
+    $blueprints = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withBlueprintClasses($classes)
+      ->withDisabled(false)
+      ->execute();
+
+    if (!$blueprints) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'No enabled blueprints exist with a blueprint class that can '.
+          'plausibly allocate resources to satisfy the requested lease.'));
+    }
+
+    $phids = mpull($blueprints, 'getPHID');
+
+    return $phids;
   }
 
 }
