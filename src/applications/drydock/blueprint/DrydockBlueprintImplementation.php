@@ -329,6 +329,47 @@ abstract class DrydockBlueprintImplementation extends Phobject {
       ->execute();
   }
 
+
+  /**
+   * Get all the @{class:DrydockBlueprintImplementation}s which can possibly
+   * build a resource to satisfy a lease.
+   *
+   * This method returns blueprints which might, at some time, be able to
+   * build a resource which can satisfy the lease. They may not be able to
+   * build that resource right now.
+   *
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockBlueprintImplementation> List of qualifying blueprint
+   *   implementations.
+   */
+  public static function getAllForAllocatingLease(
+    DrydockLease $lease) {
+
+    $impls = self::getAllBlueprintImplementations();
+
+    $keep = array();
+    foreach ($impls as $key => $impl) {
+      // Don't use disabled blueprint types.
+      if (!$impl->isEnabled()) {
+        continue;
+      }
+
+      // Don't use blueprint types which can't allocate the correct kind of
+      // resource.
+      if ($impl->getType() != $lease->getResourceType()) {
+        continue;
+      }
+
+      if (!$impl->canAnyBlueprintEverAllocateResourceForLease($lease)) {
+        continue;
+      }
+
+      $keep[$key] = $impl;
+    }
+
+    return $keep;
+  }
+
   public static function getNamedImplementation($class) {
     return idx(self::getAllBlueprintImplementations(), $class);
   }
