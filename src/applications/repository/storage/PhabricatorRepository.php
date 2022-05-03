@@ -193,7 +193,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getMonogram() {
     $callsign = $this->getCallsign();
-    if (strlen($callsign)) {
+    if (phutil_nonempty_string($callsign)) {
       return "r{$callsign}";
     }
 

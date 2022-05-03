@@ -41,7 +41,7 @@ final class DrydockManagementLeaseWorkflow
     }
 
     $until = $args->getArg('until');
-    if (strlen($until)) {
+    if (phutil_nonempty_string($until)) {
       $until = strtotime($until);
       if ($until <= 0) {
         throw new PhutilArgumentUsageException(
@@ -52,7 +52,7 @@ final class DrydockManagementLeaseWorkflow
     }
 
     $attributes_file = $args->getArg('attributes');
-    if (strlen($attributes_file)) {
+    if (phutil_nonempty_string($attributes_file)) {
       if ($attributes_file == '-') {
         echo tsprintf(
           "%s\n",

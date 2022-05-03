@@ -290,6 +290,10 @@ final class PhabricatorPolicyQuery
   }
 
   public static function isSpecialPolicy($identifier) {
+    if ($identifier === null) {
+      return true;
+    }
+
     if (self::isObjectPolicy($identifier)) {
       return true;
     }

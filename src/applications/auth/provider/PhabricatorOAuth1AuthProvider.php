@@ -21,7 +21,7 @@ abstract class PhabricatorOAuth1AuthProvider
     $config = $this->getProviderConfig();
     $adapter->setConsumerKey($config->getProperty(self::PROPERTY_CONSUMER_KEY));
     $secret = $config->getProperty(self::PROPERTY_CONSUMER_SECRET);
-    if (strlen($secret)) {
+    if (phutil_nonempty_string($secret)) {
       $adapter->setConsumerSecret(new PhutilOpaqueEnvelope($secret));
     }
     $adapter->setCallbackURI(PhabricatorEnv::getURI($this->getLoginURI()));
