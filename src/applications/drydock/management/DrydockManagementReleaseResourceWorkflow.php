@@ -15,41 +15,70 @@ final class DrydockManagementReleaseResourceWorkflow
             'repeat' => true,
             'help' => pht('Resource ID to release.'),
           ),
+          array(
+            'name' => 'all',
+            'help' => pht('Release all resources. Dangerous!'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $is_all = $args->getArg('all');
     $ids = $args->getArg('id');
-    if (!$ids) {
+    if (!$ids && !$is_all) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more resource IDs to release with "%s".',
-          '--id'));
+          'Specify which resources you want to release. See "--help" for '.
+          'guidance.'));
     }
 
     $viewer = $this->getViewer();
-    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+    $statuses = $this->getReleaseableResourceStatuses();
 
-    $resources = id(new DrydockResourceQuery())
+    $query = id(new DrydockResourceQuery())
       ->setViewer($viewer)
-      ->withIDs($ids)
-      ->execute();
+      ->withStatuses(mpull($statuses, 'getKey'));
 
-    PhabricatorWorker::setRunAllTasksInProcess(true);
-    foreach ($ids as $id) {
-      $resource = idx($resources, $id);
+    if ($ids) {
+      $query->withIDs($ids);
+    }
 
-      if (!$resource) {
-        echo tsprintf(
-          "%s\n",
-          pht('Resource "%s" does not exist.', $id));
-        continue;
+    $resources = $query->execute();
+
+    if ($ids) {
+      $id_map = mpull($resources, null, 'getID');
+
+      foreach ($ids as $id) {
+        $resource = idx($resources, $id);
+
+        if (!$resource) {
+          throw new PhutilArgumentUsageException(
+            pht('Resource "%s" does not exist.', $id));
+        }
       }
 
+      $resources = array_select_keys($id_map, $ids);
+    }
+
+    if (!$resources) {
+      echo tsprintf(
+        "%s\n",
+        pht('No resources selected for release.'));
+
+      return 0;
+    }
+
+    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+
+    PhabricatorWorker::setRunAllTasksInProcess(true);
+
+    foreach ($resources as $resource) {
       if (!$resource->canRelease()) {
         echo tsprintf(
           "%s\n",
-          pht('Resource "%s" is not releasable.', $id));
+          pht(
+            'Resource "%s" is not releasable.',
+            $resource->getDisplayName()));
         continue;
       }
 
@@ -63,9 +92,26 @@ final class DrydockManagementReleaseResourceWorkflow
 
       echo tsprintf(
         "%s\n",
-        pht('Scheduled release of resource "%s".', $id));
+        pht(
+          'Scheduled release of resource "%s".',
+          $resource->getDisplayName()));
     }
 
+    return 0;
   }
 
+  private function getReleaseableResourceStatuses() {
+    $statuses = DrydockResourceStatus::getAllStatuses();
+    foreach ($statuses as $key => $status) {
+      $statuses[$key] = DrydockResourceStatus::newStatusObject($status);
+    }
+
+    foreach ($statuses as $key => $status) {
+      if (!$status->canRelease()) {
+        unset($statuses[$key]);
+      }
+    }
+
+    return $statuses;
+  }
 }
