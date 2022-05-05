@@ -1229,6 +1229,8 @@ phutil_register_library_map(array(
     'DrydockLeaseStatus' => 'applications/drydock/constants/DrydockLeaseStatus.php',
     'DrydockLeaseUpdateWorker' => 'applications/drydock/worker/DrydockLeaseUpdateWorker.php',
     'DrydockLeaseViewController' => 'applications/drydock/controller/DrydockLeaseViewController.php',
+    'DrydockLeaseWaitingForActivationLogType' => 'applications/drydock/logtype/DrydockLeaseWaitingForActivationLogType.php',
+    'DrydockLeaseWaitingForReclamationLogType' => 'applications/drydock/logtype/DrydockLeaseWaitingForReclamationLogType.php',
     'DrydockLeaseWaitingForResourcesLogType' => 'applications/drydock/logtype/DrydockLeaseWaitingForResourcesLogType.php',
     'DrydockLog' => 'applications/drydock/storage/DrydockLog.php',
     'DrydockLogController' => 'applications/drydock/controller/DrydockLogController.php',
@@ -7294,6 +7296,8 @@ phutil_register_library_map(array(
     'DrydockLeaseStatus' => 'PhabricatorObjectStatus',
     'DrydockLeaseUpdateWorker' => 'DrydockWorker',
     'DrydockLeaseViewController' => 'DrydockLeaseController',
+    'DrydockLeaseWaitingForActivationLogType' => 'DrydockLogType',
+    'DrydockLeaseWaitingForReclamationLogType' => 'DrydockLogType',
     'DrydockLeaseWaitingForResourcesLogType' => 'DrydockLogType',
     'DrydockLog' => array(
       'DrydockDAO',
