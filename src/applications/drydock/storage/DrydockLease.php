@@ -471,6 +471,10 @@ final class DrydockLease extends DrydockDAO
     return "/drydock/lease/{$id}/";
   }
 
+  public function getDisplayName() {
+    return pht('Drydock Lease %d', $this->getID());
+  }
+
 
 /* -(  Status  )------------------------------------------------------------- */
 
