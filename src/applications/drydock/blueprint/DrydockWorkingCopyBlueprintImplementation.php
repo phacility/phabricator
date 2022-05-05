@@ -43,11 +43,6 @@ final class DrydockWorkingCopyBlueprintImplementation
       return false;
     }
 
-    // TODO: If we have a pending resource which is compatible with the
-    // configuration for this lease, prevent a new allocation? Otherwise the
-    // queue can fill up with copies of requests from the same lease. But
-    // maybe we can deal with this with "pre-leasing"?
-
     return true;
   }
 
