@@ -219,11 +219,15 @@ final class PhabricatorUserPreferences
       }
     }
 
-    switch ($this->getBuiltinKey()) {
-      case self::BUILTIN_GLOBAL_DEFAULT:
-        // NOTE: Without this policy exception, the logged-out viewer can not
-        // see global preferences.
-        return true;
+    $builtin_key = $this->getBuiltinKey();
+
+    $is_global = ($builtin_key === self::BUILTIN_GLOBAL_DEFAULT);
+    $is_view = ($capability === PhabricatorPolicyCapability::CAN_VIEW);
+
+    if ($is_global && $is_view) {
+      // NOTE: Without this policy exception, the logged-out viewer can not
+      // see global preferences.
+      return true;
     }
 
     return false;
