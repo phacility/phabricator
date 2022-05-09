@@ -46,6 +46,8 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $engineCaches = array();
   private $auxiliaryConfig = array();
 
+  private static $engineStack = array();
+
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
 
@@ -103,6 +105,24 @@ final class PhabricatorMarkupEngine extends Phobject {
    * @task markup
    */
   public function process() {
+    self::$engineStack[] = $this;
+
+    try {
+      $result = $this->execute();
+    } finally {
+      array_pop(self::$engineStack);
+    }
+
+    return $result;
+  }
+
+  public static function isRenderingEmbeddedContent() {
+    // See T13678. This prevents cycles when rendering embedded content that
+    // itself has remarkup fields.
+    return (count(self::$engineStack) > 1);
+  }
+
+  private function execute() {
     $keys = array();
     foreach ($this->objects as $key => $info) {
       if (!isset($info['markup'])) {
