@@ -260,7 +260,7 @@ abstract class DrydockWorker extends PhabricatorWorker {
     // Mark the lease as reclaiming this resource. It won't be allowed to start
     // another reclaim as long as this resource is still in the process of
     // being reclaimed.
-    $lease->setAttribute('drydock.reclaimingPHID', $resource->getPHID());
+    $lease->addReclaimedResourcePHIDs(array($resource->getPHID()));
 
     // When the resource releases, we we want to reawaken this task since it
     // should (usually) be able to start building a new resource right away.
