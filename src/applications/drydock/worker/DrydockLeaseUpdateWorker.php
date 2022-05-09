@@ -314,6 +314,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ->withStatuses(
         array(
           DrydockResourceStatus::STATUS_ACTIVE,
+          DrydockResourceStatus::STATUS_RELEASED,
         ))
       ->setLimit(1)
       ->execute();
