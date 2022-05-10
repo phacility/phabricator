@@ -78,12 +78,6 @@ final class PhabricatorApplicationTransactionCommentEditor
     $comment->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
     $comment->setEditPolicy($this->getActingAsPHID());
 
-    $file_phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-      $actor,
-      array(
-        $comment->getContent(),
-      ));
-
     $xaction->openTransaction();
       $xaction->beginReadLocking();
         if ($xaction->getID()) {
@@ -131,18 +125,6 @@ final class PhabricatorApplicationTransactionCommentEditor
         }
       $xaction->endReadLocking();
     $xaction->saveTransaction();
-
-    // Add links to any files newly referenced by the edit.
-    if ($file_phids) {
-      $editor = new PhabricatorEdgeEditor();
-      foreach ($file_phids as $file_phid) {
-        $editor->addEdge(
-          $xaction->getObjectPHID(),
-          PhabricatorObjectHasFileEdgeType::EDGECONST ,
-          $file_phid);
-      }
-      $editor->save();
-    }
 
     return $this;
   }
