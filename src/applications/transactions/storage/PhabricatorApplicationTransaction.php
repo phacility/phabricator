@@ -583,6 +583,11 @@ abstract class PhabricatorApplicationTransaction
       return true;
     }
 
+    // Always hide file attach/detach transactions.
+    if ($xaction_type === PhabricatorTransactions::TYPE_FILE) {
+      return true;
+    }
+
     // Hide creation transactions if the old value is empty. These are
     // transactions like "alice set the task title to: ...", which are
     // essentially never interesting.
@@ -711,7 +716,7 @@ abstract class PhabricatorApplicationTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
         return true;
-     case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:

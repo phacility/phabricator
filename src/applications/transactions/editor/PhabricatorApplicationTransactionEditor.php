@@ -332,6 +332,8 @@ abstract class PhabricatorApplicationTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_CREATE;
     $types[] = PhabricatorTransactions::TYPE_HISTORY;
 
+    $types[] = PhabricatorTransactions::TYPE_FILE;
+
     if ($this->object instanceof PhabricatorEditEngineSubtypeInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBTYPE;
     }
@@ -388,6 +390,84 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $new = $this->getTransactionNewValue($object, $xaction);
     $xaction->setNewValue($new);
+
+    // Apply an optional transformation to convert "external" tranaction
+    // values (provided by APIs) into "internal" values.
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    $type = $xaction->getTransactionType();
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+
+
+      // TODO: Provide a modular hook for modern transactions to do a
+      // transformation.
+      list($old, $new) = array($old, $new);
+
+      return;
+    } else {
+      switch ($type) {
+        case PhabricatorTransactions::TYPE_FILE:
+          list($old, $new) = $this->newFileTransactionInternalValues(
+            $object,
+            $xaction,
+            $old,
+            $new);
+          break;
+      }
+    }
+
+    $xaction->setOldValue($old);
+    $xaction->setNewValue($new);
+  }
+
+  private function newFileTransactionInternalValues(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction,
+    $old,
+    $new) {
+
+    $old_map = array();
+
+    if (!$this->getIsNewObject()) {
+      $phid = $object->getPHID();
+
+      $attachment_table = new PhabricatorFileAttachment();
+      $attachment_conn = $attachment_table->establishConnection('w');
+
+      $rows = queryfx_all(
+        $attachment_conn,
+        'SELECT filePHID, attachmentMode FROM %R WHERE objectPHID = %s',
+        $attachment_table,
+        $phid);
+      $old_map = ipull($rows, 'attachmentMode', 'filePHID');
+    }
+
+    $new_map = $old_map;
+
+    foreach ($new as $file_phid => $attachment_mode) {
+      if ($attachment_mode == PhabricatorFileAttachment::MODE_DETACH) {
+        unset($new_map[$file_phid]);
+        continue;
+      }
+
+      $new_map[$file_phid] = $attachment_mode;
+    }
+
+    foreach (array_keys($old_map + $new_map) as $key) {
+      if (isset($old_map[$key]) && isset($new_map[$key])) {
+        if ($old_map[$key] === $new_map[$key]) {
+          unset($old_map[$key]);
+          unset($new_map[$key]);
+        }
+      }
+    }
+
+    return array($old_map, $new_map);
   }
 
   private function getTransactionOldValue(
@@ -481,6 +561,8 @@ abstract class PhabricatorApplicationTransactionEditor
         return $xaction->getOldValue();
       case PhabricatorTransactions::TYPE_COMMENT:
         return null;
+      case PhabricatorTransactions::TYPE_FILE:
+        return null;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -512,6 +594,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_HISTORY:
+      case PhabricatorTransactions::TYPE_FILE:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_MFA:
         return true;
@@ -670,6 +753,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_FILE:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
@@ -733,6 +817,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_FILE:
         return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
 
@@ -857,6 +942,81 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_HISTORY:
         $this->sendHistory = true;
         break;
+      case PhabricatorTransactions::TYPE_FILE:
+        $this->applyFileTransaction($object, $xaction);
+        break;
+    }
+  }
+
+  private function applyFileTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old_map = $xaction->getOldValue();
+    $new_map = $xaction->getNewValue();
+
+    $add_phids = array();
+    $rem_phids = array();
+
+    foreach ($new_map as $phid => $mode) {
+      $add_phids[$phid] = $mode;
+    }
+
+    foreach ($old_map as $phid => $mode) {
+      if (!isset($new_map[$phid])) {
+        $rem_phids[] = $phid;
+      }
+    }
+
+    $now = PhabricatorTime::getNow();
+    $object_phid = $object->getPHID();
+    $attacher_phid = $this->getActingAsPHID();
+
+    $attachment_table = new PhabricatorFileAttachment();
+    $attachment_conn = $attachment_table->establishConnection('w');
+
+    $add_sql = array();
+    foreach ($add_phids as $add_phid => $add_mode) {
+      $add_sql[] = qsprintf(
+        $attachment_conn,
+        '(%s, %s, %s, %ns, %d, %d)',
+        $object_phid,
+        $add_phid,
+        $add_mode,
+        $attacher_phid,
+        $now,
+        $now);
+    }
+
+    $rem_sql = array();
+    foreach ($rem_phids as $rem_phid) {
+      $rem_sql[] = qsprintf(
+        $attachment_conn,
+        '%s',
+        $rem_phid);
+    }
+
+    foreach (PhabricatorLiskDAO::chunkSQL($add_sql) as $chunk) {
+      queryfx(
+        $attachment_conn,
+        'INSERT INTO %R (objectPHID, filePHID, attachmentMode,
+            attacherPHID, dateCreated, dateModified)
+          VALUES %LQ
+          ON DUPLICATE KEY UPDATE
+            attachmentMode = VALUES(attachmentMode),
+            attacherPHID = VALUES(attacherPHID),
+            dateModified = VALUES(dateModified)',
+        $attachment_table,
+        $chunk);
+    }
+
+    foreach (PhabricatorLiskDAO::chunkSQL($rem_sql) as $chunk) {
+      queryfx(
+        $attachment_conn,
+        'DELETE FROM %R WHERE objectPHID = %s AND filePHID in (%LQ)',
+        $attachment_table,
+        $object_phid,
+        $chunk);
     }
   }
 
@@ -1790,6 +1950,8 @@ abstract class PhabricatorApplicationTransactionEditor
         // Signing a transaction group with MFA does not require permissions
         // on its own.
         return null;
+      case PhabricatorTransactions::TYPE_FILE:
+        return null;
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getLegacyRequiredEdgeCapabilities($xaction);
       default:
@@ -2066,8 +2228,39 @@ abstract class PhabricatorApplicationTransactionEditor
       $xactions[] = $xaction;
     }
 
+    $file_xaction = $this->newFileTransaction(
+      $object,
+      $xactions);
+    if ($file_xaction) {
+      $xactions[] = $file_xaction;
+    }
+
     return $xactions;
   }
+
+
+  private function newFileTransaction(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $new_map = array();
+
+    $file_phids = $this->extractFilePHIDs($object, $xactions);
+    if (!$file_phids) {
+      return null;
+    }
+
+    foreach ($file_phids as $file_phid) {
+      $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
+    }
+
+    $xaction = $object->getApplicationTransactionTemplate()
+      ->setTransactionType(PhabricatorTransactions::TYPE_FILE)
+      ->setNewValue($new_map);
+
+    return $xaction;
+  }
+
 
   private function getRemarkupChanges(array $xactions) {
     $changes = array();
@@ -2667,10 +2860,112 @@ abstract class PhabricatorApplicationTransactionEditor
             idx($groups, $field->getFieldKey(), array()));
         }
         break;
+      case PhabricatorTransactions::TYPE_FILE:
+        $errors[] = $this->validateFileTransactions(
+          $object,
+          $xactions,
+          $type);
+        break;
     }
 
     return array_mergev($errors);
   }
+
+  private function validateFileTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type) {
+
+    $errors = array();
+
+    $mode_map = PhabricatorFileAttachment::getModeList();
+    $mode_map = array_fuse($mode_map);
+
+    $file_phids = array();
+    foreach ($xactions as $xaction) {
+      $new = $xaction->getNewValue();
+
+      if (!is_array($new)) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'File attachment transaction must have a map of files to '.
+            'attachment modes, found "%s".',
+            phutil_describe_type($new)),
+          $xaction);
+        continue;
+      }
+
+      foreach ($new as $file_phid => $attachment_mode) {
+        $file_phids[$file_phid] = $file_phid;
+
+        if (is_string($attachment_mode) && isset($mode_map[$attachment_mode])) {
+          continue;
+        }
+
+        if (!is_string($attachment_mode)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $transaction_type,
+            pht('Invalid'),
+            pht(
+              'File attachment mode (for file "%s") is invalid. Expected '.
+              'a string, found "%s".',
+              $file_phid,
+              phutil_describe_type($attachment_mode)),
+            $xaction);
+        } else {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $transaction_type,
+            pht('Invalid'),
+            pht(
+              'File attachment mode "%s" (for file "%s") is invalid. Valid '.
+              'modes are: %s.',
+              $attachment_mode,
+              $file_phid,
+              pht_list($mode_map)),
+            $xaction);
+        }
+      }
+    }
+
+    if ($file_phids) {
+      $file_map = id(new PhabricatorFileQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($file_phids)
+        ->execute();
+      $file_map = mpull($file_map, null, 'getPHID');
+    } else {
+      $file_map = array();
+    }
+
+    foreach ($xactions as $xaction) {
+      $new = $xaction->getNewValue();
+
+      if (!is_array($new)) {
+        continue;
+      }
+
+      foreach ($new as $file_phid => $attachment_mode) {
+        if (isset($file_map[$file_phid])) {
+          continue;
+        }
+
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'File "%s" is invalid: it could not be loaded, or you do not '.
+            'have permission to view it. You must be able to see a file to '.
+            'attach it to an object.',
+            $file_phid),
+          $xaction);
+      }
+    }
+
+    return $errors;
+  }
+
 
   public function validatePolicyTransaction(
     PhabricatorLiskDAO $object,
