@@ -8,6 +8,10 @@ final class PhabricatorFileAttachment
   protected $attacherPHID;
   protected $attachmentMode;
 
+  const MODE_ATTACH = 'attach';
+  const MODE_REFERENCE = 'reference';
+  const MODE_DETACH = 'detach';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -26,6 +30,14 @@ final class PhabricatorFileAttachment
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public static function getModeList() {
+    return array(
+      self::MODE_ATTACH,
+      self::MODE_REFERENCE,
+      self::MODE_DETACH,
+    );
   }
 
 }

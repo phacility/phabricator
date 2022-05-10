@@ -1422,6 +1422,26 @@ final class PhabricatorFile extends PhabricatorFileDAO
       ->addEdge($phid, $edge_type, $this->getPHID())
       ->save();
 
+    $attachment_table = new PhabricatorFileAttachment();
+    $attachment_conn = $attachment_table->establishConnection('w');
+
+    queryfx(
+      $attachment_conn,
+      'INSERT INTO %R (objectPHID, filePHID, attachmentMode,
+          attacherPHID, dateCreated, dateModified)
+        VALUES (%s, %s, %s, %ns, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          attachmentMode = VALUES(attachmentMode),
+          attacherPHID = VALUES(attacherPHID),
+          dateModified = VALUES(dateModified)',
+      $attachment_table,
+      $phid,
+      $this->getPHID(),
+      PhabricatorFileAttachment::MODE_ATTACH,
+      null,
+      PhabricatorTime::getNow(),
+      PhabricatorTime::getNow());
+
     return $this;
   }
 
