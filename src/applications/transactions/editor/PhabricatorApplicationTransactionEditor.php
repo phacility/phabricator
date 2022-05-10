@@ -4042,15 +4042,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $changes = $this->getRemarkupChanges($xactions);
-    $blocks = mpull($changes, 'getNewValue');
-
     $phids = array();
-    if ($blocks) {
-      $phids[] = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-        $this->getActor(),
-        $blocks);
-    }
 
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
