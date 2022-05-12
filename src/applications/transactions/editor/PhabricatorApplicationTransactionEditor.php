@@ -1300,7 +1300,6 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $xactions = $this->sortTransactions($xactions);
-      $file_phids = $this->extractFilePHIDs($object, $xactions);
 
       if ($is_preview) {
         $this->loadHandles($xactions);
@@ -1387,10 +1386,6 @@ abstract class PhabricatorApplicationTransactionEditor
             $xaction->save();
           }
         }
-      }
-
-      if ($file_phids) {
-        $this->attachFiles($object, $file_phids);
       }
 
       foreach ($xactions as $xaction) {
@@ -4353,20 +4348,8 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $phids = array_unique(array_filter(array_mergev($phids)));
-    if (!$phids) {
-      return array();
-    }
 
-    // Only let a user attach files they can actually see, since this would
-    // otherwise let you access any file by attaching it to an object you have
-    // view permission on.
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs($phids)
-      ->execute();
-
-    return mpull($files, 'getPHID');
+    return $phids;
   }
 
   /**
@@ -4378,28 +4361,6 @@ abstract class PhabricatorApplicationTransactionEditor
     return array();
   }
 
-
-  /**
-   * @task files
-   */
-  private function attachFiles(
-    PhabricatorLiskDAO $object,
-    array $file_phids) {
-
-    if (!$file_phids) {
-      return;
-    }
-
-    $editor = new PhabricatorEdgeEditor();
-
-    $src = $object->getPHID();
-    $type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-    foreach ($file_phids as $dst) {
-      $editor->addEdge($src, $type, $dst);
-    }
-
-    $editor->save();
-  }
 
   private function applyInverseEdgeTransactions(
     PhabricatorLiskDAO $object,
@@ -4847,20 +4808,11 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
-    $phid = $object->getPHID();
-
-    $attached_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $phid,
-      PhabricatorObjectHasFileEdgeType::EDGECONST);
-    if (!$attached_phids) {
-      return;
-    }
-
     $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
 
     $files = id(new PhabricatorFileQuery())
       ->setViewer($omnipotent_viewer)
-      ->withPHIDs($attached_phids)
+      ->withAttachedObjectPHIDs(array($object->getPHID()))
       ->execute();
     foreach ($files as $file) {
       $view_policy = $file->getViewPolicy();

@@ -20,6 +20,7 @@ final class PhabricatorFileQuery
   private $builtinKeys;
   private $isBuiltin;
   private $storageEngines;
+  private $attachedObjectPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -58,6 +59,11 @@ final class PhabricatorFileQuery
 
   public function withIsBuiltin($is_builtin) {
     $this->isBuiltin = $is_builtin;
+    return $this;
+  }
+
+  public function withAttachedObjectPHIDs(array $phids) {
+    $this->attachedObjectPHIDs = $phids;
     return $this;
   }
 
@@ -347,7 +353,18 @@ final class PhabricatorFileQuery
         id(new PhabricatorTransformedFile())->getTableName());
     }
 
+    if ($this->shouldJoinAttachmentsTable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %R attachments ON attachments.filePHID = f.phid',
+        new PhabricatorFileAttachment());
+    }
+
     return $joins;
+  }
+
+  private function shouldJoinAttachmentsTable() {
+    return ($this->attachedObjectPHIDs !== null);
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -480,6 +497,13 @@ final class PhabricatorFileQuery
         $conn,
         'storageEngine IN (%Ls)',
         $this->storageEngines);
+    }
+
+    if ($this->attachedObjectPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'attachments.objectPHID IN (%Ls)',
+        $this->attachedObjectPHIDs);
     }
 
     return $where;
