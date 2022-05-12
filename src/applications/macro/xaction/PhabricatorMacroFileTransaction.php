@@ -13,32 +13,8 @@ final class PhabricatorMacroFileTransaction
     $object->setFilePHID($value);
   }
 
-  public function applyExternalEffects($object, $value) {
-    $old = $this->generateOldValue($object);
-    $new = $value;
-    $all = array();
-    if ($old) {
-      $all[] = $old;
-    }
-    if ($new) {
-      $all[] = $new;
-    }
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs($all)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    $old_file = idx($files, $old);
-    if ($old_file) {
-      $old_file->detachFromObject($object->getPHID());
-    }
-
-    $new_file = idx($files, $new);
-    if ($new_file) {
-      $new_file->attachToObject($object->getPHID());
-    }
+  public function extractFilePHIDs($object, $value) {
+    return array($value);
   }
 
   public function getTitle() {
