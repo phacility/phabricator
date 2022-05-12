@@ -224,18 +224,6 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
       ),
       $this->canViewFile($users, $xform),
       pht('Attached Thumbnail Visibility'));
-
-    // Detach the object and make sure it affects the thumbnail.
-    $file->detachFromObject($object->getPHID());
-
-    // Test the detached thumbnail's visibility.
-    $this->assertEqual(
-      array(
-        true,
-        false,
-      ),
-      $this->canViewFile($users, $xform),
-      pht('Detached Thumbnail Visibility'));
   }
 
   private function canViewFile(array $users, PhabricatorFile $file) {

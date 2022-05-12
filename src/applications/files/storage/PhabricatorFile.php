@@ -1427,23 +1427,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
 
   /**
-   * Remove the policy edge between this file and some object.
-   *
-   * @param phid Object PHID to detach from.
-   * @return this
-   */
-  public function detachFromObject($phid) {
-    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-
-    id(new PhabricatorEdgeEditor())
-      ->removeEdge($phid, $edge_type, $this->getPHID())
-      ->save();
-
-    return $this;
-  }
-
-
-  /**
    * Configure a newly created file object according to specified parameters.
    *
    * This method is called both when creating a file from fresh data, and

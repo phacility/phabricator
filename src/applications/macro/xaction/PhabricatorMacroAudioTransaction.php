@@ -13,32 +13,14 @@ final class PhabricatorMacroAudioTransaction
     $object->setAudioPHID($value);
   }
 
-  public function applyExternalEffects($object, $value) {
-    $old = $this->generateOldValue($object);
-    $new = $value;
-    $all = array();
-    if ($old) {
-      $all[] = $old;
-    }
-    if ($new) {
-      $all[] = $new;
+  public function extractFilePHIDs($object, $value) {
+    $file_phids = array();
+
+    if ($value) {
+      $file_phids[] = $value;
     }
 
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs($all)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    $old_file = idx($files, $old);
-    if ($old_file) {
-      $old_file->detachFromObject($object->getPHID());
-    }
-
-    $new_file = idx($files, $new);
-    if ($new_file) {
-      $new_file->attachToObject($object->getPHID());
-    }
+    return $file_phids;
   }
 
   public function getTitle() {
