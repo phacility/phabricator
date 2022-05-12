@@ -46,7 +46,7 @@ final class PhutilRemarkupDocumentLinkRule extends PhutilRemarkupRule {
 
     $is_anchor = false;
     if (strncmp($link, '/', 1) == 0) {
-      $base = $engine->getConfig('uri.base');
+      $base = phutil_string_cast($engine->getConfig('uri.base'));
       $base = rtrim($base, '/');
       $link = $base.$link;
     } else if (strncmp($link, '#', 1) == 0) {
@@ -134,7 +134,7 @@ final class PhutilRemarkupDocumentLinkRule extends PhutilRemarkupRule {
 
   public function markupDocumentLink(array $matches) {
     $uri = trim($matches[1]);
-    $name = trim(idx($matches, 2));
+    $name = trim(idx($matches, 2, ''));
 
     if (!$this->isFlatText($uri)) {
       return $matches[0];
