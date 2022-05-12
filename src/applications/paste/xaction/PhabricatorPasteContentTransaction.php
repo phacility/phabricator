@@ -5,6 +5,8 @@ final class PhabricatorPasteContentTransaction
 
   const TRANSACTIONTYPE = 'paste.create';
 
+  private $filePHID;
+
   public function generateOldValue($object) {
     return $object->getFilePHID();
   }
@@ -14,7 +16,8 @@ final class PhabricatorPasteContentTransaction
   }
 
   public function extractFilePHIDs($object, $value) {
-    return array($value);
+    $file_phid = $this->getFilePHID($object, $value);
+    return array($file_phid);
   }
 
   public function validateTransactions($object, array $xactions) {
@@ -31,6 +34,18 @@ final class PhabricatorPasteContentTransaction
   }
 
   public function generateNewValue($object, $value) {
+    return $this->getFilePHID($object, $value);
+  }
+
+  private function getFilePHID($object, $value) {
+    if ($this->filePHID === null) {
+      $this->filePHID = $this->newFilePHID($object, $value);
+    }
+
+    return $this->filePHID;
+  }
+
+  private function newFilePHID($object, $value) {
     // If this transaction does not really change the paste content, return
     // the current file PHID so this transaction no-ops.
     $old_content = $object->getRawContent();
