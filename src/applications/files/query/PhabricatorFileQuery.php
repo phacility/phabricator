@@ -209,16 +209,12 @@ final class PhabricatorFileQuery
     // If we have any files left which do need objects, load the edges now.
     $object_phids = array();
     if ($need_objects) {
-      $edge_type = PhabricatorFileHasObjectEdgeType::EDGECONST;
-      $file_phids = mpull($need_objects, 'getPHID');
-
-      $edges = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($file_phids)
-        ->withEdgeTypes(array($edge_type))
-        ->execute();
+      $attachments_map = $this->newAttachmentsMap($need_objects);
 
       foreach ($need_objects as $file) {
-        $phids = array_keys($edges[$file->getPHID()][$edge_type]);
+        $file_phid = $file->getPHID();
+        $phids = $attachments_map[$file_phid];
+
         $file->attachObjectPHIDs($phids);
 
         if ($is_omnipotent) {
@@ -303,6 +299,28 @@ final class PhabricatorFileQuery
     }
 
     return $files;
+  }
+
+  private function newAttachmentsMap(array $files) {
+    $file_phids = mpull($files, 'getPHID');
+
+    $attachments_table = new PhabricatorFileAttachment();
+    $attachments_conn = $attachments_table->establishConnection('r');
+
+    $attachments = queryfx_all(
+      $attachments_conn,
+      'SELECT filePHID, objectPHID FROM %R WHERE filePHID IN (%Ls)',
+      $attachments_table,
+      $file_phids);
+
+    $attachments_map = array_fill_keys($file_phids, array());
+    foreach ($attachments as $row) {
+      $file_phid = $row['filePHID'];
+      $object_phid = $row['objectPHID'];
+      $attachments_map[$file_phid][] = $object_phid;
+    }
+
+    return $attachments_map;
   }
 
   protected function didFilterPage(array $files) {
