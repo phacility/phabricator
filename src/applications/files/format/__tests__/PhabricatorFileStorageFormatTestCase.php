@@ -45,6 +45,10 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
   }
 
   public function testAES256Storage() {
+    if (!function_exists('openssl_encrypt')) {
+      $this->assertSkipped(pht('No OpenSSL extension available.'));
+    }
+
     $engine = new PhabricatorTestStorageEngine();
 
     $key_name = 'test.abcd';

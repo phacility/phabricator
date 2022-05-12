@@ -446,7 +446,7 @@ final class PhutilRemarkupListBlockRule extends PhutilRemarkupBlockRule {
       }
 
       $start_attr = null;
-      if (ctype_digit($starts_at) && $starts_at > 1) {
+      if (ctype_digit(phutil_string_cast($starts_at)) && $starts_at > 1) {
         $start_attr = hsprintf(' start="%d"', $starts_at);
       }
 

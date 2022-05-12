@@ -184,14 +184,14 @@ final class PhutilICSWriter extends Phobject {
     }
 
     $name = $event->getName();
-    if (strlen($name)) {
+    if (phutil_nonempty_string($name)) {
       $properties[] = $this->newTextProperty(
         'SUMMARY',
         $name);
     }
 
     $description = $event->getDescription();
-    if (strlen($description)) {
+    if (phutil_nonempty_string($description)) {
       $properties[] = $this->newTextProperty(
         'DESCRIPTION',
         $description);
