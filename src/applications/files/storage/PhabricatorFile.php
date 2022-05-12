@@ -1416,12 +1416,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return this
    */
   public function attachToObject($phid) {
-    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-
-    id(new PhabricatorEdgeEditor())
-      ->addEdge($phid, $edge_type, $this->getPHID())
-      ->save();
-
     $attachment_table = new PhabricatorFileAttachment();
     $attachment_conn = $attachment_table->establishConnection('w');
 
