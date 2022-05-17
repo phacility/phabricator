@@ -369,10 +369,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $this->setLimit($limit + 1);
 
-    if (phutil_nonempty_string($pager->getAfterID())) {
-      $this->setExternalCursorString($pager->getAfterID());
-    } else if ($pager->getBeforeID()) {
-      $this->setExternalCursorString($pager->getBeforeID());
+    $after_id = phutil_string_cast($pager->getAfterID());
+    $before_id = phutil_string_cast($pager->getBeforeID());
+
+    if (phutil_nonempty_string($after_id)) {
+      $this->setExternalCursorString($after_id);
+    } else if (phutil_nonempty_string($before_id)) {
+      $this->setExternalCursorString($before_id);
       $this->setIsQueryOrderReversed(true);
     }
 
