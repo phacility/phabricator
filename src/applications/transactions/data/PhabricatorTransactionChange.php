@@ -3,6 +3,7 @@
 abstract class PhabricatorTransactionChange extends Phobject {
 
   private $transaction;
+  private $metadata = array();
   private $oldValue;
   private $newValue;
 
@@ -32,6 +33,15 @@ abstract class PhabricatorTransactionChange extends Phobject {
 
   final public function getNewValue() {
     return $this->newValue;
+  }
+
+  final public function setMetadata(array $metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
+
+  final public function getMetadata() {
+    return $this->metadata;
   }
 
 }

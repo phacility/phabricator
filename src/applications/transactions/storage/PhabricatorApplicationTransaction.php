@@ -244,6 +244,13 @@ abstract class PhabricatorApplicationTransaction
         ->setNewValue($new_value);
     }
 
+    $metadata = $this->getMetadataValue('remarkup.control', array());
+    foreach ($changes as $change) {
+      if (!$change->getMetadata()) {
+        $change->setMetadata($metadata);
+      }
+    }
+
     return $changes;
   }
 
