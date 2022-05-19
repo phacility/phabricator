@@ -2012,6 +2012,7 @@ abstract class PhabricatorEditEngine
     if (strlen($comment_text) || !$xactions) {
       $xactions[] = id(clone $template)
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->setMetadataValue('remarkup.control', $comment_metadata)
         ->attachComment(
           id(clone $comment_template)
             ->setContent($comment_text));
@@ -2077,6 +2078,26 @@ abstract class PhabricatorEditEngine
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
     }
+  }
+
+  public static function newTransactionsFromRemarkupMetadata(
+    PhabricatorApplicationTransaction $template,
+    array $metadata) {
+
+    $xactions = array();
+
+    $attached_phids = idx($metadata, 'attachedFilePHIDs');
+    if (is_array($attached_phids) && $attached_phids) {
+      $attachment_map = array_fill_keys(
+        $attached_phids,
+        PhabricatorFileAttachment::MODE_ATTACH);
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_FILE)
+        ->setNewValue($attachment_map);
+    }
+
+    return $xactions;
   }
 
   protected function newDraftEngine($object) {

@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
+final class PhabricatorRemarkupControl
+  extends AphrontFormTextAreaControl {
 
   private $disableMacro = false;
   private $disableFullScreen = false;
@@ -43,6 +44,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
   public function getRemarkupMetadata() {
     return $this->remarkupMetadata;
+  }
+
+  public function setValue($value) {
+    if ($value instanceof RemarkupValue) {
+      $this->setRemarkupMetadata($value->getMetadata());
+      $value = $value->getCorpus();
+    }
+
+    return parent::setValue($value);
   }
 
   protected function renderInput() {

@@ -2225,7 +2225,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $file_xaction = $this->newFileTransaction(
       $object,
-      $xactions);
+      $xactions,
+      $changes);
     if ($file_xaction) {
       $xactions[] = $file_xaction;
     }
@@ -2236,17 +2237,31 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private function newFileTransaction(
     PhabricatorLiskDAO $object,
-    array $xactions) {
+    array $xactions,
+    array $remarkup_changes) {
+
+    assert_instances_of(
+      $remarkup_changes,
+      'PhabricatorTransactionRemarkupChange');
 
     $new_map = array();
 
-    $file_phids = $this->extractFilePHIDs($object, $xactions);
-    if (!$file_phids) {
-      return null;
+    foreach ($remarkup_changes as $remarkup_change) {
+      $metadata = $remarkup_change->getMetadata();
+
+      $attached_phids = idx($metadata, 'attachedFilePHIDs');
+      foreach ($attached_phids as $file_phid) {
+        $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
+      }
     }
 
+    $file_phids = $this->extractFilePHIDs($object, $xactions);
     foreach ($file_phids as $file_phid) {
       $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
+    }
+
+    if (!$new_map) {
+      return null;
     }
 
     $xaction = $object->getApplicationTransactionTemplate()
