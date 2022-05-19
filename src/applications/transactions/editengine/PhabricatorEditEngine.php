@@ -1908,6 +1908,11 @@ abstract class PhabricatorEditEngine
 
     $comment_text = $request->getStr('comment');
 
+    $comment_metadata = $request->getStr('comment_metadata');
+    if (strlen($comment_metadata)) {
+      $comment_metadata = phutil_json_decode($comment_metadata);
+    }
+
     $actions = $request->getStr('editengine.actions');
     if ($actions) {
       $actions = phutil_json_decode($actions);
@@ -1923,10 +1928,9 @@ abstract class PhabricatorEditEngine
           $viewer->getPHID(),
           $current_version);
 
-        $is_empty = (!strlen($comment_text) && !$actions);
-
         $draft
           ->setProperty('comment', $comment_text)
+          ->setProperty('metadata', $comment_metadata)
           ->setProperty('actions', $actions)
           ->save();
 
