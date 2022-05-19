@@ -6,6 +6,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   private $disableFullScreen = false;
   private $canPin;
   private $sendOnEnter = false;
+  private $remarkupMetadata = array();
 
   public function setDisableMacros($disable) {
     $this->disableMacro = $disable;
@@ -35,6 +36,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     return $this->sendOnEnter;
   }
 
+  public function setRemarkupMetadata(array $value) {
+    $this->remarkupMetadata = $value;
+    return $this;
+  }
+
+  public function getRemarkupMetadata() {
+    return $this->remarkupMetadata;
+  }
+
   protected function renderInput() {
     $id = $this->getID();
     if (!$id) {
@@ -47,6 +57,25 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       throw new PhutilInvalidStateException('setUser');
     }
 
+    // NOTE: Metadata is passed to Javascript in a structured way, and also
+    // dumped directly into the form as an encoded string. This makes it less
+    // likely that we'll lose server-provided metadata (for example, from a
+    // saved draft) if there is a client-side error.
+
+    $metadata_name = $this->getName().'_metadata';
+    $metadata_value = (object)$this->getRemarkupMetadata();
+    $metadata_string = phutil_json_encode($metadata_value);
+
+    $metadata_id = celerity_generate_unique_node_id();
+    $metadata_input = phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'id' => $metadata_id,
+        'name' => $metadata_name,
+        'value' => $metadata_string,
+      ));
+
     // We need to have this if previews render images, since Ajax can not
     // currently ship JS or CSS.
     require_celerity_resource('phui-lightbox-css');
@@ -56,6 +85,8 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         'aphront-drag-and-drop-textarea',
         array(
           'target' => $id,
+          'remarkupMetadataID' => $metadata_id,
+          'remarkupMetadataValue' => $metadata_value,
           'activatedClass' => 'aphront-textarea-drag-and-drop',
           'uri' => '/file/dropupload/',
           'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
@@ -353,6 +384,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       array(
         $buttons,
         parent::renderInput(),
+        $metadata_input,
       ));
   }
 

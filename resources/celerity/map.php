@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => 'd2de90d9',
     'dark-console.pkg.js' => '187792c2',
     'differential.pkg.css' => 'ffb69e3d',
-    'differential.pkg.js' => '8deec4cd',
+    'differential.pkg.js' => 'e31329dc',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => '78c9885d',
     'maniphest.pkg.css' => '35995d6d',
@@ -473,7 +473,7 @@ return array(
     'rsrc/js/core/behavior-copy.js' => 'cf32921f',
     'rsrc/js/core/behavior-detect-timezone.js' => '78bc5d94',
     'rsrc/js/core/behavior-device.js' => 'ac2b1e01',
-    'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '7ad020a5',
+    'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '7df68a45',
     'rsrc/js/core/behavior-fancy-datepicker.js' => '36821f8d',
     'rsrc/js/core/behavior-form.js' => '55d7b788',
     'rsrc/js/core/behavior-gesture.js' => 'b58d1a2a',
@@ -589,7 +589,7 @@ return array(
     'javelin-behavior-aphlict-listen' => '4e61fa88',
     'javelin-behavior-aphlict-status' => 'c3703a16',
     'javelin-behavior-aphront-basic-tokenizer' => '3b4899b0',
-    'javelin-behavior-aphront-drag-and-drop-textarea' => '7ad020a5',
+    'javelin-behavior-aphront-drag-and-drop-textarea' => '7df68a45',
     'javelin-behavior-aphront-form-disable-on-submit' => '55d7b788',
     'javelin-behavior-aphront-more' => '506aa3f4',
     'javelin-behavior-audio-source' => '3dc5ad43',
@@ -1604,12 +1604,6 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
-    '7ad020a5' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'phabricator-drag-and-drop-file-upload',
-      'phabricator-textareautils',
-    ),
     '7b139193' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1619,6 +1613,13 @@ return array(
     '7c4d8998' => array(
       'javelin-install',
       'javelin-dom',
+    ),
+    '7df68a45' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-json',
+      'phabricator-drag-and-drop-file-upload',
+      'phabricator-textareautils',
     ),
     '80bff3af' => array(
       'javelin-install',
