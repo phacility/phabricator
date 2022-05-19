@@ -294,17 +294,38 @@ final class PhabricatorApplicationTransactionCommentView
   }
 
   private function renderCommentPanel() {
+    $viewer = $this->getViewer();
+
+    $remarkup_control = id(new PhabricatorRemarkupControl())
+      ->setViewer($viewer)
+      ->setID($this->getCommentID())
+      ->addClass('phui-comment-fullwidth-control')
+      ->addClass('phui-comment-textarea-control')
+      ->setCanPin(true)
+      ->setName('comment');
+
     $draft_comment = '';
+    $draft_metadata = array();
     $draft_key = null;
-    if ($this->getDraft()) {
-      $draft_comment = $this->getDraft()->getDraft();
-      $draft_key = $this->getDraft()->getDraftKey();
+
+    $legacy_draft = $this->getDraft();
+    if ($legacy_draft) {
+      $draft_comment = $legacy_draft->getDraft();
+      $draft_key = $legacy_draft->getDraftKey();
     }
 
     $versioned_draft = $this->getVersionedDraft();
     if ($versioned_draft) {
-      $draft_comment = $versioned_draft->getProperty('comment', '');
+      $draft_comment = $versioned_draft->getProperty(
+        'comment',
+        $draft_comment);
+      $draft_metadata = $versioned_draft->getProperty(
+        'metadata',
+        $draft_metadata);
     }
+
+    $remarkup_control->setValue($draft_comment);
+    $remarkup_control->setRemarkupMetadata($draft_metadata);
 
     if (!$this->getObjectPHID()) {
       throw new PhutilInvalidStateException('setObjectPHID', 'render');
@@ -314,7 +335,7 @@ final class PhabricatorApplicationTransactionCommentView
     $version_value = $this->getCurrentVersion();
 
     $form = id(new AphrontFormView())
-      ->setUser($this->getUser())
+      ->setUser($viewer)
       ->addSigil('transaction-append')
       ->setWorkflow(true)
       ->setFullWidth($this->fullWidth)
@@ -465,15 +486,7 @@ final class PhabricatorApplicationTransactionCommentView
       ->setValue($this->getSubmitButtonName());
 
     $form
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setID($this->getCommentID())
-          ->addClass('phui-comment-fullwidth-control')
-          ->addClass('phui-comment-textarea-control')
-          ->setCanPin(true)
-          ->setName('comment')
-          ->setUser($this->getUser())
-          ->setValue($draft_comment))
+      ->appendChild($remarkup_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addClass('phui-comment-fullwidth-control')

@@ -16,7 +16,7 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
 
   function set_metadata(key, value) {
     metadata_value[key] = value;
-    metadata_node.value = JX.JSON.stringify(metadata_value);
+    write_metadata();
   }
 
   function get_metadata(key, default_value) {
@@ -25,6 +25,12 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
     }
     return default_value;
   }
+
+  function write_metadata() {
+    metadata_node.value = JX.JSON.stringify(metadata_value);
+  }
+
+  write_metadata();
 
   if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
     var drop = new JX.PhabricatorDragAndDropFileUpload(target)
@@ -41,6 +47,10 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
 
     drop.listen('didUpload', function(file) {
       JX.TextAreaUtils.insertFileReference(target, file);
+
+      var phids = get_metadata('attachedFilePHIDs', []);
+      phids.push(file.getPHID());
+      set_metadata('attachedFilePHIDs', phids);
     });
 
     drop.start();
