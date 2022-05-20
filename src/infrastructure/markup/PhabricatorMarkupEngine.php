@@ -632,7 +632,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
       $phids = $engine->getTextMetadata(
-        PhabricatorEmbedFileRemarkupRule::KEY_EMBED_FILE_PHIDS,
+        PhabricatorEmbedFileRemarkupRule::KEY_ATTACH_INTENT_FILE_PHIDS,
         array());
       foreach ($phids as $phid) {
         $files[$phid] = $phid;

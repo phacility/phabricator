@@ -43,6 +43,14 @@ abstract class PhutilRemarkupBlockRule extends Phobject {
     return;
   }
 
+  public function willMarkupChildBlocks() {
+    return;
+  }
+
+  public function didMarkupChildBlocks() {
+    return;
+  }
+
   final public function setEngine(PhutilRemarkupEngine $engine) {
     $this->engine = $engine;
     $this->updateRules();
