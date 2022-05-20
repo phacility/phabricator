@@ -3,16 +3,10 @@
 final class PhabricatorRemarkupControl
   extends AphrontFormTextAreaControl {
 
-  private $disableMacro = false;
   private $disableFullScreen = false;
   private $canPin;
   private $sendOnEnter = false;
   private $remarkupMetadata = array();
-
-  public function setDisableMacros($disable) {
-    $this->disableMacro = $disable;
-    return $this;
-  }
 
   public function setDisableFullScreen($disable) {
     $this->disableFullScreen = $disable;
@@ -234,9 +228,7 @@ final class PhabricatorRemarkupControl
       ),
     );
 
-    $can_use_macros =
-      (!$this->disableMacro) &&
-      (function_exists('imagettftext'));
+    $can_use_macros = function_exists('imagettftext');
 
     if ($can_use_macros) {
       $can_use_macros = PhabricatorApplication::isClassInstalledForViewer(
