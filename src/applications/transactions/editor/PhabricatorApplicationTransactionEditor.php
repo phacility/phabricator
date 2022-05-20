@@ -447,12 +447,29 @@ abstract class PhabricatorApplicationTransactionEditor
       $old_map = ipull($rows, 'attachmentMode', 'filePHID');
     }
 
+    $mode_ref = PhabricatorFileAttachment::MODE_REFERENCE;
+    $mode_detach = PhabricatorFileAttachment::MODE_DETACH;
+
     $new_map = $old_map;
 
     foreach ($new as $file_phid => $attachment_mode) {
-      if ($attachment_mode == PhabricatorFileAttachment::MODE_DETACH) {
+      $is_ref = ($attachment_mode === $mode_ref);
+      $is_detach = ($attachment_mode === $mode_detach);
+
+      if ($is_detach) {
         unset($new_map[$file_phid]);
         continue;
+      }
+
+      $old_mode = idx($old_map, $file_phid);
+
+      // If we're adding a reference to a file but it is already attached,
+      // don't touch it.
+
+      if ($is_ref) {
+        if ($old_mode !== null) {
+          continue;
+        }
       }
 
       $new_map[$file_phid] = $attachment_mode;
@@ -2246,11 +2263,42 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $new_map = array();
 
+    $viewer = $this->getActor();
+
+    $old_blocks = mpull($remarkup_changes, 'getOldValue');
+    $new_blocks = mpull($remarkup_changes, 'getNewValue');
+
+    $old_refs = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $viewer,
+      $old_blocks);
+    $old_refs = array_fuse($old_refs);
+
+    $new_refs = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $viewer,
+      $new_blocks);
+    $new_refs = array_fuse($new_refs);
+
+    $add_refs = array_diff_key($new_refs, $old_refs);
+    foreach ($add_refs as $file_phid) {
+      $new_map[$file_phid] = PhabricatorFileAttachment::MODE_REFERENCE;
+    }
+
     foreach ($remarkup_changes as $remarkup_change) {
       $metadata = $remarkup_change->getMetadata();
 
       $attached_phids = idx($metadata, 'attachedFilePHIDs', array());
       foreach ($attached_phids as $file_phid) {
+
+        // If the blocks don't include a new embedded reference to this file,
+        // do not actually attach it. A common way for this to happen is for
+        // a user to upload a file, then change their mind and remove the
+        // reference. We do not want to attach the file if they decided against
+        // referencing it.
+
+        if (!isset($new_map[$file_phid])) {
+          continue;
+        }
+
         $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
       }
     }
