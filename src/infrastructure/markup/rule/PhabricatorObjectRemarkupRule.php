@@ -318,6 +318,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       'id' => $matches[1],
       'options' => idx($matches, 2),
       'original' => $matches[0],
+      'quote.depth' => $engine->getQuoteDepth(),
     ));
   }
 
@@ -337,6 +338,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       'id' => $matches[1],
       'anchor' => idx($matches, 2),
       'original' => $matches[0],
+      'quote.depth' => $engine->getQuoteDepth(),
     ));
   }
 
