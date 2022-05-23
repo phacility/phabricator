@@ -2266,7 +2266,14 @@ abstract class PhabricatorApplicationTransactionEditor
     $viewer = $this->getActor();
 
     $old_blocks = mpull($remarkup_changes, 'getOldValue');
+    foreach ($old_blocks as $key => $old_block) {
+      $old_blocks[$key] = phutil_string_cast($old_block);
+    }
+
     $new_blocks = mpull($remarkup_changes, 'getNewValue');
+    foreach ($new_blocks as $key => $new_block) {
+      $new_blocks[$key] = phutil_string_cast($new_block);
+    }
 
     $old_refs = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
       $viewer,

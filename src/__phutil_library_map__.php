@@ -3453,6 +3453,7 @@ phutil_register_library_map(array(
     'PhabricatorFileAES256StorageFormat' => 'applications/files/format/PhabricatorFileAES256StorageFormat.php',
     'PhabricatorFileAltTextTransaction' => 'applications/files/xaction/PhabricatorFileAltTextTransaction.php',
     'PhabricatorFileAttachment' => 'applications/files/storage/PhabricatorFileAttachment.php',
+    'PhabricatorFileAttachmentQuery' => 'applications/files/query/PhabricatorFileAttachmentQuery.php',
     'PhabricatorFileBundleLoader' => 'applications/files/query/PhabricatorFileBundleLoader.php',
     'PhabricatorFileChunk' => 'applications/files/storage/PhabricatorFileChunk.php',
     'PhabricatorFileChunkIterator' => 'applications/files/engine/PhabricatorFileChunkIterator.php',
@@ -9892,7 +9893,12 @@ phutil_register_library_map(array(
     ),
     'PhabricatorFileAES256StorageFormat' => 'PhabricatorFileStorageFormat',
     'PhabricatorFileAltTextTransaction' => 'PhabricatorFileTransactionType',
-    'PhabricatorFileAttachment' => 'PhabricatorFileDAO',
+    'PhabricatorFileAttachment' => array(
+      'PhabricatorFileDAO',
+      'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
+    ),
+    'PhabricatorFileAttachmentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileBundleLoader' => 'Phobject',
     'PhabricatorFileChunk' => array(
       'PhabricatorFileDAO',
