@@ -2250,8 +2250,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $metadata = $remarkup_change->getMetadata();
 
       $attached_phids = idx($metadata, 'attachedFilePHIDs');
-      foreach ($attached_phids as $file_phid) {
-        $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
+      if(is_array($attached_phids)) {
+        foreach ($attached_phids as $file_phid) {
+          $new_map[$file_phid] = PhabricatorFileAttachment::MODE_ATTACH;
+        }
       }
     }
 
