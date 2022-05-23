@@ -309,9 +309,13 @@ final class PhabricatorFileQuery
 
     $attachments = queryfx_all(
       $attachments_conn,
-      'SELECT filePHID, objectPHID FROM %R WHERE filePHID IN (%Ls)',
+      'SELECT filePHID, objectPHID FROM %R WHERE filePHID IN (%Ls)
+        AND attachmentMode IN (%Ls)',
       $attachments_table,
-      $file_phids);
+      $file_phids,
+      array(
+        PhabricatorFileAttachment::MODE_ATTACH,
+      ));
 
     $attachments_map = array_fill_keys($file_phids, array());
     foreach ($attachments as $row) {
@@ -374,8 +378,12 @@ final class PhabricatorFileQuery
     if ($this->shouldJoinAttachmentsTable()) {
       $joins[] = qsprintf(
         $conn,
-        'JOIN %R attachments ON attachments.filePHID = f.phid',
-        new PhabricatorFileAttachment());
+        'JOIN %R attachments ON attachments.filePHID = f.phid
+          AND attachmentMode IN (%Ls)',
+        new PhabricatorFileAttachment(),
+        array(
+          PhabricatorFileAttachment::MODE_ATTACH,
+        ));
     }
 
     return $joins;
