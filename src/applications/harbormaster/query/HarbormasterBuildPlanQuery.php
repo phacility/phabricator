@@ -50,10 +50,6 @@ final class HarbormasterBuildPlanQuery
     return new HarbormasterBuildPlan();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function didFilterPage(array $page) {
     if ($this->needBuildSteps) {
       $plan_phids = mpull($page, 'getPHID');

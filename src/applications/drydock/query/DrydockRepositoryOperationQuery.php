@@ -55,10 +55,6 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
     return new DrydockRepositoryOperation();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $operations) {
     $implementations = DrydockRepositoryOperationType::getAllOperationTypes();
 

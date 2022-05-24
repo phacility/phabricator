@@ -49,10 +49,6 @@ final class DrydockResourceQuery extends DrydockQuery {
     return new DrydockResource();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $resources) {
     $blueprint_phids = mpull($resources, 'getBlueprintPHID');
 

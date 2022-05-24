@@ -86,10 +86,6 @@ final class PonderQuestionQuery
     return new PonderQuestion();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PonderQuestion());
-  }
-
   protected function willFilterPage(array $questions) {
 
     $phids = mpull($questions, 'getPHID');

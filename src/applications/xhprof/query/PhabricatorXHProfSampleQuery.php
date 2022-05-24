@@ -20,10 +20,6 @@ final class PhabricatorXHProfSampleQuery
     return new PhabricatorXHProfSample();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

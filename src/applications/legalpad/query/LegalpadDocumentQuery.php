@@ -81,10 +81,6 @@ final class LegalpadDocumentQuery
     return new LegalpadDocument();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $documents) {
     if ($this->needDocumentBodies) {
       $documents = $this->loadDocumentBodies($documents);

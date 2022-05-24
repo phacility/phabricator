@@ -50,10 +50,6 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return new PhamePost();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $posts) {
     // We require blogs to do visibility checks, so load them unconditionally.
     $blog_phids = mpull($posts, 'getBlogPHID');

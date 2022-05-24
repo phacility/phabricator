@@ -32,10 +32,6 @@ final class PhabricatorProjectColumnPositionQuery
     return new PhabricatorProjectColumnPosition();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = array();
 

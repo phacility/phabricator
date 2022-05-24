@@ -38,10 +38,6 @@ final class PhortuneAccountEmailQuery
     return new PhortuneAccountEmail();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $addresses) {
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())

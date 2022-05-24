@@ -265,6 +265,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->ferretMetadata;
   }
 
+  protected function loadPage() {
+    $object = $this->newResultObject();
+
+    if (!$object instanceof PhabricatorLiskDAO) {
+      throw new Exception(
+        pht(
+          'Query class ("%s") did not return the correct type of object '.
+          'from "newResultObject()" (expected a subclass of '.
+          '"PhabricatorLiskDAO", found "%s"). Return an object of the '.
+          'expected type (this is common), or implement a custom '.
+          '"loadPage()" method (this is unusual in modern code).',
+          get_class($this),
+          phutil_describe_type($object)));
+    }
+
+    return $this->loadStandardPage($object);
+  }
+
   protected function loadStandardPage(PhabricatorLiskDAO $table) {
     $rows = $this->loadStandardPageRows($table);
     return $table->loadAllFromArray($rows);

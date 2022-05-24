@@ -44,10 +44,6 @@ final class PhabricatorPackagesVersionQuery
     return new PhabricatorPackagesVersion();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

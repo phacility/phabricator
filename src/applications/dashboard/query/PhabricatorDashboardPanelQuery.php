@@ -34,10 +34,6 @@ final class PhabricatorDashboardPanelQuery
     return $this;
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function newResultObject() {
     // TODO: If we don't do this, SearchEngine explodes when trying to
     // enumerate custom fields. For now, just give the panel a default panel

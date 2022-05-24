@@ -46,10 +46,6 @@ final class PhortuneAccountQuery
     return new PhortuneAccount();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $accounts) {
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($accounts, 'getPHID'))

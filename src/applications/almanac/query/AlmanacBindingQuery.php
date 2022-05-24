@@ -44,10 +44,6 @@ final class AlmanacBindingQuery
     return new AlmanacBinding();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $bindings) {
     $service_phids = mpull($bindings, 'getServicePHID');
     $device_phids = mpull($bindings, 'getDevicePHID');

@@ -69,10 +69,6 @@ final class AlmanacServiceQuery
     return new AlmanacService();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
 
