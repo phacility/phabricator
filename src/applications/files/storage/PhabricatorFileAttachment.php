@@ -46,6 +46,15 @@ final class PhabricatorFileAttachment
     );
   }
 
+  public function isPolicyAttachment() {
+    switch ($this->getAttachmentMode()) {
+      case self::MODE_ATTACH:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   public function attachObject($object) {
     $this->object = $object;
     return $this;

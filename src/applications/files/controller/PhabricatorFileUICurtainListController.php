@@ -53,7 +53,7 @@ final class PhabricatorFileUICurtainListController
     return $this->newDialog()
       ->setViewer($viewer)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->setTitle(pht('Attached Files'))
+      ->setTitle(pht('Referenced Files'))
       ->setObjectList($list)
       ->addCancelButton($object_handle->getURI(), pht('Close'));
   }

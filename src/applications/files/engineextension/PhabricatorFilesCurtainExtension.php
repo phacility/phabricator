@@ -34,14 +34,15 @@ final class PhabricatorFilesCurtainExtension
 
     $handles = $viewer->loadHandles($visible_phids);
 
-    PhabricatorPolicyFilterSet::loadHandleViewCapabilities(
-      $viewer,
-      $handles,
-      array($object));
-
     $ref_list = id(new PHUICurtainObjectRefListView())
       ->setViewer($viewer)
       ->setEmptyMessage(pht('None'));
+
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    $object_policies = PhabricatorPolicyQuery::loadPolicies(
+      $viewer,
+      $object);
+    $object_policy = idx($object_policies, $view_capability);
 
     foreach ($visible_attachments as $attachment) {
       $file_phid = $attachment->getFilePHID();
@@ -50,9 +51,38 @@ final class PhabricatorFilesCurtainExtension
       $ref = $ref_list->newObjectRefView()
         ->setHandle($handle);
 
-      if ($handle->hasCapabilities()) {
-        if (!$handle->hasViewCapability($object)) {
-          $ref->setExiled(true);
+      $file = $attachment->getFile();
+      if (!$file) {
+        // ...
+      } else {
+        if (!$attachment->isPolicyAttachment()) {
+          $file_policies = PhabricatorPolicyQuery::loadPolicies(
+            $viewer,
+            $file);
+          $file_policy = idx($file_policies, $view_capability);
+
+          if ($object_policy->isStrongerThanOrEqualTo($file_policy)) {
+            // The file is not attached to the object, but the file policy
+            // allows anyone who can see the object to see the file too, so
+            // there is no material problem with the file not being attached.
+          } else {
+            $attach_uri = urisprintf(
+              '/file/ui/curtain/attach/%s/%s/',
+              $object->getPHID(),
+              $file->getPHID());
+
+            $attached_link = javelin_tag(
+              'a',
+              array(
+                'href' => $attach_uri,
+                'sigil' => 'workflow',
+              ),
+              pht('File Not Attached'));
+
+            $ref->setExiled(
+              true,
+              $attached_link);
+          }
         }
       }
 
@@ -63,7 +93,7 @@ final class PhabricatorFilesCurtainExtension
     $show_all = (count($visible_attachments) < count($attachments));
     if ($show_all) {
       $view_all_uri = urisprintf(
-        '/file/ui/curtainlist/%s/',
+        '/file/ui/curtain/list/%s/',
         $object->getPHID());
 
       $loaded_count = count($attachments);
@@ -80,7 +110,7 @@ final class PhabricatorFilesCurtainExtension
     }
 
     return $this->newPanel()
-      ->setHeaderText(pht('Attached Files'))
+      ->setHeaderText(pht('Referenced Files'))
       ->setOrder(15000)
       ->appendChild($ref_list);
   }
