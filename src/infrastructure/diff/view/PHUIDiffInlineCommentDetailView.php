@@ -305,12 +305,19 @@ final class PHUIDiffInlineCommentDetailView
             'class' => 'differential-inline-done',
             'sigil' => 'differential-inline-done',
           ));
-        $done_button = phutil_tag(
+        $done_button = javelin_tag(
           'label',
           array(
             'class' => 'differential-inline-done-label ',
+            'sigil' => 'differential-inline-done-label',
           ),
           array(
+            phutil_tag(
+              'span',
+              array(
+                'class' => 'differential-inline-done-spinner ',
+              )
+            ),
             $done_input,
             pht('Done'),
           ));

@@ -357,6 +357,13 @@ JX.install('DiffInline', {
     },
 
     toggleDone: function() {
+      var label = JX.DOM.find(
+        this._row,
+        'label',
+        'differential-inline-done-label');
+
+      JX.DOM.alterClass(label, 'loading', true);
+
       var uri = this._getInlineURI();
       var data = {
         op: 'done',
@@ -371,6 +378,13 @@ JX.install('DiffInline', {
     },
 
     _ondone: function(response) {
+      var label = JX.DOM.find(
+        this._row,
+        'label',
+        'differential-inline-done-label');
+
+      JX.DOM.alterClass(label, 'loading', false);
+
       var checkbox = JX.DOM.find(
         this._row,
         'input',

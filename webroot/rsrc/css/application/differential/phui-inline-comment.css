@@ -285,6 +285,16 @@
     border-color: {$sky};
 }
 
+.differential-inline-done-label.loading .differential-inline-done-spinner:before {
+  content: "\f110";
+  font-family: FontAwesome;
+  margin: 0 6px 0 0;
+}
+
+.differential-inline-done-label.loading .differential-inline-done {
+  display: none;
+}
+
 /* - Inline State is Draft ----------------------------------------------------
 
   The Unsubmitted state of the comment / done checkbox styles.
