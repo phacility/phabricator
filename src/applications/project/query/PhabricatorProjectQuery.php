@@ -236,10 +236,6 @@ final class PhabricatorProjectQuery
     }
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $projects) {
     $ancestor_paths = array();
     foreach ($projects as $project) {

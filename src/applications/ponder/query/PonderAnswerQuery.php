@@ -59,10 +59,6 @@ final class PonderAnswerQuery
     return new PonderAnswer();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PonderAnswer());
-  }
-
   protected function willFilterPage(array $answers) {
     $questions = id(new PonderQuestionQuery())
       ->setViewer($this->getViewer())

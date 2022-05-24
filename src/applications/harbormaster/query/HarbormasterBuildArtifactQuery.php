@@ -40,10 +40,6 @@ final class HarbormasterBuildArtifactQuery
     return new HarbormasterBuildArtifact();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $page) {
     $build_targets = array();
 

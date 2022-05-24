@@ -57,10 +57,6 @@ final class PassphraseCredentialQuery
     return new PassphraseCredential();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $page) {
     if ($this->needSecrets) {
       $secret_ids = mpull($page, 'getSecretID');

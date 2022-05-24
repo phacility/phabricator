@@ -26,10 +26,6 @@ final class PhabricatorTokenGivenQuery
     return new PhabricatorTokenGiven();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

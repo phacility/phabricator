@@ -36,8 +36,8 @@ final class PhabricatorSpacesNamespaceQuery
     return 'PhabricatorSpacesApplication';
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PhabricatorSpacesNamespace());
+  public function newResultObject() {
+    return new PhabricatorSpacesNamespace();
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {

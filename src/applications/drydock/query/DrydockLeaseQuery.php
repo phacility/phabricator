@@ -57,10 +57,6 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return new DrydockLease();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $leases) {
     $resource_phids = array_filter(mpull($leases, 'getResourcePHID'));
     if ($resource_phids) {

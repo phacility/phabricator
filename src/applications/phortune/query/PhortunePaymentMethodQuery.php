@@ -38,10 +38,6 @@ final class PhortunePaymentMethodQuery
     return new PhortunePaymentMethod();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $methods) {
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())

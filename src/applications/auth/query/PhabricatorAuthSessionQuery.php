@@ -38,10 +38,6 @@ final class PhabricatorAuthSessionQuery
     return new PhabricatorAuthSession();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $sessions) {
     $identity_phids = mpull($sessions, 'getUserPHID');
 

@@ -47,10 +47,6 @@ final class PhabricatorAuthSSHKeyQuery
     return new PhabricatorAuthSSHKey();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $keys) {
     $object_phids = mpull($keys, 'getObjectPHID');
 

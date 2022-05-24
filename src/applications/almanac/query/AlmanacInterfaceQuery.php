@@ -38,10 +38,6 @@ final class AlmanacInterfaceQuery
     return new AlmanacInterface();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $interfaces) {
     $network_phids = mpull($interfaces, 'getNetworkPHID');
     $device_phids = mpull($interfaces, 'getDevicePHID');

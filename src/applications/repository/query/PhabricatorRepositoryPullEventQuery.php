@@ -40,10 +40,6 @@ final class PhabricatorRepositoryPullEventQuery
     return new PhabricatorRepositoryPullEvent();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $events) {
     // If a pull targets an invalid repository or fails before authenticating,
     // it may not have an associated repository.

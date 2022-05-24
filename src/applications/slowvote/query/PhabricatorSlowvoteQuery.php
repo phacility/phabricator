@@ -57,10 +57,6 @@ final class PhabricatorSlowvoteQuery
     return new PhabricatorSlowvotePoll();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $polls) {
     assert_instances_of($polls, 'PhabricatorSlowvotePoll');
 

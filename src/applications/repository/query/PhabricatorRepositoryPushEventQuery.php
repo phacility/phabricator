@@ -38,10 +38,6 @@ final class PhabricatorRepositoryPushEventQuery
     return new PhabricatorRepositoryPushEvent();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $events) {
     $repository_phids = mpull($events, 'getRepositoryPHID');
     $repositories = id(new PhabricatorRepositoryQuery())

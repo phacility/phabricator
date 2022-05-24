@@ -38,10 +38,6 @@ final class PhabricatorWorkerBulkJobQuery
     return new PhabricatorWorkerBulkJob();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $page) {
     $map = PhabricatorWorkerBulkJobType::getAllJobTypes();
 

@@ -72,10 +72,6 @@ final class DrydockAuthorizationQuery extends DrydockQuery {
     return new DrydockAuthorization();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $authorizations) {
     $blueprint_phids = mpull($authorizations, 'getBlueprintPHID');
     if ($blueprint_phids) {

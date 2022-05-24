@@ -95,10 +95,6 @@ final class DrydockBlueprintQuery extends DrydockQuery {
     return 'blueprint';
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willExecute() {
     if ($this->identifiers) {
       $this->identifierMap = array();

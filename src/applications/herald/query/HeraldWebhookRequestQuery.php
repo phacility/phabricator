@@ -29,10 +29,6 @@ final class HeraldWebhookRequestQuery
     return new HeraldWebhookRequest();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function withLastRequestEpochBetween($epoch_min, $epoch_max) {
     $this->lastRequestEpochMin = $epoch_min;
     $this->lastRequestEpochMax = $epoch_max;

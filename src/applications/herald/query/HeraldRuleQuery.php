@@ -86,10 +86,6 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return new HeraldRule();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $rules) {
     $rule_ids = mpull($rules, 'getID');
 

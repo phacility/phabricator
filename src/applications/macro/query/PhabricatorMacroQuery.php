@@ -100,10 +100,6 @@ final class PhabricatorMacroQuery
     return new PhabricatorFileImageMacro();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PhabricatorFileImageMacro());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

@@ -58,10 +58,6 @@ final class DifferentialChangesetQuery
     return new DifferentialChangeset();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $changesets) {
     // First, attach all the diffs we already have. We can just do this
     // directly without worrying about querying for them. When we don't have
