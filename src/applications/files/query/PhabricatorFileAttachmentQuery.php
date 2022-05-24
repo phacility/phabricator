@@ -4,10 +4,22 @@ final class PhabricatorFileAttachmentQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $objectPHIDs;
+  private $filePHIDs;
   private $needFiles;
+  private $visibleFiles;
 
   public function withObjectPHIDs(array $object_phids) {
     $this->objectPHIDs = $object_phids;
+    return $this;
+  }
+
+  public function withFilePHIDs(array $file_phids) {
+    $this->filePHIDs = $file_phids;
+    return $this;
+  }
+
+  public function withVisibleFiles($visible_files) {
+    $this->visibleFiles = $visible_files;
     return $this;
   }
 
@@ -32,6 +44,13 @@ final class PhabricatorFileAttachmentQuery
         $conn,
         'attachments.objectPHID IN (%Ls)',
         $this->objectPHIDs);
+    }
+
+    if ($this->filePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'attachments.filePHID IN (%Ls)',
+        $this->filePHIDs);
     }
 
     return $where;
@@ -91,6 +110,12 @@ final class PhabricatorFileAttachmentQuery
       foreach ($attachments as $key => $attachment) {
         $file_phid = $attachment->getFilePHID();
         $file = idx($files, $file_phid);
+
+        if ($this->visibleFiles && !$file) {
+          $this->didRejectResult($attachment);
+          unset($attachments[$key]);
+          continue;
+        }
 
         $attachment->attachFile($file);
       }

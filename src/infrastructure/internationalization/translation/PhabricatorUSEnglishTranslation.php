@@ -1789,6 +1789,20 @@ final class PhabricatorUSEnglishTranslation
         'Executed %s tasks.',
       ),
 
+      '%s modified %s attached file(s): %s.' => array(
+        array(
+          '%s modified an attached file: %3$s.',
+          '%s modified attached files: %3$s.',
+        ),
+      ),
+
+      '%s attached %s referenced file(s): %s.' => array(
+        array(
+          '%s attached a referenced file: %3$s.',
+          '%s attached referenced files: %3$s.',
+        ),
+      ),
+
     );
   }
 

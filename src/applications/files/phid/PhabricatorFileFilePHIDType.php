@@ -39,6 +39,9 @@ final class PhabricatorFileFilePHIDType extends PhabricatorPHIDType {
       $handle->setName("F{$id}");
       $handle->setFullName("F{$id}: {$name}");
       $handle->setURI($uri);
+
+      $icon = FileTypeIcon::getFileIcon($name);
+      $handle->setIcon($icon);
     }
   }
 

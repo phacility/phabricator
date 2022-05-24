@@ -95,8 +95,14 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         ),
         'document/(?P<engineKey>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileDocumentController',
-        'ui/curtainlist/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileUICurtainListController',
+        'ui/' => array(
+          'curtain/' => array(
+            'list/(?P<phid>[^/]+)/'
+              => 'PhabricatorFileUICurtainListController',
+            'attach/(?P<objectPHID>[^/]+)/(?P<filePHID>[^/]+)/'
+              => 'PhabricatorFileUICurtainAttachController',
+          ),
+        ),
       ) + $this->getResourceSubroutes(),
     );
   }

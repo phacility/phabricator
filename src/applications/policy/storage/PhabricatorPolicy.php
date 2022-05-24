@@ -417,10 +417,21 @@ final class PhabricatorPolicy
       PhabricatorPolicies::POLICY_NOONE => 1,
     );
 
-    $this_strength = idx($strengths, $this->getPHID(), 0);
-    $other_strength = idx($strengths, $other->getPHID(), 0);
+    $this_strength = idx($strengths, $this_policy, 0);
+    $other_strength = idx($strengths, $other_policy, 0);
 
     return ($this_strength > $other_strength);
+  }
+
+  public function isStrongerThanOrEqualTo(PhabricatorPolicy $other) {
+    $this_policy = $this->getPHID();
+    $other_policy = $other->getPHID();
+
+    if ($this_policy === $other_policy) {
+      return true;
+    }
+
+    return $this->isStrongerThan($other);
   }
 
   public function isValidPolicyForEdit() {

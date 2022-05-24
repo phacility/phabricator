@@ -7,6 +7,7 @@ final class PHUICurtainObjectRefView
   private $epoch;
   private $highlighted;
   private $exiled;
+  private $exileNote = false;
 
   public function setHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -23,8 +24,9 @@ final class PHUICurtainObjectRefView
     return $this;
   }
 
-  public function setExiled($is_exiled) {
+  public function setExiled($is_exiled, $note = false) {
     $this->exiled = $is_exiled;
+    $this->exileNote = $note;
     return $this;
   }
 
@@ -72,10 +74,16 @@ final class PHUICurtainObjectRefView
     }
 
     if ($this->exiled) {
+      if ($this->exileNote !== false) {
+        $exile_note = $this->exileNote;
+      } else {
+        $exile_note = pht('No View Permission');
+      }
+
       $exiled_view = array(
         id(new PHUIIconView())->setIcon('fa-eye-slash red'),
         ' ',
-        pht('No View Permission'),
+        $exile_note,
       );
 
       $exiled_cells = array();

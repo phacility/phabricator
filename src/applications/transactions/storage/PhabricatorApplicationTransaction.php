@@ -341,6 +341,9 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = $old;
         $phids[] = $new;
         break;
+      case PhabricatorTransactions::TYPE_FILE:
+        $phids[] = array_keys($old + $new);
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
         $phids[] = $record->getChangedPHIDs();
@@ -592,7 +595,9 @@ abstract class PhabricatorApplicationTransaction
 
     // Always hide file attach/detach transactions.
     if ($xaction_type === PhabricatorTransactions::TYPE_FILE) {
-      return true;
+      if ($this->getMetadataValue('attach.implicit')) {
+        return true;
+      }
     }
 
     // Hide creation transactions if the old value is empty. These are
@@ -1042,6 +1047,124 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+      case PhabricatorTransactions::TYPE_FILE:
+        $add = array_diff_key($new, $old);
+        $add = array_keys($add);
+
+        $rem = array_diff_key($old, $new);
+        $rem = array_keys($rem);
+
+        $mod = array();
+        foreach ($old + $new as $key => $ignored) {
+          if (!isset($old[$key])) {
+            continue;
+          }
+
+          if (!isset($new[$key])) {
+            continue;
+          }
+
+          if ($old[$key] === $new[$key]) {
+            continue;
+          }
+
+          $mod[] = $key;
+        }
+
+        // Specialize the specific case of only modifying files and upgrading
+        // references to attachments. This is accessible via the UI and can
+        // be shown more clearly than the generic default transaction shows
+        // it.
+
+        $mode_reference = PhabricatorFileAttachment::MODE_REFERENCE;
+        $mode_attach = PhabricatorFileAttachment::MODE_ATTACH;
+
+        $is_refattach = false;
+        if ($mod && !$add && !$rem) {
+          $all_refattach = true;
+          foreach ($mod as $phid) {
+            if (idx($old, $phid) !== $mode_reference) {
+              $all_refattach = false;
+              break;
+            }
+            if (idx($new, $phid) !== $mode_attach) {
+              $all_refattach = false;
+              break;
+            }
+          }
+          $is_refattach = $all_refattach;
+        }
+
+        if ($is_refattach) {
+          return pht(
+            '%s attached %s referenced file(s): %s.',
+            $this->renderHandleLink($author_phid),
+            phutil_count($mod),
+            $this->renderHandleList($mod));
+        } else if ($add && $rem && $mod) {
+          return pht(
+            '%s updated %s attached file(s), added %s: %s; removed %s: %s; '.
+            'modified %s: %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($add) + count($rem)),
+            phutil_count($add),
+            $this->renderHandleList($add),
+            phutil_count($rem),
+            $this->renderHandleList($rem),
+            phutil_count($mod),
+            $this->renderHandleList($mod));
+        } else if ($add && $rem) {
+          return pht(
+            '%s updated %s attached file(s), added %s: %s; removed %s: %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($add) + count($rem)),
+            phutil_count($add),
+            $this->renderHandleList($add),
+            phutil_count($rem),
+            $this->renderHandleList($rem));
+        } else if ($add && $mod) {
+          return pht(
+            '%s updated %s attached file(s), added %s: %s; modified %s: %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($add) + count($mod)),
+            phutil_count($add),
+            $this->renderHandleList($add),
+            phutil_count($mod),
+            $this->renderHandleList($mod));
+        } else if ($rem && $mod) {
+          return pht(
+            '%s updated %s attached file(s), removed %s: %s; modified %s: %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($rem) + count($mod)),
+            phutil_count($rem),
+            $this->renderHandleList($rem),
+            phutil_count($mod),
+            $this->renderHandleList($mod));
+        } else if ($add) {
+          return pht(
+            '%s attached %s file(s): %s.',
+            $this->renderHandleLink($author_phid),
+            phutil_count($add),
+            $this->renderHandleList($add));
+        } else if ($rem) {
+          return pht(
+            '%s removed %s attached file(s): %s.',
+            $this->renderHandleLink($author_phid),
+            phutil_count($rem),
+            $this->renderHandleList($rem));
+        } else if ($mod) {
+          return pht(
+            '%s modified %s attached file(s): %s.',
+            $this->renderHandleLink($author_phid),
+            phutil_count($mod),
+            $this->renderHandleList($mod));
+        } else {
+          return pht(
+            '%s attached files...',
+            $this->renderHandleLink($author_phid));
+        }
+
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
         $add = $record->getAddedPHIDs();
@@ -1479,6 +1602,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_FILE:
+        return true;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getTransactionCustomField();
         if ($field) {
@@ -1494,6 +1619,11 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function renderChangeDetailsForMail(PhabricatorUser $viewer) {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_FILE:
+        return false;
+    }
+
     $view = $this->renderChangeDetails($viewer);
     if ($view instanceof PhabricatorApplicationTransactionTextDiffDetailView) {
       return $view->renderForMail();
@@ -1503,6 +1633,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function renderChangeDetails(PhabricatorUser $viewer) {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_FILE:
+        return $this->newFileTransactionChangeDetails($viewer);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getTransactionCustomField();
         if ($field) {
@@ -1769,6 +1901,66 @@ abstract class PhabricatorApplicationTransaction
       ->addInt(-$this->getActionStrength());
   }
 
+  private function newFileTransactionChangeDetails(PhabricatorUser $viewer) {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $phids = array_keys($old + $new);
+    $handles = $viewer->loadHandles($phids);
+
+    $names = array(
+      PhabricatorFileAttachment::MODE_REFERENCE => pht('Referenced'),
+      PhabricatorFileAttachment::MODE_ATTACH => pht('Attached'),
+    );
+
+    $rows = array();
+    foreach ($old + $new as $phid => $ignored) {
+      $handle = $handles[$phid];
+
+      $old_mode = idx($old, $phid);
+      $new_mode = idx($new, $phid);
+
+      if ($old_mode === null) {
+        $old_name = pht('None');
+      } else if (isset($names[$old_mode])) {
+        $old_name = $names[$old_mode];
+      } else {
+        $old_name = pht('Unknown ("%s")', $old_mode);
+      }
+
+      if ($new_mode === null) {
+        $new_name = pht('Detached');
+      } else if (isset($names[$new_mode])) {
+        $new_name = $names[$new_mode];
+      } else {
+        $new_name = pht('Unknown ("%s")', $new_mode);
+      }
+
+      $rows[] = array(
+        $handle->renderLink(),
+        $old_name,
+        $new_name,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('File'),
+          pht('Old Mode'),
+          pht('New Mode'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+        ));
+
+    return id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_SMALL)
+      ->appendChild($table);
+  }
+
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
@@ -1835,6 +2027,5 @@ abstract class PhabricatorApplicationTransaction
       $this->delete();
     $this->saveTransaction();
   }
-
 
 }
