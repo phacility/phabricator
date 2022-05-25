@@ -398,7 +398,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $new = $xaction->getNewValue();
 
     $type = $xaction->getTransactionType();
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -493,7 +493,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $xaction->getTransactionType();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -591,7 +591,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $xaction->getTransactionType();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -712,7 +712,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $type = $xaction->getTransactionType();
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       return $xtype->getTransactionHasEffect(
         $object,
@@ -745,7 +745,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $xaction->getTransactionType();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -783,7 +783,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $xaction->getTransactionType();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -1120,7 +1120,7 @@ abstract class PhabricatorApplicationTransactionEditor
         continue;
       }
 
-      $xtype = $this->getModularTransactionType($type);
+      $xtype = $this->getModularTransactionType($object, $type);
       if (!$xtype) {
         continue;
       }
@@ -1861,7 +1861,7 @@ abstract class PhabricatorApplicationTransactionEditor
         foreach ($xactions as $xaction) {
           $type = $xaction->getTransactionType();
 
-          $xtype = $this->getModularTransactionType($type);
+          $xtype = $this->getModularTransactionType($object, $type);
           if (!$xtype) {
             $capabilities = $this->getLegacyRequiredCapabilities($xaction);
           } else {
@@ -2136,11 +2136,11 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
 
+    $object = $this->object;
     $type = $u->getTransactionType();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
-      $object = $this->object;
       return $xtype->mergeTransactions($object, $u, $v);
     }
 
@@ -2866,7 +2866,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $errors = array();
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $errors[] = $xtype->validateTransactions($object, $xactions);
     }
@@ -4009,8 +4009,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private function getMailDiffSectionHeader($xaction) {
     $type = $xaction->getTransactionType();
+    $object = $this->object;
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       return $xtype->getMailDiffSectionHeader();
     }
@@ -4408,7 +4409,7 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
 
-      $xtype = $this->getModularTransactionType($type);
+      $xtype = $this->getModularTransactionType($object, $type);
       if ($xtype) {
         $phids[] = $xtype->extractFilePHIDs($object, $xaction->getNewValue());
       } else {
@@ -4954,9 +4955,11 @@ abstract class PhabricatorApplicationTransactionEditor
       $proxy_phids);
   }
 
-  private function getModularTransactionTypes() {
+  private function getModularTransactionTypes(
+    PhabricatorLiskDAO $object) {
+
     if ($this->modularTypes === null) {
-      $template = $this->object->getApplicationTransactionTemplate();
+      $template = $object->getApplicationTransactionTemplate();
       if ($template instanceof PhabricatorModularTransaction) {
         $xtypes = $template->newModularTransactionTypes();
         foreach ($xtypes as $key => $xtype) {
@@ -4974,8 +4977,8 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->modularTypes;
   }
 
-  private function getModularTransactionType($type) {
-    $types = $this->getModularTransactionTypes();
+  private function getModularTransactionType($object, $type) {
+    $types = $this->getModularTransactionTypes($object);
     return idx($types, $type);
   }
 
@@ -5535,7 +5538,7 @@ abstract class PhabricatorApplicationTransactionEditor
         foreach ($xactions as $xaction) {
           $type = $xaction->getTransactionType();
 
-          $xtype = $this->getModularTransactionType($type);
+          $xtype = $this->getModularTransactionType($object, $type);
           if ($xtype) {
             $xtype = clone $xtype;
             $xtype->setStorage($xaction);
@@ -5582,8 +5585,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTitleForTextMail(
     PhabricatorApplicationTransaction $xaction) {
     $type = $xaction->getTransactionType();
+    $object = $this->object;
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -5599,8 +5603,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTitleForHTMLMail(
     PhabricatorApplicationTransaction $xaction) {
     $type = $xaction->getTransactionType();
+    $object = $this->object;
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
@@ -5617,8 +5622,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getBodyForTextMail(
     PhabricatorApplicationTransaction $xaction) {
     $type = $xaction->getTransactionType();
+    $object = $this->object;
 
-    $xtype = $this->getModularTransactionType($type);
+    $xtype = $this->getModularTransactionType($object, $type);
     if ($xtype) {
       $xtype = clone $xtype;
       $xtype->setStorage($xaction);
