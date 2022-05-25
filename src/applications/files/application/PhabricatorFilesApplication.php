@@ -96,6 +96,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'document/(?P<engineKey>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileDocumentController',
         'ui/' => array(
+          'detach/(?P<objectPHID>[^/]+)/(?P<filePHID>[^/]+)/'
+            => 'PhabricatorFileDetachController',
           'curtain/' => array(
             'list/(?P<phid>[^/]+)/'
               => 'PhabricatorFileUICurtainListController',

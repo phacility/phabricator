@@ -46,6 +46,13 @@ final class PhabricatorFileAttachment
     );
   }
 
+  public static function getModeNameMap() {
+    return array(
+      self::MODE_ATTACH => pht('Attached'),
+      self::MODE_REFERENCE => pht('Referenced'),
+    );
+  }
+
   public function isPolicyAttachment() {
     switch ($this->getAttachmentMode()) {
       case self::MODE_ATTACH:
@@ -71,6 +78,15 @@ final class PhabricatorFileAttachment
 
   public function getFile() {
     return $this->assertAttached($this->file);
+  }
+
+  public function canDetach() {
+    switch ($this->getAttachmentMode()) {
+      case self::MODE_ATTACH:
+        return true;
+    }
+
+    return false;
   }
 
 

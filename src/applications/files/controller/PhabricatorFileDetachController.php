@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFileUICurtainAttachController
+final class PhabricatorFileDetachController
   extends PhabricatorFileController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -17,17 +17,6 @@ final class PhabricatorFileUICurtainAttachController
       return new Aphront404Response();
     }
 
-    $attachment = id(new PhabricatorFileAttachmentQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($object->getPHID()))
-      ->withFilePHIDs(array($file_phid))
-      ->needFiles(true)
-      ->withVisibleFiles(true)
-      ->executeOne();
-    if (!$attachment) {
-      return new Aphront404Response();
-    }
-
     $handles = $viewer->loadHandles(
       array(
         $object_phid,
@@ -36,19 +25,46 @@ final class PhabricatorFileUICurtainAttachController
 
     $object_handle = $handles[$object_phid];
     $file_handle = $handles[$file_phid];
-    $cancel_uri = $object_handle->getURI();
+    $cancel_uri = $file_handle->getURI();
 
     $dialog = $this->newDialog()
       ->setViewer($viewer)
-      ->setTitle(pht('Attach File'))
+      ->setTitle(pht('Detach File'))
       ->addCancelButton($cancel_uri, pht('Close'));
 
     $file_link = phutil_tag('strong', array(), $file_handle->renderLink());
     $object_link = phutil_tag('strong', array(), $object_handle->renderLink());
 
-    if ($attachment->isPolicyAttachment()) {
+    $attachment = id(new PhabricatorFileAttachmentQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->withFilePHIDs(array($file_phid))
+      ->needFiles(true)
+      ->withVisibleFiles(true)
+      ->executeOne();
+    if (!$attachment) {
       $body = pht(
-        'The file %s is already attached to the object %s.',
+        'The file %s is not attached to the object %s.',
+        $file_link,
+        $object_link);
+
+      return $dialog->appendParagraph($body);
+    }
+
+    $mode_reference = PhabricatorFileAttachment::MODE_REFERENCE;
+    if ($attachment->getAttachmentMode() === $mode_reference) {
+      $body = pht(
+        'The file %s is referenced by the object %s, but not attached to '.
+        'it, so it can not be detached.',
+        $file_link,
+        $object_link);
+
+      return $dialog->appendParagraph($body);
+    }
+
+    if (!$attachment->canDetach()) {
+      $body = pht(
+        'The file %s can not be detached from the object %s.',
         $file_link,
         $object_link);
 
@@ -56,42 +72,13 @@ final class PhabricatorFileUICurtainAttachController
     }
 
     if (!$request->isDialogFormPost()) {
-      $dialog->appendRemarkup(
-        pht(
-          '(WARNING) This file is referenced by this object, but '.
-          'not formally attached to it. Users who can see the object may '.
-          'not be able to see the file.'));
-
       $dialog->appendParagraph(
         pht(
-          'Do you want to attach the file %s to the object %s?',
+          'Detach the file %s from the object %s?',
           $file_link,
           $object_link));
 
-      $dialog->addSubmitButton(pht('Attach File'));
-
-      return $dialog;
-    }
-
-    if (!$request->getBool('confirm')) {
-      $dialog->setTitle(pht('Confirm File Attachment'));
-
-      $dialog->addHiddenInput('confirm', 1);
-
-      $dialog->appendRemarkup(
-        pht(
-          '(IMPORTANT) If you attach this file to this object, any user who '.
-          'has permission to view the object will be able to view and '.
-          'download the file!'));
-
-      $dialog->appendParagraph(
-        pht(
-          'Really attach the file %s to the object %s, allowing any user '.
-          'who can view the object to view and download the file?',
-          $file_link,
-          $object_link));
-
-      $dialog->addSubmitButton(pht('Grant Permission'));
+      $dialog->addSubmitButton(pht('Detach File'));
 
       return $dialog;
     }
@@ -100,7 +87,7 @@ final class PhabricatorFileUICurtainAttachController
       $dialog->appendParagraph(
         pht(
           'This object (of class "%s") does not implement the required '.
-          'interface ("%s"), so files can not be manually attached to it.',
+          'interface ("%s"), so files can not be manually detached from it.',
           get_class($object),
           'PhabricatorApplicationTransactionInterface'));
 
@@ -121,7 +108,7 @@ final class PhabricatorFileUICurtainAttachController
       ->setTransactionType(PhabricatorTransactions::TYPE_FILE)
       ->setNewValue(
         array(
-          $file_phid => PhabricatorFileAttachment::MODE_ATTACH,
+          $file_phid => PhabricatorFileAttachment::MODE_DETACH,
         ));
 
     $editor->applyTransactions($object, $xactions);

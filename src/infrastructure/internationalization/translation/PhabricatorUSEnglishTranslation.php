@@ -1803,6 +1803,13 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s removed %s attached file(s): %s.' => array(
+        array(
+          '%s removed an attached file: %3$s.',
+          '%s removed attached files: %3$s.',
+        ),
+      ),
+
     );
   }
 
