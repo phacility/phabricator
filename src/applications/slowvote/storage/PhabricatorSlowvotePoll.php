@@ -62,11 +62,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
       ),
     ) + parent::getConfiguration();
   }
