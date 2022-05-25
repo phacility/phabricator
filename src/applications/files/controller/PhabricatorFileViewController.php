@@ -320,20 +320,13 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
       $finfo->addProperty(pht('Default Alt Text'), $default_alt);
     }
 
-    $phids = $file->getObjectPHIDs();
-    if ($phids) {
-      $attached = new PHUIPropertyListView();
+    $attachments_table = $this->newAttachmentsView($file);
 
-      $tab_group->addTab(
-        id(new PHUITabView())
-          ->setName(pht('Attached'))
-          ->setKey('attached')
-          ->appendChild($attached));
-
-      $attached->addProperty(
-        pht('Attached To'),
-        $viewer->renderHandleList($phids));
-    }
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('Attached'))
+        ->setKey('attached')
+        ->appendChild($attachments_table));
 
     $engine = $this->loadStorageEngine($file);
     if ($engine) {
@@ -419,5 +412,82 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
 
     return $engine->newDocumentView($ref);
   }
+
+  private function newAttachmentsView(PhabricatorFile $file) {
+    $viewer = $this->getViewer();
+
+    $attachments = id(new PhabricatorFileAttachmentQuery())
+      ->setViewer($viewer)
+      ->withFilePHIDs(array($file->getPHID()))
+      ->execute();
+
+    $handles = $viewer->loadHandles(mpull($attachments, 'getObjectPHID'));
+
+    $rows = array();
+
+    $mode_map = PhabricatorFileAttachment::getModeNameMap();
+    $mode_attach = PhabricatorFileAttachment::MODE_ATTACH;
+
+    foreach ($attachments as $attachment) {
+      $object_phid = $attachment->getObjectPHID();
+      $handle = $handles[$object_phid];
+
+      $attachment_mode = $attachment->getAttachmentMode();
+
+      $mode_name = idx($mode_map, $attachment_mode);
+      if ($mode_name === null) {
+        $mode_name = pht('Unknown ("%s")', $attachment_mode);
+      }
+
+      $detach_uri = urisprintf(
+        '/file/ui/detach/%s/%s/',
+        $object_phid,
+        $file->getPHID());
+
+      $is_disabled = !$attachment->canDetach();
+
+      $detach_button = id(new PHUIButtonView())
+        ->setHref($detach_uri)
+        ->setTag('a')
+        ->setWorkflow(true)
+        ->setDisabled($is_disabled)
+        ->setColor(PHUIButtonView::GREY)
+        ->setSize(PHUIButtonView::SMALL)
+        ->setText(pht('Detach File'));
+
+      javelin_tag(
+        'a',
+        array(
+          'href' => $detach_uri,
+          'sigil' => 'workflow',
+          'disabled' => true,
+          'class' => 'small button button-grey disabled',
+        ),
+        pht('Detach File'));
+
+      $rows[] = array(
+        $handle->renderLink(),
+        $mode_name,
+        $detach_button,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Attached To'),
+          pht('Mode'),
+          null,
+        ))
+      ->setColumnClasses(
+        array(
+          'pri wide',
+          null,
+          null,
+        ));
+
+    return $table;
+  }
+
 
 }
