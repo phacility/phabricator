@@ -20,7 +20,7 @@ final class PhabricatorSlowvoteCloseController
       return new Aphront404Response();
     }
 
-    $close_uri = '/V'.$poll->getID();
+    $close_uri = $poll->getURI();
 
     if ($request->isFormPost()) {
       if ($poll->isClosed()) {
@@ -33,7 +33,7 @@ final class PhabricatorSlowvoteCloseController
 
       $xactions[] = id(new PhabricatorSlowvoteTransaction())
         ->setTransactionType(
-            PhabricatorSlowvoteCloseTransaction::TRANSACTIONTYPE)
+            PhabricatorSlowvoteStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorSlowvoteEditor())

@@ -7,7 +7,7 @@ final class PhabricatorSlowvoteQuery
   private $phids;
   private $authorPHIDs;
   private $withVotesByViewer;
-  private $isClosed;
+  private $statuses;
 
   private $needOptions;
   private $needChoices;
@@ -33,8 +33,8 @@ final class PhabricatorSlowvoteQuery
     return $this;
   }
 
-  public function withIsClosed($with_closed) {
-    $this->isClosed = $with_closed;
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -137,12 +137,13 @@ final class PhabricatorSlowvoteQuery
         $this->authorPHIDs);
     }
 
-    if ($this->isClosed !== null) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.isClosed = %d',
-        (int)$this->isClosed);
+        'p.status IN (%Ls)',
+        $this->statuses);
     }
+
     return $where;
   }
 

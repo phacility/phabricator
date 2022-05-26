@@ -3,8 +3,8 @@
 final class SlowvotePollStatus
   extends Phobject {
 
-  const STATUS_OPEN = 0;
-  const STATUS_CLOSED = 1;
+  const STATUS_OPEN = 'open';
+  const STATUS_CLOSED = 'closed';
 
   private $key;
 
@@ -47,6 +47,10 @@ final class SlowvotePollStatus
     return $this->getProperty('header.tag.color');
   }
 
+  public function getTransactionIcon() {
+    return $this->getProperty('transaction.icon');
+  }
+
   private function getProperty($key, $default = null) {
     $spec = idx(self::getMap(), $this->getKey(), array());
     return idx($spec, $key, $default);
@@ -58,11 +62,13 @@ final class SlowvotePollStatus
         'name' => pht('Open'),
         'header.tag.icon' => 'fa-square-o',
         'header.tag.color' => 'bluegrey',
+        'transaction.icon' => 'fa-pencil',
       ),
       self::STATUS_CLOSED => array(
         'name' => pht('Closed'),
         'header.tag.icon' => 'fa-ban',
         'header.tag.color' => 'indigo',
+        'transaction.icon' => 'fa-ban',
       ),
     );
   }
