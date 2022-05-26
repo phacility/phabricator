@@ -35,9 +35,11 @@ final class PhabricatorSlowvotePollController
           ));
     }
 
-    $header_icon = $poll->getIsClosed() ? 'fa-ban' : 'fa-square-o';
-    $header_name = $poll->getIsClosed() ? pht('Closed') : pht('Open');
-    $header_color = $poll->getIsClosed() ? 'indigo' : 'bluegrey';
+    $status = $poll->getStatusObject();
+
+    $header_icon = $status->getHeaderTagIcon();
+    $header_color = $status->getHeaderTagColor();
+    $header_name = $status->getName();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($poll->getQuestion())
@@ -50,7 +52,7 @@ final class PhabricatorSlowvotePollController
     $subheader = $this->buildSubheaderView($poll);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb('V'.$poll->getID());
+    $crumbs->addTextCrumb($poll->getMonogram());
     $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
@@ -71,7 +73,11 @@ final class PhabricatorSlowvotePollController
       ->setMainColumn($poll_content);
 
     return $this->newPage()
-      ->setTitle('V'.$poll->getID().' '.$poll->getQuestion())
+      ->setTitle(
+        pht(
+          '%s %s',
+          $poll->getMonogram(),
+          $poll->getQuestion()))
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($poll->getPHID()))
       ->appendChild($view);
@@ -87,7 +93,7 @@ final class PhabricatorSlowvotePollController
 
     $curtain = $this->newCurtainView($poll);
 
-    $is_closed = $poll->getIsClosed();
+    $is_closed = $poll->isClosed();
     $close_poll_text = $is_closed ? pht('Reopen Poll') : pht('Close Poll');
     $close_poll_icon = $is_closed ? 'fa-check' : 'fa-ban';
 
