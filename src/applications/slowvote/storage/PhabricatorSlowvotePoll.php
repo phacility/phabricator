@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
+final class PhabricatorSlowvotePoll
+  extends PhabricatorSlowvoteDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
@@ -25,7 +26,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $responseVisibility = 0;
   protected $shuffle = 0;
   protected $method;
-  protected $mailKey;
   protected $viewPolicy;
   protected $isClosed = 0;
   protected $spacePHID;
@@ -59,16 +59,14 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
         'method' => 'uint32',
         'description' => 'text',
         'isClosed' => 'bool',
-        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
       ),
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorSlowvotePollPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhabricatorSlowvotePollPHIDType::TYPECONST;
   }
 
   public function getOptions() {
@@ -110,13 +108,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
   public function getURI() {
     return '/'.$this->getMonogram();
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-    return parent::save();
   }
 
 
