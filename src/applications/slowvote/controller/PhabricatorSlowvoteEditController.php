@@ -189,12 +189,19 @@ final class PhabricatorSlowvoteEditController
       }
     }
 
-    $poll_type_options = array(
-      PhabricatorSlowvotePoll::METHOD_PLURALITY =>
-        pht('Plurality (Single Choice)'),
-      PhabricatorSlowvotePoll::METHOD_APPROVAL  =>
-        pht('Approval (Multiple Choice)'),
-    );
+    $vote_type_map = SlowvotePollVotingMethod::getAll();
+    $vote_type_options = mpull($vote_type_map, 'getNameForEdit');
+
+    $method = $poll->getMethod();
+    if (!isset($vote_type_options[$method])) {
+      $method_object =
+        SlowvotePollVotingMethod::newVotingMethodObject(
+          $method);
+
+      $vote_type_options = array(
+        $method => $method_object->getNameForEdit(),
+      ) + $vote_type_options;
+    }
 
     $response_type_map = SlowvotePollResponseVisibility::getAll();
     $response_type_options = mpull($response_type_map, 'getNameForEdit');
@@ -216,12 +223,12 @@ final class PhabricatorSlowvoteEditController
           ->setLabel(pht('Vote Type'))
           ->setName('method')
           ->setValue($poll->getMethod())
-          ->setOptions($poll_type_options));
+          ->setOptions($vote_type_options));
     } else {
       $form->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Vote Type'))
-          ->setValue(idx($poll_type_options, $poll->getMethod())));
+          ->setValue(idx($vote_type_options, $poll->getMethod())));
     }
 
     if ($is_new) {

@@ -13,9 +13,6 @@ final class PhabricatorSlowvotePoll
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface {
 
-  const METHOD_PLURALITY  = 0;
-  const METHOD_APPROVAL   = 1;
-
   protected $question;
   protected $description;
   protected $authorPHID;
@@ -40,11 +37,13 @@ final class PhabricatorSlowvotePoll
       PhabricatorSlowvoteDefaultViewCapability::CAPABILITY);
 
     $default_responses = SlowvotePollResponseVisibility::RESPONSES_VISIBLE;
+    $default_method = SlowvotePollVotingMethod::METHOD_PLURALITY;
 
     return id(new PhabricatorSlowvotePoll())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->setMethod($default_method)
       ->setResponseVisibility($default_responses);
   }
 
