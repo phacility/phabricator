@@ -224,8 +224,8 @@ final class SlowvoteEmbedView extends AphrontView {
 
   private function renderControl(PhabricatorSlowvoteOption $option, $selected) {
     $types = array(
-      PhabricatorSlowvotePoll::METHOD_PLURALITY => 'radio',
-      PhabricatorSlowvotePoll::METHOD_APPROVAL => 'checkbox',
+      SlowvotePollVotingMethod::METHOD_PLURALITY => 'radio',
+      SlowvotePollVotingMethod::METHOD_APPROVAL => 'checkbox',
     );
 
     $closed = $this->getPoll()->getIsClosed();
@@ -302,10 +302,10 @@ final class SlowvoteEmbedView extends AphrontView {
     $percent = sprintf('%d%%', $count ? 100 * $choices / $count : 0);
 
     switch ($poll->getMethod()) {
-      case PhabricatorSlowvotePoll::METHOD_PLURALITY:
+      case SlowvotePollVotingMethod::METHOD_PLURALITY:
         $status = pht('%s (%d / %d)', $percent, $choices, $count);
         break;
-      case PhabricatorSlowvotePoll::METHOD_APPROVAL:
+      case SlowvotePollVotingMethod::METHOD_APPROVAL:
         $status = pht('%s Approval (%d / %d)', $percent, $choices, $count);
         break;
     }
