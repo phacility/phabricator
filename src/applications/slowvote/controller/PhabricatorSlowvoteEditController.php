@@ -57,7 +57,7 @@ final class PhabricatorSlowvoteEditController
       $v_space = $request->getStr('spacePHID');
 
       if ($is_new) {
-        $poll->setMethod($request->getInt('method'));
+        $poll->setMethod($request->getStr('method'));
       }
 
       if (!strlen($v_question)) {

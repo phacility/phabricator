@@ -3,8 +3,8 @@
 final class SlowvotePollVotingMethod
   extends Phobject {
 
-  const METHOD_PLURALITY = 0;
-  const METHOD_APPROVAL = 1;
+  const METHOD_PLURALITY = 'plurality';
+  const METHOD_APPROVAL = 'approval';
 
   private $key;
 

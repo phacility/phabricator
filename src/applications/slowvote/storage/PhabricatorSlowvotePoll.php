@@ -54,7 +54,7 @@ final class PhabricatorSlowvotePoll
         'question' => 'text255',
         'responseVisibility' => 'text32',
         'shuffle' => 'bool',
-        'method' => 'uint32',
+        'method' => 'text32',
         'description' => 'text',
         'isClosed' => 'bool',
       ),

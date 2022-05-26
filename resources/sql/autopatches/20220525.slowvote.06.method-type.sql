@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_slowvote.slowvote_poll
+  CHANGE method method VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};
