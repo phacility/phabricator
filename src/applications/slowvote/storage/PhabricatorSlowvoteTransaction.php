@@ -30,7 +30,7 @@ final class PhabricatorSlowvoteTransaction
       case PhabricatorSlowvoteQuestionTransaction::TRANSACTIONTYPE:
       case PhabricatorSlowvoteDescriptionTransaction::TRANSACTIONTYPE:
       case PhabricatorSlowvoteShuffleTransaction::TRANSACTIONTYPE:
-      case PhabricatorSlowvoteCloseTransaction::TRANSACTIONTYPE:
+      case PhabricatorSlowvoteStatusTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_DETAILS;
         break;
       case PhabricatorSlowvoteResponsesTransaction::TRANSACTIONTYPE:
