@@ -301,12 +301,16 @@ final class SlowvoteEmbedView extends AphrontView {
 
     $percent = sprintf('%d%%', $count ? 100 * $choices / $count : 0);
 
-    switch ($poll->getMethod()) {
+    $method = $poll->getMethod();
+    switch ($method) {
       case SlowvotePollVotingMethod::METHOD_PLURALITY:
         $status = pht('%s (%d / %d)', $percent, $choices, $count);
         break;
       case SlowvotePollVotingMethod::METHOD_APPROVAL:
         $status = pht('%s Approval (%d / %d)', $percent, $choices, $count);
+        break;
+      default:
+        $status = pht('Unknown ("%s")', $method);
         break;
     }
 
