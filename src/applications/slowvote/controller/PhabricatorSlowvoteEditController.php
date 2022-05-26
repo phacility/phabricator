@@ -199,6 +199,17 @@ final class PhabricatorSlowvoteEditController
     $response_type_map = SlowvotePollResponseVisibility::getAll();
     $response_type_options = mpull($response_type_map, 'getNameForEdit');
 
+    $visibility = $poll->getResponseVisibility();
+    if (!isset($response_type_options[$visibility])) {
+      $visibility_object =
+        SlowvotePollResponseVisibility::newResponseVisibilityObject(
+          $visibility);
+
+      $response_type_options = array(
+        $visibility => $visibility_object->getNameForEdit(),
+      ) + $response_type_options;
+    }
+
     if ($is_new) {
       $form->appendChild(
         id(new AphrontFormSelectControl())

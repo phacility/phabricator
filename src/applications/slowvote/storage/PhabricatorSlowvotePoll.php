@@ -53,7 +53,7 @@ final class PhabricatorSlowvotePoll
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'question' => 'text255',
-        'responseVisibility' => 'uint32',
+        'responseVisibility' => 'text32',
         'shuffle' => 'bool',
         'method' => 'uint32',
         'description' => 'text',
