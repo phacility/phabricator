@@ -6,7 +6,11 @@ final class PhabricatorSlowvoteResponsesTransaction
   const TRANSACTIONTYPE = 'vote:responses';
 
   public function generateOldValue($object) {
-    return $object->getResponseVisibility();
+    return (string)$object->getResponseVisibility();
+  }
+
+  public function generateNewValue($object, $value) {
+    return (string)$value;
   }
 
   public function applyInternalEffects($object, $value) {

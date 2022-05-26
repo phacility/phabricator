@@ -75,12 +75,12 @@ final class SlowvoteEmbedView extends AphrontView {
       $description,
     );
 
+    $quip = pht('Voting improves cardiovascular endurance.');
+
     $vis = $poll->getResponseVisibility();
     if ($this->areResultsVisible()) {
       if ($vis == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
         $quip = pht('Only you can see the results.');
-      } else {
-        $quip = pht('Voting improves cardiovascular endurance.');
       }
     } else if ($vis == SlowvotePollResponseVisibility::RESPONSES_VOTERS) {
       $quip = pht('You must vote to see the results.');

@@ -3,9 +3,9 @@
 final class SlowvotePollResponseVisibility
   extends Phobject {
 
-  const RESPONSES_VISIBLE = 0;
-  const RESPONSES_VOTERS = 1;
-  const RESPONSES_OWNER = 2;
+  const RESPONSES_VISIBLE = 'visible';
+  const RESPONSES_VOTERS = 'voters';
+  const RESPONSES_OWNER = 'owner';
 
   private $key;
 
@@ -51,7 +51,7 @@ final class SlowvotePollResponseVisibility
   }
 
   private function getProperty($key, $default = null) {
-    $spec = idx(self::getMap(), $this->getKey());
+    $spec = idx(self::getMap(), $this->getKey(), array());
     return idx($spec, $key, $default);
   }
 
