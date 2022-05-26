@@ -20,7 +20,7 @@ final class PhabricatorSlowvotePoll
   protected $shuffle = 0;
   protected $method;
   protected $viewPolicy;
-  protected $isClosed = 0;
+  protected $isClosed;
   protected $spacePHID;
 
   private $options = self::ATTACHABLE;
@@ -43,6 +43,7 @@ final class PhabricatorSlowvotePoll
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->setIsClosed(SlowvotePollStatus::STATUS_OPEN)
       ->setMethod($default_method)
       ->setResponseVisibility($default_responses);
   }
@@ -65,6 +66,14 @@ final class PhabricatorSlowvotePoll
 
   public function getPHIDType() {
     return PhabricatorSlowvotePollPHIDType::TYPECONST;
+  }
+
+  public function getStatusObject() {
+    return SlowvotePollStatus::newStatusObject($this->getIsClosed());
+  }
+
+  public function isClosed() {
+    return ($this->getIsClosed() == SlowvotePollStatus::STATUS_CLOSED);
   }
 
   public function getOptions() {

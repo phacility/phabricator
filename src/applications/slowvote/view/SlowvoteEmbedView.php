@@ -95,7 +95,7 @@ final class SlowvoteEmbedView extends AphrontView {
       ),
       $quip);
 
-    if ($poll->getIsClosed()) {
+    if ($poll->isClosed()) {
       $submit = null;
     } else {
       $submit = phutil_tag(
@@ -228,7 +228,7 @@ final class SlowvoteEmbedView extends AphrontView {
       SlowvotePollVotingMethod::METHOD_APPROVAL => 'checkbox',
     );
 
-    $closed = $this->getPoll()->getIsClosed();
+    $closed = $this->getPoll()->isClosed();
 
     return phutil_tag(
       'input',

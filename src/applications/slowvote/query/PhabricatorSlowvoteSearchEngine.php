@@ -142,7 +142,7 @@ final class PhabricatorSlowvoteSearchEngine
         ->setHref('/V'.$poll->getID())
         ->addIcon('none', $date_created);
 
-      if ($poll->getIsClosed()) {
+      if ($poll->isClosed()) {
         $item->setStatusIcon('fa-ban grey');
         $item->setDisabled(true);
       } else {
