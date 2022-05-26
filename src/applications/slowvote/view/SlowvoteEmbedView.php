@@ -77,14 +77,14 @@ final class SlowvoteEmbedView extends AphrontView {
 
     $vis = $poll->getResponseVisibility();
     if ($this->areResultsVisible()) {
-      if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
+      if ($vis == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
         $quip = pht('Only you can see the results.');
       } else {
         $quip = pht('Voting improves cardiovascular endurance.');
       }
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_VOTERS) {
+    } else if ($vis == SlowvotePollResponseVisibility::RESPONSES_VOTERS) {
       $quip = pht('You must vote to see the results.');
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
+    } else if ($vis == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
       $quip = pht('Only the author can see the results.');
     }
 
@@ -321,15 +321,19 @@ final class SlowvoteEmbedView extends AphrontView {
   private function areResultsVisible() {
     $poll = $this->getPoll();
 
-    $vis = $poll->getResponseVisibility();
-    if ($vis == PhabricatorSlowvotePoll::RESPONSES_VISIBLE) {
+    $visibility = $poll->getResponseVisibility();
+    if ($visibility == SlowvotePollResponseVisibility::RESPONSES_VISIBLE) {
       return true;
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
-      return ($poll->getAuthorPHID() == $this->getUser()->getPHID());
-    } else {
-      $choices = mgroup($poll->getChoices(), 'getAuthorPHID');
-      return (bool)idx($choices, $this->getUser()->getPHID());
     }
+
+    $viewer = $this->getViewer();
+
+    if ($visibility == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
+      return ($poll->getAuthorPHID() === $viewer->getPHID());
+    }
+
+    $choices = mgroup($poll->getChoices(), 'getAuthorPHID');
+    return (bool)idx($choices, $viewer->getPHID());
   }
 
 }

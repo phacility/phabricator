@@ -49,7 +49,7 @@ final class PhabricatorSlowvoteEditController
     if ($request->isFormPost()) {
       $v_question = $request->getStr('question');
       $v_description = $request->getStr('description');
-      $v_responses = (int)$request->getInt('responses');
+      $v_responses = $request->getStr('responses');
       $v_shuffle = (int)$request->getBool('shuffle');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_projects = $request->getArr('projects');
@@ -196,14 +196,8 @@ final class PhabricatorSlowvoteEditController
         pht('Approval (Multiple Choice)'),
     );
 
-    $response_type_options = array(
-      PhabricatorSlowvotePoll::RESPONSES_VISIBLE
-        => pht('Allow anyone to see the responses'),
-      PhabricatorSlowvotePoll::RESPONSES_VOTERS
-        => pht('Require a vote to see the responses'),
-      PhabricatorSlowvotePoll::RESPONSES_OWNER
-        => pht('Only I can see the responses'),
-    );
+    $response_type_map = SlowvotePollResponseVisibility::getAll();
+    $response_type_options = mpull($response_type_map, 'getNameForEdit');
 
     if ($is_new) {
       $form->appendChild(
