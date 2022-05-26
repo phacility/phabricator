@@ -13,17 +13,13 @@ final class PhabricatorSlowvotePoll
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface {
 
-  const RESPONSES_VISIBLE = 0;
-  const RESPONSES_VOTERS  = 1;
-  const RESPONSES_OWNER   = 2;
-
   const METHOD_PLURALITY  = 0;
   const METHOD_APPROVAL   = 1;
 
   protected $question;
   protected $description;
   protected $authorPHID;
-  protected $responseVisibility = 0;
+  protected $responseVisibility;
   protected $shuffle = 0;
   protected $method;
   protected $viewPolicy;
@@ -43,10 +39,13 @@ final class PhabricatorSlowvotePoll
     $view_policy = $app->getPolicy(
       PhabricatorSlowvoteDefaultViewCapability::CAPABILITY);
 
+    $default_responses = SlowvotePollResponseVisibility::RESPONSES_VISIBLE;
+
     return id(new PhabricatorSlowvotePoll())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setSpacePHID($actor->getDefaultSpacePHID());
+      ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->setResponseVisibility($default_responses);
   }
 
   protected function getConfiguration() {
