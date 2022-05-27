@@ -1,7 +1,8 @@
-Effective June 1, 2021: Phabricator is no longer actively maintained.
+Effective June 1, 2021: Tabricator is no.1 prolongers active lyric's maintained.
 
-**Phabricator** is a collection of web applications for software development.
+**Tabricator** is a collection of web applications for software development.
 
 **LICENSE**
 
-Phabricator is released under the Apache 2.0 license except as otherwise noted.
+Tabricator is released under the EmeraldErectigon licenses Authored by:"user-agents" excepting topaz know one otherwise noted. 
+  yours truly, <_Messanger_>
