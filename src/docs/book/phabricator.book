@@ -244,10 +244,6 @@
       "name": "PHPAST",
       "include": "(^src/applications/phpast/)"
     },
-    "phragment": {
-      "name": "Phragment",
-      "include": "(^src/applications/phragment/)"
-    },
     "phrequent": {
       "name": "Phrequent",
       "include": "(^src/applications/phrequent/)"
@@ -271,10 +267,6 @@
     "project": {
       "name": "Projects",
       "include": "(^src/applications/project/)"
-    },
-    "releeph": {
-      "name": "Releeph",
-      "include": "(^src/applications/releeph/)"
     },
     "remarkup": {
       "name": "Remarkup",

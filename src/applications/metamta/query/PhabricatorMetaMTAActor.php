@@ -143,7 +143,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
         'recipient received the original email message, so we are not '.
         'sending them this substantially similar message (for example, '.
         'the sender used "Reply All" instead of "Reply" in response to '.
-        'mail from Phabricator).'),
+        'mail from this server).'),
       self::REASON_SELF => pht(
         'This recipient is the user whose actions caused delivery of '.
         'this message, but they have set preferences so they do not '.

@@ -105,7 +105,7 @@ final class PhabricatorAuthSSHKeyGenerateController
             'This workflow will generate a new SSH keypair, add the public '.
             'key, and let you download the private key.'))
         ->appendParagraph(
-          pht('Phabricator will not retain a copy of the private key.'))
+          pht('The private key will not be retained.'))
         ->addSubmitButton(pht('Generate New Keypair'))
         ->addCancelButton($cancel_uri);
     } catch (Exception $ex) {

@@ -48,7 +48,7 @@ final class PhabricatorRepositoryVCSTransaction
       $errors[] = $this->newInvalidError(
         pht(
           'Specified version control system must be a VCS '.
-          'recognized by Phabricator. Valid systems are: %s.',
+          'recognized by this software. Valid systems are: %s.',
           implode(', ', array_keys($vcs_map))),
         $xaction);
     }

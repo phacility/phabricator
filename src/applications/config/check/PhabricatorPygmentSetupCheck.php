@@ -42,7 +42,7 @@ final class PhabricatorPygmentSetupCheck extends PhabricatorSetupCheck {
             'pygmentize');
 
           $message = pht(
-            'Phabricator has %s available in %s, but the binary '.
+            'This server has %s available in %s, but the binary '.
             'exited with an error code when run as %s. Check that it is '.
             'installed correctly.',
             phutil_tag('tt', array(), 'pygmentize'),
@@ -64,7 +64,7 @@ final class PhabricatorPygmentSetupCheck extends PhabricatorSetupCheck {
         'to provide advanced syntax highlighting.');
 
       $message = pht(
-        'Phabricator can highlight a few languages by default, '.
+        'This software can highlight a few languages by default, '.
         'but installing and enabling Pygments (a third-party highlighting '.
         "tool) will add syntax highlighting for many more languages. \n\n".
         'For instructions on installing and enabling Pygments, see the '.

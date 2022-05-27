@@ -13,15 +13,15 @@ final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
     if (!$path) {
       $summary = pht(
-        'The environmental variable %s is empty. Phabricator will not '.
+        'The environmental variable %s is empty. This server will not '.
         'be able to execute some commands.',
         '$PATH');
 
       $message = pht(
-        "The environmental variable %s is empty. Phabricator needs to execute ".
+        "The environmental variable %s is empty. This server needs to execute ".
         "some system commands, like `%s`, `%s`, `%s`, and `%s`. To execute ".
         "these commands, the binaries must be available in the webserver's ".
-        "%s. You can set additional paths in Phabricator configuration.",
+        "%s. You can set additional paths in configuration.",
         '$PATH',
         'svn',
         'git',
@@ -120,7 +120,7 @@ final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
           ->setMessage(
             pht(
               "The configured PATH includes a component which is not usable. ".
-              "Phabricator will be unable to find or execute binaries located ".
+              "This server will be unable to find or execute binaries located ".
               "here:".
               "\n\n".
               "%s".

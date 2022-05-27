@@ -21,7 +21,7 @@ final class PhabricatorSlowvoteVoteController
       return new Aphront404Response();
     }
 
-    if ($poll->getIsClosed()) {
+    if ($poll->isClosed()) {
       return new Aphront400Response();
     }
 
@@ -35,7 +35,7 @@ final class PhabricatorSlowvoteVoteController
     $votes = array_fuse($votes);
 
     $method = $poll->getMethod();
-    $is_plurality = ($method == PhabricatorSlowvotePoll::METHOD_PLURALITY);
+    $is_plurality = ($method == SlowvotePollVotingMethod::METHOD_PLURALITY);
 
     if (!$votes) {
       if ($is_plurality) {

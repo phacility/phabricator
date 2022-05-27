@@ -15,40 +15,71 @@ final class DrydockManagementReleaseLeaseWorkflow
             'repeat' => true,
             'help' => pht('Lease ID to release.'),
           ),
+          array(
+            'name' => 'all',
+            'help' => pht('Release all leases. Dangerous!'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $is_all = $args->getArg('all');
     $ids = $args->getArg('id');
-    if (!$ids) {
+
+    if (!$ids && !$is_all) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more lease IDs to release with "%s".',
-          '--id'));
+          'Select which leases you want to release. See "--help" for '.
+          'guidance.'));
     }
 
     $viewer = $this->getViewer();
-    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
 
-    $leases = id(new DrydockLeaseQuery())
+    $statuses = $this->getReleaseableLeaseStatuses();
+
+    $query = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
-      ->withIDs($ids)
-      ->execute();
+      ->withStatuses(mpull($statuses, 'getKey'));
 
-    PhabricatorWorker::setRunAllTasksInProcess(true);
-    foreach ($ids as $id) {
-      $lease = idx($leases, $id);
-      if (!$lease) {
-        echo tsprintf(
-          "%s\n",
-          pht('Lease "%s" does not exist.', $id));
-        continue;
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+
+    $leases = $query->execute();
+
+    if ($ids) {
+      $id_map = mpull($leases, null, 'getID');
+
+      foreach ($ids as $id) {
+        $lease = idx($id_map, $id);
+        if (!$lease) {
+          throw new PhutilArgumentUsageException(
+            pht('Lease "%s" does not exist.', $id));
+        }
       }
 
+      $leases = array_select_keys($id_map, $ids);
+    }
+
+    if (!$leases) {
+      echo tsprintf(
+        "%s\n",
+        pht('No leases selected for release.'));
+
+      return 0;
+    }
+
+    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+
+    PhabricatorWorker::setRunAllTasksInProcess(true);
+
+    foreach ($leases as $lease) {
       if (!$lease->canRelease()) {
         echo tsprintf(
           "%s\n",
-          pht('Lease "%s" is not releasable.', $id));
+          pht(
+            'Lease "%s" is not releasable.',
+            $lease->getDisplayName()));
         continue;
       }
 
@@ -62,9 +93,26 @@ final class DrydockManagementReleaseLeaseWorkflow
 
       echo tsprintf(
         "%s\n",
-        pht('Scheduled release of lease "%s".', $id));
+        pht(
+          'Scheduled release of lease "%s".',
+          $lease->getDisplayName()));
     }
 
+  }
+
+  private function getReleaseableLeaseStatuses() {
+    $statuses = DrydockLeaseStatus::getAllStatuses();
+    foreach ($statuses as $key => $status) {
+      $statuses[$key] = DrydockLeaseStatus::newStatusObject($status);
+    }
+
+    foreach ($statuses as $key => $status) {
+      if (!$status->canRelease()) {
+        unset($statuses[$key]);
+      }
+    }
+
+    return $statuses;
   }
 
 }

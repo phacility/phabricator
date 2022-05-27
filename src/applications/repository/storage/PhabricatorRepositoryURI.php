@@ -501,7 +501,7 @@ final class PhabricatorRepositoryURI
         'color' => 'green',
         'label' => pht('Observe'),
         'note' => pht(
-          'Phabricator will observe changes to this URI and copy them.'),
+          'Changes to this URI will be observed and pulled.'),
         'short' => pht('Copy from a remote.'),
       ),
       self::IO_MIRROR => array(
@@ -509,7 +509,7 @@ final class PhabricatorRepositoryURI
         'color' => 'green',
         'label' => pht('Mirror'),
         'note' => pht(
-          'Phabricator will push a copy of any changes to this URI.'),
+          'A copy of any changes will be pushed to this URI.'),
         'short' => pht('Push a copy to a remote.'),
       ),
       self::IO_NONE => array(
@@ -517,7 +517,7 @@ final class PhabricatorRepositoryURI
         'color' => 'grey',
         'label' => pht('No I/O'),
         'note' => pht(
-          'Phabricator will not push or pull any changes to this URI.'),
+          'No changes will be pushed or pulled from this URI.'),
         'short' => pht('Do not perform any I/O.'),
       ),
       self::IO_READ => array(
@@ -525,8 +525,7 @@ final class PhabricatorRepositoryURI
         'color' => 'blue',
         'label' => pht('Read Only'),
         'note' => pht(
-          'Phabricator will serve a read-only copy of the repository from '.
-          'this URI.'),
+          'A read-only copy of the repository will be served from this URI.'),
         'short' => pht('Serve repository in read-only mode.'),
       ),
       self::IO_READWRITE => array(
@@ -534,8 +533,7 @@ final class PhabricatorRepositoryURI
         'color' => 'blue',
         'label' => pht('Read/Write'),
         'note' => pht(
-          'Phabricator will serve a read/write copy of the repository from '.
-          'this URI.'),
+          'A read/write copy of the repository will be served from this URI.'),
         'short' => pht('Serve repository in read/write mode.'),
       ),
     );

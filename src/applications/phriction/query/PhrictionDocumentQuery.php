@@ -62,10 +62,6 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function newResultObject() {
     return new PhrictionDocument();
   }

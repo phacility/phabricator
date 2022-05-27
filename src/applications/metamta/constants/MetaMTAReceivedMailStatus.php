@@ -21,7 +21,7 @@ final class MetaMTAReceivedMailStatus
   public static function getHumanReadableName($status) {
     $map = array(
       self::STATUS_DUPLICATE => pht('Duplicate Message'),
-      self::STATUS_FROM_PHABRICATOR => pht('Phabricator Mail'),
+      self::STATUS_FROM_PHABRICATOR => pht('Mail From Self'),
       self::STATUS_NO_RECEIVERS => pht('No Receivers'),
       self::STATUS_UNKNOWN_SENDER => pht('Unknown Sender'),
       self::STATUS_DISABLED_SENDER => pht('Disabled Sender'),

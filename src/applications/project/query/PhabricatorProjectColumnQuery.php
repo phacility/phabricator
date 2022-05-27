@@ -56,10 +56,6 @@ final class PhabricatorProjectColumnQuery
     return new PhabricatorProjectColumn();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $page) {
     $projects = array();
 

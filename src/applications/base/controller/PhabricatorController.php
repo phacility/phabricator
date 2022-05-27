@@ -420,6 +420,10 @@ abstract class PhabricatorController extends AphrontController {
       ->setSubmitURI($submit_uri);
   }
 
+  public function newRedirect() {
+    return id(new AphrontRedirectResponse());
+  }
+
   public function newPage() {
     $page = id(new PhabricatorStandardPageView())
       ->setRequest($this->getRequest())

@@ -207,7 +207,7 @@ final class PhabricatorConfigClusterDatabasesController
 
     $table = id(new AphrontTableView($rows))
       ->setNoDataString(
-        pht('Phabricator is not configured in cluster mode.'))
+        pht('This server is not configured in cluster mode.'))
       ->setHeaders(
         array(
           null,

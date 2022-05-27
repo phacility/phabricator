@@ -25,10 +25,6 @@ final class DrydockCommandQuery extends DrydockQuery {
     return new DrydockCommand();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $commands) {
     $target_phids = mpull($commands, 'getTargetPHID');
 

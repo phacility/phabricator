@@ -117,7 +117,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
       throw new Exception(
         pht(
           'Unable to determine the username to connect with when trying '.
-          'to proxy an SSH request within the Phabricator cluster.'));
+          'to proxy an SSH request within the cluster.'));
     }
 
     $port = $uri->getPort();

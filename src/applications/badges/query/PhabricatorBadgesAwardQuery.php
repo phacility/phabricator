@@ -57,10 +57,6 @@ final class PhabricatorBadgesAwardQuery
     return (bool)$this->badgeStatuses;
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function newResultObject() {
     return new PhabricatorBadgesAward();
   }

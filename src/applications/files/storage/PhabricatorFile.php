@@ -1416,28 +1416,25 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return this
    */
   public function attachToObject($phid) {
-    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
+    $attachment_table = new PhabricatorFileAttachment();
+    $attachment_conn = $attachment_table->establishConnection('w');
 
-    id(new PhabricatorEdgeEditor())
-      ->addEdge($phid, $edge_type, $this->getPHID())
-      ->save();
-
-    return $this;
-  }
-
-
-  /**
-   * Remove the policy edge between this file and some object.
-   *
-   * @param phid Object PHID to detach from.
-   * @return this
-   */
-  public function detachFromObject($phid) {
-    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-
-    id(new PhabricatorEdgeEditor())
-      ->removeEdge($phid, $edge_type, $this->getPHID())
-      ->save();
+    queryfx(
+      $attachment_conn,
+      'INSERT INTO %R (objectPHID, filePHID, attachmentMode,
+          attacherPHID, dateCreated, dateModified)
+        VALUES (%s, %s, %s, %ns, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          attachmentMode = VALUES(attachmentMode),
+          attacherPHID = VALUES(attacherPHID),
+          dateModified = VALUES(dateModified)',
+      $attachment_table,
+      $phid,
+      $this->getPHID(),
+      PhabricatorFileAttachment::MODE_ATTACH,
+      null,
+      PhabricatorTime::getNow(),
+      PhabricatorTime::getNow());
 
     return $this;
   }

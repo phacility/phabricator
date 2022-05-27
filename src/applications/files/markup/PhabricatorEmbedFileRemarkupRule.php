@@ -5,7 +5,7 @@ final class PhabricatorEmbedFileRemarkupRule
 
   private $viewer;
 
-  const KEY_EMBED_FILE_PHIDS = 'phabricator.embedded-file-phids';
+  const KEY_ATTACH_INTENT_FILE_PHIDS = 'files.attach-intent';
 
   protected function getObjectNamePrefix() {
     return 'F';
@@ -23,13 +23,44 @@ final class PhabricatorEmbedFileRemarkupRule
           PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW,
         ))
       ->execute();
+    $objects = mpull($objects, null, 'getID');
 
-    $phids_key = self::KEY_EMBED_FILE_PHIDS;
-    $phids = $engine->getTextMetadata($phids_key, array());
-    foreach (mpull($objects, 'getPHID') as $phid) {
-      $phids[] = $phid;
+
+    // Identify files embedded in the block with "attachment intent", i.e.
+    // those files which the user appears to want to attach to the object.
+    // Files referenced inside quoted blocks are not considered to have this
+    // attachment intent.
+
+    $metadata_key = self::KEY_RULE_OBJECT.'.'.$this->getObjectNamePrefix();
+    $metadata = $engine->getTextMetadata($metadata_key, array());
+
+    $attach_key = self::KEY_ATTACH_INTENT_FILE_PHIDS;
+    $attach_phids = $engine->getTextMetadata($attach_key, array());
+
+    foreach ($metadata as $item) {
+
+      // If this reference was inside a quoted block, don't count it. Quoting
+      // someone else doesn't establish an intent to attach a file.
+      $depth = idx($item, 'quote.depth');
+      if ($depth > 0) {
+        continue;
+      }
+
+      $id = $item['id'];
+      $file = idx($objects, $id);
+
+      if (!$file) {
+        continue;
+      }
+
+      $attach_phids[] = $file->getPHID();
     }
-    $engine->setTextMetadata($phids_key, $phids);
+
+    $attach_phids = array_fuse($attach_phids);
+    $attach_phids = array_keys($attach_phids);
+
+    $engine->setTextMetadata($attach_key, $attach_phids);
+
 
     return $objects;
   }

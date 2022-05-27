@@ -63,10 +63,6 @@ final class HarbormasterBuildableQuery
     return new HarbormasterBuildable();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $page) {
     $buildables = array();
 

@@ -7,7 +7,7 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
       PhabricatorNotificationClient::tryAnyConnection();
     } catch (Exception $ex) {
       $message = pht(
-        "Phabricator is configured to use a notification server, but is ".
+        "This server is configured to use a notification server, but is ".
         "unable to connect to it. You should resolve this issue or disable ".
         "the notification server. It may be helpful to double check your ".
         "configuration or restart the server using the command below.\n\n%s",
@@ -26,14 +26,14 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('Unable to Connect to Notification Server'))
         ->setSummary(
           pht(
-            'Phabricator is configured to use a notification server, '.
+            'This server is configured to use a notification server, '.
             'but is not able to connect to it.'))
         ->setMessage($message)
         ->addRelatedPhabricatorConfig('notification.servers')
         ->addCommand(
           pht(
             "(To start the server, run this command.)\n%s",
-            'phabricator/ $ ./bin/aphlict start'));
+            '$ ./bin/aphlict start'));
 
       return;
     }

@@ -111,6 +111,9 @@ final class DrydockLease extends DrydockDAO
         'key_owner' => array(
           'columns' => array('ownerPHID'),
         ),
+        'key_recent' => array(
+          'columns' => array('resourcePHID', 'dateModified'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -389,6 +392,62 @@ final class DrydockLease extends DrydockDAO
       ));
   }
 
+  public function getAllocatedResourcePHIDs() {
+    return $this->getAttribute('internal.resourcePHIDs.allocated', array());
+  }
+
+  public function setAllocatedResourcePHIDs(array $phids) {
+    return $this->setAttribute('internal.resourcePHIDs.allocated', $phids);
+  }
+
+  public function addAllocatedResourcePHIDs(array $phids) {
+    $allocated_phids = $this->getAllocatedResourcePHIDs();
+
+    foreach ($phids as $phid) {
+      $allocated_phids[$phid] = $phid;
+    }
+
+    return $this->setAllocatedResourcePHIDs($allocated_phids);
+  }
+
+  public function removeAllocatedResourcePHIDs(array $phids) {
+    $allocated_phids = $this->getAllocatedResourcePHIDs();
+
+    foreach ($phids as $phid) {
+      unset($allocated_phids[$phid]);
+    }
+
+    return $this->setAllocatedResourcePHIDs($allocated_phids);
+  }
+
+  public function getReclaimedResourcePHIDs() {
+    return $this->getAttribute('internal.resourcePHIDs.reclaimed', array());
+  }
+
+  public function setReclaimedResourcePHIDs(array $phids) {
+    return $this->setAttribute('internal.resourcePHIDs.reclaimed', $phids);
+  }
+
+  public function addReclaimedResourcePHIDs(array $phids) {
+    $reclaimed_phids = $this->getReclaimedResourcePHIDs();
+
+    foreach ($phids as $phid) {
+      $reclaimed_phids[$phid] = $phid;
+    }
+
+    return $this->setReclaimedResourcePHIDs($reclaimed_phids);
+  }
+
+  public function removeReclaimedResourcePHIDs(array $phids) {
+    $reclaimed_phids = $this->getReclaimedResourcePHIDs();
+
+    foreach ($phids as $phid) {
+      unset($reclaimed_phids[$phid]);
+    }
+
+    return $this->setReclaimedResourcePHIDs($reclaimed_phids);
+  }
+
   public function setAwakenTaskIDs(array $ids) {
     $this->setAttribute('internal.awakenTaskIDs', $ids);
     return $this;
@@ -466,6 +525,10 @@ final class DrydockLease extends DrydockDAO
   public function getURI() {
     $id = $this->getID();
     return "/drydock/lease/{$id}/";
+  }
+
+  public function getDisplayName() {
+    return pht('Drydock Lease %d', $this->getID());
   }
 
 

@@ -16,7 +16,7 @@ foreach (new LiskMigrationIterator($table) as $macro) {
     foreach ($phids as $phid) {
       $editor->addEdge(
         $macro->getPHID(),
-        PhabricatorObjectHasFileEdgeType::EDGECONST,
+        25,
         $phid);
     }
     $editor->save();

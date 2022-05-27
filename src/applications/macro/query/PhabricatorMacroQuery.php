@@ -100,10 +100,6 @@ final class PhabricatorMacroQuery
     return new PhabricatorFileImageMacro();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PhabricatorFileImageMacro());
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
@@ -128,7 +124,7 @@ final class PhabricatorMacroQuery
         $this->authorPHIDs);
     }
 
-    if (strlen($this->nameLike)) {
+    if (($this->nameLike !== null) && strlen($this->nameLike)) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %~',
@@ -142,7 +138,7 @@ final class PhabricatorMacroQuery
         $this->names);
     }
 
-    if (strlen($this->namePrefix)) {
+    if (($this->namePrefix !== null) && strlen($this->namePrefix)) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %>',

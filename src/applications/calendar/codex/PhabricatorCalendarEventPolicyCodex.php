@@ -71,7 +71,7 @@ final class PhabricatorCalendarEventPolicyCodex
       ->setIsActive($object->isImportedEvent())
       ->setDescription(
         pht(
-          'Imported events can not be edited in Phabricator.'));
+          'Imported events can not be edited.'));
 
     return $rules;
   }

@@ -10,12 +10,12 @@ final class AlmanacClusterRepositoryServiceType
   }
 
   public function getServiceTypeName() {
-    return pht('Phabricator Cluster: Repository');
+    return pht('Cluster: Repository');
   }
 
   public function getServiceTypeDescription() {
     return pht(
-      'Defines a repository service for use in a Phabricator cluster.');
+      'Defines a repository service for use in a cluster.');
   }
 
   public function getFieldSpecifications() {

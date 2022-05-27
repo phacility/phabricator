@@ -140,8 +140,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       return $this->renderErrorPanel(
         $panel->getName(),
         pht(
-          'This panel has type "%s", but that panel type is not known to '.
-          'Phabricator.',
+          'This panel has type "%s", but that panel type is unknown.',
           $panel->getPanelType()));
     }
 
@@ -425,8 +424,9 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       throw new Exception(
         pht(
           'To render more than %s levels of panels nested inside other '.
-          'panels, purchase a subscription to Phabricator Gold.',
-          new PhutilNumber($max_depth)));
+          'panels, purchase a subscription to %s Gold.',
+          new PhutilNumber($max_depth),
+          PlatformSymbols::getPlatformServerName()));
     }
 
     if (in_array($panel->getPHID(), $this->parentPanelPHIDs)) {

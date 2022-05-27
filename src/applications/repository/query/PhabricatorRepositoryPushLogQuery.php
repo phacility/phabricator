@@ -64,10 +64,6 @@ final class PhabricatorRepositoryPushLogQuery
     return new PhabricatorRepositoryPushLog();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $logs) {
     $event_phids = mpull($logs, 'getPushEventPHID');
     $events = id(new PhabricatorObjectQuery())

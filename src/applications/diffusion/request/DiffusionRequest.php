@@ -207,7 +207,7 @@ abstract class DiffusionRequest extends Phobject {
    */
   private function initializeFromDictionary(array $data) {
     $blob = idx($data, 'blob');
-    if (strlen($blob)) {
+    if (phutil_nonempty_string($blob)) {
       $blob = self::parseRequestBlob($blob, $this->supportsBranches());
       $data = $blob + $data;
     }
@@ -518,12 +518,14 @@ abstract class DiffusionRequest extends Phobject {
       $result['path'] = $blob;
     }
 
-    $parts = explode('/', $result['path']);
-    foreach ($parts as $part) {
-      // Prevent any hyjinx since we're ultimately shipping this to the
-      // filesystem under a lot of workflows.
-      if ($part == '..') {
-        throw new Exception(pht('Invalid path URI.'));
+    if ($result['path'] !== null) {
+      $parts = explode('/', $result['path']);
+      foreach ($parts as $part) {
+        // Prevent any hyjinx since we're ultimately shipping this to the
+        // filesystem under a lot of workflows.
+        if ($part == '..') {
+          throw new Exception(pht('Invalid path URI.'));
+        }
       }
     }
 
@@ -561,7 +563,7 @@ abstract class DiffusionRequest extends Phobject {
     throw new DiffusionSetupException(
       pht(
         'The working copy for this repository ("%s") has not been cloned yet '.
-        'on this machine ("%s"). Make sure you havestarted the Phabricator '.
+        'on this machine ("%s"). Make sure you have started the '.
         'daemons. If this problem persists for longer than a clone should '.
         'take, check the daemon logs (in the Daemon Console) to see if there '.
         'were errors cloning the repository. Consult the "Diffusion User '.

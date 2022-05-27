@@ -20,10 +20,6 @@ final class PhabricatorPeopleUserEmailQuery
     return new PhabricatorUserEmail();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function getPrimaryTableAlias() {
     return 'email';
   }

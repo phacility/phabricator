@@ -202,7 +202,7 @@ final class PhabricatorAuthNeedsMultiFactorController
     $messages = array();
 
     $messages[] = pht(
-      'Before you can use Phabricator, you need to add multi-factor '.
+      'Before you can use this software, you need to add multi-factor '.
       'authentication to your account. Multi-factor authentication helps '.
       'secure your account by making it more difficult for attackers to '.
       'gain access or take sensitive actions.');

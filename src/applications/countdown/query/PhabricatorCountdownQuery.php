@@ -28,10 +28,6 @@ final class PhabricatorCountdownQuery
     return $this;
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function newResultObject() {
     return new PhabricatorCountdown();
   }

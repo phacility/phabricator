@@ -193,7 +193,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getMonogram() {
     $callsign = $this->getCallsign();
-    if (strlen($callsign)) {
+    if (phutil_nonempty_string($callsign)) {
       return "r{$callsign}";
     }
 
@@ -203,7 +203,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getDisplayName() {
     $slug = $this->getRepositorySlug();
-    if (strlen($slug)) {
+
+    if (phutil_nonempty_string($slug)) {
       return $slug;
     }
 
@@ -281,9 +282,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getSubversionBaseURI($commit = null) {
     $subpath = $this->getDetail('svn-subpath');
-    if (!strlen($subpath)) {
+
+    if (!phutil_nonempty_string($subpath)) {
       $subpath = null;
     }
+
     return $this->getSubversionPathURI($subpath, $commit);
   }
 
@@ -301,7 +304,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uri = rtrim($uri, '/');
 
-    if (strlen($path)) {
+    if (phutil_nonempty_string($path)) {
       $path = rawurlencode($path);
       $path = str_replace('%2F', '/', $path);
       $uri = $uri.'/'.ltrim($path, '/');
@@ -574,12 +577,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getURI() {
     $short_name = $this->getRepositorySlug();
-    if (strlen($short_name)) {
+    if (phutil_nonempty_string($short_name)) {
       return "/source/{$short_name}/";
     }
 
     $callsign = $this->getCallsign();
-    if (strlen($callsign)) {
+    if (phutil_nonempty_string($callsign)) {
       return "/diffusion/{$callsign}/";
     }
 
@@ -593,7 +596,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getCommitURI($identifier) {
     $callsign = $this->getCallsign();
-    if (strlen($callsign)) {
+    if (phutil_nonempty_string($callsign)) {
       return "/r{$callsign}{$identifier}";
     }
 
@@ -736,25 +739,26 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return $this->getCommitURI($commit);
     }
 
-    if (strlen($path)) {
+    if (phutil_nonempty_string($path)) {
       $path = ltrim($path, '/');
       $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
       $path = phutil_escape_uri($path);
     }
 
     $raw_branch = $branch;
-    if (strlen($branch)) {
+    if (phutil_nonempty_string($branch)) {
       $branch = phutil_escape_uri_path_component($branch);
       $path = "{$branch}/{$path}";
     }
 
     $raw_commit = $commit;
-    if (strlen($commit)) {
+    if (phutil_nonempty_string($commit)) {
       $commit = str_replace('$', '$$', $commit);
       $commit = ';'.phutil_escape_uri($commit);
     }
 
-    if (strlen($line)) {
+    $line = phutil_string_cast($line);
+    if (phutil_nonempty_string($line)) {
       $line = '$'.phutil_escape_uri($line);
     }
 
@@ -862,7 +866,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getDefaultBranch() {
     $default = $this->getDetail('default-branch');
-    if (strlen($default)) {
+    if (phutil_nonempty_string($default)) {
       return $default;
     }
 
@@ -1943,7 +1947,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'point at this host, or the "device.id" configuration file on '.
           'this host may be incorrect.'.
           "\n\n".
-          'Requests routed within the cluster by Phabricator are always '.
+          'Requests routed within the cluster are always '.
           'expected to be sent to a node which can serve the request. To '.
           'prevent loops, this request will not be proxied again.'.
           "\n\n".
@@ -2205,7 +2209,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new PhutilAggregateException(
           pht(
             'Unable to read device public key while attempting to make '.
-            'authenticated method call within the Phabricator cluster. '.
+            'authenticated method call within the cluster. '.
             'Use `%s` to register keys for this device. Exception: %s',
             'bin/almanac register',
             $ex->getMessage()),
@@ -2220,7 +2224,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new PhutilAggregateException(
           pht(
             'Unable to read device private key while attempting to make '.
-            'authenticated method call within the Phabricator cluster. '.
+            'authenticated method call within the cluster. '.
             'Use `%s` to register keys for this device. Exception: %s',
             'bin/almanac register',
             $ex->getMessage()),

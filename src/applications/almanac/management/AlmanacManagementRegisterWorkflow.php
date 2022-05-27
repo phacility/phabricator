@@ -147,10 +147,9 @@ final class AlmanacManagementRegisterWorkflow
     if (!$public_key) {
       throw new PhutilArgumentUsageException(
         pht(
-          'The public key corresponding to the given private key is not '.
-          'yet known to Phabricator. Associate the public key with an '.
-          'Almanac device in the web interface before registering hosts '.
-          'with it.'));
+          'The public key corresponding to the given private key is unknown. '.
+          'Associate the public key with an Almanac device in the web '.
+          'interface before registering hosts with it.'));
     }
 
     if ($public_key->getObjectPHID() !== $device->getPHID()) {

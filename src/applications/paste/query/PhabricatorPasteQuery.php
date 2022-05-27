@@ -84,10 +84,6 @@ final class PhabricatorPasteQuery
     return new PhabricatorPaste();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage(new PhabricatorPaste());
-  }
-
   protected function didFilterPage(array $pastes) {
     if ($this->needRawContent) {
       $pastes = $this->loadRawContent($pastes);

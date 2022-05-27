@@ -33,12 +33,14 @@ final class PhabricatorAsanaConfigOptions
         ->setSummary(pht('Optional Asana projects to use as application tags.'))
         ->setDescription(
           pht(
-            'When Phabricator creates tasks in Asana, it can add the tasks '.
+            'When %s creates tasks in Asana, it can add the tasks '.
             'to Asana projects based on which application the corresponding '.
-            'object in Phabricator comes from. For example, you can add code '.
+            'object in %s comes from. For example, you can add code '.
             'reviews in Asana to a "Differential" project.'.
             "\n\n".
-            'NOTE: This feature is new and experimental.')),
+            'NOTE: This feature is new and experimental.',
+            PlatformSymbols::getPlatformServerName(),
+            PlatformSymbols::getPlatformServerName())),
     );
   }
 

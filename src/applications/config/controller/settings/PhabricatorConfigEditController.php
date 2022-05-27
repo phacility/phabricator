@@ -18,7 +18,7 @@ final class PhabricatorConfigEditController
       } else {
         $desc = pht(
           'This configuration option is unknown. It may be misspelled, '.
-          'or have existed in a previous version of Phabricator.');
+          'or have existed in a previous version of the software.');
       }
 
       // This may be a dead config entry, which existed in the past but no

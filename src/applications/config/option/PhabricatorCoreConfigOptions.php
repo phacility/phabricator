@@ -38,15 +38,15 @@ final class PhabricatorCoreConfigOptions
     $applications_app_href = '/applications/';
 
     $silent_description = $this->deformat(pht(<<<EOREMARKUP
-This option allows you to stop Phabricator from sending data to most external
+This option allows you to stop this service from sending data to most external
 services: it will disable email, SMS, repository mirroring, remote builds,
 Doorkeeper writes, and webhooks.
 
-This option is intended to allow a Phabricator instance to be exported, copied,
-imported, and run in a test environment without impacting users. For example,
-if you are migrating to new hardware, you could perform a test migration first
-with this flag set, make sure things work, and then do a production cutover
-later with higher confidence and less disruption.
+This option is intended to allow an instance to be exported, copied, imported,
+and run in a test environment without impacting users. For example, if you are
+migrating to new hardware, you could perform a test migration first with this
+flag set, make sure things work, and then do a production cutover later with
+higher confidence and less disruption.
 
 Without making use of this flag to silence the temporary test environment,
 users would receive duplicate email during the time the test instance and old
@@ -72,35 +72,35 @@ EOREMARKUP
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht('URI where Phabricator is installed.'))
+        ->setSummary(pht('URI where this software is installed.'))
         ->setDescription(
           pht(
-            'Set the URI where Phabricator is installed. Setting this '.
+            'Set the URI where this software is installed. Setting this '.
             'improves security by preventing cookies from being set on other '.
             'domains, and allows daemons to send emails with links that have '.
             'the correct domain.'))
-        ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
+        ->addExample('http://devtools.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.production-uri', 'string', null)
         ->setSummary(
           pht('Primary install URI, for multi-environment installs.'))
         ->setDescription(
           pht(
-            'If you have multiple Phabricator environments (like a '.
-            'development/staging environment for working on testing '.
-            'Phabricator, and a production environment for deploying it), '.
+            'If you have multiple %s environments (like a '.
+            'development/staging environment and a production environment), '.
             'set the production environment URI here so that emails and other '.
             'durable URIs will always generate with links pointing at the '.
             'production environment. If unset, defaults to `%s`. Most '.
             'installs do not need to set this option.',
+            PlatformSymbols::getPlatformServerName(),
             'phabricator.base-uri'))
-        ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
+        ->addExample('http://devtools.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.allowed-uris', 'list<string>', array())
         ->setLocked(true)
-        ->setSummary(pht('Alternative URIs that can access Phabricator.'))
+        ->setSummary(pht('Alternative URIs that can access this service.'))
         ->setDescription(
           pht(
             "These alternative URIs will be able to access 'normal' pages ".
-            "on your Phabricator install. Other features such as OAuth ".
+            "on your this install. Other features such as OAuth ".
             "won't work. The major use case for this is moving installs ".
             "across domains."))
         ->addExample(
@@ -109,7 +109,7 @@ EOREMARKUP
           pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
-          pht('The timezone Phabricator should use.'))
+          pht('The timezone this software should use by default.'))
         ->setDescription($timezone_description)
         ->addExample('America/New_York', pht('US East (EDT)'))
         ->addExample('America/Chicago', pht('US Central (CDT)'))
@@ -119,12 +119,12 @@ EOREMARKUP
         ->setLocked(true)
         ->setSummary(
           pht(
-            'Set a string Phabricator should use to prefix cookie names.'))
+            'Set a string this software should use to prefix cookie names.'))
         ->setDescription(
           pht(
             'Cookies set for x.com are also sent for y.x.com. Assuming '.
-            'Phabricator instances are running on both domains, this will '.
-            'create a collision preventing you from logging in.'))
+            'instances are running on both domains, this will create a '.
+            'collision preventing you from logging in.'))
         ->addExample('dev', pht('Prefix cookie with "%s"', 'dev')),
       $this->newOption('phabricator.show-prototypes', 'bool', false)
         ->setLocked(true)
@@ -141,11 +141,11 @@ EOREMARKUP
             "IMPORTANT: The upstream does not provide support for prototype ".
             "applications.".
             "\n\n".
-            "Phabricator includes prototype applications which are in an ".
+            "This platform includes prototype applications which are in an ".
             "**early stage of development**. By default, prototype ".
             "applications are not installed, because they are often not yet ".
             "developed enough to be generally usable. You can enable ".
-            "this option to install them if you're developing Phabricator ".
+            "this option to install them if you're developing applications ".
             "or are interested in previewing upcoming features.".
             "\n\n".
             "To learn more about prototypes, see [[ %s | %s ]].".
@@ -164,7 +164,7 @@ EOREMARKUP
           pht('Allows you to remove levity and jokes from the UI.'))
         ->setDescription(
           pht(
-            'By default, Phabricator includes some flavor text in the UI, '.
+            'By default, this software includes some flavor text in the UI, '.
             'like a prompt to "Weigh In" rather than "Add Comment" in '.
             'Maniphest. If you\'d prefer more traditional UI strings like '.
             '"Add Comment", you can set this flag to disable most of the '.
@@ -189,7 +189,7 @@ EOREMARKUP
           'will not be linked.'))
         ->setDescription(
           pht(
-            'By default, Phabricator links object names in Remarkup fields '.
+            'By default, this software links object names in Remarkup fields '.
             'to the corresponding object. This regex can be used to modify '.
             'this behavior; object names that match this regex will not be '.
             'linked.')),
@@ -200,11 +200,11 @@ EOREMARKUP
             '$PATH'))
         ->setDescription(
           pht(
-            "Phabricator occasionally shells out to other binaries on the ".
+            "Thhi software sometimes executes other binaries on the ".
             "server. An example of this is the `%s` command, used to ".
             "syntax-highlight code written in languages other than PHP. By ".
             "default, it is assumed that these binaries are in the %s of the ".
-            "user running Phabricator (normally 'apache', 'httpd', or ".
+            "user running this software (normally 'apache', 'httpd', or ".
             "'nobody'). Here you can add extra directories to the %s ".
             "environment variable, for when these binaries are in ".
             "non-standard locations.\n\n".
@@ -216,7 +216,7 @@ EOREMARKUP
             'pygmentize',
             '$PATH',
             '$PATH',
-            'phabricator/support/bin/',
+            'support/bin/',
             $path))
         ->setLocked(true)
         ->addExample('/usr/local/bin', pht('Add One Path'))
@@ -251,7 +251,7 @@ EOREMARKUP
       $this->newOption('phabricator.application-settings', 'wild', array())
         ->setLocked(true)
         ->setDescription(
-          pht('Customized settings for Phabricator applications.')),
+          pht('Customized settings for applications.')),
       $this->newOption('phabricator.cache-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),
@@ -262,7 +262,7 @@ EOREMARKUP
             pht('Run Silently'),
             pht('Run Normally'),
           ))
-        ->setSummary(pht('Stop Phabricator from sending any email, etc.'))
+        ->setSummary(pht('Stop this software from sending any email, etc.'))
         ->setDescription($silent_description),
       );
 
@@ -306,11 +306,11 @@ EOREMARKUP
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must NOT have a path, ".
-            "e.g. '%s' is OK, but '%s' is not. Phabricator must be installed ".
-            "on an entire domain; it can not be installed on a path.",
+            "e.g. '%s' is OK, but '%s' is not. This software must be '.
+            'installed on an entire domain; it can not be installed on a path.",
             $key,
-            'http://phabricator.example.com/',
-            'http://example.com/phabricator/'));
+            'http://devtools.example.com/',
+            'http://example.com/devtools/'));
       }
     }
 

@@ -44,7 +44,7 @@ final class PhabricatorPeopleEmpowerController
       $short = pht('Remove Administrator');
       $body = pht(
         'Remove %s as an administrator? They will no longer be able to '.
-        'perform administrative functions on this Phabricator install.',
+        'perform administrative functions on this server.',
         phutil_tag('strong', array(), $user->getUsername()));
       $submit = pht('Remove Administrator');
     } else {
@@ -53,7 +53,7 @@ final class PhabricatorPeopleEmpowerController
       $body = pht(
         'Empower %s as an administrator? They will be able to create users, '.
         'approve users, make and remove administrators, delete accounts, and '.
-        'perform other administrative functions on this Phabricator install.',
+        'perform other administrative functions on this server.',
         phutil_tag('strong', array(), $user->getUsername()));
       $submit = pht('Make Administrator');
     }

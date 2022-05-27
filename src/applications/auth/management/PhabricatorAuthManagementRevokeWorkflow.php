@@ -60,7 +60,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
 
     $type = $args->getArg('type');
     $is_everything = $args->getArg('everything');
-    if (!strlen($type) && !$is_everything) {
+    if ($type === null && !$is_everything) {
       if ($is_list) {
         // By default, "bin/revoke --list" implies "--everything".
         $types = $all_types;
@@ -94,7 +94,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
     $from = $args->getArg('from');
 
     if ($is_list) {
-      if (strlen($from) || $is_everywhere) {
+      if ($from !== null || $is_everywhere) {
         throw new PhutilArgumentUsageException(
           pht(
             'You can not "--list" and revoke credentials (with "--from" or '.

@@ -286,6 +286,10 @@ final class DrydockResource extends DrydockDAO
     return $log->save();
   }
 
+  public function getDisplayName() {
+    return pht('Drydock Resource %d', $this->getID());
+  }
+
 
 /* -(  Status  )------------------------------------------------------------- */
 

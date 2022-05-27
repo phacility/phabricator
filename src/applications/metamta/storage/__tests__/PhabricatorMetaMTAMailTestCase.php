@@ -395,7 +395,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     // We expect the HTML body was dropped completely after the text body was
     // truncated.
     $this->assertTrue(
-      !strlen($html_body),
+      !phutil_nonempty_string($html_body),
       pht('HTML Body Removed'));
 
 
@@ -416,7 +416,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $html_body = $mailer->getHTMLBody();
 
     $this->assertEqual($string_1kb, $text_body);
-    $this->assertTrue(!strlen($html_body));
+    $this->assertTrue(!phutil_nonempty_string($html_body));
   }
 
 }

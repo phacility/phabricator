@@ -44,14 +44,14 @@ final class PhabricatorAuthenticationConfigOptions
           pht('Require administrators to approve new accounts.'))
         ->setDescription(
           pht(
-            "Newly registered Phabricator accounts can either be placed ".
+            "Newly registered accounts can either be placed ".
             "into a manual approval queue for administrative review, or ".
             "automatically activated immediately. The approval queue is ".
             "enabled by default because it gives you greater control over ".
-            "who can register an account and access Phabricator.\n\n".
+            "who can register an account and access the server.\n\n".
             "If your install is completely public, or on a VPN, or users can ".
             "only register with a trusted provider like LDAP, or you've ".
-            "otherwise configured Phabricator to prevent unauthorized ".
+            "otherwise configured the server to prevent unauthorized ".
             "registration, you can disable the queue to reduce administrative ".
             "overhead.\n\n".
             "NOTE: Before you disable the queue, make sure ".
@@ -107,7 +107,7 @@ final class PhabricatorAuthenticationConfigOptions
             'This option controls whether users can edit account email '.
             'addresses and profile real names.'.
             "\n\n".
-            'If you set up Phabricator to automatically synchronize account '.
+            'If you set things up to automatically synchronize account '.
             'information from some other authoritative system, you can '.
             'prevent users from making these edits to ensure information '.
             'remains consistent across both systems.')),

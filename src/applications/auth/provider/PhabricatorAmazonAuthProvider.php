@@ -14,7 +14,7 @@ final class PhabricatorAmazonAuthProvider
     $https_note = null;
     if ($uri->getProtocol() !== 'https') {
       $https_note = pht(
-        'NOTE: Amazon **requires** HTTPS, but your Phabricator install does '.
+        'NOTE: Amazon **requires** HTTPS, but this service does '.
         'not use HTTPS. **You will not be able to add Amazon as an '.
         'authentication provider until you configure HTTPS on this install**.');
     }

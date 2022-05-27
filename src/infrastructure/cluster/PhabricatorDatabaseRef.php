@@ -353,7 +353,7 @@ final class PhabricatorDatabaseRef
         $ref->setConnectionMessage(
           pht(
             'No permission to run "SHOW SLAVE STATUS". Grant this user '.
-            '"REPLICATION CLIENT" permission to allow Phabricator to '.
+            '"REPLICATION CLIENT" permission to allow this server to '.
             'monitor replica health.'));
       } catch (AphrontInvalidCredentialsQueryException $ex) {
         $ref->setConnectionStatus(self::STATUS_AUTH);

@@ -37,10 +37,6 @@ final class DrydockLogQuery extends DrydockQuery {
     return new DrydockLog();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function didFilterPage(array $logs) {
     $blueprint_phids = array_filter(mpull($logs, 'getBlueprintPHID'));
     if ($blueprint_phids) {

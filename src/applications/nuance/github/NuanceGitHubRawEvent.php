@@ -164,7 +164,7 @@ final class NuanceGitHubRawEvent extends Phobject {
     $raw = $this->raw;
 
     $full = idxv($raw, array('repo', 'name'));
-    if (strlen($full)) {
+    if (phutil_nonempty_string($full)) {
       return $full;
     }
 

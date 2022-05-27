@@ -67,7 +67,7 @@ EOTEXT
       PhabricatorEnv::getDoclink('Configuring Encryption')));
 
     $require_mfa_description = $this->deformat(pht(<<<EOTEXT
-By default, Phabricator allows users to add multi-factor authentication to
+By default, this software allows users to add multi-factor authentication to
 their accounts, but does not require it. By enabling this option, you can
 force all users to add at least one authentication factor before they can use
 their accounts.
@@ -87,7 +87,7 @@ EOTEXT
         ->setSummary(pht('Alternate domain to serve files from.'))
         ->setDescription(
           pht(
-            'By default, Phabricator serves files from the same domain '.
+            'By default, this software serves files from the same domain '.
             'the application is served from. This is convenient, but '.
             'presents a security risk.'.
             "\n\n".
@@ -119,7 +119,7 @@ EOTEXT
           pht(
             "If the web server responds to both HTTP and HTTPS requests but ".
             "you want users to connect with only HTTPS, you can set this ".
-            "to `true` to make Phabricator redirect HTTP requests to HTTPS.".
+            "to `true` to make this service redirect HTTP requests to HTTPS.".
             "\n\n".
             "Normally, you should just configure your server not to accept ".
             "HTTP traffic, but this setting may be useful if you originally ".
@@ -128,15 +128,14 @@ EOTEXT
             "balancer which terminates HTTPS connections and you can not ".
             "reasonably configure more granular behavior there.".
             "\n\n".
-            "IMPORTANT: Phabricator determines if a request is HTTPS or not ".
-            "by examining the PHP `%s` variable. If you run ".
-            "Apache/mod_php this will probably be set correctly for you ".
-            "automatically, but if you run Phabricator as CGI/FCGI (e.g., ".
-            "through nginx or lighttpd), you need to configure your web ".
-            "server so that it passes the value correctly based on the ".
-            "connection type.".
+            "IMPORTANT: A request is identified as HTTP or HTTPS by examining ".
+            "the PHP `%s` variable. If you run Apache/mod_php this will ".
+            "probably be set correctly for you automatically, but if you run ".
+            "as CGI/FCGI (e.g., through nginx or lighttpd), you need to ".
+            "configure your web server so that it passes the value correctly ".
+            "based on the connection type.".
             "\n\n".
-            "If you configure Phabricator in cluster mode, note that this ".
+            "If you configure clustering, note that this ".
             "setting is ignored by intracluster requests.",
             "\$_SERVER['HTTPS']"))
         ->setBoolOptions(
@@ -177,12 +176,12 @@ EOTEXT
             'dangerous URI handlers.'.
             "\n\n".
             'This set is also used to enforce valid redirect URIs. '.
-            'Phabricator will refuse to issue a HTTP "Location" redirect to a '.
-            'URI with a protocol not on this set.'.
+            'This service will refuse to issue a HTTP "Location" redirect '.
+            'to a URI with a protocol not on this set.'.
             "\n\n".
             'Usually, "http" and "https" should be present in this set. If '.
-            'you remove one or both protocols, some Phabricator features '.
-            'which rely on links or redirects may not work.'))
+            'you remove one or both protocols, some features which rely on '.
+            'links or redirects may not work.'))
         ->addExample("http\nhttps", pht('Valid Setting'))
         ->setLocked(true),
       $this->newOption(
@@ -248,10 +247,9 @@ EOTEXT
               'requests.'))
           ->setDescription(
             pht(
-              'Phabricator users can make requests to other services from '.
-              'the Phabricator host in some circumstances (for example, by '.
-              'creating a repository with a remote URL or having Phabricator '.
-              'fetch an image from a remote server).'.
+              'Users can make requests to other services from '.
+              'service hosts in some circumstances (for example, by '.
+              'creating a repository with a remote URL).'.
               "\n\n".
               'This may represent a security vulnerability if services on '.
               'the same subnet will accept commands or reveal private '.
@@ -259,8 +257,8 @@ EOTEXT
               'IP address. In particular, all hosts in EC2 have access to '.
               'such a service.'.
               "\n\n".
-              'This option defines a list of netblocks which Phabricator '.
-              'will decline to connect to. Generally, you should list all '.
+              'This option defines a list of netblocks which requests will '.
+              'never be issued to. Generally, you should list all '.
               'private IP space here.'))
           ->addExample(array('0.0.0.0/0'), pht('No Outbound Requests')),
         $this->newOption('security.strict-transport-security', 'bool', false)
@@ -326,11 +324,11 @@ EOTEXT
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must NOT have a path, ".
-            "e.g. '%s' is OK, but '%s' is not. Phabricator must be installed ".
-            "on an entire domain; it can not be installed on a path.",
+            "e.g. '%s' is OK, but '%s' is not. This software must be ".
+            "installed on an entire domain; it can not be installed on a path.",
             $key,
-            'http://phabricator.example.com/',
-            'http://example.com/phabricator/'));
+            'http://devtools.example.com/',
+            'http://example.com/devtools/'));
       }
     }
   }

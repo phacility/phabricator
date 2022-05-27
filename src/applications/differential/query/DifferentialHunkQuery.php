@@ -34,10 +34,6 @@ final class DifferentialHunkQuery
     return new DifferentialHunk();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $hunks) {
     $changesets = mpull($this->changesets, null, 'getID');
     foreach ($hunks as $key => $hunk) {

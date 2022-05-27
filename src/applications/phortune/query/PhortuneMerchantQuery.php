@@ -32,10 +32,6 @@ final class PhortuneMerchantQuery
     return new PhortuneMerchant();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $merchants) {
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($merchants, 'getPHID'))

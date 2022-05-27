@@ -50,10 +50,6 @@ final class HarbormasterBuildPlanQuery
     return new HarbormasterBuildPlan();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function didFilterPage(array $page) {
     if ($this->needBuildSteps) {
       $plan_phids = mpull($page, 'getPHID');
@@ -98,7 +94,7 @@ final class HarbormasterBuildPlanQuery
         $this->statuses);
     }
 
-    if (strlen($this->datasourceQuery)) {
+    if (!phutil_nonempty_string($this->datasourceQuery)) {
       $where[] = qsprintf(
         $conn,
         'plan.name LIKE %>',

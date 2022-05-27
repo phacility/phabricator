@@ -9,6 +9,11 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   private $disabled;
   private $authorizedPHIDs;
 
+  private $identifiers;
+  private $identifierIDs;
+  private $identifierPHIDs;
+  private $identifierMap;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -45,6 +50,43 @@ final class DrydockBlueprintQuery extends DrydockQuery {
       $ngrams);
   }
 
+  public function withIdentifiers(array $identifiers) {
+    if (!$identifiers) {
+      throw new Exception(
+        pht(
+          'Can not issue a query with an empty identifier list.'));
+    }
+
+    $this->identifiers = $identifiers;
+
+    $ids = array();
+    $phids = array();
+
+    foreach ($identifiers as $identifier) {
+      if (ctype_digit($identifier)) {
+        $ids[] = $identifier;
+      } else {
+        $phids[] = $identifier;
+      }
+    }
+
+    $this->identifierIDs = $ids;
+    $this->identifierPHIDs = $phids;
+
+    return $this;
+  }
+
+  public function getIdentifierMap() {
+    if ($this->identifierMap === null) {
+      throw new Exception(
+        pht(
+          'Execute a query with identifiers before getting the '.
+          'identifier map.'));
+    }
+
+    return $this->identifierMap;
+  }
+
   public function newResultObject() {
     return new DrydockBlueprint();
   }
@@ -53,8 +95,12 @@ final class DrydockBlueprintQuery extends DrydockQuery {
     return 'blueprint';
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
+  protected function willExecute() {
+    if ($this->identifiers) {
+      $this->identifierMap = array();
+    } else {
+      $this->identifierMap = null;
+    }
   }
 
   protected function willFilterPage(array $blueprints) {
@@ -68,6 +114,30 @@ final class DrydockBlueprintQuery extends DrydockQuery {
       }
       $impl = clone $impl;
       $blueprint->attachImplementation($impl);
+    }
+
+    if ($this->identifiers) {
+      $id_map = mpull($blueprints, null, 'getID');
+      $phid_map = mpull($blueprints, null, 'getPHID');
+
+      $map = $this->identifierMap;
+
+      foreach ($this->identifierIDs as $id) {
+        if (isset($id_map[$id])) {
+          $map[$id] = $id_map[$id];
+        }
+      }
+
+      foreach ($this->identifierPHIDs as $phid) {
+        if (isset($phid_map[$phid])) {
+          $map[$phid] = $phid_map[$phid];
+        }
+      }
+
+      // Just for consistency, reorder the map to match input order.
+      $map = array_select_keys($map, $this->identifiers);
+
+      $this->identifierMap = $map;
     }
 
     return $blueprints;
@@ -109,6 +179,29 @@ final class DrydockBlueprintQuery extends DrydockQuery {
         $conn,
         'blueprint.isDisabled = %d',
         (int)$this->disabled);
+    }
+
+    if ($this->identifiers !== null) {
+      $parts = array();
+
+      if ($this->identifierIDs) {
+        $parts[] = qsprintf(
+          $conn,
+          'blueprint.id IN (%Ld)',
+          $this->identifierIDs);
+      }
+
+      if ($this->identifierPHIDs) {
+        $parts[] = qsprintf(
+          $conn,
+          'blueprint.phid IN (%Ls)',
+          $this->identifierPHIDs);
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        '%LO',
+        $parts);
     }
 
     return $where;

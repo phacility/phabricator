@@ -75,16 +75,16 @@ final class SlowvoteEmbedView extends AphrontView {
       $description,
     );
 
+    $quip = pht('Voting improves cardiovascular endurance.');
+
     $vis = $poll->getResponseVisibility();
     if ($this->areResultsVisible()) {
-      if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
+      if ($vis == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
         $quip = pht('Only you can see the results.');
-      } else {
-        $quip = pht('Voting improves cardiovascular endurance.');
       }
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_VOTERS) {
+    } else if ($vis == SlowvotePollResponseVisibility::RESPONSES_VOTERS) {
       $quip = pht('You must vote to see the results.');
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
+    } else if ($vis == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
       $quip = pht('Only the author can see the results.');
     }
 
@@ -95,7 +95,7 @@ final class SlowvoteEmbedView extends AphrontView {
       ),
       $quip);
 
-    if ($poll->getIsClosed()) {
+    if ($poll->isClosed()) {
       $submit = null;
     } else {
       $submit = phutil_tag(
@@ -224,11 +224,11 @@ final class SlowvoteEmbedView extends AphrontView {
 
   private function renderControl(PhabricatorSlowvoteOption $option, $selected) {
     $types = array(
-      PhabricatorSlowvotePoll::METHOD_PLURALITY => 'radio',
-      PhabricatorSlowvotePoll::METHOD_APPROVAL => 'checkbox',
+      SlowvotePollVotingMethod::METHOD_PLURALITY => 'radio',
+      SlowvotePollVotingMethod::METHOD_APPROVAL => 'checkbox',
     );
 
-    $closed = $this->getPoll()->getIsClosed();
+    $closed = $this->getPoll()->isClosed();
 
     return phutil_tag(
       'input',
@@ -301,12 +301,16 @@ final class SlowvoteEmbedView extends AphrontView {
 
     $percent = sprintf('%d%%', $count ? 100 * $choices / $count : 0);
 
-    switch ($poll->getMethod()) {
-      case PhabricatorSlowvotePoll::METHOD_PLURALITY:
+    $method = $poll->getMethod();
+    switch ($method) {
+      case SlowvotePollVotingMethod::METHOD_PLURALITY:
         $status = pht('%s (%d / %d)', $percent, $choices, $count);
         break;
-      case PhabricatorSlowvotePoll::METHOD_APPROVAL:
+      case SlowvotePollVotingMethod::METHOD_APPROVAL:
         $status = pht('%s Approval (%d / %d)', $percent, $choices, $count);
+        break;
+      default:
+        $status = pht('Unknown ("%s")', $method);
         break;
     }
 
@@ -321,15 +325,19 @@ final class SlowvoteEmbedView extends AphrontView {
   private function areResultsVisible() {
     $poll = $this->getPoll();
 
-    $vis = $poll->getResponseVisibility();
-    if ($vis == PhabricatorSlowvotePoll::RESPONSES_VISIBLE) {
+    $visibility = $poll->getResponseVisibility();
+    if ($visibility == SlowvotePollResponseVisibility::RESPONSES_VISIBLE) {
       return true;
-    } else if ($vis == PhabricatorSlowvotePoll::RESPONSES_OWNER) {
-      return ($poll->getAuthorPHID() == $this->getUser()->getPHID());
-    } else {
-      $choices = mgroup($poll->getChoices(), 'getAuthorPHID');
-      return (bool)idx($choices, $this->getUser()->getPHID());
     }
+
+    $viewer = $this->getViewer();
+
+    if ($visibility == SlowvotePollResponseVisibility::RESPONSES_OWNER) {
+      return ($poll->getAuthorPHID() === $viewer->getPHID());
+    }
+
+    $choices = mgroup($poll->getChoices(), 'getAuthorPHID');
+    return (bool)idx($choices, $viewer->getPHID());
   }
 
 }

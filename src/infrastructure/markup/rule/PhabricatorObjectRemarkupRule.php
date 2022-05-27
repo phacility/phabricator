@@ -126,6 +126,12 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       return $this->renderObjectTagForMail($name, $href, $handle);
     }
 
+    // See T13678. If we're already rendering embedded content, render a
+    // default reference instead to avoid cycles.
+    if (PhabricatorMarkupEngine::isRenderingEmbeddedContent()) {
+      return $this->renderDefaultObjectEmbed($object, $handle);
+    }
+
     return $this->renderObjectEmbed($object, $handle, $options);
   }
 
@@ -133,6 +139,12 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     $object,
     PhabricatorObjectHandle $handle,
     $options) {
+    return $this->renderDefaultObjectEmbed($object, $handle);
+  }
+
+  final protected function renderDefaultObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle) {
 
     $name = $handle->getFullName();
     $href = $handle->getURI();
@@ -306,6 +318,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       'id' => $matches[1],
       'options' => idx($matches, 2),
       'original' => $matches[0],
+      'quote.depth' => $engine->getQuoteDepth(),
     ));
   }
 
@@ -325,6 +338,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       'id' => $matches[1],
       'anchor' => idx($matches, 2),
       'original' => $matches[0],
+      'quote.depth' => $engine->getQuoteDepth(),
     ));
   }
 

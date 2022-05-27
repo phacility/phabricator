@@ -129,7 +129,7 @@ final class PhabricatorExternalEditorSettingsPanel
     $protocol_table = id(new AphrontTableView($protocol_rows))
       ->setNoDataString(
         pht(
-          'Phabricator is not configured to allow any editor protocols.'))
+          'No allowed editor protocols are configured.'))
       ->setHeaders(
         array(
           pht('Protocol'),

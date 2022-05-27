@@ -89,8 +89,7 @@ final class PhutilPhabricatorAuthAdapter extends PhutilOAuthAuthAdapter {
     } catch (PhutilJSONParserException $ex) {
       throw new Exception(
         pht(
-          'Expected valid JSON response from Phabricator %s request.',
-          'user.whoami'),
+          'Expected valid JSON response from "user.whoami" request.'),
         $ex);
     }
   }

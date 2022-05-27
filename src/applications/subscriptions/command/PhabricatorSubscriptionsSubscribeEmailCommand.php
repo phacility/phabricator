@@ -26,8 +26,7 @@ final class PhabricatorSubscriptionsSubscribeEmailCommand
       'command has no effect if you do not specify any subscribers.'.
       "\n\n".
       'Users who are CC\'d on the email itself are also automatically '.
-      'subscribed if Phabricator knows which accounts are linked to their '.
-      'email addresses.',
+      'subscribed if their addresses are associated with a known account.',
       '!subscribe alincoln #ios');
   }
 

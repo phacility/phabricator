@@ -96,8 +96,7 @@ final class PhabricatorDashboardPanel
       throw new Exception(
         pht(
           'Attempting to use a panel in a way that requires an '.
-          'implementation, but the panel implementation ("%s") is unknown to '.
-          'Phabricator.',
+          'implementation, but the panel implementation ("%s") is unknown.',
           $this->getPanelType()));
     }
     return $impl;

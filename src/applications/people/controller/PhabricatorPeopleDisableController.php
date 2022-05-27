@@ -90,7 +90,7 @@ final class PhabricatorPeopleDisableController
       $short_title = pht('Disable User');
 
       $body = pht(
-        'Disable %s? They will no longer be able to access Phabricator or '.
+        'Disable %s? They will no longer be able to access this server or '.
         'receive email.',
         phutil_tag('strong', array(), $user->getUsername()));
 
@@ -100,7 +100,7 @@ final class PhabricatorPeopleDisableController
       $short_title = pht('Enable User');
 
       $body = pht(
-        'Enable %s? They will be able to access Phabricator and receive '.
+        'Enable %s? They will be able to access this server and receive '.
         'email again.',
         phutil_tag('strong', array(), $user->getUsername()));
 

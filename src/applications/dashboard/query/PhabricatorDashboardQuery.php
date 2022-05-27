@@ -34,10 +34,6 @@ final class PhabricatorDashboardQuery
     return $this;
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   public function newResultObject() {
     return new PhabricatorDashboard();
   }

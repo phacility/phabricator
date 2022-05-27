@@ -26,10 +26,6 @@ final class PhabricatorOAuthClientAuthorizationQuery
     return new PhabricatorOAuthClientAuthorization();
   }
 
-  protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
-  }
-
   protected function willFilterPage(array $authorizations) {
     $client_phids = mpull($authorizations, 'getClientPHID');
 

@@ -20,20 +20,20 @@ final class PhabricatorSlowvoteCloseController
       return new Aphront404Response();
     }
 
-    $close_uri = '/V'.$poll->getID();
+    $close_uri = $poll->getURI();
 
     if ($request->isFormPost()) {
-      if ($poll->getIsClosed()) {
-        $new_status = 0;
+      if ($poll->isClosed()) {
+        $new_status = SlowvotePollStatus::STATUS_OPEN;
       } else {
-        $new_status = 1;
+        $new_status = SlowvotePollStatus::STATUS_CLOSED;
       }
 
       $xactions = array();
 
       $xactions[] = id(new PhabricatorSlowvoteTransaction())
         ->setTransactionType(
-            PhabricatorSlowvoteCloseTransaction::TRANSACTIONTYPE)
+            PhabricatorSlowvoteStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorSlowvoteEditor())
@@ -46,7 +46,7 @@ final class PhabricatorSlowvoteCloseController
       return id(new AphrontRedirectResponse())->setURI($close_uri);
     }
 
-    if ($poll->getIsClosed()) {
+    if ($poll->isClosed()) {
       $title = pht('Reopen Poll');
       $content = pht('Are you sure you want to reopen the poll?');
       $submit = pht('Reopen');

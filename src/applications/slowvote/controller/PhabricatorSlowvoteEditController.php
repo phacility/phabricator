@@ -49,7 +49,7 @@ final class PhabricatorSlowvoteEditController
     if ($request->isFormPost()) {
       $v_question = $request->getStr('question');
       $v_description = $request->getStr('description');
-      $v_responses = (int)$request->getInt('responses');
+      $v_responses = $request->getStr('responses');
       $v_shuffle = (int)$request->getBool('shuffle');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_projects = $request->getArr('projects');
@@ -57,7 +57,7 @@ final class PhabricatorSlowvoteEditController
       $v_space = $request->getStr('spacePHID');
 
       if ($is_new) {
-        $poll->setMethod($request->getInt('method'));
+        $poll->setMethod($request->getStr('method'));
       }
 
       if (!strlen($v_question)) {
@@ -189,21 +189,33 @@ final class PhabricatorSlowvoteEditController
       }
     }
 
-    $poll_type_options = array(
-      PhabricatorSlowvotePoll::METHOD_PLURALITY =>
-        pht('Plurality (Single Choice)'),
-      PhabricatorSlowvotePoll::METHOD_APPROVAL  =>
-        pht('Approval (Multiple Choice)'),
-    );
+    $vote_type_map = SlowvotePollVotingMethod::getAll();
+    $vote_type_options = mpull($vote_type_map, 'getNameForEdit');
 
-    $response_type_options = array(
-      PhabricatorSlowvotePoll::RESPONSES_VISIBLE
-        => pht('Allow anyone to see the responses'),
-      PhabricatorSlowvotePoll::RESPONSES_VOTERS
-        => pht('Require a vote to see the responses'),
-      PhabricatorSlowvotePoll::RESPONSES_OWNER
-        => pht('Only I can see the responses'),
-    );
+    $method = $poll->getMethod();
+    if (!isset($vote_type_options[$method])) {
+      $method_object =
+        SlowvotePollVotingMethod::newVotingMethodObject(
+          $method);
+
+      $vote_type_options = array(
+        $method => $method_object->getNameForEdit(),
+      ) + $vote_type_options;
+    }
+
+    $response_type_map = SlowvotePollResponseVisibility::getAll();
+    $response_type_options = mpull($response_type_map, 'getNameForEdit');
+
+    $visibility = $poll->getResponseVisibility();
+    if (!isset($response_type_options[$visibility])) {
+      $visibility_object =
+        SlowvotePollResponseVisibility::newResponseVisibilityObject(
+          $visibility);
+
+      $response_type_options = array(
+        $visibility => $visibility_object->getNameForEdit(),
+      ) + $response_type_options;
+    }
 
     if ($is_new) {
       $form->appendChild(
@@ -211,12 +223,12 @@ final class PhabricatorSlowvoteEditController
           ->setLabel(pht('Vote Type'))
           ->setName('method')
           ->setValue($poll->getMethod())
-          ->setOptions($poll_type_options));
+          ->setOptions($vote_type_options));
     } else {
       $form->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Vote Type'))
-          ->setValue(idx($poll_type_options, $poll->getMethod())));
+          ->setValue(idx($vote_type_options, $poll->getMethod())));
     }
 
     if ($is_new) {

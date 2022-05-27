@@ -68,7 +68,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
         ->setTitle(pht('Revoke Authorization?'))
         ->appendParagraph(
           pht(
-            'This application will no longer be able to access Phabricator '.
+            'This application will no longer be able to access this server '.
             'on your behalf.'))
         ->addSubmitButton(pht('Revoke Authorization'))
         ->addCancelButton($panel_uri);

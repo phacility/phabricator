@@ -166,8 +166,9 @@ final class DifferentialJIRAIssuesField
           pht('Not Linked'),
           pht(
             'You can not add JIRA issues (%s) to this revision because your '.
-            'Phabricator account is not linked to a JIRA account.',
-            implode(', ', $add)),
+            '%s account is not linked to a JIRA account.',
+            implode(', ', $add),
+            PlatformSymbols::getPlatformServerName()),
           $xaction);
         continue;
       }

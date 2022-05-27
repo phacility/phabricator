@@ -264,7 +264,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
             pht(
               'Used if the "From:" address does not map to a user account. '.
               'Setting a default author will allow anyone on the public '.
-              'internet to create objects in Phabricator by sending email to '.
+              'internet to create objects by sending email to '.
               'this address.')));
 
     if ($is_new) {

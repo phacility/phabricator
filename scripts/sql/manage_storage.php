@@ -5,13 +5,13 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/init/init-setup.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline(pht('manage Phabricator storage and schemata'));
+$args->setTagline(pht('manage storage and schemata'));
 $args->setSynopsis(<<<EOHELP
 **storage** __workflow__ [__options__]
-Manage Phabricator database storage and schema versioning.
+Manage database storage and schema versioning.
 
 **storage** upgrade
-Initialize or upgrade Phabricator storage.
+Initialize or upgrade storage.
 
 **storage** upgrade --user __root__ --password __hunter2__
 Use administrative credentials for schema changes.
@@ -74,7 +74,7 @@ try {
         'name'    => 'disable-utf8mb4',
         'help'    => pht(
           'Disable %s, even if the database supports it. This is an '.
-          'advanced feature used for testing changes to Phabricator; you '.
+          'advanced feature used for testing internal changes; you '.
           'should not normally use this flag.',
           'utf8mb4'),
       ),
@@ -168,9 +168,9 @@ foreach ($refs as $ref) {
         'Unable to connect to MySQL using the configured credentials. '.
         'You must configure standard credentials before you can upgrade '.
         'storage. Run these commands to set up credentials:'),
-      "  phabricator/ $ ./bin/config set mysql.host __host__\n".
-      "  phabricator/ $ ./bin/config set mysql.user __username__\n".
-      "  phabricator/ $ ./bin/config set mysql.pass __password__",
+      "  $ ./bin/config set mysql.host __host__\n".
+      "  $ ./bin/config set mysql.user __username__\n".
+      "  $ ./bin/config set mysql.pass __password__",
       pht(
         'These standard credentials are separate from any administrative '.
         'credentials provided to this command with __%s__ or '.

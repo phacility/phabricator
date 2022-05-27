@@ -42,7 +42,7 @@ final class PhabricatorAWSConfigOptions
           pht(
             'Explicit S3 endpoint to use. This should be the endpoint '.
             'which corresponds to the region you have selected in '.
-            '`amazon-s3.region`. Phabricator can not determine the correct '.
+            '`amazon-s3.region`. This software can not determine the correct '.
             'endpoint automatically because some endpoint locations are '.
             'irregular.'))
         ->addExample(

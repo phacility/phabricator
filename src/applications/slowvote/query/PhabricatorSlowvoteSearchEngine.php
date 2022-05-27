@@ -26,20 +26,17 @@ final class PhabricatorSlowvoteSearchEngine
       $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    $statuses = $map['statuses'];
-    if (count($statuses) == 1) {
-      $status = head($statuses);
-      if ($status == 'open') {
-        $query->withIsClosed(false);
-      } else {
-        $query->withIsClosed(true);
-      }
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
   }
 
   protected function buildCustomSearchFields() {
+
+    $status_options = SlowvotePollStatus::getAll();
+    $status_options = mpull($status_options, 'getName');
 
     return array(
       id(new PhabricatorUsersSearchField())
@@ -61,11 +58,7 @@ final class PhabricatorSlowvoteSearchEngine
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Statuses'))
-        ->setOptions(
-          array(
-          'open' => pht('Open'),
-          'closed' => pht('Closed'),
-        )),
+        ->setOptions($status_options),
     );
   }
 
@@ -137,12 +130,12 @@ final class PhabricatorSlowvoteSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($poll)
-        ->setObjectName('V'.$poll->getID())
+        ->setObjectName($poll->getMonogram())
         ->setHeader($poll->getQuestion())
-        ->setHref('/V'.$poll->getID())
+        ->setHref($poll->getURI())
         ->addIcon('none', $date_created);
 
-      if ($poll->getIsClosed()) {
+      if ($poll->isClosed()) {
         $item->setStatusIcon('fa-ban grey');
         $item->setDisabled(true);
       } else {

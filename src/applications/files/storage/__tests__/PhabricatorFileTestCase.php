@@ -100,7 +100,14 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(
         ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE)
-      ->setNewValue('{'.$file->getMonogram().'}');
+      ->setNewValue('{'.$file->getMonogram().'}')
+      ->setMetadataValue(
+        'remarkup.control',
+        array(
+          'attachedFilePHIDs' => array(
+            $file->getPHID(),
+          ),
+        ));
 
     id(new ManiphestTransactionEditor())
       ->setActor($author)
@@ -167,9 +174,10 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     // Create an object and test object policies.
 
-    $object = ManiphestTask::initializeNewTask($author);
-    $object->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy());
-    $object->save();
+    $object = ManiphestTask::initializeNewTask($author)
+      ->setTitle(pht('File Visibility Test Task'))
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+      ->save();
 
     $this->assertTrue(
       $filter->hasCapability(
@@ -185,10 +193,53 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
         PhabricatorPolicyCapability::CAN_VIEW),
       pht('Object Visible to Others'));
 
+    // Reference the file in a comment. This should not affect the file
+    // policy.
+
+    $file_ref = '{F'.$file->getID().'}';
+
+    $xactions = array();
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new ManiphestTransactionComment())
+          ->setContent($file_ref));
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($object, $xactions);
+
+    // Test the referenced file's visibility.
+    $this->assertEqual(
+      array(
+        true,
+        false,
+      ),
+      $this->canViewFile($users, $file),
+      pht('Referenced File Visibility'));
+
     // Attach the file to the object and test that the association opens a
     // policy exception for the non-author viewer.
 
-    $file->attachToObject($object->getPHID());
+    $xactions = array();
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->setMetadataValue(
+        'remarkup.control',
+        array(
+          'attachedFilePHIDs' => array(
+            $file->getPHID(),
+          ),
+        ))
+      ->attachComment(
+        id(new ManiphestTransactionComment())
+          ->setContent($file_ref));
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($object, $xactions);
 
     // Test the attached file's visibility.
     $this->assertEqual(
@@ -224,18 +275,6 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
       ),
       $this->canViewFile($users, $xform),
       pht('Attached Thumbnail Visibility'));
-
-    // Detach the object and make sure it affects the thumbnail.
-    $file->detachFromObject($object->getPHID());
-
-    // Test the detached thumbnail's visibility.
-    $this->assertEqual(
-      array(
-        true,
-        false,
-      ),
-      $this->canViewFile($users, $xform),
-      pht('Detached Thumbnail Visibility'));
   }
 
   private function canViewFile(array $users, PhabricatorFile $file) {

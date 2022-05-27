@@ -92,6 +92,7 @@
   opacity: 0.75;
 }
 
-.phui-curtain-object-ref-view-exiled-cell {
+.phui-curtain-object-ref-view-exiled-cell,
+.phui-curtain-object-ref-view-exiled-cell a {
   color: {$red};
 }

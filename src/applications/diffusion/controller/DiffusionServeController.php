@@ -421,7 +421,7 @@ final class DiffusionServeController extends DiffusionController {
           $result = new PhabricatorVCSResponse(
             500,
             pht(
-              'Phabricator does not support HTTP access to Subversion '.
+              'This server does not support HTTP access to Subversion '.
               'repositories.'));
           break;
         default:

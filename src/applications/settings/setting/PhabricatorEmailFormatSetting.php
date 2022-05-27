@@ -22,8 +22,8 @@ final class PhabricatorEmailFormatSetting
 
   protected function getControlInstructions() {
     return pht(
-      'You can opt to receive plain text email from Phabricator instead '.
-      'of HTML email. Plain text email works better with some clients.');
+      'You can opt to receive plain text email instead of HTML email. '.
+      'Plain text email works better with some clients.');
   }
 
   public function getSettingDefaultValue() {

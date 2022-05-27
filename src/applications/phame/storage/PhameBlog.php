@@ -154,7 +154,7 @@ final class PhameBlog extends PhameDAO
       $href = PhabricatorEnv::getProductionURI(
         '/config/edit/policy.allow-public/');
       return pht(
-        'For custom domains to work, this Phabricator instance must be '.
+        'For custom domains to work, this this server must be '.
         'configured to allow the public access policy. Configure this '.
         'setting %s, or ask an administrator to configure this setting. '.
         'The domain can be specified later once this setting has been '.

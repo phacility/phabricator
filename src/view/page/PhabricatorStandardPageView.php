@@ -276,7 +276,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
               'doc_name' => pht('See Documentation'),
               'doc_href' => $doc_href,
               'message' => pht(
-                'Phabricator thinks you are using %s, but your '.
+                'This server thinks you are using %s, but your '.
                 'client is convinced that it is using %s. This is a serious '.
                 'misconfiguration with subtle, but significant, consequences.',
                 $server_protocol, $client_protocol),

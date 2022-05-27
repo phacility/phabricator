@@ -10,8 +10,7 @@ final class HarbormasterFileArtifact extends HarbormasterArtifact {
 
   public function getArtifactTypeDescription() {
     return pht(
-      'Stores a reference to file data which has been uploaded to '.
-      'Phabricator.');
+      'Stores a reference to file data.');
   }
 
   public function getArtifactParameterSpecification() {

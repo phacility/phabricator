@@ -7,6 +7,22 @@ abstract class PhutilRemarkupQuotedBlockRule
     return true;
   }
 
+  public function willMarkupChildBlocks() {
+    $engine = $this->getEngine();
+
+    $depth = $engine->getQuoteDepth();
+    $depth = $depth + 1;
+    $engine->setQuoteDepth($depth);
+  }
+
+  public function didMarkupChildBlocks() {
+    $engine = $this->getEngine();
+
+    $depth = $engine->getQuoteDepth();
+    $depth = $depth - 1;
+    $engine->setQuoteDepth($depth);
+  }
+
   final protected function normalizeQuotedBody($text) {
     $text = phutil_split_lines($text, true);
     foreach ($text as $key => $line) {

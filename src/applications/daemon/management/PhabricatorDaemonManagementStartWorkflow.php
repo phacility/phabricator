@@ -8,7 +8,7 @@ final class PhabricatorDaemonManagementStartWorkflow
       ->setName('start')
       ->setSynopsis(
         pht(
-          'Start the standard configured collection of Phabricator daemons. '.
+          'Start the standard configured collection of daemons. '.
           'This is appropriate for most installs. Use **%s** to '.
           'customize which daemons are launched.',
           'phd launch'))

@@ -265,6 +265,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->ferretMetadata;
   }
 
+  protected function loadPage() {
+    $object = $this->newResultObject();
+
+    if (!$object instanceof PhabricatorLiskDAO) {
+      throw new Exception(
+        pht(
+          'Query class ("%s") did not return the correct type of object '.
+          'from "newResultObject()" (expected a subclass of '.
+          '"PhabricatorLiskDAO", found "%s"). Return an object of the '.
+          'expected type (this is common), or implement a custom '.
+          '"loadPage()" method (this is unusual in modern code).',
+          get_class($this),
+          phutil_describe_type($object)));
+    }
+
+    return $this->loadStandardPage($object);
+  }
+
   protected function loadStandardPage(PhabricatorLiskDAO $table) {
     $rows = $this->loadStandardPageRows($table);
     return $table->loadAllFromArray($rows);
@@ -369,10 +387,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $this->setLimit($limit + 1);
 
-    if (strlen($pager->getAfterID())) {
-      $this->setExternalCursorString($pager->getAfterID());
-    } else if ($pager->getBeforeID()) {
-      $this->setExternalCursorString($pager->getBeforeID());
+    $after_id = phutil_string_cast($pager->getAfterID());
+    $before_id = phutil_string_cast($pager->getBeforeID());
+
+    if (phutil_nonempty_string($after_id)) {
+      $this->setExternalCursorString($after_id);
+    } else if (phutil_nonempty_string($before_id)) {
+      $this->setExternalCursorString($before_id);
       $this->setIsQueryOrderReversed(true);
     }
 

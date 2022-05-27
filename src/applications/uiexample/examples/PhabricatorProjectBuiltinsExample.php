@@ -7,7 +7,7 @@ final class PhabricatorProjectBuiltinsExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return pht('Builtin Project Images that ship with Phabricator.');
+    return pht('Builtin Project Images.');
   }
 
   public function getCategory() {

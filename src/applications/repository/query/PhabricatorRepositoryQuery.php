@@ -633,7 +633,7 @@ final class PhabricatorRepositoryQuery
         $this->uuids);
     }
 
-    if (strlen($this->datasourceQuery)) {
+    if (phutil_nonempty_string($this->datasourceQuery)) {
       // This handles having "rP" match callsigns starting with "P...".
       $query = trim($this->datasourceQuery);
       if (preg_match('/^r/', $query)) {

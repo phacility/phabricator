@@ -112,8 +112,9 @@ final class DifferentialDiffCreateController extends DifferentialController {
           array(
             array(
               pht(
-                'The best way to create a diff is to use the Arcanist '.
-                'command-line tool.'),
+                'The best way to create a diff is to use the %s '.
+                'command-line tool.',
+                PlatformSymbols::getPlatformClientName()),
               ' ',
               $arcanist_link,
             ),

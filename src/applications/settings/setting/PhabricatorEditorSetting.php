@@ -21,8 +21,8 @@ final class PhabricatorEditorSetting
     return pht(
       "Many text editors can be configured as URI handlers for special ".
       "protocols like `editor://`. If you have installed and configured ".
-      "such an editor, Phabricator can generate links that you can click ".
-      "to open files locally.".
+      "such an editor, some applications can generate links that you can ".
+      "click to open files locally.".
       "\n\n".
       "Provide a URI pattern for building external editor URIs in your ".
       "environment. For example, if you use TextMate on macOS, the pattern ".
@@ -42,7 +42,7 @@ final class PhabricatorEditorSetting
   }
 
   public function validateTransactionValue($value) {
-    if (!strlen($value)) {
+    if (!phutil_nonempty_string($value)) {
       return;
     }
 

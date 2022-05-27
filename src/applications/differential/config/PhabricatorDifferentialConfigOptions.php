@@ -210,8 +210,8 @@ EOHELP
             'to "Close" the revision and move it off the dashboard.'.
             "\n\n".
             'If you have an unusual workflow where Differential is used for '.
-            'post-commit review (normally called "Audit", elsewhere in '.
-            'Phabricator), you can set this flag to treat the "Accepted" '.
+            'post-commit review (normally called "Audit", elsewhere), you '.
+            'can set this flag to treat the "Accepted" '.
             'state as a "Closed" state and end the review workflow early.'.
             "\n\n".
             'This sort of workflow is very unusual. Very few installs should '.
@@ -228,7 +228,7 @@ EOHELP
         ->setSummary(pht('Attach patches to email, as text attachments.'))
         ->setDescription(
           pht(
-            'If you set this to true, Phabricator will attach patches to '.
+            'If you set this to true, patches will be attached to '.
             'Differential mail (as text attachments). This will not work if '.
             'you are using SendGrid as your mail adapter.')),
       $this->newOption(

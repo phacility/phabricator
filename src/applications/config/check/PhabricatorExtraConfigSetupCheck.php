@@ -38,9 +38,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       } else {
         $summary = pht('This option is not recognized. It may be misspelled.');
         $message = pht(
-          "The configuration option '%s' is not recognized. It may be ".
-          "misspelled, or it might have existed in an older version of ".
-          "Phabricator. It has no effect, and should be corrected or deleted.",
+          'The configuration option "%s" is not recognized. It may be '.
+          'misspelled, or it might have existed in an older version of '.
+          'the software. It has no effect, and should be corrected or deleted.',
           $key);
         $short = pht('Unknown Config');
         $name = pht('Unknown Configuration Option "%s"', $key);
@@ -76,7 +76,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       $issue->setMessage($message);
 
       if ($found_local) {
-        $command = csprintf('phabricator/ $ ./bin/config delete %s', $key);
+        $command = csprintf('$ ./bin/config delete %s', $key);
         $issue->addCommand($command);
       }
 
@@ -155,7 +155,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'details about this setup issue, see %s.'.
         "\n\n".
         'This database value is currently respected, but a future version '.
-        'of Phabricator will stop respecting database values for locked '.
+        'of the software will stop respecting database values for locked '.
         'configuration options.',
         $key,
         $set_command,
@@ -167,7 +167,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
           ),
           $doc_name));
       $command = csprintf(
-        'phabricator/ $ ./bin/config delete --database %R',
+        '$ ./bin/config delete --database %R',
         $key);
 
       $this->newIssue('config.locked.'.$key)
@@ -191,7 +191,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
           pht(
             'The "feed.http-hooks" option is deprecated in favor of '.
             'Webhooks. This option will be removed in a future version '.
-            'of Phabricator.'.
+            'of the software.'.
             "\n\n".
             'You can configure Webhooks in Herald.'.
             "\n\n".
@@ -283,8 +283,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'Reply handlers can no longer be overridden with configuration.');
 
     $monospace_reason = pht(
-      'Phabricator no longer supports global customization of monospaced '.
-      'fonts.');
+      'Global customization of monospaced fonts is no longer supported.');
 
     $public_mail_reason = pht(
       'Inbound mail addresses are now configured for each application '.
@@ -346,7 +345,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'auth.sshkeys.enabled' => pht(
         'SSH keys are now actually useful, so they are always enabled.'),
       'differential.anonymous-access' => pht(
-        'Phabricator now has meaningful global access controls. See `%s`.',
+        'Global access controls now exist, see `%s`.',
         'policy.allow-public'),
       'celerity.resource-path' => pht(
         'An alternate resource map is no longer supported. Instead, use '.
@@ -356,7 +355,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'auth.sessions.conduit' => $session_reason,
       'auth.sessions.web' => $session_reason,
       'tokenizer.ondemand' => pht(
-        'Phabricator now manages typeahead strategies automatically.'),
+        'Typeahead strategies are now managed automatically.'),
       'differential.revision-custom-detail-renderer' => pht(
         'Obsolete; use standard rendering events instead.'),
       'differential.show-host-field' => $differential_field_reason,
@@ -383,16 +382,15 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'pool size with `%s`.',
         'phd.taskmasters'),
       'storage.engine-selector' => pht(
-        'Phabricator now automatically discovers available storage engines '.
-        'at runtime.'),
+        'Storage engines are now discovered automatically at runtime.'),
       'storage.upload-size-limit' => pht(
-        'Phabricator now supports arbitrarily large files. Consult the '.
+        'Arbitrarily large files are now supported. Consult the '.
         'documentation for configuration details.'),
       'security.allow-outbound-http' => pht(
         'This option has been replaced with the more granular option `%s`.',
         'security.outbound-blacklist'),
       'metamta.reply.show-hints' => pht(
-        'Phabricator no longer shows reply hints in mail.'),
+        'Reply hints are no longer shown in mail.'),
 
       'metamta.differential.reply-handler-domain' => $reply_domain_reason,
       'metamta.diffusion.reply-handler-domain' => $reply_domain_reason,
@@ -406,15 +404,15 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.package.reply-handler' => $reply_handler_reason,
 
       'metamta.precedence-bulk' => pht(
-        'Phabricator now always sends transaction mail with '.
-        '"Precedence: bulk" to improve deliverability.'),
+        'Transaction mail is now always sent with "Precedence: bulk" to '.
+        'improve deliverability.'),
 
       'style.monospace' => $monospace_reason,
       'style.monospace.windows' => $monospace_reason,
 
       'search.engine-selector' => pht(
-        'Phabricator now automatically discovers available search engines '.
-        'at runtime.'),
+        'Available search engines are now automatically discovered at '.
+        'runtime.'),
 
       'metamta.files.public-create-email' => $public_mail_reason,
       'metamta.maniphest.public-create-email' => $public_mail_reason,
@@ -469,12 +467,12 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'maniphest.priorities.needs-triage' => $dashboard_reason,
 
       'mysql.implementation' => pht(
-        'Phabricator now automatically selects the best available '.
-        'MySQL implementation.'),
+        'The best available MYSQL implementation is now selected '.
+        'automatically.'),
 
       'mysql.configuration-provider' => pht(
-        'Phabricator now has application-level management of partitioning '.
-        'and replicas.'),
+        'Partitioning and replication are now managed in primary '.
+        'configuration.'),
 
       'search.elastic.host' => $elastic_reason,
       'search.elastic.namespace' => $elastic_reason,
@@ -541,7 +539,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'Whitespace rendering is now handled automatically.'),
 
       'phd.pid-directory' => pht(
-        'Phabricator daemons no longer use PID files.'),
+        'Daemons no longer use PID files.'),
 
       'phd.trace' => $phd_reason,
       'phd.verbose' => $phd_reason,
