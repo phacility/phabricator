@@ -325,6 +325,10 @@ final class PhabricatorApplicationTransactionCommentView
     }
 
     $remarkup_control->setValue($draft_comment);
+
+    if (!is_array($draft_metadata)) {
+      $draft_metadata = array();
+    }
     $remarkup_control->setRemarkupMetadata($draft_metadata);
 
     if (!$this->getObjectPHID()) {
