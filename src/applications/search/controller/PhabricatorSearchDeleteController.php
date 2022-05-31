@@ -42,6 +42,19 @@ final class PhabricatorSearchDeleteController
       }
 
       $named_query = $engine->getBuiltinQuery($key);
+
+      // After loading a global query, make sure the viewer actually has
+      // permission to view and edit it.
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $named_query,
+        PhabricatorPolicyCapability::CAN_VIEW);
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $named_query,
+        PhabricatorPolicyCapability::CAN_EDIT);
     }
 
     $builtin = null;
