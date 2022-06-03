@@ -752,7 +752,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $raw_commit = $commit;
-    if (phutil_nonempty_string($commit)) {
+    if (phutil_nonempty_scalar($commit)) {
       $commit = str_replace('$', '$$', $commit);
       $commit = ';'.phutil_escape_uri($commit);
     }
