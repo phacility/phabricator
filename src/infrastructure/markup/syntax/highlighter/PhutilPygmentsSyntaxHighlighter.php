@@ -144,7 +144,7 @@ final class PhutilPygmentsSyntaxHighlighter extends Phobject {
       'man' => 'groff',
       'mao' => 'mako',
       'mc' => 'mason',
-      'md' => 'minid',
+      'md' => 'md',
       'mhtml' => 'mason',
       'mi' => 'mason',
       'ml' => 'ocaml',
