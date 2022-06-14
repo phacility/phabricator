@@ -29,6 +29,32 @@ final class PhabricatorRemarkupEditField
     return $value;
   }
 
+  public function getValueForDefaults() {
+    $value = parent::getValueForDefaults();
+
+    if ($value instanceof RemarkupValue) {
+      $value = $value->getCorpus();
+    }
+
+    return $value;
+  }
+
+  protected function getDefaultValueFromConfiguration($value) {
+
+    // See T13685. After changes to file attachment handling, the database
+    // was briefly poisoned with "array()" values as defaults.
+
+    try {
+      $value = phutil_string_cast($value);
+    } catch (Exception $ex) {
+      $value = '';
+    } catch (Throwable $ex) {
+      $value = '';
+    }
+
+    return $value;
+  }
+
   public function getMetadata() {
     $defaults = array();
 

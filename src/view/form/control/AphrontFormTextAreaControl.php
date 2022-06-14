@@ -73,7 +73,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
 
     // NOTE: This needs to be string cast, because if we pass `null` the
     // tag will be self-closed and some browsers aren't thrilled about that.
-    $value = (string)$this->getValue();
+    $value = phutil_string_cast($this->getValue());
 
     // NOTE: We also need to prefix the string with a newline, because browsers
     // ignore a newline immediately after a <textarea> tag, so they'll eat
