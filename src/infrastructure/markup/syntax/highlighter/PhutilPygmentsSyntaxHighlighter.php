@@ -114,7 +114,7 @@ final class PhutilPygmentsSyntaxHighlighter extends Phobject {
       'gemspec' => 'rb',
       'geo' => 'glsl',
       'GNUmakefile' => 'make',
-      'h' => 'c',
+      'h' => 'cpp',
       'h++' => 'cpp',
       'hh' => 'cpp',
       'hpp' => 'cpp',
