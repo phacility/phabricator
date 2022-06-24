@@ -44,7 +44,15 @@ final class PhutilRemarkupCodeBlockRule extends PhutilRemarkupBlockRule {
   }
 
   public function markupText($text, $children) {
-    if (preg_match('/^\s*```/', $text)) {
+    $fenced_lang = null;
+
+    $matches = [];
+    if (preg_match('/^\s*```(([a-z]+)\n)?/', $text, $matches)) {
+      // Detect the Markdown language syntax before trimming the blank lines.
+      if (count($matches) == 3 && $matches[2]) {
+        $fenced_lang = $matches[2];
+      }
+
       // If this is a ```-style block, trim off the backticks and any leading
       // blank line.
       $text = preg_replace('/^\s*```(\s*\n)?/', '', $text);
@@ -73,6 +81,13 @@ final class PhutilRemarkupCodeBlockRule extends PhutilRemarkupBlockRule {
           break;
         }
       }
+
+      if (!$valid && $fenced_lang) {
+        # Fallback to Markdown language syntax.
+        $valid = true;
+        $custom['lang'] = $fenced_lang;
+      }
+
       if ($valid) {
         array_shift($lines);
         $options = $custom + $options;
