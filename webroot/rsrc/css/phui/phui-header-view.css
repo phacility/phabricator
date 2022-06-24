@@ -89,6 +89,14 @@ body .phui-header-shell.phui-bleed-header
   color: {$darkbluetext};
 }
 
+.phui-header-view .phui-header-header a.bug-number {
+  color: {$blue};
+}
+
+.phui-header-view .phui-header-header a.bug-number:hover {
+  text-decoration: underline !important;
+}
+
 .phui-box-blue-property .phui-header-view .phui-header-header a {
   color: {$bluetext};
 }

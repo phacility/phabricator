@@ -670,7 +670,7 @@ final class DifferentialRevisionViewController
 
   private function buildHeader(DifferentialRevision $revision) {
     $view = id(new PHUIHeaderView())
-      ->setHeader($revision->getTitle($revision))
+      ->setHeader($this->markupHeader($revision->getTitle()))
       ->setUser($this->getViewer())
       ->setPolicyObject($revision)
       ->setHeaderIcon('fa-cog');
@@ -700,6 +700,29 @@ final class DifferentialRevisionViewController
     }
 
     return $view;
+  }
+
+  private function markupHeader($text) {
+    $matches = [];
+    if (!preg_match('/^(bug\s*#?\s*(\d+))(.*)$/i', $text, $matches)) {
+      return $text;
+    }
+
+    $bug_text = $matches[1];
+    $bug = $matches[2];
+    $tail = $matches[3];
+
+    $uri = id(new PhutilURI(PhabricatorEnv::getEnvConfig('bugzilla.url')))
+        ->setPath('/show_bug.cgi')
+        ->setQueryParam('id', $bug);
+
+    return phutil_tag('span', array(), array(
+      phutil_tag('a', array(
+        'href' => $uri,
+        'class' => 'bug-number',
+      ), array($bug_text)),
+      $tail
+    ));
   }
 
   private function buildSubheaderView(DifferentialRevision $revision) {
