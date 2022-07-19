@@ -29,6 +29,7 @@ final class PhabricatorUserConfigOptions
       id(new PhabricatorUserRolesField())->getFieldKey() => true,
       id(new PhabricatorUserStatusField())->getFieldKey() => true,
       id(new PhabricatorUserBlurbField())->getFieldKey() => true,
+      id(new PhabricatorUserReviewQueueField())->getFieldKey() => true,
     );
 
     foreach ($default as $key => $enabled) {

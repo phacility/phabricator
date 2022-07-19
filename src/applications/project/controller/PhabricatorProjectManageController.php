@@ -146,12 +146,53 @@ final class PhabricatorProjectManageController
       pht('Hashtags'),
       $this->renderHashtags($tags));
 
+    $view->addProperty(
+      pht('Review Queue'),
+      $this->getReviewQueue($project));
+
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
     return $view;
+  }
+
+  private function getReviewQueue(PhabricatorProject $project) {
+    $user_phid = $project->getPHID();
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getViewer())
+      ->withReviewers(array($user_phid))
+      ->withIsOpen(true)
+      ->needReviewers(true)
+      ->setLimit(100)
+      ->execute();
+
+    $len = 0;
+    foreach ($revisions as $revision) {
+      if (!$revision->isNeedsReview()) {
+        // Draft, Change Planned, etc.
+        continue;
+      }
+
+      foreach ($revision->getReviewers() as $reviewer) {
+        if ($reviewer->getReviewerPHID() != $user_phid) {
+          continue;
+        }
+
+        if ($reviewer->getReviewerStatus() == 'accepted') {
+          // Waiting for other reviewer.
+          continue;
+        }
+        $len++;
+      }
+    }
+
+    $url = '/differential/?responsiblePHIDs%5B0%5D=' . $user_phid
+         . '&statuses%5B0%5D=open()'
+         . '&order=newest'
+         . '&bucket=action';
+    return new PhutilSafeHTML('<a href="' . $url . '">' . $len . '</a>');
   }
 
 }
