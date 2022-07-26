@@ -19,6 +19,7 @@ final class DifferentialUpliftRequestCustomField
         "Risk associated with taking this patch" => "",
         "Explanation of risk level" => "",
         "String changes made/needed" => "",
+        "Is Android affected?" => false,
     );
 
     // How each field is formatted in ReMarkup:
