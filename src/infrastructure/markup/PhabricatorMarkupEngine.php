@@ -541,6 +541,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     $rules[] = new PhutilRemarkupUnderlineRule();
     $rules[] = new PhutilRemarkupHighlightRule();
     $rules[] = new PhutilRemarkupAnchorRule();
+    $rules[] = new PhutilRemarkupDisclosureRule();
 
     foreach (self::loadCustomInlineRules() as $rule) {
       $rules[] = clone $rule;

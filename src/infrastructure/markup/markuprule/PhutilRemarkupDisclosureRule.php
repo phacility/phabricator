@@ -1,6 +1,6 @@
 <?php
 
-final class PhutilRemarkupDiscolureRule extends PhutilRemarkupRule {
+final class PhutilRemarkupDisclosureRule extends PhutilRemarkupRule {
 
   public function apply($text) {
     if ($this->getEngine()->isTextMode()) {
