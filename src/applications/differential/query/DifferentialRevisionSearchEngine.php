@@ -113,13 +113,13 @@ final class DifferentialRevisionSearchEngine
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Modified After'))
         ->setKey('modifiedStart')
-        ->setIsHidden(true)
+        ->setIsHidden(false)
         ->setDescription(
           pht('Find revisions modified at or after a particular time.')),
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Modified Before'))
         ->setKey('modifiedEnd')
-        ->setIsHidden(true)
+        ->setIsHidden(false)
         ->setDescription(
           pht('Find revisions modified at or before a particular time.')),
       id(new PhabricatorSearchStringListField())
