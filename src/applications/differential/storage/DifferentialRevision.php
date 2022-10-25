@@ -1127,7 +1127,13 @@ final class DifferentialRevision extends DifferentialDAO
       'color.ansi' => $status->getANSIColor(),
     );
 
+    $stack_graph = id(new DifferentialRevisionGraph())
+        ->setSeedPHID($this->getPHID())
+        ->setLoadEntireGraph(true)
+        ->loadGraph();
+
     return array(
+      'stackGraph' => $stack_graph->getEdges(DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,),
       'title' => $this->getTitle(),
       'uri' => PhabricatorEnv::getURI($this->getURI()),
       'authorPHID' => $this->getAuthorPHID(),
