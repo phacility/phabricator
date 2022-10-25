@@ -496,5 +496,22 @@ final class DifferentialUpliftRequestCustomField
 
         return pht('%s updated the uplift request field.', $xaction->renderHandleLink($author_phid));
     }
+
+    public function getApplicationTransactionTitleForFeed(
+        PhabricatorApplicationTransaction $xaction) {
+
+        if($this->proxy) {
+            return $this->proxy->getApplicationTransactionTitle($xaction);
+        }
+
+        $author_phid = $xaction->getAuthorPHID();
+        $object_phid = $xaction->getObjectPHID();
+
+        return pht(
+            '%s updated the uplift request field for %s.',
+            $xaction->renderHandleLink($author_phid),
+            $xaction->renderHandleLink($object_phid)
+        );
+    }
 }
 
