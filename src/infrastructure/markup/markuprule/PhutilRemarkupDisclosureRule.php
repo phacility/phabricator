@@ -7,19 +7,26 @@ final class PhutilRemarkupDisclosureRule extends PhutilRemarkupRule {
       return $text;
     }
 
-    /**
-     * Matches the details markdown tag
-     * with a summary element
-     * https://regex101.com/r/Pe2G41/1
-     */
-    return $this->replaceHTML(
-      '@(?<!:)<details>(.+?)<summary>(.+?)</summary>(.+?)</details>@s',
-      array($this, 'applyCallback'),
-      $text);
-  }
+    // Tags to match in text and what the tag should look like after
+    // HTML sanitization. Altering the left margin creates indentation.
+    $replacements = array(
+      '<details>' => hsprintf('<details style="margin-left: 2em">'),
+      '</details>' => hsprintf('</details>'),
+      '<summary>' => hsprintf('<summary style="margin-left: -2em">'),
+      '</summary>' => hsprintf('</summary>'),
+    );
 
-  protected function applyCallback(array $matches) {
-    return hsprintf("<details>\n<summary>%s</summary>\n\n%s\n</details>", $matches[2], $matches[3]);
+    // Sanitize text and replace each sanitized tag with it's
+    // corresponding replacement text.
+    foreach ($replacements as $match => $replacement) {
+      $text = PhutilSafeHTML::applyFunction(
+        'preg_replace',
+        hsprintf('@\s?%s\s?@s', $match),
+        $replacement,
+        $text);
+    }
+
+    return $text;
   }
 
 }
