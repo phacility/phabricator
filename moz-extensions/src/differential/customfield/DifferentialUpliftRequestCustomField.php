@@ -72,95 +72,6 @@ final class DifferentialUpliftRequestCustomField
         return true;
     }
 
-    /* Set QE required flag on the relevant Bugzilla bug. */
-    public function setManualQERequiredFlag(int $bug) {
-        // Construct request for setting `qe-verify` flag, see
-        // https://bmo.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug
-        $url = id(new PhutilURI(PhabricatorEnv::getEnvConfig('bugzilla.url')))
-            ->setPath('/rest/bug/'.$bug);
-        $api_key = PhabricatorEnv::getEnvConfig('bugzilla.automation_api_key');
-
-        // Encode here because `setData` below will fail due to nested arrays.
-        $data = phutil_json_encode(
-            array(
-                'flags' => array(
-                    array(
-                        'name' => 'qe-verify',
-                        'status' => '?',
-                    ),
-                ),
-            ),
-        );
-
-        $future = id(new HTTPSFuture($url))
-            ->addHeader('Accept', 'application/json')
-            ->addHeader('Content-Type', 'application/json')
-            ->addHeader('User-Agent', 'Phabricator')
-            ->addHeader('X-Bugzilla-API-Key', $api_key)
-            ->setData($data)
-            ->setMethod('PUT')
-            ->setTimeout(PhabricatorEnv::getEnvConfig('bugzilla.timeout'));
-
-        try {
-            list($status, $body) = $future->resolve();
-            $status_code = (int) $status->getStatusCode();
-
-            # Return an error string and invalidate transaction if Bugzilla can't be contacted.
-            $body = phutil_json_decode($body);
-            if (array_key_exists("error", $body) && $body["error"]) {
-                throw new Exception(
-                    'Could not set `qe-verify` on Bugzilla: status code: '.$status_code.'! Please file a bug.'
-                );
-            }
-
-        } catch (PhutilJSONParserException $ex) {
-            throw new Exception(
-                'Expected invalid JSON response from BMO while setting `qe-verify` flag.'
-            );
-        }
-    }
-
-    /* Comment the uplift request form on the relevant Bugzilla bug. */
-    public function commentUpliftOnBugzilla(int $bug) {
-        // Construct request for leaving a comment, see
-        // https://bmo.readthedocs.io/en/latest/api/core/v1/comment.html#create-comments
-        $url = id(new PhutilURI(PhabricatorEnv::getEnvConfig('bugzilla.url')))
-            ->setPath('/rest/bug/'.$bug.'/comment');
-        $api_key = PhabricatorEnv::getEnvConfig('bugzilla.automation_api_key');
-
-        $data = array(
-            'comment' => $this->getRemarkup(),
-            'is_markdown' => true,
-            'is_private' => false,
-        );
-
-        $future = id(new HTTPSFuture($url))
-            ->addHeader('Accept', 'application/json')
-            ->addHeader('User-Agent', 'Phabricator')
-            ->addHeader('X-Bugzilla-API-Key', $api_key)
-            ->setData($data)
-            ->setMethod('POST')
-            ->setTimeout(PhabricatorEnv::getEnvConfig('bugzilla.timeout'));
-
-        try {
-            list($status, $body) = $future->resolve();
-            $status_code = (int) $status->getStatusCode();
-
-            # Return an error string and invalidate transaction if Bugzilla can't be contacted.
-            $body = phutil_json_decode($body);
-            if (array_key_exists("error", $body) && $body["error"]) {
-                throw new Exception(
-                    'Could not leave a comment on Bugzilla: status code '.$status_code.'! Please file a bug.',
-                );
-            }
-
-        } catch (PhutilJSONParserException $ex) {
-            throw new Exception(
-                'Received invalid JSON response from BMO while leaving a comment.'
-            );
-        }
-    }
-
     /* -(  Edit View  )---------------------------------------------------------- */
 
     public function shouldAppearInEditView() {
@@ -341,10 +252,6 @@ final class DifferentialUpliftRequestCustomField
         return $validation_errors;
     }
 
-    public function qeRequired() {
-        return $this->getValue()['Needs manual QE test'] === true;
-    }
-
     public function validateApplicationTransactions(
         PhabricatorApplicationTransactionEditor $editor,
         $type, array $xactions) {
@@ -369,37 +276,6 @@ final class DifferentialUpliftRequestCustomField
         }
 
         return $errors;
-    }
-
-    // Update Bugzilla when applying effects.
-    public function applyApplicationTransactionExternalEffects(
-        PhabricatorApplicationTransaction $xaction
-    ) {
-        $ret = parent::applyApplicationTransactionExternalEffects($xaction);
-
-        // Don't update Bugzilla when the field is empty.
-        if (empty($this->getvalue())) {
-            return $ret;
-        }
-
-        // Similar idea to `BugStore::resolveBug`.
-        // We should have already checked for the bug during validation.
-        $bugzillaField = new DifferentialBugzillaBugIDField();
-        $bugzillaField->setObject($this->getObject());
-        (new PhabricatorCustomFieldStorageQuery())
-            ->addField($bugzillaField)
-            ->execute();
-        $bug = $bugzillaField->getValue();
-
-        // Always comment the uplift form.
-        $this->commentUpliftOnBugzilla($bug);
-
-        // If QE is required, set the Bugzilla flag.
-        if ($this->qeRequired()) {
-            $this->setManualQERequiredFlag($bug);
-        }
-
-        return $ret;
     }
 
     // When storing the value convert the question => answer mapping to a JSON string.
