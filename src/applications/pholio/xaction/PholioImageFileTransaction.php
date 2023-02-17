@@ -107,11 +107,18 @@ final class PholioImageFileTransaction
     // including old file PHIDs) because we currently don't have a storage
     // object when called. This might change at some point.
 
-    $new_phids = $value;
+    $image_changes = $value;
+
+    $image_phids = array();
+    foreach ($image_changes as $change_type => $phids) {
+      foreach ($phids as $phid) {
+        $image_phids[$phid] = $phid;
+      }
+    }
 
     $file_phids = array();
-    foreach ($new_phids as $phid) {
-      $file_phids[] = $editor->loadPholioImage($object, $phid)
+    foreach ($image_phids as $image_phid) {
+      $file_phids[] = $editor->loadPholioImage($object, $image_phid)
         ->getFilePHID();
     }
 
