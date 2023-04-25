@@ -141,13 +141,15 @@ class Text_Figlet
             /* ZIPed font */
             if (fread($fp, 2) == 'PK') {
                 fclose($fp);
+
                 $zip = new ZipArchive();
                 $open_result = $zip->open($filename, ZipArchive::RDONLY);
                 if ($open_result !== true) {
                     return self::raiseError('Cannot open figlet font file ' .
                         $filename . ', got error: ' . $open_result, 2);
                 }
-                $name = zip->getNameIndex(0);
+
+                $name = $zip->getNameIndex(0);
                 $zip->close();
 
                 if (!($fp = fopen('zip://' . realpath($filename) . '#' . $name, 'rb'))) {
