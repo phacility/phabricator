@@ -140,20 +140,15 @@ class Text_Figlet
         if (!$compressed) {
             /* ZIPed font */
             if (fread($fp, 2) == 'PK') {
-                if (!function_exists('zip_open')) {
-                    return self::raiseError('Cannot load ZIP compressed fonts since'
-                                            . ' ZIP PHP extension is not available.',
-                                            5);
-                }
-
                 fclose($fp);
-
-                if (!($fp = zip_open($filename))) {
-                    return self::raiseError('Cannot open figlet font file ' . $filename, 2);
+                $zip = new ZipArchive();
+                $open_result = $zip->open($filename, ZipArchive::RDONLY);
+                if ($open_result !== true) {
+                    return self::raiseError('Cannot open figlet font file ' .
+                        $filename . ', got error: ' . $open_result, 2);
                 }
-
-                $name = zip_entry_name(zip_read($fp));
-                zip_close($fp);
+                $name = zip->getNameIndex(0);
+                $zip->close();
 
                 if (!($fp = fopen('zip://' . realpath($filename) . '#' . $name, 'rb'))) {
                     return self::raiseError('Cannot open figlet font file ' . $filename, 2);
@@ -231,7 +226,7 @@ class Text_Figlet
                     $i = hexdec(substr($i, 2));
                 } else {
                     // If octal
-                    if ($i{0} === '0' && $i !== '0' || substr($i, 0, 2) == '-0') {
+                    if ($i[0] === '0' && $i !== '0' || substr($i, 0, 2) == '-0') {
                         $i = octdec($i);
                     }
                 }
@@ -274,7 +269,7 @@ class Text_Figlet
                 $lt = hexdec(substr($str, $i+2, 4));
                 $i += 5;
             } else {
-                $lt = ord($str{$i});
+                $lt = ord($str[$i]);
             }
 
             $hb = preg_quote($this->hardblank, '/');
