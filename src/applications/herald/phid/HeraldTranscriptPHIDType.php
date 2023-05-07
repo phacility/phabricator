@@ -35,7 +35,7 @@ final class HeraldTranscriptPHIDType extends PhabricatorPHIDType {
       $id = $xscript->getID();
 
       $handle->setName(pht('Transcript %s', $id));
-      $handle->setURI("/herald/transcript/${id}/");
+      $handle->setURI("/herald/transcript/{$id}/");
     }
   }
 

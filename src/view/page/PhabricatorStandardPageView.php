@@ -188,7 +188,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       }
     }
 
-    if (strlen($prefix)) {
+    if ($prefix !== null && strlen($prefix)) {
       $title = $prefix.' '.$title;
     }
 

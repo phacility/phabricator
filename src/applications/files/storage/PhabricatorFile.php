@@ -288,7 +288,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // update the parent file if a MIME type hasn't been provided. This matters
     // for large media files like video.
     $mime_type = idx($params, 'mime-type');
-    if (!strlen($mime_type)) {
+    if ($mime_type === null || !strlen($mime_type)) {
       $file->setMimeType('application/octet-stream');
     }
 
@@ -856,7 +856,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // instance identity in the path allows us to distinguish between requests
     // originating from different instances but served through the same CDN.
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (strlen($instance)) {
+    if ($instance !== null && strlen($instance)) {
       $parts[] = '@'.$instance;
     }
 
@@ -903,7 +903,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $parts[] = 'xform';
 
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (strlen($instance)) {
+    if ($instance !== null && strlen($instance)) {
       $parts[] = '@'.$instance;
     }
 
@@ -1278,7 +1278,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getAltText() {
     $alt = $this->getCustomAltText();
 
-    if (strlen($alt)) {
+    if ($alt !== null && strlen($alt)) {
       return $alt;
     }
 
@@ -1309,7 +1309,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $parts = array();
 
     $name = $this->getName();
-    if (strlen($name)) {
+    if ($name !== null && strlen($name)) {
       $parts[] = $name;
     }
 

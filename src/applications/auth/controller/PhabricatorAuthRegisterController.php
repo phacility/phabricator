@@ -18,7 +18,7 @@ final class PhabricatorAuthRegisterController
     $invite = $this->loadInvite();
 
     $is_setup = false;
-    if (strlen($account_key)) {
+    if ($account_key !== null && strlen($account_key)) {
       $result = $this->loadAccountForRegistrationOrLinking($account_key);
       list($account, $provider, $response) = $result;
       $is_default = false;
@@ -244,9 +244,9 @@ final class PhabricatorAuthRegisterController
 
     $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
 
-    $e_username = strlen($value_username) ? null : true;
+    $e_username = phutil_nonempty_string($value_username) ? null : true;
     $e_realname = $require_real_name ? true : null;
-    $e_email = strlen($value_email) ? null : true;
+    $e_email = phutil_nonempty_string($value_email) ? null : true;
     $e_password = true;
     $e_captcha = true;
 
@@ -288,7 +288,7 @@ final class PhabricatorAuthRegisterController
 
       if ($can_edit_username) {
         $value_username = $request->getStr('username');
-        if (!strlen($value_username)) {
+        if (!phutil_nonempty_string($value_username)) {
           $e_username = pht('Required');
           $errors[] = pht('Username is required.');
         } else if (!PhabricatorUser::validateUsername($value_username)) {
@@ -323,7 +323,7 @@ final class PhabricatorAuthRegisterController
 
       if ($can_edit_email) {
         $value_email = $request->getStr('email');
-        if (!strlen($value_email)) {
+        if (!phutil_nonempty_string($value_email)) {
           $e_email = pht('Required');
           $errors[] = pht('Email is required.');
         } else if (!PhabricatorUserEmail::isValidAddress($value_email)) {
@@ -339,7 +339,7 @@ final class PhabricatorAuthRegisterController
 
       if ($can_edit_realname) {
         $value_realname = $request->getStr('realName');
-        if (!strlen($value_realname) && $require_real_name) {
+        if (!phutil_nonempty_string($value_realname) && $require_real_name) {
           $e_realname = pht('Required');
           $errors[] = pht('Real name is required.');
         } else {

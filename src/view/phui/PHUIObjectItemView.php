@@ -97,6 +97,10 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
+  public function getHeader() {
+    return $this->header;
+  }
+
   public function setSubHead($subhead) {
     $this->subhead = $subhead;
     return $this;
@@ -120,10 +124,6 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function getTitleText() {
     return $this->titleText;
-  }
-
-  public function getHeader() {
-    return $this->header;
   }
 
   public function addByline($byline) {
@@ -659,8 +659,12 @@ final class PHUIObjectItemView extends AphrontTagView {
         $this->getImageIcon());
     }
 
-    if ($image && (strlen($this->href) || strlen($this->imageHref))) {
-      $image_href = ($this->imageHref) ? $this->imageHref : $this->href;
+    $image_href = $this->href;
+    if ($image_href === null || !strlen($image_href)) {
+      $image_href = $this->imageHref;
+    }
+
+    if ($image && $image_href !== null && strlen($image_href)) {
       $image = phutil_tag(
         'a',
         array(
@@ -873,7 +877,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       'class' => 'phui-oi-status-icon',
     );
 
-    if (strlen($label)) {
+    if ($label !== null && strlen($label)) {
       $options['sigil'] = 'has-tooltip';
       $options['meta']  = array('tip' => $label, 'size' => 300);
     }

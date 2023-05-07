@@ -89,6 +89,9 @@ final class PhabricatorEditEngineSubtype
   }
 
   public function hasTagView() {
+    if ($this->getTagText() === null) {
+      return false;
+    }
     return (bool)strlen($this->getTagText());
   }
 

@@ -179,7 +179,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $order = $saved->getParameter('order');
     $builtin = $query->getBuiltinOrderAliasMap();
-    if (strlen($order) && isset($builtin[$order])) {
+    if ($order !== null && strlen($order) && isset($builtin[$order])) {
       $query->setOrder($order);
     } else {
       // If the order is invalid or not available, we choose the first
@@ -872,7 +872,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   protected function readBoolFromRequest(
     AphrontRequest $request,
     $key) {
-    if (!strlen($request->getStr($key))) {
+    if (!phutil_nonempty_string($request->getStr($key))) {
       return null;
     }
     return $request->getBool($key);
@@ -895,7 +895,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @task dates
    */
   protected function parseDateTime($date_time) {
-    if (!strlen($date_time)) {
+    if ($date_time === null || !strlen($date_time)) {
       return null;
     }
 
@@ -916,7 +916,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $start_str = $saved_query->getParameter($start_key);
     $start = null;
-    if (strlen($start_str)) {
+    if ($start_str !== null && strlen($start_str)) {
       $start = $this->parseDateTime($start_str);
       if (!$start) {
         $this->addError(
@@ -929,7 +929,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $end_str = $saved_query->getParameter($end_key);
     $end = null;
-    if (strlen($end_str)) {
+    if ($end_str !== null && strlen($end_str)) {
       $end = $this->parseDateTime($end_str);
       if (!$end) {
         $this->addError(
@@ -1137,7 +1137,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $viewer = $this->requireViewer();
 
     $query_key = $request->getValue('queryKey');
-    if (!strlen($query_key)) {
+    if ($query_key === null || !strlen($query_key)) {
       $saved_query = new PhabricatorSavedQuery();
     } else if ($this->isBuiltinQuery($query_key)) {
       $saved_query = $this->buildSavedQueryFromBuiltin($query_key);

@@ -92,7 +92,7 @@ final class PhabricatorNotificationServersConfigType
       }
 
       $path = idx($spec, 'path');
-      if ($type == 'admin' && strlen($path)) {
+      if ($type == 'admin' && $path !== null && strlen($path)) {
         throw $this->newException(
           pht(
             'Notification server configuration describes an invalid host '.

@@ -44,8 +44,8 @@ final class PHUIInfoView extends AphrontTagView {
     return $this;
   }
 
-  public function setIsHidden($bool) {
-    $this->isHidden = $bool;
+  public function setIsHidden($is_hidden) {
+    $this->isHidden = $is_hidden;
     return $this;
   }
 
@@ -147,7 +147,7 @@ final class PHUIInfoView extends AphrontTagView {
     }
 
     $title = $this->title;
-    if ($title || strlen($title)) {
+    if ($title !== null && strlen($title)) {
       $title = phutil_tag(
         'h1',
         array(

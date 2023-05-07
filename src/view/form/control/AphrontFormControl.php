@@ -109,7 +109,7 @@ abstract class AphrontFormControl extends AphrontView {
   }
 
   public function isEmpty() {
-    return !strlen($this->getValue());
+    return $this->getValue() === null || !strlen($this->getValue());
   }
 
   public function getSerializedValue() {
@@ -171,9 +171,8 @@ abstract class AphrontFormControl extends AphrontView {
       array('class' => 'aphront-form-input'),
       $this->renderInput());
 
-    $error = null;
-    if (strlen($this->getError())) {
-      $error = $this->getError();
+    $error = $this->error;
+    if ($error !== null && strlen($error)) {
       if ($error === true) {
         $error = phutil_tag(
           'span',
@@ -185,9 +184,12 @@ abstract class AphrontFormControl extends AphrontView {
           array('class' => 'aphront-form-error'),
           $error);
       }
+    } else {
+      $error = null;
     }
 
-    if (strlen($this->getLabel())) {
+    $label = $this->label;
+    if ($label !== null && strlen($label)) {
       $label = phutil_tag(
         'label',
         array(
@@ -203,7 +205,8 @@ abstract class AphrontFormControl extends AphrontView {
       $custom_class .= ' aphront-form-control-nolabel';
     }
 
-    if (strlen($this->getCaption())) {
+    $caption = $this->caption;
+    if ($caption !== null && strlen($caption)) {
       $caption = phutil_tag(
         'div',
         array('class' => 'aphront-form-caption'),

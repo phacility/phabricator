@@ -110,7 +110,7 @@ final class PhabricatorProfileMenuItemView
     return $this->isExternalLink;
   }
 
-  public function setIsLabel($is_label) {
+  public function setIsLabel() {
     return $this->setSpecialType('label');
   }
 
@@ -118,7 +118,7 @@ final class PhabricatorProfileMenuItemView
     return $this->isSpecialType('label');
   }
 
-  public function setIsDivider($is_divider) {
+  public function setIsDivider() {
     return $this->setSpecialType('divider');
   }
 
@@ -140,7 +140,7 @@ final class PhabricatorProfileMenuItemView
       ->setName($this->getName());
 
     $uri = $this->getURI();
-    if (strlen($uri)) {
+    if ($uri !== null && strlen($uri)) {
       if ($this->getIsExternalLink()) {
         if (!PhabricatorEnv::isValidURIForLink($uri)) {
           $uri = '#';
@@ -176,7 +176,7 @@ final class PhabricatorProfileMenuItemView
     }
 
     $tooltip = $this->getTooltip();
-    if (strlen($tooltip)) {
+    if ($tooltip !== null && strlen($tooltip)) {
       $view->setTooltip($tooltip);
     }
 

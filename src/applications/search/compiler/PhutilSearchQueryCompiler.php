@@ -104,6 +104,9 @@ final class PhutilSearchQueryCompiler
   private function tokenizeQuery($query) {
     $maximum_bytes = 1024;
 
+    if ($query === null) {
+      $query = '';
+    }
     $query_bytes = strlen($query);
     if ($query_bytes > $maximum_bytes) {
       throw new PhutilSearchQueryCompilerSyntaxException(

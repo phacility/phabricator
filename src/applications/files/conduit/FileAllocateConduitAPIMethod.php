@@ -65,7 +65,7 @@ final class FileAllocateConduitAPIMethod
         ->executeOne();
     }
 
-    if (strlen($name) && !$hash && !$file) {
+    if ($name !== null && strlen($name) && !$hash && !$file) {
       if ($length > PhabricatorFileStorageEngine::getChunkThreshold()) {
         // If we don't have a hash, but this file is large enough to store in
         // chunks and thus may be resumable, try to find a partially uploaded

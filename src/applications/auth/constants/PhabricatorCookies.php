@@ -89,7 +89,7 @@ final class PhabricatorCookies extends Phobject {
     // temporary and clearing it when users log out.
 
     $value = $request->getCookie(self::COOKIE_CLIENTID);
-    if (!strlen($value)) {
+    if ($value === null || !strlen($value)) {
       $request->setTemporaryCookie(
         self::COOKIE_CLIENTID,
         Filesystem::readRandomCharacters(16));

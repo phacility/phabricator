@@ -36,7 +36,12 @@ final class PhabricatorUserLogView extends AphrontView {
 
     $rows = array();
     foreach ($logs as $log) {
-      $session = substr($log->getSession(), 0, 6);
+      // Events such as "Login Failure" will not have an associated session.
+      $session = $log->getSession();
+      if ($session === null) {
+        $session = '';
+      }
+      $session = substr($session, 0, 6);
 
       $actor_phid = $log->getActorPHID();
       $user_phid = $log->getUserPHID();

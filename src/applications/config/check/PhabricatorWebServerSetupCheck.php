@@ -23,7 +23,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
     }
 
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    if (!strlen($base_uri)) {
+    if ($base_uri === null || !strlen($base_uri)) {
       // If `phabricator.base-uri` is not set then we can't really do
       // anything.
       return;

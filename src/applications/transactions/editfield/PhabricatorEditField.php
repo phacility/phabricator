@@ -418,7 +418,7 @@ abstract class PhabricatorEditField extends Phobject {
       }
 
       $instructions = $this->getControlInstructions();
-      if (strlen($instructions)) {
+      if ($instructions !== null && strlen($instructions)) {
         $form->appendRemarkupInstructions($instructions);
       }
 

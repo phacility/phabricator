@@ -147,6 +147,9 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   }
 
   public static function tokenizeString($string) {
+    if ($string === null) {
+      return array();
+    }
     $string = phutil_utf8_strtolower($string);
     $string = trim($string);
     if (!strlen($string)) {
@@ -464,7 +467,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     // We're looking for a "(" so that a string like "members(q" is identified
     // and parsed as a function call. This allows us to start generating
     // results immediately, before the user fully types out "members(quack)".
-    return (strpos($token, '(') !== false);
+    return ($token !== null && strpos($token, '(') !== false);
   }
 
 

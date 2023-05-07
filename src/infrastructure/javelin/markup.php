@@ -77,7 +77,10 @@ function phabricator_form(PhabricatorUser $user, $attributes, $content) {
   $is_post = (strcasecmp($http_method, 'POST') === 0);
 
   $http_action = idx($attributes, 'action');
-  $is_absolute_uri = preg_match('#^(https?:|//)#', $http_action);
+  $is_absolute_uri = false;
+  if ($http_action != null) {
+    $is_absolute_uri = preg_match('#^(https?:|//)#', $http_action);
+  }
 
   if ($is_post) {
 

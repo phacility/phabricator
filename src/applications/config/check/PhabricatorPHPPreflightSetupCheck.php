@@ -124,7 +124,7 @@ final class PhabricatorPHPPreflightSetupCheck extends PhabricatorSetupCheck {
     }
 
     $open_basedir = ini_get('open_basedir');
-    if (strlen($open_basedir)) {
+    if ($open_basedir !== null && strlen($open_basedir)) {
       // If `open_basedir` is set, just fatal. It's technically possible for
       // us to run with certain values of `open_basedir`, but: we can only
       // raise fatal errors from preflight steps, so we'd have to do this check

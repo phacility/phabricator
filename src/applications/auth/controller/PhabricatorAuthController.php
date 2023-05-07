@@ -282,7 +282,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       $viewer,
       PhabricatorAuthLoginMessageType::MESSAGEKEY);
 
-    if (!strlen($text)) {
+    if ($text === null || !strlen($text)) {
       return null;
     }
 

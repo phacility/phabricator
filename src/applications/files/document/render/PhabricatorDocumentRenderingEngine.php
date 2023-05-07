@@ -60,12 +60,12 @@ abstract class PhabricatorDocumentRenderingEngine
     }
 
     $encode_setting = $request->getStr('encode');
-    if (strlen($encode_setting)) {
+    if (phutil_nonempty_string($encode_setting)) {
       $engine->setEncodingConfiguration($encode_setting);
     }
 
     $highlight_setting = $request->getStr('highlight');
-    if (strlen($highlight_setting)) {
+    if (phutil_nonempty_string($highlight_setting)) {
       $engine->setHighlightingConfiguration($highlight_setting);
     }
 
@@ -208,12 +208,12 @@ abstract class PhabricatorDocumentRenderingEngine
     $this->activeEngine = $engine;
 
     $encode_setting = $request->getStr('encode');
-    if (strlen($encode_setting)) {
+    if (phutil_nonempty_string($encode_setting)) {
       $engine->setEncodingConfiguration($encode_setting);
     }
 
     $highlight_setting = $request->getStr('highlight');
-    if (strlen($highlight_setting)) {
+    if (phutil_nonempty_string($highlight_setting)) {
       $engine->setHighlightingConfiguration($highlight_setting);
     }
 

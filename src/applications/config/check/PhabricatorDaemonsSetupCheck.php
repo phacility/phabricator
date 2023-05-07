@@ -53,7 +53,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
     }
 
     $expect_user = PhabricatorEnv::getEnvConfig('phd.user');
-    if (strlen($expect_user)) {
+    if ($expect_user !== null && strlen($expect_user)) {
 
       try {
         $all_daemons = id(new PhabricatorDaemonLogQuery())

@@ -49,7 +49,8 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
 
     $args += $defaults;
 
-    if (!strlen($args['uri'])) {
+    $uri_arg = $args['uri'];
+    if ($uri_arg === null || !strlen($uri_arg)) {
       return $matches[0];
     }
 
@@ -57,9 +58,9 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
     // validate it more carefully before proxying it, but if whatever the user
     // has typed isn't even close, just decline to activate the rule behavior.
     try {
-      $uri = new PhutilURI($args['uri']);
+      $uri = new PhutilURI($uri_arg);
 
-      if (!strlen($uri->getProtocol())) {
+      if ($uri->getProtocol() === null || !strlen($uri->getProtocol())) {
         return $matches[0];
       }
 

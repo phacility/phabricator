@@ -17,7 +17,7 @@ final class PhabricatorSearchDateField
   }
 
   protected function validateControlValue($value) {
-    if (!strlen($value)) {
+    if ($value === null || !strlen($value)) {
       return;
     }
 
@@ -32,7 +32,7 @@ final class PhabricatorSearchDateField
   }
 
   protected function parseDateTime($value) {
-    if (!strlen($value)) {
+    if ($value === null || !strlen($value)) {
       return null;
     }
 

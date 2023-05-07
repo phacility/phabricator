@@ -29,7 +29,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $request_kind = $request->getURIData('kind');
     $is_download = ($request_kind === 'download');
 
-    if (!strlen($alt) || $main_domain == $alt_domain) {
+    if (($alt === null || !strlen($alt)) || $main_domain == $alt_domain) {
       // No alternate domain.
       $should_redirect = false;
       $is_alternate_domain = false;
@@ -69,7 +69,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     // an initial request for bytes 0-1 of the audio file, and things go south
     // if we can't respond with a 206 Partial Content.
     $range = $request->getHTTPHeader('range');
-    if (strlen($range)) {
+    if ($range !== null && strlen($range)) {
       list($begin, $end) = $response->parseHTTPRange($range);
     }
 

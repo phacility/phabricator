@@ -36,6 +36,8 @@
 
 # NPM local packages
 /support/aphlict/server/node_modules/
+/support/aphlict/server/package.json
+/support/aphlict/server/package-lock.json
 
 # Places for users to add custom resources.
 /resources/cows/custom/*

@@ -11,7 +11,7 @@ final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
 
     $host_header = AphrontRequest::getHTTPHeader('Host');
     if (strpos($host_header, '.') === false) {
-      if (!strlen(trim($host_header))) {
+      if ($host_header === null || !strlen(trim($host_header))) {
         $name = pht('No "Host" Header');
         $summary = pht('No "Host" header present in request.');
         $message = pht(

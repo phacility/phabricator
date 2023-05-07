@@ -105,6 +105,10 @@ final class PHUITagView extends AphrontTagView {
     return $this;
   }
 
+  public function getHref() {
+    return $this->href;
+  }
+
   public function setClosed($closed) {
     $this->closed = $closed;
     return $this;
@@ -126,7 +130,7 @@ final class PHUITagView extends AphrontTagView {
   }
 
   protected function getTagName() {
-    return strlen($this->href) ? 'a' : 'span';
+    return ($this->href !== null && strlen($this->href)) ? 'a' : 'span';
   }
 
   public function setContextObject($context_object) {

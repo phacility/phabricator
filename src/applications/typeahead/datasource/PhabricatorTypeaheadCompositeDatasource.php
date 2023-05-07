@@ -28,7 +28,8 @@ abstract class PhabricatorTypeaheadCompositeDatasource
 
     // We only need to do a prefix phase query if there's an actual query
     // string. If the user didn't type anything, nothing can possibly match it.
-    if (strlen($this->getRawQuery())) {
+    $raw_query = $this->getRawQuery();
+    if ($raw_query !== null && strlen($raw_query)) {
       $phases[] = self::PHASE_PREFIX;
     }
 
@@ -213,6 +214,9 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     if ($offset || $limit) {
       if (!$limit) {
         $limit = count($results);
+      }
+      if (!$offset) {
+        $offset = 0;
       }
 
       $results = array_slice($results, $offset, $limit, $preserve_keys = true);

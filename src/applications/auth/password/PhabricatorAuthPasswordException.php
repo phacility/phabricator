@@ -4,7 +4,7 @@ final class PhabricatorAuthPasswordException
   extends Exception {
 
   private $passwordError;
-  private $confirmErorr;
+  private $confirmError;
 
   public function __construct(
     $message,

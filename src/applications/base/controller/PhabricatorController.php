@@ -74,7 +74,7 @@ abstract class PhabricatorController extends AphrontController {
       $session_engine = new PhabricatorAuthSessionEngine();
 
       $phsid = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
-      if (strlen($phsid)) {
+      if ($phsid !== null && strlen($phsid)) {
         $session_user = $session_engine->loadUserForSession(
           PhabricatorAuthSession::TYPE_WEB,
           $phsid);

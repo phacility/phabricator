@@ -114,6 +114,9 @@ final class DarkConsoleCore extends Phobject {
    * need to convert it to UTF-8.
    */
   private function sanitizeForJSON($data) {
+    if ($data === null) {
+      return '<null>';
+    }
     if (is_object($data)) {
       return '<object:'.get_class($data).'>';
     } else if (is_array($data)) {

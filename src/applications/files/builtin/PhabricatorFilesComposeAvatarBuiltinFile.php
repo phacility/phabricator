@@ -183,11 +183,11 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       'image/png');
   }
 
-  private static function rgba2gd($rgba) {
-    $r = $rgba[0];
-    $g = $rgba[1];
-    $b = $rgba[2];
-    $a = $rgba[3];
+  private static function rgba2gd(array $rgba) {
+    $r = (int)$rgba[0];
+    $g = (int)$rgba[1];
+    $b = (int)$rgba[2];
+    $a = (int)$rgba[3];
     $a = (1 - $a) * 255;
     return ($a << 24) | ($r << 16) | ($g << 8) | $b;
   }

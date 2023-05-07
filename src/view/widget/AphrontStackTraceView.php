@@ -30,7 +30,7 @@ final class AphrontStackTraceView extends AphrontView {
       $relative = $file;
       foreach ($libraries as $library) {
         $root = phutil_get_library_root($library);
-        if (Filesystem::isDescendant($file, $root)) {
+        if ($file !== null && Filesystem::isDescendant($file, $root)) {
           $lib = $library;
           $relative = Filesystem::readablePath($file, $root);
           break;

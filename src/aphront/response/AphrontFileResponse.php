@@ -19,7 +19,7 @@ final class AphrontFileResponse extends AphrontResponse {
   }
 
   public function setDownload($download) {
-    if (!strlen($download)) {
+    if ($download === null || !strlen($download)) {
       $download = 'untitled';
     }
     $this->download = $download;
@@ -113,7 +113,8 @@ final class AphrontFileResponse extends AphrontResponse {
       $headers[] = array('Content-Length', $content_len);
     }
 
-    if (strlen($this->getDownload())) {
+    $download = $this->getDownload();
+    if ($download !== null && strlen($download)) {
       $headers[] = array('X-Download-Options', 'noopen');
 
       $filename = $this->getDownload();
@@ -150,7 +151,7 @@ final class AphrontFileResponse extends AphrontResponse {
       $begin = (int)$matches[1];
 
       // The "Range" may be "200-299" or "200-", meaning "until end of file".
-      if (strlen($matches[2])) {
+      if ($matches[2] !== null && strlen($matches[2])) {
         $range_end = (int)$matches[2];
         $end = $range_end + 1;
       } else {

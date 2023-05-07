@@ -135,7 +135,7 @@ final class AphrontTableView extends AphrontView {
 
     $col_classes = array();
     foreach ($this->columnClasses as $key => $class) {
-      if (strlen($class)) {
+      if ($class !== null && strlen($class)) {
         $col_classes[] = $class;
       } else {
         $col_classes[] = null;

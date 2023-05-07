@@ -67,7 +67,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
     require_celerity_resource('global-drag-and-drop-css');
 
     $hint_text = $this->getHintText();
-    if (!strlen($hint_text)) {
+    if ($hint_text === null || !strlen($hint_text)) {
       $hint_text = "\xE2\x87\xAA ".pht('Drop Files to Upload');
     }
 

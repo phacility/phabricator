@@ -97,10 +97,9 @@ final class AphrontSideNavFilterView extends AphrontView {
       ->setName($name)
       ->setType($type);
 
-    if (strlen($icon)) {
+    if ($icon !== null) {
       $item->setIcon($icon);
     }
-
 
     if (strlen($key)) {
       $item->setKey($key);
@@ -145,7 +144,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function selectFilter($key, $default = null) {
     $this->selectedFilter = $default;
-    if ($this->menu->getItem($key) && strlen($key)) {
+    if ($key !== null && strlen($key) && $this->menu->getItem($key)) {
       $this->selectedFilter = $key;
     }
     return $this->selectedFilter;

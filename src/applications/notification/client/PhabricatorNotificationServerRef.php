@@ -144,7 +144,19 @@ final class PhabricatorNotificationServerRef
   }
 
   public function getURI($to_path = null) {
-    $full_path = rtrim($this->getPath(), '/').'/'.ltrim($to_path, '/');
+    if ($to_path === null || !strlen($to_path)) {
+      $to_path = '';
+    } else {
+      $to_path = '/'.ltrim($to_path, '/');
+    }
+
+    $base_path = $this->getPath();
+    if ($base_path === null || !strlen($base_path)) {
+      $base_path = '';
+    } else {
+      $base_path = rtrim($base_path, '/');
+    }
+    $full_path = $base_path.$to_path;
 
     $uri = id(new PhutilURI('http://'.$this->getHost()))
       ->setProtocol($this->getProtocol())
@@ -152,7 +164,7 @@ final class PhabricatorNotificationServerRef
       ->setPath($full_path);
 
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (strlen($instance)) {
+    if ($instance !== null && strlen($instance)) {
       $uri->replaceQueryParam('instance', $instance);
     }
 
@@ -161,7 +173,7 @@ final class PhabricatorNotificationServerRef
 
   public function getWebsocketURI($to_path = null) {
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (strlen($instance)) {
+    if ($instance !== null && strlen($instance)) {
       $to_path = $to_path.'~'.$instance.'/';
     }
 

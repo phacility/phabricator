@@ -197,7 +197,7 @@ final class PhabricatorEmbedFileRemarkupRule
       $alt = $options['alt'];
     }
 
-    if (!strlen($alt)) {
+    if ($alt === null || !strlen($alt)) {
       $alt = $file->getAltText();
     }
 
@@ -346,6 +346,9 @@ final class PhabricatorEmbedFileRemarkupRule
   }
 
   private function parseDimension($string) {
+    if ($string === null || !strlen($string)) {
+      return null;
+    }
     $string = trim($string);
 
     if (preg_match('/^(?:\d*\\.)?\d+%?$/', $string)) {
