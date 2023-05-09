@@ -13,6 +13,12 @@ final class PhabricatorProjectDetailsProfileMenuItem
     return pht('Project Details');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
+
   public function getMenuItemTypeIcon() {
     return 'fa-file-text-o';
   }
@@ -25,17 +31,6 @@ final class PhabricatorProjectDetailsProfileMenuItem
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(

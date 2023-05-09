@@ -13,14 +13,14 @@ final class PhabricatorPeoplePictureProfileMenuItem
     return pht('User Picture');
   }
 
-  public function canHideMenuItem(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return false;
-  }
-
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
     return $this->getDefaultName();
+  }
+
+  public function canHideMenuItem(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return false;
   }
 
   public function buildEditEngineFields(

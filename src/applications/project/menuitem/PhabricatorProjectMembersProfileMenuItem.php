@@ -13,19 +13,14 @@ final class PhabricatorProjectMembersProfileMenuItem
     return pht('Members');
   }
 
-  public function getMenuItemTypeIcon() {
-    return 'fa-users';
-  }
-
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
 
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
+  public function getMenuItemTypeIcon() {
+    return 'fa-users';
   }
 
   public function buildEditEngineFields(

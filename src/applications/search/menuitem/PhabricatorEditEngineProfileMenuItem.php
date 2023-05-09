@@ -71,11 +71,9 @@ final class PhabricatorEditEngineProfileMenuItem
     if (!$form) {
       return pht('(Restricted/Invalid Form)');
     }
-    if (strlen($this->getName($config))) {
-      return $this->getName($config);
-    } else {
-      return $form->getName();
-    }
+
+    $default = $form->getName();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(
@@ -90,13 +88,8 @@ final class PhabricatorEditEngineProfileMenuItem
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   protected function newMenuItemViewList(

@@ -13,20 +13,15 @@ final class PhabricatorPeopleBadgesProfileMenuItem
     return pht('Badges');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(

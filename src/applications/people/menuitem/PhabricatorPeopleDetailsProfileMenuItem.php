@@ -15,13 +15,8 @@ final class PhabricatorPeopleDetailsProfileMenuItem
 
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(

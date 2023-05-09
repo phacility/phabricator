@@ -13,6 +13,12 @@ final class PhabricatorHomeProfileMenuItem
     return pht('Home');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
+
   public function getMenuItemTypeIcon() {
     return 'fa-home';
   }
@@ -20,17 +26,6 @@ final class PhabricatorHomeProfileMenuItem
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
   }
 
   public function newPageContent(

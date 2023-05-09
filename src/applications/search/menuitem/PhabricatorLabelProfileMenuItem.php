@@ -20,7 +20,7 @@ final class PhabricatorLabelProfileMenuItem
 
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
-    return $this->getLabelName($config);
+    return $this->getNameFromConfig($config);
   }
 
   public function buildEditEngineFields(
@@ -30,22 +30,15 @@ final class PhabricatorLabelProfileMenuItem
         ->setKey(self::FIELD_NAME)
         ->setLabel(pht('Name'))
         ->setIsRequired(true)
-        ->setValue($this->getLabelName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getLabelName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
-    $name = $this->getLabelName($config);
-
     $item = $this->newItemView()
-      ->setName($name)
+      ->setName($this->getNameFromConfig($config))
       ->setIsLabel(true);
 
     return array(

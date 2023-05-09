@@ -14,6 +14,17 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
   abstract public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config);
 
+  protected function getNameFromConfig(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $default = '') {
+    $name = $config->getMenuItemProperty('name');
+
+    if ($name !== null && strlen($name)) {
+      return $name;
+    }
+    return $default;
+  }
+
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array();

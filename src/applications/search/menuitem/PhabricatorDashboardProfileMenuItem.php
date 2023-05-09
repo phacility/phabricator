@@ -43,7 +43,6 @@ final class PhabricatorDashboardProfileMenuItem
     );
   }
 
-
   public function newPageContent(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
@@ -104,24 +103,19 @@ final class PhabricatorDashboardProfileMenuItem
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
     $dashboard = $this->getDashboard();
-
     if (!$dashboard) {
       if ($this->getDashboardHandle()->getPolicyFiltered()) {
         return pht('Restricted Dashboard');
-      } else {
-        return pht('Invalid Dashboard');
       }
+      return pht('Invalid Dashboard');
     }
 
     if ($dashboard->isArchived()) {
       return pht('Archived Dashboard');
     }
 
-    if (strlen($this->getName($config))) {
-      return $this->getName($config);
-    } else {
-      return $dashboard->getName();
-    }
+    $default = $dashboard->getName();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(
@@ -136,13 +130,8 @@ final class PhabricatorDashboardProfileMenuItem
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   protected function newMenuItemViewList(

@@ -13,6 +13,12 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     return pht('Subprojects');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
+
   public function getMenuItemTypeIcon() {
     return 'fa-sitemap';
   }
@@ -23,17 +29,6 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     }
 
     return true;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(

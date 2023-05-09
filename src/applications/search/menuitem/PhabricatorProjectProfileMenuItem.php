@@ -62,11 +62,9 @@ final class PhabricatorProjectProfileMenuItem
     if (!$project) {
       return pht('(Restricted/Invalid Project)');
     }
-    if (strlen($this->getName($config))) {
-      return $this->getName($config);
-    } else {
-      return $project->getName();
-    }
+
+    $default = $project->getName();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(
@@ -81,13 +79,8 @@ final class PhabricatorProjectProfileMenuItem
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   protected function newMenuItemViewList(

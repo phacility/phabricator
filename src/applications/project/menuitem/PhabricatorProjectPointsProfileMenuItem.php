@@ -13,6 +13,11 @@ final class PhabricatorProjectPointsProfileMenuItem
     return pht('Points Bar');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $this->getDefaultName();
+  }
+
   public function shouldEnableForObject($object) {
     $viewer = $this->getViewer();
 
@@ -33,11 +38,6 @@ final class PhabricatorProjectPointsProfileMenuItem
     }
 
     return true;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(

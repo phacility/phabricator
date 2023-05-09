@@ -23,7 +23,7 @@ final class PhabricatorLinkProfileMenuItem
 
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
-    return $this->getLinkName($config);
+    return $this->getNameFromConfig($config);
   }
 
   public function buildEditEngineFields(
@@ -33,7 +33,7 @@ final class PhabricatorLinkProfileMenuItem
         ->setKey(self::FIELD_NAME)
         ->setLabel(pht('Name'))
         ->setIsRequired(true)
-        ->setValue($this->getLinkName($config)),
+        ->setValue($this->getNameFromConfig($config)),
       id(new PhabricatorTextEditField())
         ->setKey(self::FIELD_URI)
         ->setLabel(pht('URI'))
@@ -49,11 +49,6 @@ final class PhabricatorLinkProfileMenuItem
         ->setIconSet(new PhabricatorProfileMenuItemIconSet())
         ->setValue($this->getLinkIcon($config)),
     );
-  }
-
-  private function getLinkName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   private function getLinkIcon(
@@ -75,7 +70,7 @@ final class PhabricatorLinkProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $icon = $this->getLinkIcon($config);
-    $name = $this->getLinkName($config);
+    $name = $this->getNameFromConfig($config);
     $uri = $this->getLinkURI($config);
     $tooltip = $this->getLinkTooltip($config);
 

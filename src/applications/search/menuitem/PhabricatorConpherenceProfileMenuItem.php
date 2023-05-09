@@ -69,12 +69,8 @@ final class PhabricatorConpherenceProfileMenuItem
       return pht('(Restricted/Invalid Conpherence)');
     }
 
-    $name = $this->getName($config);
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $room->getTitle();
+    $default = $room->getTitle();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(
@@ -89,13 +85,8 @@ final class PhabricatorConpherenceProfileMenuItem
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   protected function newMenuItemViewList(

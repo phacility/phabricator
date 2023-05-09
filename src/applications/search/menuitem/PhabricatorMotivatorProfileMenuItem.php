@@ -22,11 +22,10 @@ final class PhabricatorMotivatorProfileMenuItem
 
     $options = $this->getOptions();
     $name = idx($options, $config->getMenuItemProperty('source'));
-    if ($name !== null) {
+    if ($name !== null && strlen($name)) {
       return pht('Motivator: %s', $name);
-    } else {
-      return pht('Motivator');
     }
+    return pht('Motivator');
   }
 
   public function buildEditEngineFields(

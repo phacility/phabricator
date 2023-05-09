@@ -13,6 +13,12 @@ final class PhabricatorManageProfileMenuItem
     return pht('Edit Menu');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $default = $this->getDefaultName();
+    return $this->getNameFromConfig($config, $default);
+  }
+
   public function getMenuItemTypeIcon() {
     return 'fa-pencil';
   }
@@ -27,17 +33,6 @@ final class PhabricatorManageProfileMenuItem
     return false;
   }
 
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    $name = $config->getMenuItemProperty('name');
-
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $this->getDefaultName();
-  }
-
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
@@ -45,7 +40,7 @@ final class PhabricatorManageProfileMenuItem
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setPlaceholder($this->getDefaultName())
-        ->setValue($config->getMenuItemProperty('name')),
+        ->setValue($this->getNameFromConfig($config)),
     );
   }
 

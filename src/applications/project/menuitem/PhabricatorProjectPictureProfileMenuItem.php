@@ -13,6 +13,11 @@ final class PhabricatorProjectPictureProfileMenuItem
     return pht('Project Picture');
   }
 
+  public function getDisplayName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $this->getDefaultName();
+  }
+
   public function getMenuItemTypeIcon() {
     return 'fa-image';
   }
@@ -20,11 +25,6 @@ final class PhabricatorProjectPictureProfileMenuItem
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;
-  }
-
-  public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(

@@ -26,12 +26,8 @@ final class PhabricatorApplicationProfileMenuItem
       return pht('(Restricted/Invalid Application)');
     }
 
-    $name = $this->getName($config);
-    if (strlen($name)) {
-      return $name;
-    }
-
-    return $application->getName();
+    $default = $application->getName();
+    return $this->getNameFromConfig($config, $default);
   }
 
   public function buildEditEngineFields(
@@ -46,13 +42,8 @@ final class PhabricatorApplicationProfileMenuItem
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
+        ->setValue($this->getNameFromConfig($config)),
     );
-  }
-
-  private function getName(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $config->getMenuItemProperty('name');
   }
 
   private function getApplication(
