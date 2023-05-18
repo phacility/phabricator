@@ -478,7 +478,7 @@ final class PhabricatorRepositoryCommit
     }
 
     $author = $this->getRawAuthorStringForDisplay();
-    if (strlen($author)) {
+    if ($author !== null && strlen($author)) {
       return DiffusionView::renderName($author);
     }
 
@@ -493,7 +493,7 @@ final class PhabricatorRepositoryCommit
     }
 
     $committer = $this->getRawCommitterStringForDisplay();
-    if (strlen($committer)) {
+    if ($committer !== null && strlen($committer)) {
       return DiffusionView::renderName($committer);
     }
 

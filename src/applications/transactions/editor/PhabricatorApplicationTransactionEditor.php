@@ -2363,7 +2363,9 @@ abstract class PhabricatorApplicationTransactionEditor
         // Here, we don't care about processing only new mentions after an edit
         // because there is no way for an object to ever "unmention" itself on
         // another object, so we can ignore the old value.
-        $engine->markupText($change->getNewValue());
+        if ($change->getNewValue() !== null) {
+          $engine->markupText($change->getNewValue());
+        }
 
         $mentioned_phids += $engine->getTextMetadata(
           PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,

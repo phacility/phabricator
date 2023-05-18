@@ -37,7 +37,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $repository = $drequest->getRepository();
 
     $path = $request->getValue('path');
-    if (!strlen($path) || $path === '/') {
+    if ($path === null || !strlen($path) || $path === '/') {
       $path = null;
     }
 
@@ -282,8 +282,13 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
     $results = array();
 
-    $match_against = trim($path, '/');
-    $match_len = strlen($match_against);
+    if ($path !== null) {
+      $match_against = trim($path, '/');
+      $match_len = strlen($match_against);
+    } else {
+      $match_against = '';
+      $match_len = 0;
+    }
 
     // For the root, don't trim. For other paths, trim the "/" after we match.
     // We need this because Mercurial's canonical paths have no leading "/",
@@ -295,7 +300,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       if (strncmp($path, $match_against, $match_len)) {
         continue;
       }
-      if (!strlen($path)) {
+      if ($path === null || !strlen($path)) {
         continue;
       }
       $remainder = substr($path, $trim_len);

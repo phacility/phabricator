@@ -1133,7 +1133,7 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setHookWait(phutil_microseconds_since($hook_start));
 
     $identifier = $this->getRequestIdentifier();
-    if (strlen($identifier)) {
+    if ($identifier !== null && strlen($identifier)) {
       $event->setRequestIdentifier($identifier);
     }
 

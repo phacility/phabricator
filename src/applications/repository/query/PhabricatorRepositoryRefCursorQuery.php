@@ -132,7 +132,7 @@ final class PhabricatorRepositoryRefCursorQuery
         $name_hashes);
     }
 
-    if (strlen($this->datasourceQuery)) {
+    if ($this->datasourceQuery !== null && strlen($this->datasourceQuery)) {
       $where[] = qsprintf(
         $conn,
         'refNameRaw LIKE %>',

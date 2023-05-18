@@ -15,9 +15,13 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $repository = $request->getRepository();
     require_celerity_resource('diffusion-css');
 
-    $base_path = trim($request->getPath(), '/');
-    if ($base_path) {
-      $base_path = $base_path.'/';
+    if ($request->getPath() !== null) {
+      $base_path = trim($request->getPath(), '/');
+      if ($base_path) {
+        $base_path = $base_path.'/';
+      }
+    } else {
+      $base_path = '';
     }
 
     $need_pull = array();

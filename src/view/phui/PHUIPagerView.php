@@ -50,7 +50,12 @@ final class PHUIPagerView extends AphrontView {
   public function readFromRequest(AphrontRequest $request) {
     $this->uri = $request->getRequestURI();
     $this->pagingParameter = 'offset';
-    $this->offset = $request->getInt($this->pagingParameter);
+
+    $offset = $request->getInt($this->pagingParameter);
+    if ($offset === null) {
+      $offset = 0;
+    }
+    $this->offset = $offset;
     return $this;
   }
 

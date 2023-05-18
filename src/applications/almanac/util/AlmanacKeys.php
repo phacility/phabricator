@@ -58,7 +58,7 @@ final class AlmanacKeys extends Phobject {
 
   public static function getClusterSSHUser() {
     $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-    if (strlen($username)) {
+    if ($username !== null && strlen($username)) {
       return $username;
     }
 

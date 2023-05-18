@@ -56,7 +56,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
     // show "Field:" templates for some fields even if they are empty.
     $edit_mode = $request->getValue('edit');
 
-    $is_any_edit = (bool)strlen($edit_mode);
+    $is_any_edit = $edit_mode !== null && (bool)strlen($edit_mode);
     $is_create = ($edit_mode == 'create');
 
     $field_list = DifferentialCommitMessageField::newEnabledFields($viewer);
@@ -115,7 +115,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
 
       $is_title = ($field_key == $key_title);
 
-      if (!strlen($value)) {
+      if ($value === null || !strlen($value)) {
         if ($is_template) {
           $commit_message[] = $label.': ';
         }

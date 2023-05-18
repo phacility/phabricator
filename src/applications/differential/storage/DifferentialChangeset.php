@@ -325,7 +325,7 @@ final class DifferentialChangeset
 
   public function getOldStatePathVector() {
     $path = $this->getOldFile();
-    if (!strlen($path)) {
+    if ($path === null || !strlen($path)) {
       $path = $this->getFilename();
     }
 

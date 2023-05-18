@@ -50,7 +50,8 @@ final class DiffusionHistoryController extends DiffusionController {
     // ancestors appropriately, but this would currrently be prohibitively
     // expensive in the general case.
 
-    $show_graph = !strlen($drequest->getPath());
+    $show_graph = ($drequest->getPath() === null
+      || !strlen($drequest->getPath()));
     if ($show_graph) {
       $history_list
         ->setParents($history_results['parents'])
@@ -98,7 +99,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $viewer = $this->getViewer();
     $repository = $drequest->getRepository();
 
-    $no_path = !strlen($drequest->getPath());
+    $no_path = $drequest->getPath() === null || !strlen($drequest->getPath());
     if ($no_path) {
       $header_text = pht('History');
     } else {

@@ -87,7 +87,7 @@ final class DiffusionDocumentRenderingEngine
     $ref->setSymbolMetadata($this->getSymbolMetadata());
 
     $coverage = $drequest->loadCoverage();
-    if (strlen($coverage)) {
+    if ($coverage !== null && strlen($coverage)) {
       $ref->addCoverage($coverage);
     }
   }

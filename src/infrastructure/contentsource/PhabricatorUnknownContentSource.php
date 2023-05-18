@@ -7,7 +7,7 @@ final class PhabricatorUnknownContentSource
 
   public function getSourceName() {
     $source = $this->getSource();
-    if (strlen($source)) {
+    if ($source !== null && strlen($source)) {
       return pht('Unknown ("%s")', $source);
     } else {
       return pht('Unknown');

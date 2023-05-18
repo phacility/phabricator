@@ -345,7 +345,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     // Make some reasonable effort to produce reasonable default directory
     // names from repository names.
-    if (!strlen($name)) {
+    if ($name === null || !strlen($name)) {
       $name = $this->getName();
       $name = phutil_utf8_strtolower($name);
       $name = preg_replace('@[ -/:->]+@', '-', $name);
@@ -721,14 +721,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $head = idx($params, 'head');
     $against = idx($params, 'against');
 
-    if ($req_commit && !strlen($commit)) {
+    if ($req_commit && ($commit === null || !strlen($commit))) {
       throw new Exception(
         pht(
           'Diffusion URI action "%s" requires commit!',
           $action));
     }
 
-    if ($req_branch && !strlen($branch)) {
+    if ($req_branch && ($branch === null || !strlen($branch))) {
       throw new Exception(
         pht(
           'Diffusion URI action "%s" requires branch!',
@@ -779,20 +779,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         break;
       case 'compare':
         $uri = $this->getPathURI("/{$action}/");
-        if (strlen($head)) {
+        if ($head !== null && strlen($head)) {
           $query['head'] = $head;
-        } else if (strlen($raw_commit)) {
+        } else if ($raw_commit !== null && strlen($raw_commit)) {
           $query['commit'] = $raw_commit;
-        } else if (strlen($raw_branch)) {
+        } else if ($raw_branch !== null && strlen($raw_branch)) {
           $query['head'] = $raw_branch;
         }
 
-        if (strlen($against)) {
+        if ($against !== null && strlen($against)) {
           $query['against'] = $against;
         }
         break;
       case 'branch':
-        if (strlen($path)) {
+        if ($path != null && strlen($path)) {
           $uri = $this->getPathURI("/repository/{$path}");
         } else {
           $uri = $this->getPathURI('/');
@@ -1160,7 +1160,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    */
   public function getRemoteURIObject() {
     $raw_uri = $this->getDetail('remote-uri');
-    if (!strlen($raw_uri)) {
+    if ($raw_uri === null || !strlen($raw_uri)) {
       return new PhutilURI('');
     }
 
@@ -2818,7 +2818,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $permanent_rules = $this->getStringListForConduit($permanent_rules);
 
     $default_branch = $this->getDefaultBranch();
-    if (!strlen($default_branch)) {
+    if ($default_branch === null || !strlen($default_branch)) {
       $default_branch = null;
     }
 

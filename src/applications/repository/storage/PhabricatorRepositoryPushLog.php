@@ -158,6 +158,9 @@ final class PhabricatorRepositoryPushLog
   }
 
   public function getRefName() {
+    if ($this->getRefNameRaw() === null) {
+      return null;
+    }
     return $this->getUTF8StringFromStorage(
       $this->getRefNameRaw(),
       $this->getRefNameEncoding());
@@ -174,6 +177,9 @@ final class PhabricatorRepositoryPushLog
   public function getRefOldShort() {
     if ($this->getRepository()->isSVN()) {
       return $this->getRefOld();
+    }
+    if ($this->getRefOld() === null) {
+      return null;
     }
     return substr($this->getRefOld(), 0, 12);
   }

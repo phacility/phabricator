@@ -92,7 +92,10 @@ abstract class DiffusionFileFutureQuery
 
     $drequest = $this->getRequest();
 
-    $name = basename($drequest->getPath());
+    $name = '';
+    if ($drequest->getPath() !== null) {
+      $name = basename($drequest->getPath());
+    }
     $relative_ttl = phutil_units('48 hours in seconds');
 
     try {

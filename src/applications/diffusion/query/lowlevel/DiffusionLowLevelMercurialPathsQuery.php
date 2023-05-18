@@ -32,8 +32,12 @@ final class DiffusionLowLevelMercurialPathsQuery
       $hg_paths_command = 'locate --print0 --rev %s -I %s';
     }
 
-    $match_against = trim($path, '/');
-    $prefix = trim('./'.$match_against, '/');
+    if ($path !== null) {
+      $match_against = trim($path, '/');
+      $prefix = trim('./'.$match_against, '/');
+    } else {
+      $prefix = '.';
+    }
     list($entire_manifest) = $repository->execxLocalCommand(
       $hg_paths_command,
       hgsprintf('%s', $commit),

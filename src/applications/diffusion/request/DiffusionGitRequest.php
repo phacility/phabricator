@@ -3,7 +3,7 @@
 final class DiffusionGitRequest extends DiffusionRequest {
 
   protected function isStableCommit($symbol) {
-    return preg_match('/^[a-f0-9]{40}\z/', $symbol);
+    return $symbol !== null && preg_match('/^[a-f0-9]{40}\z/', $symbol);
   }
 
   public function getBranch() {

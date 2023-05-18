@@ -42,7 +42,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     if (!strlen($namespace)) {
       $namespace = self::getDefaultStorageNamespace();
     }
-    if (!strlen($namespace)) {
+    if ($namespace === null || !strlen($namespace)) {
       throw new Exception(pht('No storage namespace configured!'));
     }
     return $namespace;
@@ -295,7 +295,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
 
     if (function_exists('mb_detect_encoding')) {
-      if (strlen($encoding)) {
+      if ($encoding !== null && strlen($encoding)) {
         $try_encodings = array(
           $encoding,
         );

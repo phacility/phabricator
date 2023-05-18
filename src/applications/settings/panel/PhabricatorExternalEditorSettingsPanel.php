@@ -39,7 +39,7 @@ final class PhabricatorExternalEditorSettingsPanel
     $viewer = $this->getViewer();
     $pattern = $viewer->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
 
-    if (!strlen($pattern)) {
+    if ($pattern === null || !strlen($pattern)) {
       return null;
     }
 

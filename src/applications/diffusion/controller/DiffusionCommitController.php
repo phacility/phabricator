@@ -27,8 +27,11 @@ final class DiffusionCommitController extends DiffusionController {
 
     // If this page is being accessed via "/source/xyz/commit/...", redirect
     // to the canonical URI.
-    $has_callsign = strlen($request->getURIData('repositoryCallsign'));
-    $has_id = strlen($request->getURIData('repositoryID'));
+    $repo_callsign = $request->getURIData('repositoryCallsign');
+    $has_callsign = $repo_callsign !== null && strlen($repo_callsign);
+    $repo_id = $request->getURIData('repositoryID');
+    $has_id = $repo_id !== null && strlen($repo_id);
+
     if (!$has_callsign && !$has_id) {
       $canonical_uri = $repository->getCommitURI($commit_identifier);
       return id(new AphrontRedirectResponse())
@@ -922,7 +925,7 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function linkBugtraq($corpus) {
     $url = PhabricatorEnv::getEnvConfig('bugtraq.url');
-    if (!strlen($url)) {
+    if ($url === null || !strlen($url)) {
       return $corpus;
     }
 

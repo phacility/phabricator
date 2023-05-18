@@ -238,7 +238,7 @@ final class PhabricatorRepositoryPullEngine
     $identifier = $repository->getPHID();
 
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (strlen($instance)) {
+    if ($instance !== null && strlen($instance)) {
       $identifier = "{$identifier}:{$instance}";
     }
 
@@ -575,7 +575,7 @@ final class PhabricatorRepositoryPullEngine
       $ref_rules);
 
     // Empty repositories don't have any refs.
-    if (!strlen(rtrim($stdout))) {
+    if ($stdout === null || !strlen(rtrim($stdout))) {
       return array();
     }
 

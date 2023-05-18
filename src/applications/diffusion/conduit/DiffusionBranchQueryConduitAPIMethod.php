@@ -30,7 +30,7 @@ final class DiffusionBranchQueryConduitAPIMethod
     $repository = $drequest->getRepository();
 
     $contains = $request->getValue('contains');
-    if (strlen($contains)) {
+    if ($contains !== null && strlen($contains)) {
 
       // See PHI958 (and, earlier, PHI720). If "patterns" are provided, pass
       // them to "git branch ..." to let callers test for reachability from
@@ -80,7 +80,7 @@ final class DiffusionBranchQueryConduitAPIMethod
       ->setRepository($repository);
 
     $contains = $request->getValue('contains');
-    if (strlen($contains)) {
+    if ($contains !== null && strlen($contains)) {
       $query->withContainsCommit($contains);
     }
 

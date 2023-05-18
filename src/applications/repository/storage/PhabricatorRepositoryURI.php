@@ -752,7 +752,7 @@ final class PhabricatorRepositoryURI
     // without requiring an index rebuild.
 
     $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
-    if (strlen($ssh_host)) {
+    if ($ssh_host !== null && strlen($ssh_host)) {
       $domain_map['<ssh-host>'] = $ssh_host;
     }
 

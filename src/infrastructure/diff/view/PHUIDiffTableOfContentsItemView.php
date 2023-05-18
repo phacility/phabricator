@@ -139,7 +139,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     $not_applicable = '-';
 
     $coverage = $this->getCoverage();
-    if (!strlen($coverage)) {
+    if ($coverage === null || !strlen($coverage)) {
       return $not_applicable;
     }
 
@@ -157,7 +157,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     $not_applicable = '-';
 
     $coverage = $this->getCoverage();
-    if (!strlen($coverage)) {
+    if ($coverage === null || !strlen($coverage)) {
       return $not_applicable;
     }
 

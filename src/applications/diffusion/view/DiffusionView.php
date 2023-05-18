@@ -71,7 +71,7 @@ abstract class DiffusionView extends AphrontView {
     $display_name = idx($details, 'name');
     unset($details['name']);
 
-    if (strlen($display_name)) {
+    if ($display_name !== null && strlen($display_name)) {
       $display_name = phutil_tag(
         'span',
         array(

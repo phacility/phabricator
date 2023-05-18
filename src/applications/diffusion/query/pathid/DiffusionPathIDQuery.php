@@ -48,6 +48,10 @@ final class DiffusionPathIDQuery extends Phobject {
    */
   public static function normalizePath($path) {
 
+    if ($path === null) {
+      return '/';
+    }
+
     // Normalize to single slashes, e.g. "///" => "/".
     $path = preg_replace('@[/]{2,}@', '/', $path);
 

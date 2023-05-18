@@ -50,7 +50,7 @@ final class PhabricatorRepositoryEditor
     // If the repository does not have a local path yet, assign it one based
     // on its ID. We can't do this earlier because we won't have an ID yet.
     $local_path = $object->getLocalPath();
-    if (!strlen($local_path)) {
+    if ($local_path === null || !strlen($local_path)) {
       $local_key = 'repository.default-local-path';
 
       $local_root = PhabricatorEnv::getEnvConfig($local_key);

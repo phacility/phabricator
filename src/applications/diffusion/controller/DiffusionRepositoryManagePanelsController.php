@@ -40,7 +40,7 @@ final class DiffusionRepositoryManagePanelsController
     }
 
     $selected = $request->getURIData('panel');
-    if (!strlen($selected)) {
+    if ($selected === null || !strlen($selected)) {
       $selected = head_key($panels);
     }
 

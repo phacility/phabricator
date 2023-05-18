@@ -265,7 +265,10 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected function renderPathLinks(DiffusionRequest $drequest, $action) {
     $path = $drequest->getPath();
-    $path_parts = array_filter(explode('/', trim($path, '/')));
+    $path_parts = array();
+    if ($path !== null && strlen($path)) {
+      $path_parts = array_filter(explode('/', trim($path, '/')));
+    }
 
     $divider = phutil_tag(
       'span',

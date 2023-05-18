@@ -36,7 +36,7 @@ $authstruct_raw = $cache->getKey($authstruct_key);
 
 $authstruct = null;
 
-if (strlen($authstruct_raw)) {
+if ($authstruct_raw !== null && strlen($authstruct_raw)) {
   try {
     $authstruct = phutil_json_decode($authstruct_raw);
   } catch (Exception $ex) {
@@ -135,7 +135,7 @@ foreach ($authstruct['keys'] as $key_struct) {
 
   $cmd = csprintf('%s %Ls', $bin, $key_argv);
 
-  if (strlen($instance)) {
+  if ($instance !== null && strlen($instance)) {
     $cmd = csprintf('PHABRICATOR_INSTANCE=%s %C', $instance, $cmd);
   }
 

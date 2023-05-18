@@ -60,7 +60,7 @@ abstract class DifferentialCommitMessageField
   }
 
   public function renderFieldValue($value) {
-    if (!strlen($value)) {
+    if ($value === null || !strlen($value)) {
       return null;
     }
 
