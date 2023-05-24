@@ -232,7 +232,9 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
 
       $lines = '';
       for ($ii = $min; $ii < $max; $ii++) {
-        $lines .= $text[$ii];
+        if (isset($text[$ii])) {
+          $lines .= $text[$ii];
+        }
       }
 
       $blocks[$key]['text'] = $lines;

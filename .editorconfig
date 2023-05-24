@@ -10,25 +10,25 @@ insert_final_newline = true
 max_line_length = 80
 
 [.arclint]
-max_line_length =
+max_line_length = unset
 
 [resources/sql/**.sql]
-max_line_length =
+max_line_length = unset
 
 [scripts/install/install_*.sh]
-max_line_length =
+max_line_length = unset
 
 [src/applications/differential/parser/__tests__/data/*.diff]
 trim_trailing_whitespace = false
 
 [src/applications/differential/parser/__tests__/messages/long-title.txt]
-max_line_length =
+max_line_length = unset
 
 [src/applications/diffusion/ssh/__tests__/hgwiredata/*.txt]
-max_line_length =
+max_line_length = unset
 
 [externals/**]
-indent_style =
-indent_size =
+indent_style = unset
+indent_size = unset
 trim_trailing_whitespace = false
 insert_final_newline = false

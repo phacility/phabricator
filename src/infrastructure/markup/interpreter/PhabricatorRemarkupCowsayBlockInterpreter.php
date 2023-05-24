@@ -15,6 +15,7 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
     $map = self::getCowMap();
 
     $cow = idx($argv, 'cow');
+    $cow = ($cow === null ? '' : $cow);
     $cow = phutil_utf8_strtolower($cow);
     if (empty($map[$cow])) {
       $cow = 'default';

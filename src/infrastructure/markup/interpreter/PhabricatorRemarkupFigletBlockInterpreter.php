@@ -14,6 +14,7 @@ final class PhabricatorRemarkupFigletBlockInterpreter
     $map = self::getFigletMap();
 
     $font = idx($argv, 'font');
+    $font = ($font === null ? '' : $font);
     $font = phutil_utf8_strtolower($font);
     if (empty($map[$font])) {
       $font = 'standard';

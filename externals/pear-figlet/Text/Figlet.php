@@ -143,7 +143,12 @@ class Text_Figlet
                 fclose($fp);
 
                 $zip = new ZipArchive();
-                $open_result = $zip->open($filename, ZipArchive::RDONLY);
+                $open_flag = 0;
+                // The RDONLY flag was only introduced in 7.4.3.
+                if (defined('ZipArchive::RDONLY')) {
+                  $open_flag = ZipArchive::RDONLY;
+                } 
+                $open_result = $zip->open($filename, $open_flag);
                 if ($open_result !== true) {
                     return self::raiseError('Cannot open figlet font file ' .
                         $filename . ', got error: ' . $open_result, 2);
