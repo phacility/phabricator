@@ -414,7 +414,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
     $sync_token = null;
 
     $sync_key = $request->getStr($this->getMFASyncTokenFormKey());
-    if (strlen($sync_key)) {
+    if (phutil_nonempty_string($sync_key)) {
       $sync_key_digest = PhabricatorHash::digestWithNamedKey(
         $sync_key,
         PhabricatorAuthMFASyncTemporaryTokenType::DIGEST_KEY);

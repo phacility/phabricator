@@ -16,7 +16,7 @@ final class AlmanacPropertyEditController
     $cancel_uri = $object->getURI();
     $property_key = $request->getStr('key');
 
-    if (!strlen($property_key)) {
+    if (!phutil_nonempty_string($property_key)) {
       return $this->buildPropertyKeyResponse($cancel_uri, null);
     } else {
       $error = null;

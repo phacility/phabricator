@@ -14,7 +14,7 @@ final class PhabricatorMetaMTAReceivedMailProcessingException
     $this->statusCode = $args[0];
 
     $args = array_slice($args, 1);
-    call_user_func_array(array('parent', '__construct'), $args);
+    call_user_func_array(array(parent::class, '__construct'), $args);
   }
 
 }

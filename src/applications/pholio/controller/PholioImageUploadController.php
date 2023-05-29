@@ -18,7 +18,7 @@ final class PholioImageUploadController extends PholioController {
       return new Aphront404Response();
     }
 
-    if (!strlen($title)) {
+    if (!phutil_nonempty_string($title)) {
       $title = $file->getName();
     }
 

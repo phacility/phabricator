@@ -83,7 +83,7 @@ final class PhabricatorAuthFactorProviderViewController
 
 
     $custom_enroll = $provider->getEnrollMessage();
-    if (strlen($custom_enroll)) {
+    if ($custom_enroll !== null && strlen($custom_enroll)) {
       $view->addSectionHeader(
         pht('Custom Enroll Message'),
         PHUIPropertyListView::ICON_SUMMARY);

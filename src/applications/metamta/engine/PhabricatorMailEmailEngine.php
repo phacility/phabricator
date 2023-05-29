@@ -91,7 +91,7 @@ final class PhabricatorMailEmailEngine
       $parts = array();
 
       $encrypt_uri = $mail->getMustEncryptURI();
-      if (!strlen($encrypt_uri)) {
+      if ($encrypt_uri === null || !strlen($encrypt_uri)) {
         $encrypt_phid = $mail->getRelatedPHID();
         if ($encrypt_phid) {
           $encrypt_uri = urisprintf(
@@ -100,7 +100,7 @@ final class PhabricatorMailEmailEngine
         }
       }
 
-      if (strlen($encrypt_uri)) {
+      if ($encrypt_uri !== null && strlen($encrypt_uri)) {
         $parts[] = pht(
           'This secure message is notifying you of a change to this object:');
         $parts[] = PhabricatorEnv::getProductionURI($encrypt_uri);
@@ -242,7 +242,8 @@ final class PhabricatorMailEmailEngine
     }
 
     // If we don't have a display name, fill in a default.
-    if (!strlen($reply_address->getDisplayName())) {
+    $reply_display_name = $reply_address->getDisplayName();
+    if ($reply_display_name === null || !strlen($reply_display_name)) {
       $reply_address->setDisplayName(PlatformSymbols::getPlatformServerName());
     }
 
@@ -313,7 +314,7 @@ final class PhabricatorMailEmailEngine
     // a generic one.
     if ($must_encrypt) {
       $encrypt_subject = $mail->getMustEncryptSubject();
-      if (!strlen($encrypt_subject)) {
+      if ($encrypt_subject === null || !strlen($encrypt_subject)) {
         $encrypt_subject = pht('Object Updated');
       }
       $subject[] = $encrypt_subject;
@@ -497,7 +498,7 @@ final class PhabricatorMailEmailEngine
     $object = id(new PhutilEmailAddress())
       ->setAddress($address);
 
-    if (strlen($name)) {
+    if ($name !== null && strlen($name)) {
       $object->setDisplayName($name);
     }
 
@@ -507,7 +508,7 @@ final class PhabricatorMailEmailEngine
   public function newDefaultEmailAddress() {
     $raw_address = PhabricatorEnv::getEnvConfig('metamta.default-address');
 
-    if (!strlen($raw_address)) {
+    if ($raw_address == null || !strlen($raw_address)) {
       $domain = $this->newMailDomain();
       $raw_address = "noreply@{$domain}";
     }
@@ -527,7 +528,7 @@ final class PhabricatorMailEmailEngine
 
   private function newMailDomain() {
     $domain = PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
-    if (strlen($domain)) {
+    if ($domain !== null && strlen($domain)) {
       return $domain;
     }
 

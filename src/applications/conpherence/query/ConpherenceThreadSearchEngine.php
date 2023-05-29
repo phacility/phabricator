@@ -106,7 +106,7 @@ final class ConpherenceThreadSearchEngine
     $engines = array();
 
     $fulltext = $query->getParameter('fulltext');
-    if (strlen($fulltext) && $conpherences) {
+    if ($fulltext !== null && strlen($fulltext) && $conpherences) {
       $context = $this->loadContextMessages($conpherences, $fulltext);
 
       $author_phids = array();
@@ -151,7 +151,7 @@ final class ConpherenceThreadSearchEngine
       $icon = id(new PHUIIconView())
         ->setIcon($icon_name);
 
-      if (!strlen($fulltext)) {
+      if ($fulltext === null || !strlen($fulltext)) {
         $item = id(new PHUIObjectItemView())
           ->setObjectName($conpherence->getMonogram())
           ->setHeader($title)

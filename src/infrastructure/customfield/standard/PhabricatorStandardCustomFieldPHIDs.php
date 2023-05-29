@@ -40,7 +40,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     // TODO: Clean this up.
 
     $result = array();
-    if (!is_array($value)) {
+    if ($value !== null && !is_array($value)) {
       $value = json_decode($value, true);
       if (is_array($value)) {
         $result = array_values($value);

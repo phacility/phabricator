@@ -57,6 +57,9 @@ final class PhabricatorAuthChallenge
     assert_instances_of($challenges, __CLASS__);
 
     $token_list = $request->getStr(self::HTTPKEY);
+    if ($token_list === null) {
+      return;
+    }
     $token_list = explode(' ', $token_list);
 
     $token_map = array();

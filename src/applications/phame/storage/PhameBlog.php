@@ -169,7 +169,7 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getLiveURI() {
-    if (strlen($this->getDomain())) {
+    if ($this->getDomain() !== null && strlen($this->getDomain())) {
       return $this->getExternalLiveURI();
     } else {
       return $this->getInternalLiveURI();

@@ -50,7 +50,9 @@ final class PassphraseCredentialControl extends AphrontFormControl {
     // credential. Populate it into the menu to allow them to save the form
     // without making any changes.
     $current_phid = $this->getValue();
-    if (strlen($current_phid) && empty($options_map[$current_phid])) {
+    if ($current_phid !== null && strlen($current_phid)
+      && empty($options_map[$current_phid])) {
+
       $viewer = $this->getViewer();
 
       $current_name = null;
