@@ -30,9 +30,22 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $data = $request->getValue('data');
+    if ($data === null || !strlen($data)) {
+      throw new Exception(pht('Field "data" must be non-empty.'));
+    }
+
     $diff_id = $request->getValue('diff_id');
+    if ($diff_id === null) {
+      throw new Exception(pht('Field "diff_id" must be non-null.'));
+    }
+
     $name = $request->getValue('name');
-    $data = json_decode($request->getValue('data'), true);
+    if ($name === null || !strlen($name)) {
+      throw new Exception(pht('Field "name" must be non-empty.'));
+    }
+
+    $data = json_decode($data, true);
 
     self::updateDiffProperty($diff_id, $name, $data);
   }

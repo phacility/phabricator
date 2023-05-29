@@ -25,6 +25,9 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
 
   protected function execute(ConduitAPIRequest $request) {
     $slug = $request->getValue('slug');
+    if ($slug === null || !strlen($slug)) {
+      throw new Exception(pht('Field "slug" must be non-empty.'));
+    }
 
     $doc = id(new PhrictionDocumentQuery())
       ->setViewer($request->getUser())

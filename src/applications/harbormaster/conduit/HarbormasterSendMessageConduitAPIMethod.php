@@ -515,7 +515,7 @@ EOREMARKUP
       }
     }
 
-    if (!strlen($receiver_name)) {
+    if ($receiver_name === null || !strlen($receiver_name)) {
       throw new Exception(
         pht(
           'Call omits required "receiver" parameter. Specify the PHID '.
@@ -523,7 +523,7 @@ EOREMARKUP
     }
 
     $message_type = $request->getValue('type');
-    if (!strlen($message_type)) {
+    if ($message_type === null || !strlen($message_type)) {
       throw new Exception(
         pht(
           'Call omits required "type" parameter. Specify the type of '.

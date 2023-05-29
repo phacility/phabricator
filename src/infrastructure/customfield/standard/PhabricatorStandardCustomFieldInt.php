@@ -24,7 +24,7 @@ final class PhabricatorStandardCustomFieldInt
 
   public function getValueForStorage() {
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && strlen($value)) {
       return $value;
     } else {
       return null;

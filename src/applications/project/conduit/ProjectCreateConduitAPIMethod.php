@@ -43,12 +43,21 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
 
     $project = PhabricatorProject::initializeNewProject($user);
     $type_name = PhabricatorProjectNameTransaction::TRANSACTIONTYPE;
+
+    $name = $request->getValue('name');
+    if ($name === null || !strlen(name)) {
+      throw new Exception(pht('Field "name" must be non-empty.'));
+    }
+
     $members = $request->getValue('members');
+    if ($members === null) {
+      $members = array();
+    }
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType($type_name)
-      ->setNewValue($request->getValue('name'));
+      ->setNewValue($name);
 
     if ($request->getValue('icon')) {
       $xactions[] = id(new PhabricatorProjectTransaction())

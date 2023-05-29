@@ -55,6 +55,9 @@ final class DifferentialCreateDiffConduitAPIMethod
   protected function execute(ConduitAPIRequest $request) {
     $viewer = $request->getUser();
     $change_data = $request->getValue('changes');
+    if ($change_data === null) {
+      throw new Exception(pht('Field "changes" must be non-empty.'));
+    }
 
     $changes = array();
     foreach ($change_data as $dict) {

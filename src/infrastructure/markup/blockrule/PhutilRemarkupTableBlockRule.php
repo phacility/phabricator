@@ -114,7 +114,7 @@ final class PhutilRemarkupTableBlockRule extends PhutilRemarkupBlockRule {
         if ($cell->isContentNode()) {
           $content = $node->getContent();
 
-          if (!strlen(trim($content))) {
+          if ($content === null || !strlen(trim($content))) {
             continue;
           }
 

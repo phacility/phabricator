@@ -43,7 +43,7 @@ final class PasteCreateConduitAPIMethod extends PasteConduitAPIMethod {
     $title    = $request->getValue('title');
     $language = $request->getValue('language');
 
-    if (!strlen($content)) {
+    if ($content === null || !strlen($content)) {
       throw new ConduitException('ERR-NO-PASTE');
     }
 

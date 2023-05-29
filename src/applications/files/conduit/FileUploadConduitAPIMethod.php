@@ -31,6 +31,9 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
     $view_policy = $request->getValue('viewPolicy');
 
     $data = $request->getValue('data_base64');
+    if ($data === null) {
+      throw new Exception(pht('Field "data_base64" must be non-empty.'));
+    }
     $data = $this->decodeBase64($data);
 
     $params = array(

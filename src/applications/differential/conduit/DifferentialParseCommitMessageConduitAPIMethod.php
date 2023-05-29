@@ -33,6 +33,9 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     }
 
     $corpus = $request->getValue('corpus');
+    if ($corpus === null || !strlen($corpus)) {
+      throw new Exception(pht('Field "corpus" must be non-empty.'));
+    }
     $field_map = $parser->parseFields($corpus);
 
     $errors = $parser->getErrors();

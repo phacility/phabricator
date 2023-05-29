@@ -26,6 +26,9 @@ final class DifferentialCreateRawDiffConduitAPIMethod
   protected function execute(ConduitAPIRequest $request) {
     $viewer = $request->getUser();
     $raw_diff = $request->getValue('diff');
+    if ($raw_diff === null || !strlen($raw_diff)) {
+      throw new Exception(pht('Field "raw_diff" must be non-empty.'));
+    }
 
     $repository_phid = $request->getValue('repositoryPHID');
     if ($repository_phid) {

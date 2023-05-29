@@ -218,7 +218,7 @@ final class DifferentialTransactionEditor
 
           // No "$", to allow for branches like T123_demo.
           $match = null;
-          if (preg_match('/^T(\d+)/i', $branch, $match)) {
+          if ($branch !== null && preg_match('/^T(\d+)/i', $branch, $match)) {
             $task_id = $match[1];
             $tasks = id(new ManiphestTaskQuery())
               ->setViewer($this->getActor())
