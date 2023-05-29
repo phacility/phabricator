@@ -194,7 +194,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
     $identifier = $args->getArg('repository');
     $repository = null;
-    if (strlen($identifier)) {
+    if ($identifier !== null && strlen($identifier)) {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withIdentifiers(array($identifier))

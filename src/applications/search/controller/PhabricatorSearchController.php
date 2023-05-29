@@ -13,7 +13,7 @@ final class PhabricatorSearchController
     $viewer = $this->getViewer();
     $query = $request->getStr('query');
 
-    if ($request->getStr('jump') != 'no' && strlen($query)) {
+    if ($request->getStr('jump') != 'no' && phutil_nonempty_string($query)) {
       $jump_uri = id(new PhabricatorDatasourceEngine())
         ->setViewer($viewer)
         ->newJumpURI($query);

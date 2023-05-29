@@ -98,7 +98,7 @@ final class ManiphestTaskPointsTransaction
   }
 
   private function getValueForPoints($value) {
-    if (!strlen($value)) {
+    if ($value !== null && !strlen($value)) {
       $value = null;
     }
     if ($value !== null) {

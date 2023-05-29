@@ -87,7 +87,7 @@ abstract class PhameLiveController extends PhameController {
     $this->isExternal = $is_external;
     $this->isLive = $is_live;
 
-    if (strlen($post_id)) {
+    if ($post_id !== null && strlen($post_id)) {
       $post_query = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->needHeaderImage(true)

@@ -22,12 +22,14 @@ final class HeraldRuleDatasource
     $query = id(new HeraldRuleQuery())
       ->setViewer($viewer);
 
-    if (preg_match('/^[hH]\d+\z/', $raw_query)) {
-      $id = trim($raw_query, 'hH');
-      $id = (int)$id;
-      $query->withIDs(array($id));
-    } else {
-      $query->withDatasourceQuery($raw_query);
+    if ($raw_query !== null && strlen($raw_query)) {
+      if (preg_match('/^[hH]\d+\z/', $raw_query)) {
+        $id = trim($raw_query, 'hH');
+        $id = (int)$id;
+        $query->withIDs(array($id));
+      } else {
+        $query->withDatasourceQuery($raw_query);
+      }
     }
 
     $rules = $query->execute();

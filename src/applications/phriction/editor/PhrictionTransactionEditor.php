@@ -307,7 +307,7 @@ final class PhrictionTransactionEditor
     }
 
     $description = $object->getContent()->getDescription();
-    if (strlen($description)) {
+    if ($description !== null && strlen($description)) {
       $body->addTextSection(
         pht('EDIT NOTES'),
         $description);
@@ -556,7 +556,7 @@ final class PhrictionTransactionEditor
       ->setContent($this->getOldContent()->getContent())
       ->setDescription('');
 
-    if (strlen($this->getDescription())) {
+    if ($this->getDescription() !== null && strlen($this->getDescription())) {
       $content->setDescription($this->getDescription());
     }
 

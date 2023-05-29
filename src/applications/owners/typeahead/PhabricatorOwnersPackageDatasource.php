@@ -24,14 +24,16 @@ final class PhabricatorOwnersPackageDatasource
     $query = id(new PhabricatorOwnersPackageQuery())
       ->setOrder('name');
 
-    // If the user is querying by monogram explicitly, like "O123", do an ID
-    // search. Otherwise, do an ngram substring search.
-    if (preg_match('/^[oO]\d+\z/', $raw_query)) {
-      $id = trim($raw_query, 'oO');
-      $id = (int)$id;
-      $query->withIDs(array($id));
-    } else {
-      $query->withNameNgrams($raw_query);
+    if ($raw_query !== null && strlen($raw_query)) {
+      // If the user is querying by monogram explicitly, like "O123", do an ID
+      // search. Otherwise, do an ngram substring search.
+      if (preg_match('/^[oO]\d+\z/', $raw_query)) {
+        $id = trim($raw_query, 'oO');
+        $id = (int)$id;
+        $query->withIDs(array($id));
+      } else {
+        $query->withNameNgrams($raw_query);
+      }
     }
 
     $packages = $this->executeQuery($query);

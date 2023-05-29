@@ -67,7 +67,8 @@ final class PhamePost extends PhameDAO
     $blog = $this->getBlog();
     $is_draft = $this->isDraft();
     $is_archived = $this->isArchived();
-    if (strlen($blog->getDomain()) && !$is_draft && !$is_archived) {
+    $is_external = $blog->getDomain() !== null && strlen($blog->getDomain());
+    if ($is_external && !$is_draft && !$is_archived) {
       return $this->getExternalLiveURI();
     } else {
       return $this->getInternalLiveURI();

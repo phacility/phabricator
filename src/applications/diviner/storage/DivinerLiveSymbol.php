@@ -182,7 +182,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   public function setTitle($value) {
     $this->writeField('title', $value);
 
-    if (strlen($value)) {
+    if ($value !== null && strlen($value)) {
       $slug = DivinerAtomRef::normalizeTitleString($value);
       $hash = PhabricatorHash::digestForIndex($slug);
       $this->titleSlugHash = $hash;

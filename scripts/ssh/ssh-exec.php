@@ -103,7 +103,7 @@ try {
         '--phabricator-ssh-device',
         $user_name,
         $device_name));
-  } else if (strlen($user_name)) {
+  } else if ($user_name !== null && strlen($user_name)) {
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withUsernames(array($user_name))
@@ -117,7 +117,7 @@ try {
 
     id(new PhabricatorAuthSessionEngine())
       ->willServeRequestForUser($user);
-  } else if (strlen($device_name)) {
+  } else if ($device_name !== null && strlen($device_name)) {
     if (!$remote_address) {
       throw new Exception(
         pht(

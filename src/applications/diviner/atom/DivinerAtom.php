@@ -81,10 +81,15 @@ final class DivinerAtom extends Phobject {
   public function setDocblockRaw($docblock_raw) {
     $this->docblockRaw = $docblock_raw;
 
-    $parser = new PhutilDocblockParser();
-    list($text, $meta) = $parser->parse($docblock_raw);
-    $this->docblockText = $text;
-    $this->docblockMeta = $meta;
+    if ($docblock_raw !== null) {
+      $parser = new PhutilDocblockParser();
+      list($text, $meta) = $parser->parse($docblock_raw);
+      $this->docblockText = $text;
+      $this->docblockMeta = $meta;
+    } else {
+      $this->docblockText = null;
+      $this->docblockMeta = null;
+    }
 
     return $this;
   }

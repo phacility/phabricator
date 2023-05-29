@@ -24,7 +24,7 @@ final class PhabricatorSSHLog extends Phobject {
       );
 
       $sudo_user = PhabricatorEnv::getEnvConfig('phd.user');
-      if (strlen($sudo_user)) {
+      if ($sudo_user !== null && strlen($sudo_user)) {
         $data['S'] = $sudo_user;
       }
 

@@ -19,9 +19,10 @@ final class PhabricatorProjectDatasource
     $viewer = $this->getViewer();
 
     $raw_query = $this->getRawQuery();
-
-    // Allow users to type "#qa" or "qa" to find "Quality Assurance".
-    $raw_query = ltrim($raw_query, '#');
+    if ($raw_query !== null && strlen($raw_query)) {
+      // Allow users to type "#qa" or "qa" to find "Quality Assurance".
+      $raw_query = ltrim($raw_query, '#');
+    }
     $tokens = self::tokenizeString($raw_query);
 
     $query = id(new PhabricatorProjectQuery())
@@ -142,7 +143,7 @@ final class PhabricatorProjectDatasource
         $proj_result->addAttribute($proj->getDisplayIconName());
 
         $description = idx($descriptions, $phid);
-        if (strlen($description)) {
+        if ($description !== null && strlen($description)) {
           $summary = PhabricatorMarkupEngine::summarizeSentence($description);
           $proj_result->addAttribute($summary);
         }

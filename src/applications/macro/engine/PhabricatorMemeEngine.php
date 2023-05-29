@@ -180,8 +180,8 @@ final class PhabricatorMemeEngine extends Phobject {
     // When we aren't adding text, just return the data unmodified. This saves
     // us from doing expensive stitching when we aren't actually making any
     // changes to the image.
-    $above_text = $this->getAboveText();
-    $below_text = $this->getBelowText();
+    $above_text = coalesce($this->getAboveText(), '');
+    $below_text = coalesce($this->getBelowText(), '');
     if (!strlen(trim($above_text)) && !strlen(trim($below_text))) {
       return $template_data;
     }
@@ -271,7 +271,7 @@ final class PhabricatorMemeEngine extends Phobject {
     $font = $this->getFont();
     $size = $metrics['size'];
 
-    $above = $this->getAboveText();
+    $above = coalesce($this->getAboveText(), '');
     if (strlen($above)) {
       $x = (int)floor(($dx - $metrics['text']['above']['width']) / 2);
       $y = $metrics['text']['above']['height'] + 12;
@@ -279,7 +279,7 @@ final class PhabricatorMemeEngine extends Phobject {
       $this->drawText($img, $font, $metrics['size'], $x, $y, $above);
     }
 
-    $below = $this->getBelowText();
+    $below = coalesce($this->getBelowText(), '');
     if (strlen($below)) {
       $x = (int)floor(($dx - $metrics['text']['below']['width']) / 2);
       $y = $dy - 12 - $metrics['text']['below']['descend'];
@@ -331,6 +331,7 @@ final class PhabricatorMemeEngine extends Phobject {
         $all_fit = true;
         $text_metrics = array();
         foreach ($texts as $key => $text) {
+          $text = coalesce($text, '');
           $box = imagettfbbox($cursor, 0, $font, $text);
           $height = abs($box[3] - $box[5]);
           $width = abs($box[0] - $box[2]);

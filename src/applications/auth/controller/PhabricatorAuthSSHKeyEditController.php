@@ -54,10 +54,10 @@ final class PhabricatorAuthSSHKeyEditController
       $cancel_uri);
 
     $v_name = $key->getName();
-    $e_name = strlen($v_name) ? null : true;
+    $e_name = $v_name !== null && strlen($v_name) ? null : true;
 
     $v_key = $key->getEntireKey();
-    $e_key = strlen($v_key) ? null : true;
+    $e_key = $v_key !== null && strlen($v_key) ? null : true;
 
     $validation_exception = null;
     if ($request->isFormPost()) {

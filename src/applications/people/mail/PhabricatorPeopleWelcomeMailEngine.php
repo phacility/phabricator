@@ -118,14 +118,14 @@ final class PhabricatorPeopleWelcomeMailEngine
     $recipient = $this->getRecipient();
 
     $custom_body = $this->getWelcomeMessage();
-    if (strlen($custom_body)) {
+    if ($custom_body !== null && strlen($custom_body)) {
       return $this->newRemarkupText($custom_body);
     }
 
     $default_body = PhabricatorAuthMessage::loadMessageText(
       $recipient,
       PhabricatorAuthWelcomeMailMessageType::MESSAGEKEY);
-    if (strlen($default_body)) {
+    if ($default_body !== null && strlen($default_body)) {
       return $this->newRemarkupText($default_body);
     }
 

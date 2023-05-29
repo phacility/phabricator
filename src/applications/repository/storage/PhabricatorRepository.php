@@ -2480,7 +2480,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $has_https = false;
     }
 
-    $has_ssh = (bool)strlen(PhabricatorEnv::getEnvConfig('phd.user'));
+    $phd_user = PhabricatorEnv::getEnvConfig('phd.user');
+    $has_ssh = $phd_user !== null && strlen($phd_user);
 
     $protocol_map = array(
       PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH => $has_ssh,
