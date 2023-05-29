@@ -41,12 +41,12 @@ final class PhabricatorDashboardPanelTabsController
 
     $op = $request->getURIData('op');
     $after = $request->getStr('after');
-    if (!strlen($after)) {
+    if (!phutil_nonempty_string($after)) {
       $after = null;
     }
 
     $target = $request->getStr('target');
-    if (!strlen($target)) {
+    if (!phutil_nonempty_string($target)) {
       $target = null;
     }
 
@@ -103,7 +103,7 @@ final class PhabricatorDashboardPanelTabsController
 
     $context_phid = $request->getStr('contextPHID');
     $context = null;
-    if (strlen($context_phid)) {
+    if (phutil_nonempty_string($context_phid)) {
       $context = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($context_phid))

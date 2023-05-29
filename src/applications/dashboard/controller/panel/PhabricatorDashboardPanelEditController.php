@@ -15,7 +15,7 @@ final class PhabricatorDashboardPanelEditController
     // editing.
 
     $context_phid = $request->getStr('contextPHID');
-    if (strlen($context_phid)) {
+    if (phutil_nonempty_string($context_phid)) {
       $context = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($context_phid))

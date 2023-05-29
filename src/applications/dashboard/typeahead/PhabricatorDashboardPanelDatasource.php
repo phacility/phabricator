@@ -28,7 +28,7 @@ final class PhabricatorDashboardPanelDatasource
     $query = new PhabricatorDashboardPanelQuery();
 
     $raw_query = $this->getRawQuery();
-    if (preg_match('/^[wW]\d+\z/', $raw_query)) {
+    if ($raw_query !== null && preg_match('/^[wW]\d+\z/', $raw_query)) {
       $id = trim($raw_query, 'wW');
       $id = (int)$id;
       $query->withIDs(array($id));

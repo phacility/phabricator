@@ -101,7 +101,7 @@ final class PhabricatorDashboardTabsPanelType
       $subpanel = idx($panels, $panel_id);
 
       $name = idx($tab_spec, 'name');
-      if (!strlen($name)) {
+      if ($name === null || !strlen($name)) {
         if ($subpanel) {
           $name = $subpanel->getName();
         }
