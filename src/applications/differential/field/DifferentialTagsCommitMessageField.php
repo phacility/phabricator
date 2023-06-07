@@ -22,7 +22,7 @@ final class DifferentialTagsCommitMessageField
   }
 
   public function isTemplateField() {
-    return false;
+    return true;
   }
 
   public function parseFieldValue($value) {
