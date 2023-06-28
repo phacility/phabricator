@@ -13,10 +13,12 @@ final class DifferentialReviewersSearchEngineAttachment
 
   public function willLoadAttachmentData($query, $spec) {
     $query->needReviewers(true);
+    $query->needActiveDiffs(true);
   }
 
   public function getAttachmentForObject($object, $data, $spec) {
     $reviewers = $object->getReviewers();
+    $diff_phid = $object->getActiveDiff()->getPHID();
 
     $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
 
@@ -30,6 +32,7 @@ final class DifferentialReviewersSearchEngineAttachment
         'status' => $status,
         'isBlocking' => $is_blocking,
         'actorPHID' => $reviewer->getLastActorPHID(),
+        'isCurrentAction' => $reviewer->isCurrentAction($diff_phid),
       );
     }
 
