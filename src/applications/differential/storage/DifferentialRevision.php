@@ -223,6 +223,11 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorUser $viewer,
     DifferentialReviewer $reviewer) {
 
+    // NOTE(joel.jeske)
+    // We do not want to support force-acceptance if owning a parent package
+    // All ownership rules should be declared in OWNERS.toml files
+    return false;
+
     if (!$reviewer->isPackage()) {
       return false;
     }
