@@ -147,7 +147,7 @@ final class PhabricatorNotificationServerRef
     if ($to_path === null || !strlen($to_path)) {
       $to_path = '';
     } else {
-      $to_path = '/'.ltrim($to_path, '/');
+      $to_path = ltrim($to_path, '/');
     }
 
     $base_path = $this->getPath();
@@ -156,7 +156,7 @@ final class PhabricatorNotificationServerRef
     } else {
       $base_path = rtrim($base_path, '/');
     }
-    $full_path = $base_path.$to_path;
+    $full_path = $base_path.'/'.$to_path;
 
     $uri = id(new PhutilURI('http://'.$this->getHost()))
       ->setProtocol($this->getProtocol())

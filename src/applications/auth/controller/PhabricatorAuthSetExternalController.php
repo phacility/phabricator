@@ -40,7 +40,7 @@ final class PhabricatorAuthSetExternalController
     $text = PhabricatorAuthMessage::loadMessageText(
       $viewer,
       PhabricatorAuthLinkMessageType::MESSAGEKEY);
-    if (!strlen($text)) {
+    if (!phutil_nonempty_string($text)) {
       $text = pht(
         'You can link your %s account to an external account to '.
         'allow you to log in more easily in the future. To continue, choose '.

@@ -164,7 +164,7 @@ final class PhabricatorCookies extends Phobject {
     // Old cookies look like: /uri
     // New cookies look like: timestamp,/uri
 
-    if (!strlen($cookie)) {
+    if (!phutil_nonempty_string($cookie)) {
       return null;
     }
 
