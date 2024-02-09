@@ -18,6 +18,7 @@ final class DifferentialResponsibleDatasource
   public function getComponentDatasources() {
     return array(
       new DifferentialResponsibleUserDatasource(),
+      new DifferentialExactResponsibleViewerFunctionDatasource(),
       new DifferentialResponsibleViewerFunctionDatasource(),
       new DifferentialExactUserFunctionDatasource(),
       new PhabricatorProjectDatasource(),
