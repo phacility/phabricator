@@ -79,10 +79,6 @@ abstract class PhabricatorCustomField extends Phobject {
         $role,
         $fields);
 
-      foreach ($fields as $field) {
-        $field->setObject($object);
-      }
-
       foreach ($fields as $key => $field) {
         // NOTE: We perform this filtering in "buildFieldList()", but may need
         // to filter again after subtype adjustment.
@@ -95,6 +91,10 @@ abstract class PhabricatorCustomField extends Phobject {
           unset($fields[$key]);
           continue;
         }
+      }
+
+      foreach ($fields as $field) {
+        $field->setObject($object);
       }
 
       $field_list = new PhabricatorCustomFieldList($fields);
