@@ -20,12 +20,12 @@ final class PhabricatorFileDropUploadController
 
     $name = $request->getStr('name');
     $file_phid = $request->getStr('phid');
-    // If there's no explicit view policy, make it very restrictive by default.
+    // If there's no explicit view policy, make it viewable by default.
     // This is the correct policy for files dropped onto objects during
     // creation, comment and edit flows.
     $view_policy = $request->getStr('viewPolicy');
     if (!$view_policy) {
-      $view_policy = $viewer->getPHID();
+      $view_policy = PhabricatorPolicies::getMostOpenPolicy();
     }
 
     $is_chunks = $request->getBool('querychunks');

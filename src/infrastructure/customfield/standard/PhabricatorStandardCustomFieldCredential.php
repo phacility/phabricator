@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldCredential
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newStringIndex($value);
     }
 

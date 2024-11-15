@@ -47,6 +47,7 @@ final class PhabricatorPeopleProfileViewController
       ->appendChild($feed);
 
     $projects = $this->buildProjectsView($user);
+    $roles = $this->buildRolesView($user);
     $calendar = $this->buildCalendarDayView($user);
 
     $home = id(new PHUITwoColumnView())
@@ -61,6 +62,7 @@ final class PhabricatorPeopleProfileViewController
       ->setSideColumn(
         array(
           $projects,
+          $roles,
           $calendar,
         ));
 
@@ -158,6 +160,60 @@ final class PhabricatorPeopleProfileViewController
       $list = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild(pht('User does not belong to any projects.'));
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($list)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+
+    return $box;
+  }
+
+  private function buildRolesView(
+    PhabricatorUser $user) {
+
+    $viewer = $this->getViewer();
+    $roles = id(new PhabricatorRoleQuery())
+      ->setViewer($viewer)
+      ->withMemberPHIDs(array($user->getPHID()))
+      ->needImages(true)
+      ->withStatuses(
+        array(
+          PhabricatorRoleStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Roles'));
+
+    if (!empty($roles)) {
+      $limit = 5;
+      $render_phids = array_slice($roles, 0, $limit);
+      $list = id(new PhabricatorRoleListView())
+        ->setUser($viewer)
+        ->setRoles($render_phids);
+
+      if (count($roles) > $limit) {
+        $header_text = pht(
+          'Roles (%s)',
+          phutil_count($roles));
+
+        $header = id(new PHUIHeaderView())
+          ->setHeader($header_text)
+          ->addActionLink(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setIcon('fa-list-ul')
+              ->setText(pht('View All'))
+              ->setHref('/role/?member='.$user->getPHID()));
+
+      }
+
+    } else {
+      $list = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild(pht('User does not belong to any roles.'));
     }
 
     $box = id(new PHUIObjectBoxView())

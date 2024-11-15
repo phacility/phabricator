@@ -1,0 +1,5 @@
+[mysqld]
+sql_mode=STRICT_ALL_TABLES
+max_allowed_packet=33554432
+innodb_buffer_pool_size=1600M
+local_infile=0

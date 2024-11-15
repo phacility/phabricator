@@ -226,7 +226,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
     $all_deps = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs($task_phids)
-      ->withEdgeTypes(array(ManiphestTaskDependsOnTaskEdgeType::EDGECONST));
+      ->withEdgeTypes(array(ManiphestTaskDependsOnTaskEdgeType::EDGECONST, ManiphestTaskBlockerEdgeType::EDGECONST));
     $all_deps->execute();
 
     $result = array();
@@ -244,7 +244,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
       $task_deps = $all_deps->getDestinationPHIDs(
         array($task->getPHID()),
-        array(ManiphestTaskDependsOnTaskEdgeType::EDGECONST));
+        array(ManiphestTaskDependsOnTaskEdgeType::EDGECONST, ManiphestTaskBlockerEdgeType::EDGECONST));
 
       $result[$task->getPHID()] = array(
         'id'           => $task->getID(),

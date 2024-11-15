@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldBool
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newNumericIndex((int)$value);
     }
 
@@ -36,7 +36,7 @@ final class PhabricatorStandardCustomFieldBool
   }
 
   public function setValueFromStorage($value) {
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $value = (bool)$value;
     } else {
       $value = null;

@@ -156,7 +156,7 @@ final class PhabricatorAuthPasswordEngine
     $terms_map = array();
     foreach ($blocklist as $term) {
       $terms_map[$term] = $term;
-      foreach (preg_split('/[ @.]/', $term) as $subterm) {
+      foreach (preg_split('/[ @.]/', phutil_string_cast($term)) as $subterm) {
         $terms_map[$subterm] = $term;
       }
     }

@@ -40,7 +40,9 @@ abstract class ManiphestController extends PhabricatorController {
   final protected function newTaskGraphDropdownMenu(
     ManiphestTask $task,
     $has_parents,
+    $has_blocked_tasks,
     $has_subtasks,
+    $has_blockers,
     $include_standalone) {
     $viewer = $this->getViewer();
 
@@ -64,9 +66,21 @@ abstract class ManiphestController extends PhabricatorController {
           ->setIcon('fa-chevron-circle-up'))
       ->addAction(
         id(new PhabricatorActionView())
+          ->setHref($parents_uri)
+          ->setName(pht('Search Blocked Tasks'))
+          ->setDisabled(!$has_blocked_tasks)
+          ->setIcon('fa-chevron-circle-up'))
+      ->addAction(
+        id(new PhabricatorActionView())
           ->setHref($subtasks_uri)
           ->setName(pht('Search Subtasks'))
           ->setDisabled(!$has_subtasks)
+          ->setIcon('fa-chevron-circle-down'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setHref($subtasks_uri)
+          ->setName(pht('Search Blockers'))
+          ->setDisabled(!$has_blockers)
           ->setIcon('fa-chevron-circle-down'));
 
     if ($include_standalone) {

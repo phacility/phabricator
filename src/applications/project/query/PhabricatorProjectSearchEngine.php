@@ -130,7 +130,7 @@ final class PhabricatorProjectSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if (strlen($map['name'])) {
+    if ($map['name'] !== null && $map['name'] !== '') {
       $tokens = PhabricatorTypeaheadDatasource::tokenizeString($map['name']);
       $query->withNameTokens($tokens);
     }

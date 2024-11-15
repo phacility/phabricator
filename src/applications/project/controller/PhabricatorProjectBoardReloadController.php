@@ -12,7 +12,7 @@ final class PhabricatorProjectBoardReloadController
     }
 
     $order = $request->getStr('order');
-    if (!strlen($order)) {
+    if ($order === null || $order === '') {
       $order = PhabricatorProjectColumnNaturalOrder::ORDERKEY;
     }
 

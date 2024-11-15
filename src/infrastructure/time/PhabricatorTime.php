@@ -52,7 +52,7 @@ final class PhabricatorTime extends Phobject {
     $old_zone = date_default_timezone_get();
 
     date_default_timezone_set($user->getTimezoneIdentifier());
-      $timestamp = (int)strtotime($time, self::getNow());
+      $timestamp = (int)strtotime(phutil_string_cast($time), self::getNow());
       if ($timestamp <= 0) {
         $timestamp = null;
       }

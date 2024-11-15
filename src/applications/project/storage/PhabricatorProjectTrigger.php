@@ -53,7 +53,7 @@ final class PhabricatorProjectTrigger
 
   public function getDisplayName() {
     $name = $this->getName();
-    if (strlen($name)) {
+    if ($name !== null && $name !== '') {
       return $name;
     }
 

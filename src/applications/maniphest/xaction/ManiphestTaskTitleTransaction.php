@@ -20,7 +20,7 @@ final class ManiphestTaskTitleTransaction
   public function getActionName() {
     $old = $this->getOldValue();
 
-    if (!strlen($old)) {
+    if ($old === null || $old === '') {
       return pht('Created');
     }
 
@@ -30,7 +30,7 @@ final class ManiphestTaskTitleTransaction
   public function getTitle() {
     $old = $this->getOldValue();
 
-    if (!strlen($old)) {
+    if ($old === null || $old === '') {
       return pht(
         '%s created this task.',
         $this->renderAuthor());
@@ -72,7 +72,7 @@ final class ManiphestTaskTitleTransaction
 
     foreach ($xactions as $xaction) {
       $new = $xaction->getNewValue();
-      if (!strlen($new)) {
+      if ($new === null || $new === '') {
         $errors[] = $this->newInvalidError(
           pht('Tasks must have a title.'),
           $xaction);

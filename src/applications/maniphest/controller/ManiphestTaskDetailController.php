@@ -6,6 +6,98 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return true;
   }
 
+  private function buildGraph(ManiphestTask $task, int $subtask_type) {
+    switch ($subtask_type) {
+      case ManiphestTaskDependsOnTaskEdgeType::EDGECONST:
+        $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+        break;
+      
+      case ManiphestTaskBlockerEdgeType::EDGECONST:
+        $parent_type = ManiphestTaskBlockedEdgeType::EDGECONST;
+        break;
+
+      default:
+        return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $graph_limit = 200;
+    $overflow_message = null;
+    $task_graph = id(new ManiphestTaskGraph())
+      ->setViewer($viewer)
+      ->setSubtaskType($subtask_type)
+      ->setSeedPHID($task->getPHID())
+      ->setLimit($graph_limit)
+      ->loadGraph();
+
+    $allow_render_graph = false;
+    $graph_table = null;
+    $has_parents = null;
+    $has_subtasks = null;
+
+    if (!$task_graph->isEmpty()) {
+      $parent_map = $task_graph->getEdges($parent_type);
+      $subtask_map = $task_graph->getEdges($subtask_type);
+      $parent_list = idx($parent_map, $task->getPHID(), array());
+      $subtask_list = idx($subtask_map, $task->getPHID(), array());
+      $has_parents = (bool)$parent_list;
+      $has_subtasks = (bool)$subtask_list;
+
+      // First, get a count of direct parent tasks and subtasks. If there
+      // are too many of these, we just don't draw anything. You can use
+      // the search button to browse tasks with the search UI instead.
+      $direct_count = count($parent_list) + count($subtask_list);
+
+      if ($direct_count > $graph_limit) {
+        $overflow_message = pht(
+          'This task is directly connected to more than %s other tasks. '.
+          'Use %s to browse parents or subtasks, or %s to show more of the '.
+          'graph.',
+          new PhutilNumber($graph_limit),
+          phutil_tag('strong', array(), pht('Search...')),
+          phutil_tag('strong', array(), pht('View Standalone Graph')));
+      } else {
+        // If there aren't too many direct tasks, but there are too many total
+        // tasks, we'll only render directly connected tasks.
+        if ($task_graph->isOverLimit()) {
+          $task_graph->setRenderOnlyAdjacentNodes(true);
+
+          $overflow_message = pht(
+            'This task is connected to more than %s other tasks. '.
+            'Only direct parents and subtasks are shown here. Use '.
+            '%s to show more of the graph.',
+            new PhutilNumber($graph_limit),
+            phutil_tag('strong', array(), pht('View Standalone Graph')));
+        }
+
+        $graph_table = $task_graph->newGraphTable();
+      }
+
+      if ($overflow_message) {
+        $overflow_view = $this->newTaskGraphOverflowView(
+          $task,
+          $overflow_message,
+          true);
+
+        $graph_table = array(
+          $overflow_view,
+          $graph_table,
+        );
+      }
+
+      $allow_render_graph = true;
+    }
+
+    $result = array(
+      'table' => $graph_table,
+      'has_parents' => $has_parents,
+      'has_subtasks' => $has_subtasks,
+      'allow_render_graph' => $allow_render_graph
+    );
+    return $result;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
@@ -79,80 +171,49 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $related_tabs = array();
     $graph_menu = null;
+    $new_tab = null;
 
-    $graph_limit = 200;
-    $overflow_message = null;
-    $task_graph = id(new ManiphestTaskGraph())
-      ->setViewer($viewer)
-      ->setSeedPHID($task->getPHID())
-      ->setLimit($graph_limit)
-      ->loadGraph();
-    if (!$task_graph->isEmpty()) {
-      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
-      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-      $parent_map = $task_graph->getEdges($parent_type);
-      $subtask_map = $task_graph->getEdges($subtask_type);
-      $parent_list = idx($parent_map, $task->getPHID(), array());
-      $subtask_list = idx($subtask_map, $task->getPHID(), array());
-      $has_parents = (bool)$parent_list;
-      $has_subtasks = (bool)$subtask_list;
+    $subtask_graph_map = $this->buildGraph($task, ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+    $subtask_graph_table = $subtask_graph_map['table'];
+    $has_parents = $subtask_graph_map['has_parents'];
+    $has_subtasks = $subtask_graph_map['has_subtasks'];
 
-      // First, get a count of direct parent tasks and subtasks. If there
-      // are too many of these, we just don't draw anything. You can use
-      // the search button to browse tasks with the search UI instead.
-      $direct_count = count($parent_list) + count($subtask_list);
+    $blocker_graph_map = $this->buildGraph($task, ManiphestTaskBlockerEdgeType::EDGECONST);
+    $blocker_graph_table = $blocker_graph_map['table'];
+    $has_blocked_tasks = $blocker_graph_map['has_parents'];
+    $has_blockers = $blocker_graph_map['has_subtasks'];
 
-      if ($direct_count > $graph_limit) {
-        $overflow_message = pht(
-          'This task is directly connected to more than %s other tasks. '.
-          'Use %s to browse parents or subtasks, or %s to show more of the '.
-          'graph.',
-          new PhutilNumber($graph_limit),
-          phutil_tag('strong', array(), pht('Search...')),
-          phutil_tag('strong', array(), pht('View Standalone Graph')));
-
-        $graph_table = null;
-      } else {
-        // If there aren't too many direct tasks, but there are too many total
-        // tasks, we'll only render directly connected tasks.
-        if ($task_graph->isOverLimit()) {
-          $task_graph->setRenderOnlyAdjacentNodes(true);
-
-          $overflow_message = pht(
-            'This task is connected to more than %s other tasks. '.
-            'Only direct parents and subtasks are shown here. Use '.
-            '%s to show more of the graph.',
-            new PhutilNumber($graph_limit),
-            phutil_tag('strong', array(), pht('View Standalone Graph')));
-        }
-
-        $graph_table = $task_graph->newGraphTable();
-      }
-
-      if ($overflow_message) {
-        $overflow_view = $this->newTaskGraphOverflowView(
-          $task,
-          $overflow_message,
-          true);
-
-        $graph_table = array(
-          $overflow_view,
-          $graph_table,
-        );
-      }
-
+    if ($subtask_graph_map['allow_render_graph'] || $blocker_graph_map['allow_render_graph']) {
       $graph_menu = $this->newTaskGraphDropdownMenu(
         $task,
         $has_parents,
+        $has_blocked_tasks,
         $has_subtasks,
+        $has_blockers,
         true);
 
-      $related_tabs[] = id(new PHUITabView())
+      $new_tab = id(new PHUITabView())
         ->setName(pht('Task Graph'))
-        ->setKey('graph')
-        ->appendChild($graph_table);
+        ->setKey('graph');
     }
 
+    if ($subtask_graph_map['allow_render_graph']) {
+      $subtask_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Subtasks'));
+      $new_tab
+        ->appendChild($subtask_header)
+        ->appendChild($subtask_graph_table);
+    }
+
+    if ($blocker_graph_map['allow_render_graph']) {
+      $blocker_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Blockers'));
+      $new_tab
+        ->appendChild($blocker_header)
+        ->appendChild($blocker_graph_table);
+    }
+
+    $related_tabs[] = $new_tab;
     $related_tabs[] = $this->newMocksTab($task, $query);
     $related_tabs[] = $this->newMentionsTab($task, $query);
     $related_tabs[] = $this->newDuplicatesTab($task, $query);
@@ -249,6 +310,64 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return $view;
   }
 
+  private function buildSubtaskItem(
+    ManiphestTask $task,
+    PhabricatorEditEngine $edit_engine,
+    int $subtask_type) {
+    
+    switch ($subtask_type) {
+      case ManiphestTaskDependsOnTaskEdgeType::EDGECONST:
+        $subtask_query_param = 'parent';
+        $view_name = 'Create Subtask';
+        $subtask_controller = 'subtask';
+        break;
+      
+      case ManiphestTaskBlockerEdgeType::EDGECONST:
+        $subtask_query_param = 'blocked';
+        $view_name = 'Create Blocker';
+        $subtask_controller = 'blocker';
+        break;
+
+      default:
+        return null;
+    }
+
+    $id = $task->getID();
+    
+    $subtype_map = $task->newEditEngineSubtypeMap();
+    $subtask_options = $subtype_map->getCreateFormsForSubtype(
+      $edit_engine,
+      $task);
+
+    // If no forms are available, we want to show the user an error.
+    // If one form is available, we take them user directly to the form.
+    // If two or more forms are available, we give the user a choice.
+
+    // The "subtask" controller handles the first case (no forms) and the
+    // third case (more than one form). In the case of one form, we link
+    // directly to the form.
+    $subtask_uri = "/task/{$subtask_controller}/{$id}/";
+    $subtask_workflow = true;
+
+    if (count($subtask_options) == 1) {
+      $subtask_form = head($subtask_options);
+      $form_key = $subtask_form->getIdentifier();
+      $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
+        ->replaceQueryParam($subtask_query_param, $id)
+        ->replaceQueryParam('template', $id)
+        ->replaceQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
+      $subtask_workflow = false;
+    }
+
+    $subtask_uri = $this->getApplicationURI($subtask_uri);
+
+    return id(new PhabricatorActionView())
+      ->setName(pht($view_name))
+      ->setHref($subtask_uri)
+      ->setIcon('fa-level-down')
+      ->setDisabled(!$subtask_options)
+      ->setWorkflow($subtask_workflow);
+  }
 
   private function buildCurtain(
     ManiphestTask $task,
@@ -256,7 +375,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $viewer = $this->getViewer();
 
     $id = $task->getID();
-    $phid = $task->getPHID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -279,48 +397,21 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow($workflow_edit));
 
-    $subtype_map = $task->newEditEngineSubtypeMap();
-    $subtask_options = $subtype_map->getCreateFormsForSubtype(
-      $edit_engine,
-      $task);
-
-    // If no forms are available, we want to show the user an error.
-    // If one form is available, we take them user directly to the form.
-    // If two or more forms are available, we give the user a choice.
-
-    // The "subtask" controller handles the first case (no forms) and the
-    // third case (more than one form). In the case of one form, we link
-    // directly to the form.
-    $subtask_uri = "/task/subtask/{$id}/";
-    $subtask_workflow = true;
-
-    if (count($subtask_options) == 1) {
-      $subtask_form = head($subtask_options);
-      $form_key = $subtask_form->getIdentifier();
-      $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
-        ->replaceQueryParam('parent', $id)
-        ->replaceQueryParam('template', $id)
-        ->replaceQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
-      $subtask_workflow = false;
-    }
-
-    $subtask_uri = $this->getApplicationURI($subtask_uri);
-
-    $subtask_item = id(new PhabricatorActionView())
-      ->setName(pht('Create Subtask'))
-      ->setHref($subtask_uri)
-      ->setIcon('fa-level-down')
-      ->setDisabled(!$subtask_options)
-      ->setWorkflow($subtask_workflow);
 
     $relationship_list = PhabricatorObjectRelationshipList::newForObject(
       $viewer,
       $task);
 
+    $subtask_item = $this->buildSubtaskItem($task, $edit_engine, ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+    $blocker_item = $this->buildSubtaskItem($task, $edit_engine, ManiphestTaskBlockerEdgeType::EDGECONST);
+
     $submenu_actions = array(
       $subtask_item,
       ManiphestTaskHasParentRelationship::RELATIONSHIPKEY,
       ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY,
+      $blocker_item,
+      ManiphestTaskHasBlockedRelationship::RELATIONSHIPKEY,
+      ManiphestTaskHasBlockerRelationship::RELATIONSHIPKEY,
       ManiphestTaskMergeInRelationship::RELATIONSHIPKEY,
       ManiphestTaskCloseAsDuplicateRelationship::RELATIONSHIPKEY,
     );

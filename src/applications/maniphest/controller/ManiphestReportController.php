@@ -186,8 +186,8 @@ final class ManiphestReportController extends ManiphestController {
       switch ($row['transactionType']) {
         case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
           // NOTE: Hack to avoid json_decode().
-          $oldv = trim($row['oldValue'], '"');
-          $newv = trim($row['newValue'], '"');
+          $oldv = trim(phutil_string_cast($row['oldValue']), '"');
+          $newv = trim(phutil_string_cast($row['newValue']), '"');
           break;
         case ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE:
           // NOTE: Merging a task does not generate a "status" transaction.

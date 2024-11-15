@@ -17,12 +17,12 @@ final class PhabricatorProjectColumnNameTransaction
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
-    if (!strlen($old)) {
+    if ($old === null || $old === '') {
       return pht(
         '%s named this column %s.',
         $this->renderAuthor(),
         $this->renderNewValue());
-    } else if (strlen($new)) {
+    } else if ($new !== null && $new !== '') {
       return pht(
         '%s renamed this column from %s to %s.',
         $this->renderAuthor(),

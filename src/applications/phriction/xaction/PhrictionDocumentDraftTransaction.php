@@ -28,10 +28,10 @@ final class PhrictionDocumentDraftTransaction
     }
 
     $content = $object->getContent()->getContent();
-    if ($this->isEmptyTextTransaction($content, $xactions)) {
-      $errors[] = $this->newRequiredError(
-        pht('Documents must have content.'));
-    }
+    //if ($this->isEmptyTextTransaction($content, $xactions)) {
+      //$errors[] = $this->newRequiredError(
+        //pht('Documents must have content.'));
+    //}
 
     return $errors;
   }

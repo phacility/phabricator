@@ -7,34 +7,36 @@ final class ManiphestTaskGraphController
     return true;
   }
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $this->getViewer();
-    $id = $request->getURIData('id');
+  private function buildGraph(ManiphestTask $task, int $subtask_type) {
+    switch ($subtask_type) {
+      case ManiphestTaskDependsOnTaskEdgeType::EDGECONST:
+        $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+        break;
+      
+      case ManiphestTaskBlockerEdgeType::EDGECONST:
+        $parent_type = ManiphestTaskBlockedEdgeType::EDGECONST;
+        break;
 
-    $task = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->executeOne();
-    if (!$task) {
-      return new Aphront404Response();
+      default:
+        return null;
     }
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($task->getMonogram(), $task->getURI())
-      ->addTextCrumb(pht('Graph'))
-      ->setBorder(true);
-
+    $viewer = $this->getViewer();
     $graph_limit = 2000;
     $overflow_message = null;
     $task_graph = id(new ManiphestTaskGraph())
       ->setViewer($viewer)
+      ->setSubtaskType($subtask_type)
       ->setSeedPHID($task->getPHID())
       ->setLimit($graph_limit)
       ->setIsStandalone(true)
       ->loadGraph();
+
+    $graph_table = null;
+    $has_parents = null;
+    $has_subtasks = null;
+
     if (!$task_graph->isEmpty()) {
-      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
-      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
       $parent_map = $task_graph->getEdges($parent_type);
       $subtask_map = $task_graph->getEdges($subtask_type);
       $parent_list = idx($parent_map, $task->getPHID(), array());
@@ -54,8 +56,6 @@ final class ManiphestTaskGraphController
           'or subtasks.',
           new PhutilNumber($graph_limit),
           phutil_tag('strong', array(), pht('Search...')));
-
-        $graph_table = null;
       } else {
         // If there aren't too many direct tasks, but there are too many total
         // tasks, we'll only render directly connected tasks.
@@ -71,13 +71,19 @@ final class ManiphestTaskGraphController
         $graph_table = $task_graph->newGraphTable();
       }
 
-      $graph_menu = $this->newTaskGraphDropdownMenu(
-        $task,
-        $has_parents,
-        $has_subtasks,
-        false);
+      if ($overflow_message) {
+        $overflow_view = $this->newTaskGraphOverflowView(
+          $task,
+          $overflow_message,
+          false);
+  
+        $graph_table = array(
+          $overflow_view,
+          $graph_table,
+        );
+      }
+
     } else {
-      $graph_menu = null;
       $graph_table = null;
 
       $overflow_message = pht(
@@ -85,29 +91,70 @@ final class ManiphestTaskGraphController
         'graph to draw.');
     }
 
-    if ($overflow_message) {
-      $overflow_view = $this->newTaskGraphOverflowView(
-        $task,
-        $overflow_message,
-        false);
+    $result = array(
+      'table' => $graph_table,
+      'has_parents' => $has_parents,
+      'has_subtasks' => $has_subtasks,
+    );
+    return $result;
 
-      $graph_table = array(
-        $overflow_view,
-        $graph_table,
-      );
+  }
+
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
+    if (!$task) {
+      return new Aphront404Response();
     }
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($task->getMonogram(), $task->getURI())
+      ->addTextCrumb(pht('Graph'))
+      ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Task Graph'));
+
+    $subtask_graph_map = $this->buildGraph($task, ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+    $subtask_graph_table = $subtask_graph_map['table'];
+    $has_parents = $subtask_graph_map['has_parents'];
+    $has_subtasks = $subtask_graph_map['has_subtasks'];
+
+    $blocker_graph_map = $this->buildGraph($task, ManiphestTaskBlockerEdgeType::EDGECONST);
+    $blocker_graph_table = $blocker_graph_map['table'];
+    $has_blocked_tasks = $blocker_graph_map['has_parents'];
+    $has_blockers = $blocker_graph_map['has_subtasks'];
+
+    $graph_menu = $this->newTaskGraphDropdownMenu(
+      $task,
+      $has_parents,
+      $has_blocked_tasks,
+      $has_subtasks,
+      $has_blockers,
+      true);
 
     if ($graph_menu) {
       $header->addActionLink($graph_menu);
     }
 
+    $subtask_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Subtasks'));
+
+    $blocker_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Blockers'));
+
     $tab_view = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($graph_table);
+      ->appendChild($subtask_header)
+      ->appendChild($subtask_graph_table)
+      ->appendChild($blocker_header)
+      ->appendChild($blocker_graph_table);
 
     $view = id(new PHUITwoColumnView())
       ->setFooter($tab_view);

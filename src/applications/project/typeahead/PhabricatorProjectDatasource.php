@@ -84,10 +84,10 @@ final class PhabricatorProjectDatasource
       }
 
       $slug = $proj->getPrimarySlug();
-      if (!strlen($slug)) {
+      if ($slug === null || $slug === '') {
         foreach ($proj->getSlugs() as $slug_object) {
           $slug = $slug_object->getSlug();
-          if (strlen($slug)) {
+          if ($slug !== null && $slug !== '') {
             break;
           }
         }
@@ -133,7 +133,7 @@ final class PhabricatorProjectDatasource
         ->setPriorityType('proj')
         ->setClosed($closed);
 
-      if (strlen($slug)) {
+      if ($slug !== null && $slug !== '') {
         $proj_result->setAutocomplete('#'.$slug);
       }
 

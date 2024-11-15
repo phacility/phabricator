@@ -1669,7 +1669,7 @@ abstract class PhabricatorCustomField extends Phobject {
     $map = array();
     foreach ($fields as $field) {
       $modern_key = $field->getModernFieldKey();
-      if (!strlen($modern_key)) {
+      if ($modern_key === null || $modern_key === '') {
         continue;
       }
 

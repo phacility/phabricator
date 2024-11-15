@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldSelect
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newStringIndex($value);
     }
 
@@ -73,7 +73,7 @@ final class PhabricatorStandardCustomFieldSelect
   }
 
   public function renderPropertyViewValue(array $handles) {
-    if (!strlen($this->getFieldValue())) {
+    if ($this->getFieldValue() === null || $this->getFieldValue() === '') {
       return null;
     }
     return idx($this->getOptions(), $this->getFieldValue());

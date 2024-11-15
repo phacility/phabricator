@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldInt
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newNumericIndex((int)$value);
     }
 
@@ -32,7 +32,7 @@ final class PhabricatorStandardCustomFieldInt
   }
 
   public function setValueFromStorage($value) {
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $value = (int)$value;
     } else {
       $value = null;
@@ -52,7 +52,7 @@ final class PhabricatorStandardCustomFieldInt
     PhabricatorCursorPagedPolicyAwareQuery $query,
     $value) {
 
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $query->withApplicationSearchContainsConstraint(
         $this->newNumericIndex(null),
         $value);
@@ -83,7 +83,7 @@ final class PhabricatorStandardCustomFieldInt
 
     foreach ($xactions as $xaction) {
       $value = $xaction->getNewValue();
-      if (strlen($value)) {
+      if ($value !== null && $value !== '') {
         if (!preg_match('/^-?\d+/', $value)) {
           $errors[] = new PhabricatorApplicationTransactionValidationError(
             $type,
@@ -101,14 +101,14 @@ final class PhabricatorStandardCustomFieldInt
   public function getApplicationTransactionHasEffect(
     PhabricatorApplicationTransaction $xaction) {
 
-    $old = $xaction->getOldValue();
-    $new = $xaction->getNewValue();
+    $old = phutil_string_cast($xaction->getOldValue());
+    $new = phutil_string_cast($xaction->getNewValue());
     if (!strlen($old) && strlen($new)) {
       return true;
-    } else if (strlen($old) && !strlen($new)) {
+    } elseif (strlen($old) && !strlen($new)) {
       return true;
     } else {
-      return ((int)$old !== (int)$new);
+      return (int)$xaction->getOldValue() !== $xaction->getNewValue();
     }
   }
 

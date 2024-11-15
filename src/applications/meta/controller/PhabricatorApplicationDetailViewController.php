@@ -114,7 +114,7 @@ final class PhabricatorApplicationDetailViewController
     }
 
     $overview = $application->getOverview();
-    if (strlen($overview)) {
+    if ($overview !== null && $overview !== '') {
       $overview = new PHUIRemarkupView($viewer, $overview);
       $properties->addSectionHeader(
         pht('Overview'), PHUIPropertyListView::ICON_SUMMARY);

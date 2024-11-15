@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldLink
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newStringIndex($value);
     }
 
@@ -21,7 +21,7 @@ final class PhabricatorStandardCustomFieldLink
   public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
 
-    if (!strlen($value)) {
+    if ($value === null || $value === '') {
       return null;
     }
 

@@ -328,7 +328,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     if (isset($params['storageEngines'])) {
       $engines = $params['storageEngines'];
     } else {
-      $size = strlen($data);
+      $size = strlen(phutil_string_cast($data));
       $engines = PhabricatorFileStorageEngine::loadStorageEngines($size);
 
       if (!$engines) {
@@ -406,7 +406,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         $exceptions);
     }
 
-    $file->setByteSize(strlen($data));
+    $file->setByteSize(strlen(phutil_string_cast($data)));
 
     $hash = self::hashFileContent($data);
     $file->setContentHash($hash);
@@ -786,7 +786,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // it just means we'll store extra data when users upload duplicate files
     // instead of being able to deduplicate it.
 
-    $hash = hash('sha256', $data, $raw_output = false);
+    $hash = hash('sha256', phutil_string_cast($data), $raw_output = false);
     if ($hash === false) {
       return null;
     }

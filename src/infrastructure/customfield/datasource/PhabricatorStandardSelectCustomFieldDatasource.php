@@ -37,7 +37,7 @@ final class PhabricatorStandardSelectCustomFieldDatasource
     }
 
     $role = $this->getParameter('role');
-    if (!strlen($role)) {
+    if ($role === null || $role === '') {
       throw new Exception(pht('No custom field role specified.'));
     }
 
@@ -45,7 +45,7 @@ final class PhabricatorStandardSelectCustomFieldDatasource
     $field_list = PhabricatorCustomField::getObjectFields($object, $role);
 
     $field_key = $this->getParameter('key');
-    if (!strlen($field_key)) {
+    if ($field_key === null || $field_key === '') {
       throw new Exception(pht('No custom field key specified.'));
     }
 

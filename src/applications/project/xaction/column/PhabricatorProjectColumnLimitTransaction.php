@@ -10,7 +10,7 @@ final class PhabricatorProjectColumnLimitTransaction
   }
 
   public function generateNewValue($object, $value) {
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       return (int)$value;
     } else {
       return null;

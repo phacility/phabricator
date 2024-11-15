@@ -11,7 +11,7 @@ final class PhabricatorStandardCustomFieldDate
     $indexes = array();
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $indexes[] = $this->newNumericIndex((int)$value);
     }
 
@@ -24,7 +24,7 @@ final class PhabricatorStandardCustomFieldDate
 
   public function getValueForStorage() {
     $value = $this->getFieldValue();
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       return (int)$value;
     } else {
       return null;
@@ -32,7 +32,7 @@ final class PhabricatorStandardCustomFieldDate
   }
 
   public function setValueFromStorage($value) {
-    if (strlen($value)) {
+    if ($value !== null && $value !== '') {
       $value = (int)$value;
     } else {
       $value = null;
@@ -74,7 +74,7 @@ final class PhabricatorStandardCustomFieldDate
     // specify as a string. Parse the string into an epoch.
 
     $value = $this->getFieldValue();
-    if (!ctype_digit($value)) {
+    if (!ctype_digit(phutil_string_cast($value))) {
       $value = PhabricatorTime::parseLocalTime($value, $this->getViewer());
     }
 
@@ -109,14 +109,14 @@ final class PhabricatorStandardCustomFieldDate
     }
 
     $min_str = idx($value, 'min', '');
-    if (strlen($min_str)) {
+    if ($min_str !== null && $min_str !== '') {
       $min = PhabricatorTime::parseLocalTime($min_str, $viewer);
     } else {
       $min = null;
     }
 
     $max_str = idx($value, 'max', '');
-    if (strlen($max_str)) {
+    if ($max_str !== null && $max_str !== '') {
       $max = PhabricatorTime::parseLocalTime($max_str, $viewer);
     } else {
       $max = null;

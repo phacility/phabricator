@@ -203,7 +203,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
 
       $info[] = null;
       $info[] = $this->newSectionHeader(pht('HTML BODY'));
-      if (strlen($message->getHTMLBody())) {
+      if (strlen(phutil_string_cast($message->getHTMLBody()))) {
         $info[] = $message->getHTMLBody();
         $info[] = null;
       } else {

@@ -514,6 +514,8 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       id(new PhabricatorBoardColumnsSearchEngineAttachment())
         ->setAttachmentKey('columns'),
+      id(new PhabricatorRoleBoardColumnsSearchEngineAttachment())
+        ->setAttachmentKey('role_columns'),
     );
   }
 

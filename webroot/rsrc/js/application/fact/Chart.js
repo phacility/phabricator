@@ -200,11 +200,8 @@ JX.install('Chart', {
 
             var y = parseInt(d.y1);
 
-            var label = d.n + ' Points';
-
             var view =
-              d_y + '-' + d_m + '-' + d_d + ': ' + y + '<br />' +
-              label;
+              d_y + '-' + d_m + '-' + d_d + '<br /><b>' + y + '</b>';
 
             div
               .html(view)
