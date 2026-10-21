@@ -1,5 +1,8 @@
 FROM php:8.4.27-fpm-alpine3.23 AS base
 
+# Used for some file patchs in the image. MUST match the Docker image.
+ENV PHPSHORT=84
+
 LABEL maintainer="dkl@mozilla.com"
 
 # From https://github.com/marco-c/risk-analysis-addon/releases
@@ -73,7 +76,16 @@ RUN { \
 RUN { \
         echo 'always_populate_raw_post_data=-1'; \
         echo 'post_max_size="32M"'; \
+        echo 'session.upload_progress.enabled = Off'; \
     } | tee /usr/local/etc/php/conf.d/phabricator.ini
+
+# Disable session upload progress for all PHPs, including the distro-shipped
+# one (despite it not being used), to counter CVE-2026-109619.
+RUN sed -i \
+  's/^;session.upload_progress.enabled.*/session.upload_progress.enabled = Off/' \
+  /etc/php${PHPSHORT}/php.ini \
+  /usr/local/etc/php/php.ini-production \
+  /usr/local/etc/php/php.ini-development
 
 # add a non-privileged user for installing and running the application
 RUN addgroup -g 10001 app \
