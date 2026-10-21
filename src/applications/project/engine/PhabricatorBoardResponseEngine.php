@@ -205,7 +205,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
   public static function newTaskProperties($task) {
     return array(
-      'points' => (double)$task->getPoints(),
+      'points' => (float)$task->getPoints(),
       'status' => $task->getStatus(),
       'priority' => (int)$task->getPriority(),
       'owner' => $task->getOwnerPHID(),

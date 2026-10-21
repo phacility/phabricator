@@ -220,14 +220,14 @@ abstract class PhabricatorChartFunction
 
     $is_reversed = ($src > $dst);
     if ($is_reversed) {
-      $min = (double)$dst;
-      $max = (double)$src;
+      $min = (float)$dst;
+      $max = (float)$src;
     } else {
-      $min = (double)$src;
-      $max = (double)$dst;
+      $min = (float)$src;
+      $max = (float)$dst;
     }
 
-    $step = (double)($max - $min) / (double)($count - 1);
+    $step = (float)($max - $min) / (float)($count - 1);
 
     $steps = array();
     for ($cursor = $min; $cursor <= $max; $cursor += $step) {

@@ -253,7 +253,7 @@ abstract class DifferentialController extends PhabricatorController {
     // Cast duration to a float since it used to be a string in some
     // cases.
     if (isset($map['duration'])) {
-      $map['duration'] = (double)$map['duration'];
+      $map['duration'] = (float)$map['duration'];
     }
 
     return $map;

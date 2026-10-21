@@ -14,7 +14,7 @@ final class ConduitPointsParameterType
     }
 
     if ($value !== null) {
-      $value = (double)$value;
+      $value = (float)$value;
       if ($value < 0) {
         $this->raiseValidationException(
           $request,

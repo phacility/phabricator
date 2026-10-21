@@ -42,7 +42,7 @@ final class PhabricatorProjectColumnPointsOrder
 
     return array(
       $overall_order,
-      -1.0 * (double)$points,
+      -1.0 * (float)$points,
       -1 * (int)$object->getID(),
     );
   }
