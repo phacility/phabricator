@@ -179,6 +179,9 @@ final class PhabricatorPolicyFilter extends Phobject {
     $filtered = array();
     $viewer_phid = $viewer->getPHID();
 
+    // TODO: This is reachable, but probably not correct.
+    $viewer_phid = (string)$viewer_phid;
+
     if (empty($this->userProjects[$viewer_phid])) {
       $this->userProjects[$viewer_phid] = array();
     }
@@ -572,7 +575,11 @@ final class PhabricatorPolicyFilter extends Phobject {
 
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectProjectPHIDType::TYPECONST) {
-          if (!empty($this->userProjects[$viewer->getPHID()][$policy])) {
+
+          // TODO: This is reachable, but probably not ideal.
+          $viewer_phid = (string)$viewer->getPHID();
+
+          if (!empty($this->userProjects[$viewer_phid][$policy])) {
             return true;
           } else {
             $this->rejectObject($object, $policy, $capability);
@@ -756,6 +763,10 @@ final class PhabricatorPolicyFilter extends Phobject {
     $viewer = $this->viewer;
     $viewer_phid = $viewer->getPHID();
 
+    // TODO: This is reachable with a public viewer, but probably not
+    // ideal.
+    $viewer_phid = (string)$viewer_phid;
+
     $custom_policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->withPHIDs(array_keys($map))
@@ -803,7 +814,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $this->customPolicies[$viewer_phid] = array();
     }
 
-    $this->customPolicies[$viewer->getPHID()] += $custom_policies;
+    $this->customPolicies[$viewer_phid] += $custom_policies;
   }
 
   private function checkObjectPolicy(
@@ -829,7 +840,9 @@ final class PhabricatorPolicyFilter extends Phobject {
     PhabricatorPolicyInterface $object) {
 
     $viewer = $this->viewer;
-    $viewer_phid = $viewer->getPHID();
+
+    // TODO: This is reachable without a PHID, but probably not ideal.
+    $viewer_phid = (string)$viewer->getPHID();
 
     $policy = idx($this->customPolicies[$viewer_phid], $policy_phid);
     if (!$policy) {

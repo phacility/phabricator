@@ -124,8 +124,11 @@ final class HarbormasterBuildPlanBehavior
     $storage_key = self::getStorageKeyForBehaviorKey($behavior_key);
 
     $plan_value = $plan->getPlanProperty($storage_key);
-    if (isset($this->options[$plan_value])) {
-      return $this->options[$plan_value];
+
+    if ($plan_value !== null) {
+      if (isset($this->options[$plan_value])) {
+        return $this->options[$plan_value];
+      }
     }
 
     return idx($this->options, $this->defaultKey);

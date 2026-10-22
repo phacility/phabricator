@@ -563,7 +563,7 @@ final class PhabricatorApplicationTransactionCommentView
     // Merge options into groups.
     $groups = array();
     foreach ($action_map as $key => $item) {
-      $group_key = $item['groupKey'];
+      $group_key = (string)$item['groupKey'];
       if (!isset($groups[$group_key])) {
         $groups[$group_key] = array();
       }

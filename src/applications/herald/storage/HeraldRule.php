@@ -77,7 +77,11 @@ final class HeraldRule extends HeraldDAO
     if ($this->ruleApplied === self::ATTACHABLE) {
       $this->ruleApplied = array();
     }
-    $this->ruleApplied[$phid] = $applied;
+
+    // TODO: It is possible, but probably not correct, to arrive here with an
+    // empty PHID.
+    $this->ruleApplied[(string)$phid] = $applied;
+
     return $this;
   }
 

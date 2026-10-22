@@ -10,7 +10,7 @@ final class MultimeterSampleController extends MultimeterController {
     $viewer = $this->getViewer();
     $group_map = $this->getColumnMap();
 
-    $group = explode('.', $request->getStr('group'));
+    $group = explode('.', (string)$request->getStr('group'));
     $group = array_intersect($group, array_keys($group_map));
     $group = array_fuse($group);
 

@@ -204,9 +204,15 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function isUserMember($user_phid) {
+    // TODO: This is reachable, but probably not correct.
+    if ($user_phid === null) {
+      return false;
+    }
+
     if ($this->memberPHIDs !== self::ATTACHABLE) {
       return in_array($user_phid, $this->memberPHIDs);
     }
+
     return $this->assertAttachedKey($this->sparseMembers, $user_phid);
   }
 
@@ -339,7 +345,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     if ($this->sparseWatchers === self::ATTACHABLE) {
       $this->sparseWatchers = array();
     }
-    $this->sparseWatchers[$user_phid] = $is_watcher;
+
+    // TODO: This is reachable, but probably not correct.
+    if ($user_phid !== null) {
+      $this->sparseWatchers[$user_phid] = $is_watcher;
+    }
+
     return $this;
   }
 

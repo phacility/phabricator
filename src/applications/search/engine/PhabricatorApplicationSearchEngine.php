@@ -970,6 +970,12 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function getResultBucket(PhabricatorSavedQuery $saved) {
     $key = $saved->getParameter('bucket');
+
+    // TODO: This is reachable, but probably not correct.
+    if ($key === null) {
+      return null;
+    }
+
     if ($key == self::BUCKET_NONE) {
       return null;
     }

@@ -172,7 +172,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   public function getTitle() {
     $title = parent::getTitle();
 
-    if (!strlen($title)) {
+    if (!phutil_nonempty_string($title)) {
       $title = $this->getName();
     }
 

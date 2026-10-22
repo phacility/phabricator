@@ -258,7 +258,8 @@ final class DifferentialChangesetTwoUpRenderer
         }
       }
 
-      if (isset($hunk_starts[$o_num])) {
+
+      if ($o_num && isset($hunk_starts[$o_num])) {
         $html[] = $context_not_available;
       }
 

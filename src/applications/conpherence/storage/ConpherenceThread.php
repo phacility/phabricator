@@ -92,6 +92,10 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function getParticipantIfExists($phid, $default = null) {
+    if ($phid === null) {
+      return $default;
+    }
+
     $participants = $this->getParticipants();
     return idx($participants, $phid, $default);
   }
@@ -263,8 +267,10 @@ final class ConpherenceThread extends ConpherenceDAO
         return false;
     }
 
-    $participants = $this->getParticipants();
-    return isset($participants[$user->getPHID()]);
+    $user_phid = $user->getPHID();
+    $is_participant = (bool)$this->getParticipantIfExists($user_phid);
+
+    return $is_participant;
   }
 
   public function describeAutomaticCapability($capability) {

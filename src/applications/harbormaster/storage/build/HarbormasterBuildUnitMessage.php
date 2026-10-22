@@ -102,7 +102,7 @@ final class HarbormasterBuildUnitMessage
     $obj->setDuration((float)idx($dict, 'duration'));
 
     $path = idx($dict, 'path');
-    if (strlen($path)) {
+    if (phutil_nonempty_string($path)) {
       $obj->setProperty('path', $path);
     }
 

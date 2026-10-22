@@ -107,7 +107,7 @@ final class DifferentialRevisionViewController
     list($changesets, $vs_map, $vs_changesets, $rendering_references) =
       $this->loadChangesetsAndVsMap(
         $target,
-        idx($diffs, $diff_vs),
+        idx($diffs, (string)$diff_vs),
         $repository);
 
     $this->setChangesetCount(count($rendering_references));
@@ -335,7 +335,7 @@ final class DifferentialRevisionViewController
 
     $detail_diffs = array_select_keys(
       $diffs,
-      array($diff_vs, $target->getID()));
+      array((string)$diff_vs, (string)$target->getID()));
     $detail_diffs = mpull($detail_diffs, null, 'getPHID');
 
     $this->loadHarbormasterData($detail_diffs);
@@ -1420,8 +1420,10 @@ final class DifferentialRevisionViewController
       }
     }
 
-    if (isset($diffs[$old_id])) {
-      return $old_id;
+    if ($old_id !== null) {
+      if (isset($diffs[$old_id])) {
+        return $old_id;
+      }
     }
 
     return null;
@@ -1440,8 +1442,10 @@ final class DifferentialRevisionViewController
       return new Aphront404Response();
     }
 
-    if (isset($diffs[$new_id])) {
-      return $new_id;
+    if ($new_id !== null) {
+      if (isset($diffs[$new_id])) {
+        return $new_id;
+      }
     }
 
     return (int)last_key($diffs);

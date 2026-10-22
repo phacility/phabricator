@@ -36,9 +36,13 @@ final class PhabricatorSearchOrderField
     // If the SavedQuery has an alias for an order, map it to the canonical
     // name for the order so the correct option is selected in the dropdown.
     $value = parent::getValueForControl();
-    if (isset($this->orderAliases[$value])) {
-      $value = $this->orderAliases[$value];
+
+    if ($value !== null) {
+      if (isset($this->orderAliases[$value])) {
+        $value = $this->orderAliases[$value];
+      }
     }
+
     return $value;
   }
 

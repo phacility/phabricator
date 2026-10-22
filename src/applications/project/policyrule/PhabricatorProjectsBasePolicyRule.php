@@ -6,6 +6,12 @@ abstract class PhabricatorProjectsBasePolicyRule
   private $memberships = array();
 
   protected function getMemberships($viewer_phid) {
+
+    // TODO: This is possible, but probably not correct.
+    if ($viewer_phid === null) {
+      return array();
+    }
+
     return idx($this->memberships, $viewer_phid, array());
   }
 

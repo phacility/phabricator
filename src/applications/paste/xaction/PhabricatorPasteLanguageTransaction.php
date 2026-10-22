@@ -14,7 +14,7 @@ final class PhabricatorPasteLanguageTransaction
   }
 
   private function renderLanguageValue($value) {
-    if (!strlen($value)) {
+    if (!phutil_nonempty_string($value)) {
       return $this->renderValue(pht('autodetect'));
     } else {
       return $this->renderValue($value);
