@@ -825,7 +825,9 @@ final class PhabricatorPolicyFilter extends Phobject {
     $policy_phid,
     PhabricatorPolicyInterface $object) {
     $viewer = $this->viewer;
-    $viewer_phid = $viewer->getPHID();
+
+    // TODO: This is reachable with a null viewer, but probably should not be.
+    $viewer_phid = (string)$viewer->getPHID();
 
     $rule = idx($this->objectPolicies[$viewer_phid], $policy_phid);
     if (!$rule) {

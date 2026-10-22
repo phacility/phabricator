@@ -120,12 +120,12 @@ final class PhabricatorPasteContentTransaction
     $files = mpull($files, null, 'getPHID');
 
     $old_text = '';
-    if (idx($files, $old)) {
+    if ($old !== null && idx($files, $old)) {
       $old_text = $files[$old]->loadFileData();
     }
 
     $new_text = '';
-    if (idx($files, $new)) {
+    if ($new !== null && idx($files, $new)) {
       $new_text = $files[$new]->loadFileData();
     }
 

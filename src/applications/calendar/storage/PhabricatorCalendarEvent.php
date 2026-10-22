@@ -518,6 +518,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $invitees = $this->getInvitees();
     $invitees = mpull($invitees, null, 'getInviteePHID');
 
+    if ($phid === null) {
+      return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    }
+
     $invited = idx($invitees, $phid);
     if (!$invited) {
       return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;

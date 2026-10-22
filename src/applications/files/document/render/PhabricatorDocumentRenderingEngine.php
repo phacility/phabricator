@@ -49,7 +49,7 @@ abstract class PhabricatorDocumentRenderingEngine
     $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
 
     $engine_key = $this->getSelectedDocumentEngineKey();
-    if (!isset($engines[$engine_key])) {
+    if ($engine_key === null || !isset($engines[$engine_key])) {
       $engine_key = head_key($engines);
     }
     $engine = $engines[$engine_key];
