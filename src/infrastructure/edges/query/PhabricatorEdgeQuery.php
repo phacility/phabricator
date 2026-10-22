@@ -214,7 +214,11 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
           }
         }
         foreach ($edges as $key => $edge) {
-          $edges[$key]['data'] = idx($data_map, $edge['dataID'], array());
+          if ($edge['dataID'] !== null) {
+            $edges[$key]['data'] = idx($data_map, $edge['dataID'], array());
+          } else {
+            $edges[$key]['data'] = array();
+          }
         }
       }
 

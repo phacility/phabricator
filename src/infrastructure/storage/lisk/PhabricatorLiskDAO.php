@@ -322,32 +322,36 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   protected function willReadData(array &$data) {
     parent::willReadData($data);
 
-    static $custom;
-    if ($custom === null) {
-      $custom = $this->getConfigOption(self::CONFIG_APPLICATION_SERIALIZERS);
-    }
-
-    if ($custom) {
-      foreach ($custom as $key => $serializer) {
-        $data[$key] = $serializer->willReadValue($data[$key]);
-      }
+    $serializer_map = $this->getLiskApplicationSerializerMap();
+    foreach ($serializer_map as $key => $serializer) {
+      $data[$key] = $serializer->willReadValue($data[$key]);
     }
   }
 
   protected function willWriteData(array &$data) {
-    static $custom;
-    if ($custom === null) {
-      $custom = $this->getConfigOption(self::CONFIG_APPLICATION_SERIALIZERS);
-    }
-
-    if ($custom) {
-      foreach ($custom as $key => $serializer) {
-        $data[$key] = $serializer->willWriteValue($data[$key]);
-      }
+    $serializer_map = $this->getLiskApplicationSerializerMap();
+    foreach ($serializer_map as $key => $serializer) {
+      $data[$key] = $serializer->willWriteValue($data[$key]);
     }
 
     parent::willWriteData($data);
   }
 
+  final protected function getLiskApplicationSerializerMap() {
+    static $maps = array();
+    $key = static::class;
+
+    if (!isset($maps[$key])) {
+      $map = $this->getConfigOption(self::CONFIG_APPLICATION_SERIALIZERS);
+
+      if ($map === null) {
+        $map = array();
+      }
+
+      $maps[$key] = $map;
+    }
+
+    return $maps[$key];
+  }
 
 }

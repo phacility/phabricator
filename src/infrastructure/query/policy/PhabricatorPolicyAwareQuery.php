@@ -401,7 +401,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
     // Mark this object as filtered so handles can render "Restricted" instead
     // of "Unknown".
-    $phid = $object->getPHID();
+    $phid = (string)$object->getPHID();
     $this->addPolicyFilteredPHIDs(array($phid => $phid));
 
     $this->getPolicyFilter()->rejectObject(

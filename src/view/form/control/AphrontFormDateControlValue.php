@@ -347,7 +347,7 @@ final class AphrontFormDateControlValue extends Phobject {
       'midnight' => '12:00 AM',
     );
 
-    $normalized = phutil_utf8_strtolower($time);
+    $normalized = phutil_utf8_strtolower((string)$time);
     if (isset($colloquial[$normalized])) {
       $time = $colloquial[$normalized];
     }
