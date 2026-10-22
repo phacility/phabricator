@@ -32,7 +32,7 @@ final class DivinerFindController extends DivinerController {
     }
 
     $context = $request->getStr('context');
-    if (strlen($context)) {
+    if (phutil_nonempty_string($context)) {
       $query->withContexts(array($context));
     }
 

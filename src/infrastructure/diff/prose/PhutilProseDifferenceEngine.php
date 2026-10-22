@@ -128,7 +128,9 @@ final class PhutilProseDifferenceEngine extends Phobject {
         return phutil_utf8v_combined($corpus);
     }
 
+    $corpus = (string)$corpus;
     $pieces = preg_split($expr, $corpus, -1, PREG_SPLIT_DELIM_CAPTURE);
+
     return $this->stitchPieces($pieces, $level);
   }
 

@@ -63,13 +63,16 @@ final class DivinerBookController extends DivinerController {
       $group_spec = array();
     }
 
-    $groups = mgroup($atoms, 'getGroupName');
-    $groups = array_select_keys($groups, array_keys($group_spec)) + $groups;
-    if (isset($groups[''])) {
-      $no_group = $groups[''];
-      unset($groups['']);
-      $groups[''] = $no_group;
+    $groups = array();
+    foreach ($atoms as $atom_key => $atom) {
+      $group_name = (string)$atom->getGroupName();
+      if (!isset($groups[$group_name])) {
+        $groups[$group_name] = array();
+      }
+      $groups[$group_name][$atom_key] = $atom;
     }
+
+    $groups = array_select_keys($groups, array_keys($group_spec)) + $groups;
 
     $out = array();
     foreach ($groups as $group => $atoms) {
