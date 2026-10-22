@@ -406,7 +406,10 @@ final class PhutilSearchQueryCompiler
       $present_tokens = array();
       $absent_tokens = array();
       foreach ($results as $result) {
-        $function = $result['function'];
+
+        // TODO: This is reachable with a null function, but perhaps it
+        // should not be.
+        $function = (string)$result['function'];
 
         if ($result['operator'] === self::OPERATOR_ABSENT) {
           $absent_tokens[$function][] = $result;

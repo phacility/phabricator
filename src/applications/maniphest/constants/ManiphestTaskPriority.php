@@ -141,6 +141,10 @@ final class ManiphestTaskPriority extends ManiphestConstants {
    * @return  string  The priority name if the level is a valid one.
    */
   public static function getTaskPriorityName($priority) {
+    if ($priority === null) {
+      return null;
+    }
+
     return idx(self::getTaskPriorityMap(), $priority, $priority);
   }
 
