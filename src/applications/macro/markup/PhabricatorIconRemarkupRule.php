@@ -67,8 +67,10 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
     }
 
     $color = $options['color'];
-    if (empty($color_names[$color])) {
-      $color = null;
+    if ($color !== null) {
+      if (empty($color_names[$color])) {
+        $color = null;
+      }
     }
 
     $classes = array();

@@ -255,9 +255,11 @@ final class ManiphestTaskSearchEngine
     }
 
     $group = idx($map, 'group');
-    $group = idx($this->getGroupValues(), $group);
-    if ($group) {
-      $query->setGroupBy($group);
+    if ($group !== null) {
+      $group = idx($this->getGroupValues(), $group);
+      if ($group) {
+        $query->setGroupBy($group);
+      }
     }
 
     if ($map['ids']) {

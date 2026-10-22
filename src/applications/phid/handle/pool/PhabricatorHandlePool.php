@@ -25,7 +25,13 @@ final class PhabricatorHandlePool extends Phobject {
   public function newHandleList(array $phids) {
     // Mark any PHIDs we haven't loaded yet as unloaded. This will let us bulk
     // load them later.
+
+    // TODO: This is reachable with "null" in the list, but probably should
+    // not be.
+
     foreach ($phids as $phid) {
+      $phid = (string)$phid;
+
       if (empty($this->handles[$phid])) {
         $this->unloadedPHIDs[$phid] = true;
       }
@@ -33,6 +39,7 @@ final class PhabricatorHandlePool extends Phobject {
 
     $unique = array();
     foreach ($phids as $phid) {
+      $phid = (string)$phid;
       $unique[$phid] = $phid;
     }
 

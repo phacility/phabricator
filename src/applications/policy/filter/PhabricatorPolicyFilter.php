@@ -730,7 +730,6 @@ final class PhabricatorPolicyFilter extends Phobject {
 
   private function loadObjectPolicies(array $map) {
     $viewer = $this->viewer;
-    $viewer_phid = $viewer->getPHID();
 
     $rules = PhabricatorPolicyQuery::getObjectPolicyRules(null);
 
@@ -755,6 +754,11 @@ final class PhabricatorPolicyFilter extends Phobject {
       $rule->willApplyRules($viewer, array(), $object_list);
       $results[$key] = $rule;
     }
+
+    $viewer_phid = $viewer->getPHID();
+
+    // TODO: This is reachable with a public viewer, but probably not ideal.
+    $viewer_phid = (string)$viewer_phid;
 
     $this->objectPolicies[$viewer_phid] = $results;
   }

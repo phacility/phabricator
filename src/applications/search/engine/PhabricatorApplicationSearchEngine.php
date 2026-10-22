@@ -698,6 +698,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @task builtin
    */
   public function isBuiltinQuery($query_key) {
+
+    // TODO: This is reachable with a null key, but probably should not be.
+    $query_key = (string)$query_key;
+
     $builtins = $this->getBuiltinQueries();
     return isset($builtins[$query_key]);
   }

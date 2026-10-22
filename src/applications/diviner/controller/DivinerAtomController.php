@@ -437,7 +437,7 @@ final class DivinerAtomController extends DivinerController {
     $tasks = $symbol->getAtom()->getDocblockMetaValue('task');
 
     if (!is_array($tasks)) {
-      if (strlen($tasks)) {
+      if (phutil_nonempty_string($tasks)) {
         $tasks = array($tasks);
       } else {
         $tasks = array();
