@@ -387,7 +387,13 @@ final class PhabricatorStartup {
    * @task validation
    */
   private static function setupPHP() {
-    error_reporting(E_ALL | E_STRICT);
+
+    if (version_compare(phpversion(), '8.4', '<')) {
+      error_reporting(E_ALL | E_STRICT);
+    } else {
+      error_reporting(E_ALL);
+    }
+
     self::$oldMemoryLimit = ini_get('memory_limit');
     ini_set('memory_limit', -1);
 

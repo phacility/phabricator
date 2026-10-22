@@ -1,7 +1,13 @@
 <?php
 
 function init_phabricator_script(array $options) {
-  error_reporting(E_ALL | E_STRICT);
+
+  if (version_compare(phpversion(), '8.4', '<')) {
+    error_reporting(E_ALL | E_STRICT);
+  } else {
+    error_reporting(E_ALL);
+  }
+
   ini_set('display_errors', 1);
 
   $include_path = ini_get('include_path');

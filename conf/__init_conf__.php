@@ -45,7 +45,12 @@ function phabricator_read_config_file($original_config) {
   }
 
   // Make sure config file errors are reported.
-  $old_error_level = error_reporting(E_ALL | E_STRICT);
+  if (version_compare(phpversion(), '8.4', '<')) {
+    $old_error_level = error_reporting(E_ALL | E_STRICT);
+  } else {
+    $old_error_level = error_reporting(E_ALL);
+  }
+
   $old_display_errors = ini_get('display_errors');
   ini_set('display_errors', 1);
 
