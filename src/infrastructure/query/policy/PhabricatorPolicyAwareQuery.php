@@ -520,6 +520,9 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
     $results = array();
     foreach ($phids as $key => $phid) {
+      if (!$phid) {
+        continue;
+      }
       if (isset($this->workspace[$viewer_fragment][$phid])) {
         $results[$phid] = $this->workspace[$viewer_fragment][$phid];
         unset($phids[$key]);

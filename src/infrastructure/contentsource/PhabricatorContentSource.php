@@ -34,7 +34,7 @@ abstract class PhabricatorContentSource extends Phobject {
     $force = false) {
 
     $map = self::getAllContentSources();
-    if (isset($map[$source])) {
+    if ($source && isset($map[$source])) {
       $obj = clone $map[$source];
     } else {
       if ($force) {

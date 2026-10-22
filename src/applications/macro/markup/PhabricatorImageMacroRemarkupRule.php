@@ -114,7 +114,14 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
       }
 
       $id = null;
-      $audio = idx($files, $macro->getAudioPHID());
+
+      $audio_phid = $macro->getAudioPHID();
+      if ($audio_phid) {
+        $audio = idx($files, $audio_phid);
+      } else {
+        $audio = null;
+      }
+
       $should_play = ($audio && $macro->getAudioBehavior() !=
         PhabricatorFileImageMacro::AUDIO_BEHAVIOR_NONE);
       if ($should_play) {
