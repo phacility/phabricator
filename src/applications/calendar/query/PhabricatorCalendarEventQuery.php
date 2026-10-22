@@ -285,7 +285,7 @@ final class PhabricatorCalendarEventQuery
       }
 
       $parent_phid = (string)$event->getInstanceOfEventPHID();
-      $sequence = $event->getSequenceIndex();
+      $sequence = (string)$event->getSequenceIndex();
 
       $have_pairs[$parent_phid][$sequence] = true;
     }
@@ -651,6 +651,8 @@ final class PhabricatorCalendarEventQuery
 
       $membership_map = array();
       foreach ($rsvp_phids as $rsvp_phid) {
+        $rsvp_phid = (string)$rsvp_phid;
+
         $membership_map[$rsvp_phid] = array();
         $membership_map[$rsvp_phid][] = $rsvp_phid;
 

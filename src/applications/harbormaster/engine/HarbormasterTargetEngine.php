@@ -132,7 +132,10 @@ final class HarbormasterTargetEngine extends Phobject {
    */
   private function getAutosteps(array $autotargets) {
     $all_steps = HarbormasterBuildStepImplementation::getImplementations();
-    $all_steps = mpull($all_steps, null, 'getBuildStepAutotargetStepKey');
+    $all_steps = mpull_filter_keys(
+      $all_steps,
+      null,
+      'getBuildStepAutotargetStepKey');
 
     // Make sure all the targets really exist.
     foreach ($autotargets as $autotarget) {
