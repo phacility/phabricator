@@ -29,13 +29,13 @@ final class PhabricatorAuthAccountView extends AphrontView {
     $realname = $account->getRealName();
 
     $use_name = null;
-    if (strlen($dispname)) {
+    if (phutil_nonempty_string($dispname)) {
       $use_name = $dispname;
-    } else if (strlen($username) && strlen($realname)) {
+    } else if (phutil_nonempty_string($username) && phutil_nonempty_string($realname)) {
       $use_name = $username.' ('.$realname.')';
-    } else if (strlen($username)) {
+    } else if (phutil_nonempty_string($username)) {
       $use_name = $username;
-    } else if (strlen($realname)) {
+    } else if (phutil_nonempty_string($realname)) {
       $use_name = $realname;
     }
 
@@ -62,7 +62,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
       ));
 
     $account_uri = $account->getAccountURI();
-    if (strlen($account_uri)) {
+    if (phutil_nonempty_string($account_uri)) {
 
       // Make sure we don't link a "javascript:" URI if a user somehow
       // managed to get one here.

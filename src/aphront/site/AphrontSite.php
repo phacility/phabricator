@@ -15,7 +15,7 @@ abstract class AphrontSite extends Phobject {
 
   protected function isHostMatch($host, array $uris) {
     foreach ($uris as $uri) {
-      if (!strlen($uri)) {
+      if (!phutil_nonempty_string($uri)) {
         continue;
       }
 

@@ -14,7 +14,7 @@ final class PhabricatorResourceSite extends PhabricatorSite {
     $host = $request->getHost();
 
     $uri = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    if (!strlen($uri)) {
+    if (!phutil_nonempty_string($uri)) {
       return null;
     }
 

@@ -27,7 +27,7 @@ final class PhabricatorFerretSearchEngineExtension
     PhabricatorSavedQuery $saved,
     array $map) {
 
-    if (!strlen($map['query'])) {
+    if (!phutil_nonempty_string($map['query'])) {
       return;
     }
 

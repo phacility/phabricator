@@ -41,7 +41,7 @@ final class DiffusionRepositoryDatasource
       $parts[] = $name;
 
       $slug = $repository->getRepositorySlug();
-      if (strlen($slug)) {
+      if (phutil_nonempty_string($slug)) {
         $parts[] = $slug;
       }
 

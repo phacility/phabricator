@@ -475,7 +475,7 @@ final class PhutilLDAPAuthAdapter extends PhutilAuthAdapter {
     $profiler->endServiceCall($call_id, array());
 
     if (!$ok) {
-      if (strlen($user)) {
+      if (phutil_nonempty_string($user)) {
         $this->raiseConnectionException(
           $conn,
           pht('Failed to bind to LDAP server (as user "%s").', $user));

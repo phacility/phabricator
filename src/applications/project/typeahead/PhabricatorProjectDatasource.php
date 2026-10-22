@@ -84,7 +84,7 @@ final class PhabricatorProjectDatasource
       }
 
       $slug = $proj->getPrimarySlug();
-      if (!strlen($slug)) {
+      if (!phutil_nonempty_string($slug)) {
         foreach ($proj->getSlugs() as $slug_object) {
           $slug = $slug_object->getSlug();
           if (strlen($slug)) {
@@ -133,7 +133,7 @@ final class PhabricatorProjectDatasource
         ->setPriorityType('proj')
         ->setClosed($closed);
 
-      if (strlen($slug)) {
+      if (phutil_nonempty_string($slug)) {
         $proj_result->setAutocomplete('#'.$slug);
       }
 

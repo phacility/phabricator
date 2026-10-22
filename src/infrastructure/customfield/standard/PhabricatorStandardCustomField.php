@@ -301,7 +301,7 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function renderPropertyViewValue(array $handles) {
-    if (!strlen($this->getFieldValue())) {
+    if (!phutil_nonempty_string($this->getFieldValue())) {
       return null;
     }
     return $this->getFieldValue();

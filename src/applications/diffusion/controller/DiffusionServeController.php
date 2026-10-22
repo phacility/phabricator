@@ -64,7 +64,7 @@ final class DiffusionServeController extends DiffusionController {
     } else if ($content_type == 'application/x-git-receive-pack-request') {
       // We get this for `git-receive-pack`.
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-    } else if (preg_match($lfs_pattern, $content_type)) {
+    } else if (preg_match($lfs_pattern,phutil_nonempty_string( $content_type))) {
       // This is a Git LFS HTTP API request.
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
       $this->isGitLFSRequest = true;

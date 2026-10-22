@@ -191,7 +191,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
       // If the name is something meaningful to humans, we'll render this
       // in text as: "Title" <link>. Otherwise, we'll just render: <link>.
-      $is_interesting_name = (bool)strlen($name);
+      $is_interesting_name = (bool)phutil_nonempty_string($name);
 
       $target = idx($document_map, $key, null);
 

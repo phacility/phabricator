@@ -142,7 +142,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
 
     $username = $request->getStr('ldap_username');
     $password = $request->getStr('ldap_password');
-    $has_password = strlen($password);
+    $has_password = phutil_nonempty_string($password);
     $password = new PhutilOpaqueEnvelope($password);
 
     if (!strlen($username) || !$has_password) {

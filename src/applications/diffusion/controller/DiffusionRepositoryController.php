@@ -362,7 +362,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($viewer);
 
     $description = $repository->getDetail('description');
-    if (strlen($description)) {
+    if (phutil_nonempty_string($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
@@ -508,7 +508,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $repository_name = $repository->getName();
     $branch_name = $drequest->getBranch();
-    if (strlen($branch_name)) {
+    if (phutil_nonempty_string($branch_name)) {
       $repository_name .= ' ('.$branch_name.')';
     }
 
