@@ -393,7 +393,7 @@ final class PhabricatorRepositoryQuery
       }
 
       foreach ($repositories as $repository) {
-        $file = idx($files, $repository->getProfileImagePHID());
+        $file = idx($files, (string)$repository->getProfileImagePHID());
         if (!$file) {
           if (!$default) {
             $default = PhabricatorFile::loadBuiltin(
