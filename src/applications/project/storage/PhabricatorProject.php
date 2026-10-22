@@ -220,6 +220,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     if ($this->sparseMembers === self::ATTACHABLE) {
       $this->sparseMembers = array();
     }
+
+    // TODO: This is reachable, but probably not desirable.
+    $user_phid = (string)$user_phid;
+
     $this->sparseMembers[$user_phid] = $is_member;
     return $this;
   }
