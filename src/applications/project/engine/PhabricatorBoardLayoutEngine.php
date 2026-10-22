@@ -361,7 +361,10 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
           $next_sequence = 1;
         }
 
-        $proxy_columns = mpull($board_columns, null, 'getProxyPHID');
+        $proxy_columns = mpull_filter_keys(
+          $board_columns,
+          null,
+          'getProxyPHID');
         foreach ($child_projects as $child_phid => $child) {
           if (isset($proxy_columns[$child_phid])) {
             continue;
