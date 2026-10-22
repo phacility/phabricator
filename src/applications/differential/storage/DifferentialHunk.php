@@ -232,7 +232,7 @@ final class DifferentialHunk
         $use_next_newline = false;
       } else {
         $use_next_newline = true;
-        $results[$n] = substr($line, 1);
+        $results[(int)$n] = substr($line, 1);
       }
 
       if ($line[0] == ' ' || isset($include_map[$line[0]])) {
