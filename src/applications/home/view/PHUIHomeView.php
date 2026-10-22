@@ -86,7 +86,8 @@ final class PHUIHomeView
     $panel = $this->newQueryPanel()
       ->setName(pht('Active Revisions'))
       ->setProperty('class', 'DifferentialRevisionSearchEngine')
-      ->setProperty('key', 'active');
+      ->setProperty('key', 'active')
+      ->setProperty('modifiedStart', '30 days ago');
 
     return $this->renderPanel($panel);
   }

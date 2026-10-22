@@ -727,6 +727,10 @@ final class PhabricatorOwnersPackage
         ->setKey('ignored')
         ->setType('map<string, wild>')
         ->setDescription(pht('Ignored attribute information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('slack')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Slack Channel to Ping for Review.')),
     );
   }
 

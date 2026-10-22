@@ -56,34 +56,73 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       'vurisprintf',
       $settings['uri'],
       $variables);
-
     $method = nonempty(idx($settings, 'method'), 'POST');
 
-    $future = id(new HTTPSFuture($uri))
-      ->setMethod($method)
-      ->setTimeout(60);
+    $sleepDuration = 30;
+    $retry = 0;
+    while (true) {
+      $future = id(new HTTPSFuture($uri))
+        ->setMethod($method)
+        ->setTimeout(60);
 
-    $credential_phid = $this->getSetting('credential');
-    if ($credential_phid) {
-      $key = PassphrasePasswordKey::loadFromPHID(
-        $credential_phid,
-        $viewer);
-      $future->setHTTPBasicAuthCredentials(
-        $key->getUsernameEnvelope()->openEnvelope(),
-        $key->getPasswordEnvelope());
+      $credential_phid = $this->getSetting('credential');
+      if ($credential_phid) {
+        $key = PassphrasePasswordKey::loadFromPHID(
+          $credential_phid,
+          $viewer);
+        $future->setHTTPBasicAuthCredentials(
+          $key->getUsernameEnvelope()->openEnvelope(),
+          $key->getPasswordEnvelope());
+      }
+
+      $this->resolveFutures(
+        $build,
+        $build_target,
+        array($future));
+
+      $this->logHTTPResponse($build, $build_target, $future, $uri);
+
+      list($status) = $future->resolve();
+      try {
+        $this->emitBuildResultMetric($build->getBuildPlan()->getID(), $status->getStatusCode(), $retry);
+      } catch (Exception $e) {
+        echo 'Caught exception while sending Jenkins metrics to statsd: ',  $e->getMessage(), "\n";
+      }
+      if (!$status->isError()) {
+        return;
+      }
+      if ($retry == 2) {
+        throw new HarbormasterBuildFailureException();
+      }
+      sleep($sleepDuration);
+      $sleepDuration *= 2;
+      $retry++;
     }
+  }
 
-    $this->resolveFutures(
-      $build,
-      $build_target,
-      array($future));
+  public function emitBuildResultMetric($plan, $status, $retry) {
+    $template = 'echo "phabricator_build_result_total:1|c|#plan:$plan,status:$status,retry:$retry" | nc -w 3 -vu apollo-statsd.integration-tests.svc.cluster.local 8125';
+    $vars = array(
+      '$plan' => $plan,
+      '$status' => $status,
+      '$retry' => $retry,
+    );
+    $command = strtr($template, $vars);
+    echo $command;
 
-    $this->logHTTPResponse($build, $build_target, $future, $uri);
-
-    list($status) = $future->resolve();
-    if ($status->isError()) {
-      throw new HarbormasterBuildFailureException();
+    $metrics_retry = 0;
+    $retval = 0;
+    $output = null;
+    while ($metrics_retry < 3) {
+      exec($command, $output, $retval);
+      if ($retval == 0) {
+        return;
+      }
+      $metrics_retry++;
+      sleep(1);
     }
+    echo "Got error code $retval when sending metrics to statsd with output:\n";
+    print_r($output);
   }
 
   public function getFieldSpecifications() {
@@ -112,5 +151,4 @@ final class HarbormasterHTTPRequestBuildStepImplementation
   public function supportsWaitForMessage() {
     return true;
   }
-
 }

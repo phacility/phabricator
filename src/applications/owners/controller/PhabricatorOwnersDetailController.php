@@ -220,7 +220,17 @@ final class PhabricatorOwnersDetailController
       $ignored = phutil_tag('em', array(), pht('None'));
     }
 
+
+
     $view->addProperty(pht('Ignored Attributes'), $ignored);
+
+    // Add Slack Channel Field
+    $slack_channel = $package->getSlackChannel();
+    if ($slack_channel) {
+      $view->addProperty(pht('Slack Channel'), $slack_channel);
+    } else {
+      $view->addProperty(pht('Slack Channel'), phutil_tag('em', array(), pht('None')));
+    }
 
     $description = $package->getDescription();
     if (strlen($description)) {

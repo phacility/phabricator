@@ -166,11 +166,14 @@ final class DifferentialReviewersView extends AphrontView {
           null,
           $diff->getPHID()));
 
-      if ($reviewer->isPackage()) {
-        if (!$reviewer->getChangesets()) {
-          $item->setNote(pht('(Owns No Changed Paths)'));
-        }
-      }
+      // With advanced Ownership in OWNERS.toml, this is message is
+      // no longer accurate.
+      //
+      // if ($reviewer->isPackage()) {
+      //   if (!$reviewer->getChangesets()) {
+      //     $item->setNote(pht('(Owns No Changed Paths)'));
+      //   }
+      // }
 
       if ($handle->hasCapabilities()) {
         if (!$handle->hasViewCapability($diff)) {

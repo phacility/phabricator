@@ -182,6 +182,14 @@ EOTEXT
           array(
             'generated' => pht('Ignore generated files (review only).'),
           )),
+      id(new PhabricatorTextEditField())
+        ->setKey('slackChannel')
+        ->setLabel(pht('Slack Channel'))
+        ->setDescription(pht('Slack channel associated with this package.'))
+        ->setTransactionType(
+          PhabricatorOwnersPackageSlackChannelTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setValue($object->getSlackChannel()),
       id(new PhabricatorConduitEditField())
         ->setKey('paths.set')
         ->setLabel(pht('Paths'))

@@ -593,9 +593,14 @@ EOREMARKUP
 
     $unit_messages = $request->getValue('unit', array());
     foreach ($unit_messages as $unit) {
-      $save[] = HarbormasterBuildUnitMessage::newFromDictionary(
+      $bu_message = HarbormasterBuildUnitMessage::newFromDictionary(
         $build_target,
         $unit);
+      // DEVX-2087:only save to db for failed test case and coverage information
+      if (($bu_message->getResult() == ArcanistUnitTestResult::RESULT_FAIL) ||
+          ($bu_message->getProperty('coverage') != null)) {
+        $save[] = $bu_message;
+      }
     }
 
     $save[] = HarbormasterBuildMessage::initializeNewMessage($viewer)
