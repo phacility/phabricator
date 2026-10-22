@@ -284,7 +284,7 @@ final class PhabricatorCalendarEventQuery
         continue;
       }
 
-      $parent_phid = $event->getInstanceOfEventPHID();
+      $parent_phid = (string)$event->getInstanceOfEventPHID();
       $sequence = $event->getSequenceIndex();
 
       $have_pairs[$parent_phid][$sequence] = true;

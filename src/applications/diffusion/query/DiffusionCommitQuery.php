@@ -450,7 +450,7 @@ final class DiffusionCommitQuery
       $data = mpull($data, null, 'getPHID');
 
       foreach ($commits as $commit) {
-        $author_identity = idx($data, $commit->getAuthorIdentityPHID());
+        $author_identity = idx($data, (string)$commit->getAuthorIdentityPHID());
         $committer_identity = idx($data, $commit->getCommitterIdentityPHID());
         $commit->attachIdentities($author_identity, $committer_identity);
       }

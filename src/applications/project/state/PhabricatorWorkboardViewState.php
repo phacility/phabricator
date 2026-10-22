@@ -184,7 +184,7 @@ final class PhabricatorWorkboardViewState
 
   private function isValidOrder($order) {
     $map = PhabricatorProjectColumnOrder::getEnabledOrders();
-    return isset($map[$order]);
+    return isset($map[(string)$order]);
   }
 
   private function getDefaultOrder() {

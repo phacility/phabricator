@@ -51,7 +51,7 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
     }
 
     return new ExecFuture(
-      'ssh %Ls -l %P -p %s -i %P %s -- %s',
+      'ssh %Ls -l %P -p %s -i %P -- %s %s',
       $flags,
       $credential->getUsernameEnvelope(),
       $this->getConfig('port'),
