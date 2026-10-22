@@ -663,13 +663,15 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getFlag(PhabricatorUser $viewer) {
-    return $this->assertAttachedKey($this->flags, $viewer->getPHID());
+    return $this->assertAttachedKey(
+      $this->flags,
+      $viewer->getCacheFragment());
   }
 
   public function attachFlag(
     PhabricatorUser $viewer,
     PhabricatorFlag $flag = null) {
-    $this->flags[$viewer->getPHID()] = $flag;
+    $this->flags[$viewer->getCacheFragment()] = $flag;
     return $this;
   }
 

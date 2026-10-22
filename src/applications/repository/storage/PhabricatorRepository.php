@@ -848,7 +848,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function isTracked() {
-    $status = $this->getDetail('tracking-enabled');
+    $status = (string)$this->getDetail('tracking-enabled');
+
     $map = self::getStatusMap();
     $spec = idx($map, $status);
 

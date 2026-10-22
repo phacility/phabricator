@@ -587,7 +587,7 @@ final class PhabricatorCalendarEventQuery
     }
 
     foreach ($events as $key => $event) {
-      $event_invitees = idx($invitees, $event->getPHID(), array());
+      $event_invitees = idx($invitees, (string)$event->getPHID(), array());
       $event->attachInvitees($event_invitees);
 
       $instance_of = $event->getInstanceOfEventPHID();
