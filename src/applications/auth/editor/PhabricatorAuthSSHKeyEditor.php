@@ -124,7 +124,7 @@ final class PhabricatorAuthSSHKeyEditor
         }
         break;
 
-      case PhabricatorAuthSSHKeyTransaction::TYPE_KEY;
+      case PhabricatorAuthSSHKeyTransaction::TYPE_KEY:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),
           $xactions);

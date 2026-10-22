@@ -467,7 +467,7 @@ final class PhabricatorStartup {
         case INPUT_COOKIE:
           $_COOKIE = array_merge($_COOKIE, $filtered);
           break;
-        case INPUT_ENV;
+        case INPUT_ENV:
           $env = array_merge($_ENV, $filtered);
           $_ENV = self::filterEnvSuperglobal($env);
           break;

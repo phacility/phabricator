@@ -47,7 +47,7 @@ final class AphrontHTTPHeaderParser extends Phobject {
       $c = $content[$ii];
 
       switch ($state) {
-        case 'prekey';
+        case 'prekey':
           // We're eating space in front of a key.
           if ($c == ' ') {
             $ii++;
@@ -56,7 +56,7 @@ final class AphrontHTTPHeaderParser extends Phobject {
           $pair_name = '';
           $state = 'key';
           break;
-        case 'key';
+        case 'key':
           // We're parsing a key name until we find "=" or ";".
           if ($c == ';') {
             $state = 'done';

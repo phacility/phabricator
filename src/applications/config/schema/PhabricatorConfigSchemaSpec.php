@@ -348,7 +348,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
             $column_type = 'longtext';
           }
           break;
-        case 'fulltext';
+        case 'fulltext':
           // MySQL (at least, under MyISAM) refuses to create a FULLTEXT index
           // on a LONGBLOB column. We'd also lose case insensitivity in search.
           // Force this column to utf8 collation. This will truncate results
@@ -408,7 +408,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           $column_type = 'bigint(20)';
           break;
         case 'phid':
-        case 'policy';
+        case 'policy':
         case 'hashpath64':
         case 'ipaddress':
           $column_type = 'varbinary(64)';

@@ -168,7 +168,7 @@ final class DifferentialTransaction
     $tags = array();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $tags[] = self::MAILTAG_CC;
         break;
       case self::TYPE_ACTION:

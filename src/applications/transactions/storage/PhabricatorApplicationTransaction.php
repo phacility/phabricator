@@ -536,7 +536,7 @@ abstract class PhabricatorApplicationTransaction
 
   public function getColor() {
     switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT;
+      case PhabricatorTransactions::TYPE_COMMENT:
         $comment = $this->getComment();
         if ($comment && $comment->getIsRemoved()) {
           return 'black';
@@ -550,7 +550,7 @@ abstract class PhabricatorApplicationTransaction
             return 'sky';
         }
         break;
-      case PhabricatorTransactions::TYPE_MFA;
+      case PhabricatorTransactions::TYPE_MFA:
         return 'pink';
     }
     return null;

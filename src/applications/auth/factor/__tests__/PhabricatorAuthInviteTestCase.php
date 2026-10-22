@@ -244,7 +244,7 @@ final class PhabricatorAuthInviteTestCase extends PhabricatorTestCase {
               case 'out':
                 $viewer = $logged_out;
                 break;
-              case 'in';
+              case 'in':
                 $viewer = $logged_in;
                 break;
               case 'same':

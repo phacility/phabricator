@@ -92,7 +92,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
                 $cur_badness = 1;
                 $cur_reason = 'Const';
                 break;
-              case 'eq_ref';
+              case 'eq_ref':
                 $cur_badness = 2;
                 $cur_reason = 'EqRef';
                 break;

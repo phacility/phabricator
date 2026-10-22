@@ -36,7 +36,7 @@ final class PhabricatorSearchRelationshipSourceController
         $query->setParameter('ownerPHIDs', array($viewer->getPHID()));
         $query->setParameter('statuses', array($status_open));
         break;
-      case 'created';
+      case 'created':
         $query->setParameter('authorPHIDs', array($viewer->getPHID()));
         $query->setParameter('statuses', array($status_open));
         break;

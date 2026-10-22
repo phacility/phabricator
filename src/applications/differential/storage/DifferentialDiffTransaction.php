@@ -19,7 +19,7 @@ final class DifferentialDiffTransaction
 
   public function getActionName() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_DIFF_CREATE;
+      case self::TYPE_DIFF_CREATE:
         return pht('Created');
     }
 
@@ -34,7 +34,7 @@ final class DifferentialDiffTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_DIFF_CREATE;
+      case self::TYPE_DIFF_CREATE:
         return pht(
           '%s created this diff.',
           $author_handle);

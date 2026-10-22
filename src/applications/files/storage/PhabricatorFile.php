@@ -980,7 +980,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
 
     switch ($matches[1]) {
-      case 'jpg';
+      case 'jpg':
       case 'jpeg':
         return function_exists('imagejpeg');
         break;

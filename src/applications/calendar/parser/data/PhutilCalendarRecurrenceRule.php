@@ -245,7 +245,7 @@ final class PhutilCalendarRecurrenceRule
         case 'INTERVAL':
         case 'WKST':
         case 'COUNT':
-        case 'UNTIL';
+        case 'UNTIL':
           break;
         default:
           $value = explode(',', $value);
