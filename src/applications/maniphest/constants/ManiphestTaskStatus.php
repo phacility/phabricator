@@ -228,7 +228,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   private static function getStatusAttribute($status, $key, $default = null) {
     $config = self::getStatusConfig();
 
-    $spec = idx($config, $status);
+    $spec = idx($config, (string)$status);
     if ($spec) {
       return idx($spec, $key, $default);
     }

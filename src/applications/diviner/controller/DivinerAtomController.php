@@ -132,7 +132,14 @@ final class DivinerAtomController extends DivinerController {
       $tasks = $this->composeTasks($symbol);
 
       if ($tasks) {
-        $methods_by_task = igroup($methods, 'task');
+        $methods_by_task = array();
+        foreach ($methods as $key => $method) {
+          $task = (string)idx($method, 'task');
+          if (!isset($methods_by_task[$task])) {
+            $methods_by_task[$task] = array();
+          }
+          $methods_by_task[$task][$key] = $method;
+        }
 
         // Add phantom tasks for methods which have a "@task" name that isn't
         // documented anywhere, or methods that have no "@task" name.

@@ -451,7 +451,9 @@ final class DiffusionCommitQuery
 
       foreach ($commits as $commit) {
         $author_identity = idx($data, (string)$commit->getAuthorIdentityPHID());
-        $committer_identity = idx($data, $commit->getCommitterIdentityPHID());
+        $committer_identity = idx(
+          $data,
+          (string)$commit->getCommitterIdentityPHID());
         $commit->attachIdentities($author_identity, $committer_identity);
       }
     }
