@@ -262,7 +262,7 @@ EOREMARKUP
       }
 
       $group_id = $xaction->getTransactionGroupID();
-      if (!strlen($group_id)) {
+      if (!phutil_nonempty_string($group_id)) {
         $group_id = null;
       } else {
         $group_id = (string)$group_id;

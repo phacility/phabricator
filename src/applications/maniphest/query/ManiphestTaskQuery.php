@@ -1036,7 +1036,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $parts[] = null;
     }
 
-    if (!strlen($parts[1])) {
+    if (!phutil_nonempty_string($parts[1])) {
       $parts[1] = null;
     }
 

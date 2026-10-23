@@ -235,7 +235,7 @@ final class PhabricatorPolicyFilter extends Phobject {
     if ($need_projects) {
       foreach ($objects as $object) {
         if ($object instanceof PhabricatorProject) {
-          $project_phid = $object->getPHID();
+          $project_phid = (string)$object->getPHID();
           if (isset($need_projects[$project_phid])) {
             $is_member = $object->isUserMember($viewer_phid);
             $this->userProjects[$viewer_phid][$project_phid] = $is_member;

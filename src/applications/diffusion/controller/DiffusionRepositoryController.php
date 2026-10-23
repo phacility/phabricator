@@ -362,7 +362,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($viewer);
 
     $description = $repository->getDetail('description');
-    if (strlen($description)) {
+    if (phutil_nonempty_string($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
