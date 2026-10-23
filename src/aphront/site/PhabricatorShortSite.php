@@ -14,7 +14,7 @@ final class PhabricatorShortSite extends PhabricatorSite {
     $host = $request->getHost();
 
     $uri = PhabricatorEnv::getEnvConfig('phurl.short-uri');
-    if (!strlen($uri)) {
+    if (!phutil_nonempty_string($uri)) {
       return null;
     }
 

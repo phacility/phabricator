@@ -118,6 +118,10 @@ final class PhabricatorObjectQuery
 
     $groups = array();
     foreach ($phids as $phid) {
+      if (!phutil_nonempty_string($phid)) {
+        continue;
+      }
+
       $type = phid_get_type($phid);
       $groups[$type][] = $phid;
     }
