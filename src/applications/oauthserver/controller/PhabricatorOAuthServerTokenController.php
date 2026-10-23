@@ -25,7 +25,7 @@ final class PhabricatorOAuthServerTokenController
     $client_id_header = idx($_SERVER, 'PHP_AUTH_USER');
 
     $has_param = phutil_nonempty_string($client_id_parameter);
-    $has_header = phutil_nonempty_string($client_id_header)
+    $has_header = phutil_nonempty_string($client_id_header);
 
     if ($has_param && $has_header) {
       if ($client_id_parameter !== $client_id_header) {
