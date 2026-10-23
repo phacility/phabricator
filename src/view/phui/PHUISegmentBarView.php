@@ -30,7 +30,7 @@ final class PHUISegmentBarView extends AphrontTagView {
     require_celerity_resource('phui-segment-bar-view-css');
 
     $label = $this->label;
-    if (strlen($label)) {
+    if (phutil_nonempty_string($label)) {
       $label = phutil_tag(
         'div',
         array(
