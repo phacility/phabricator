@@ -55,7 +55,7 @@ final class PHUISegmentBarSegmentView extends AphrontTagView {
     $left = sprintf('%.2f%%', $left);
 
     $tooltip = $this->tooltip;
-    if (strlen($tooltip)) {
+    if (phutil_nonempty_string($tooltip)) {
       Javelin::initBehavior('phabricator-tooltips');
 
       $sigil = 'has-tooltip';
