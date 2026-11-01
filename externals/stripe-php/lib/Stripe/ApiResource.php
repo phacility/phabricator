@@ -59,7 +59,7 @@ abstract class Stripe_ApiResource extends Stripe_Object
   public static function classUrl($class)
   {
     $base = self::_scopedLsb($class, 'className', $class);
-    return "/v1/${base}s";
+    return "/v1/{$base}s";
   }
 
   /**
