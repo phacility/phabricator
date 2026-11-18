@@ -4,7 +4,7 @@ class Stripe_Card extends Stripe_ApiResource
 {
   public static function constructFrom($values, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::scopedConstructFrom($class, $values, $apiKey);
   }
 
@@ -50,7 +50,7 @@ class Stripe_Card extends Stripe_ApiResource
    */
   public function delete($params=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedDelete($class, $params);
   }
 
@@ -59,7 +59,7 @@ class Stripe_Card extends Stripe_ApiResource
    */
   public function save()
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedSave($class);
   }
 }

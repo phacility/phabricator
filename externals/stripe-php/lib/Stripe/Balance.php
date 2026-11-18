@@ -9,7 +9,7 @@ class Stripe_Balance extends Stripe_SingletonApiResource
     */
   public static function retrieve($apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedSingletonRetrieve($class, $apiKey);
   }
 }

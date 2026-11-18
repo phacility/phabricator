@@ -31,7 +31,7 @@ class Stripe_Subscription extends Stripe_ApiResource
    */
   public function cancel($params=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedDelete($class, $params);
   }
 
@@ -40,7 +40,7 @@ class Stripe_Subscription extends Stripe_ApiResource
    */
   public function save()
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedSave($class);
   }
 

@@ -30,7 +30,7 @@ class Stripe_Refund extends Stripe_ApiResource
    */
   public function save()
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedSave($class);
   }
 }

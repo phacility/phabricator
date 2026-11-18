@@ -10,7 +10,7 @@ class Stripe_Token extends Stripe_ApiResource
    */
   public static function retrieve($id, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedRetrieve($class, $id, $apiKey);
   }
 
@@ -22,7 +22,7 @@ class Stripe_Token extends Stripe_ApiResource
    */
   public static function create($params=null, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedCreate($class, $params, $apiKey);
   }
 }

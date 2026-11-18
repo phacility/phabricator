@@ -10,7 +10,7 @@ class Stripe_Plan extends Stripe_ApiResource
    */
   public static function retrieve($id, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedRetrieve($class, $id, $apiKey);
   }
 
@@ -22,7 +22,7 @@ class Stripe_Plan extends Stripe_ApiResource
    */
   public static function create($params=null, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedCreate($class, $params, $apiKey);
   }
 
@@ -33,7 +33,7 @@ class Stripe_Plan extends Stripe_ApiResource
    */
   public function delete($params=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedDelete($class, $params);
   }
   
@@ -42,7 +42,7 @@ class Stripe_Plan extends Stripe_ApiResource
    */
   public function save()
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedSave($class);
   }
   
@@ -54,7 +54,7 @@ class Stripe_Plan extends Stripe_ApiResource
    */
   public static function all($params=null, $apiKey=null)
   {
-    $class = get_class();
+    $class = __CLASS__;
     return self::_scopedAll($class, $params, $apiKey);
   }
 }
