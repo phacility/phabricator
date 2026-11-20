@@ -1,5 +1,5 @@
 {
-  "phabricator.uri": "https://secure.phabricator.com/",
+  "phabricator.uri": "https://phabricator.robinhood.com/",
   "load": ["src/"],
   "history.immutable": false
 }

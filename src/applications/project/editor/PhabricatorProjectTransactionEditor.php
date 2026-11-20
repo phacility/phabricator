@@ -127,7 +127,10 @@ final class PhabricatorProjectTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
+    // Don't ever send email for changes to a Phab Projects.
+    // We perform bulk updates in response to OWNER file changes
+    // and this can cause queuing and a lot of email spam.
+    return false;
   }
 
   protected function getMailSubjectPrefix() {

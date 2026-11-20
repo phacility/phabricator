@@ -196,6 +196,7 @@ final class HarbormasterBuildArtifact
       'buildTargetPHID' => $this->getBuildTargetPHID(),
       'artifactType' => $this->getArtifactType(),
       'artifactKey' => $this->getArtifactKey(),
+      'artifactData' => $this->artifactData,
       'isReleased' => (bool)$this->getIsReleased(),
     );
   }

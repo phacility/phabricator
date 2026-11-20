@@ -134,7 +134,7 @@ final class DifferentialReviewer
     return false;
   }
 
-  private function isCurrentAction($diff_phid) {
+  public function isCurrentAction($diff_phid) {
     if (!$diff_phid) {
       return true;
     }

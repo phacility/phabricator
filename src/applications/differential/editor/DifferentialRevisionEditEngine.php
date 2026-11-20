@@ -200,7 +200,8 @@ final class DifferentialRevisionEditEngine
       $author_field->setCommentActionLabel(pht('Foist Upon'));
     }
 
-    $fields[] = $author_field;
+    // DEVX-2064
+    // $fields[] = $author_field;
 
     $fields[] = id(new PhabricatorRemarkupEditField())
       ->setKey(DifferentialRevisionSummaryTransaction::EDITKEY)
