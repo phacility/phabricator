@@ -279,12 +279,10 @@ class Stripe_ApiRequestor
     if ($rbody === false) {
       $errno = curl_errno($curl);
       $message = curl_error($curl);
-      curl_close($curl);
       $this->handleCurlError($errno, $message);
     }
 
     $rcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    curl_close($curl);
     return array($rbody, $rcode);
   }
 
