@@ -3,6 +3,8 @@
 final class PhortuneDisplayException
   extends Exception {
 
+  private $view;
+
   public function setView($view) {
     $this->view = $view;
     return $this;
