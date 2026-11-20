@@ -6,6 +6,7 @@ class Stripe_ApiRequestor
    * @var string $apiKey The API key that's to be used to make requests.
    */
   public $apiKey;
+  public $_apiKey;
 
   private static $_preFlight;
 
