@@ -33,7 +33,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
  
- 
+
 
 /*
  * Version: 1.1.4
@@ -99,7 +99,7 @@
 		public static function set(&$srctab, $x, $y, $repl, $replLen = false) {
 			$srctab[$y] = substr_replace($srctab[$y], ($replLen !== false)?substr($repl,0,$replLen):$repl, $x, ($replLen !== false)?$replLen:strlen($repl));
 		}
-	}	
+	}
 
 
 
@@ -123,7 +123,7 @@
     define('QR_DEFAULT_MASK', 2);                                                               // when QR_FIND_BEST_MASK === false
                                                   
     define('QR_PNG_MAXIMUM_SIZE',  1024);                                                       // maximum allowed png image width (in pixels), tune to make sure GD and PHP can handle such big images
-                                                  
+
 
 
 
@@ -302,7 +302,7 @@
     //##########################################################################
     
     QRtools::markTime('start');
-    
+
 
 
 
@@ -1739,7 +1739,7 @@
     }
         
         
-    
+
 
 
 
@@ -2941,7 +2941,7 @@
 
             if($this->count < $this->dataLength) {
                 $row = $this->count % $this->blocks;
-                $col = $this->count / $this->blocks;
+                $col = (int)($this->count / $this->blocks);
                 if($col >= $this->rsblocks[0]->dataLength) {
                     $row += $this->b1;
                 }
